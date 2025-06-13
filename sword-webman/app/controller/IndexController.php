@@ -8,21 +8,36 @@ class IndexController
 {
     public function index(Request $request)
     {
-        $tiempoInicio = microtime(true);
-
-        // Futura lógica para construir la página irá aquí.
-
-        $tiempoFin = microtime(true);
-        $tiempoCarga = ($tiempoFin - $tiempoInicio) * 1000;
-
-        $datosContenido = [
-            'tiempoCarga' => number_format($tiempoCarga, 2)
-        ];
-
-        $datosLayout = [
-            'titulo' => 'Página de Inicio'
-        ];
-
-        return renderConLayout('index/index', $datosContenido, $datosLayout);
+        return <<<EOF
+<style>
+  * {
+    padding: 0;
+    margin: 0;
+  }
+  iframe {
+    border: none;
+    overflow: scroll;
+  }
+</style>
+<iframe
+  src="https://www.workerman.net/wellcome"
+  width="100%"
+  height="100%"
+  allow="clipboard-write"
+  sandbox="allow-scripts allow-same-origin allow-popups"
+></iframe>
+EOF;
     }
+
+    public function view(Request $request)
+    {
+        return view('index/view', ['name' => 'webman']);
+    }
+
+    public function json(Request $request)
+    {
+        return json(['code' => 0, 'msg' => 'ok']);
+    }
+
 }
+

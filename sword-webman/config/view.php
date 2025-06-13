@@ -18,11 +18,5 @@ use support\view\Blade;
 use support\view\ThinkPHP;
 
 return [
-    'handler' => Raw::class,
-    'view_suffix' => 'php',
-
-    'options' => [
-        'debug' => false,
-        'cache' => runtime_path() . '/views',
-    ]
+    'handler' => Raw::class
 ];

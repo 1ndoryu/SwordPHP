@@ -81,17 +81,20 @@ class AuthController
         $usuario = $this->usuarioService->autenticarUsuario($identificador, $clave);
 
         if ($usuario) {
-            // AHORA QUE EL MIDDLEWARE DE SESIÓN ESTÁ ARREGLADO, UNA SESIÓN ESTÁ ACTIVA.
-            // La función nativa de PHP para regenerar el ID debería funcionar correctamente.
+            // Regeneramos el ID de la sesión para prevenir ataques de fijación de sesión.
             session_regenerate_id(true);
 
             // Guardamos la información del usuario en la sesión recién regenerada.
             $request->session()->set('usuarioId', $usuario->id);
             
-            return redirect('/admin');
+            // CAMBIO: Creamos la respuesta de redirección manualmente.
+            // Esto envía una cabecera HTTP "Location: /admin" al navegador,
+            // que es la forma estándar y más robusta de redirigir.
+            return new Response(302, ['Location' => '/admin']);
         }
 
         session()->set('error', 'Las credenciales proporcionadas no son correctas.');
+        // Para la redirección al login, el helper no debería dar problemas.
         return redirect('/login');
     }
 }

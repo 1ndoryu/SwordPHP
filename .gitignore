@@ -1,0 +1,49 @@
+# #################### #
+# # Composer         #
+# #################### #
+# Las dependencias de PHP deben ser instaladas vía Composer y no deben estar en el repositorio.
+/vendor/
+
+# #################### #
+# # Archivos de Entorno#
+# #################### #
+# Ignorar el archivo de variables de entorno. Contiene datos sensibles.
+# Se debe crear un archivo .env.example con la estructura, pero sin los valores.
+.env
+.env.local
+.env.*.local
+
+# #################### #
+# # Logs y Archivos   #
+# # Temporales       #
+# #################### #
+# Ignorar todos los archivos de logs.
+*.log
+logs/
+*.tmp
+
+# #################### #
+# # IDEs y Editores    #
+# #################### #
+# Ignorar configuraciones de IDEs y editores de código.
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+nbproject/
+
+# #################### #
+# # Sistema Operativo  #
+# #################### #
+# Ignorar archivos específicos del sistema operativo.
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# #################### #
+# # Archivos de Build  #
+# # y Compilación      #
+# #################### #
+# En el futuro, si tienes assets que se compilan (CSS/JS), irían aquí.
+/public/build/
+/node_modules/

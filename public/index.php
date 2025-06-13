@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 // --- INICIO: MODO DEBUG ---
@@ -11,10 +12,12 @@ error_reporting(E_ALL);
 use App\Controller\HomeController;
 use App\Service\Config;
 use App\Service\Database;
+use App\Service\Logger;
 use App\View\View;
 use DI\ContainerBuilder;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
 use function DI\create;
@@ -36,8 +39,15 @@ $containerBuilder->addDefinitions([
     Config::class => create(Config::class)->constructor(
         require __DIR__ . '/../config/app.php'
     ),
+    LoggerInterface::class => function (ContainerInterface $container) {
+        return new Logger($container->get(Config::class));
+    },
+    
     Database::class => function (ContainerInterface $container) {
-        return new Database($container->get(Config::class));
+        return new Database(
+            $container->get(Config::class),
+            $container->get(LoggerInterface::class)
+        );
     },
 
     // Renderizador de vistas
@@ -45,7 +55,7 @@ $containerBuilder->addDefinitions([
         $config = $container->get(Config::class);
         return new View($config->get('view.path'));
     },
-    
+
     // Dependencia de Slim
     ResponseFactoryInterface::class => function (ContainerInterface $container) {
         return $container->get(App::class)->getResponseFactory();

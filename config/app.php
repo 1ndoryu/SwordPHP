@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Monolog\Logger;
+
 return [
     'appName' => $_ENV['APP_NAME'] ?? 'SwordPHP',
     'env' => $_ENV['APP_ENV'] ?? 'production',
@@ -17,5 +19,10 @@ return [
         'username' => $_ENV['DB_USERNAME'],
         'password' => $_ENV['DB_PASSWORD'],
         'charset' => 'utf8',
+    ],
+    'logger' => [
+        'name' => $_ENV['APP_NAME'] ?? 'SwordPHP',
+        'path' => __DIR__ . '/../logs/app.log',
+        'level' => Logger::DEBUG,
     ]
 ];

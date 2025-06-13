@@ -1,49 +1,43 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Service;
 
 use PDO;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 class Database
 {
-    private PDO $pdo;
+    private ?PDO $pdo = null;
 
-    public function __construct(Config $config)
-    {
-        $dbConfig = $config->get('db');
-
-        $dsn = sprintf(
-            '%s:host=%s;port=%d;dbname=%s',
-            $dbConfig['driver'],
-            $dbConfig['host'],
-            $dbConfig['port'],
-            $dbConfig['database']
-        );
-
-        $defaultOptions = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ];
-
+    public function __construct(
+        private readonly Config $config,
+        private readonly LoggerInterface $logger
+    ) {
         try {
+            $dbConfig = $this->config->get('db');
+            $dsn = "{$dbConfig['driver']}:host={$dbConfig['host']};port={$dbConfig['port']};dbname={$dbConfig['database']}";
+            
             $this->pdo = new PDO(
                 $dsn,
                 $dbConfig['username'],
-                $dbConfig['password'],
-                $defaultOptions
+                $dbConfig['password']
             );
+            
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // En un futuro, aquí podríamos loguear el error.
-            // Por ahora, relanzamos la excepción para detener la ejecución.
-            throw new PDOException($e->getMessage(), (int)$e->getCode());
+            $this->logger->critical('Error de conexión a la base de datos', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            die('Error de aplicación crítico. Contacte al administrador.');
         }
     }
 
-    public function getConnection(): PDO
+    public function getConnection(): ?PDO
     {
         return $this->pdo;
     }

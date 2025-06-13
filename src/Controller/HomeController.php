@@ -4,23 +4,26 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Service\Database;
 use App\View\View;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class HomeController
 {
-    /**
-     * El contenedor de dependencias inyectará automáticamente
-     * una instancia de View aquí.
-     */
-    public function __construct(private View $vista) {}
-    /**
-     * Utiliza la instancia de View inyectada para renderizar la página.
-     */
-    public function index(Request $request, Response $response, array $args): Response
+    public function __construct(
+        private View $view,
+        private Database $database
+    ) {}
+
+    public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        // La plantilla 'home.php' se encargará de todo.
-        return $this->vista->render($response, 'home.php');
+        $pdo = $this->database->getConnection();
+        $stmt = $pdo->query('SELECT version()');
+        $dbVersion = $stmt->fetchColumn();
+
+        return $this->view->render($response, 'home', [
+            'dbVersion' => $dbVersion
+        ]);
     }
 }

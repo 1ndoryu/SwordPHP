@@ -4,29 +4,21 @@ declare(strict_types=1);
 namespace App\View;
 
 use Psr\Http\Message\ResponseInterface;
+use League\Plates\Engine;
 
 class View
 {
-    protected string $path;
+    private Engine $engine;
 
     public function __construct(string $path)
     {
-        $this->path = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $this->engine = new Engine($path);
     }
 
     public function render(ResponseInterface $response, string $template, array $data = []): ResponseInterface
     {
-        ob_start();
-
-        // Extrae las variables para que estén disponibles en la plantilla
-        extract($data, EXTR_SKIP);
-
-        // Incluye la plantilla
-        require $this->path . $template;
-
-        $output = ob_get_clean();
-        $response->getBody()->write($output);
-
+        $content = $this->engine->render($template, $data);
+        $response->getBody()->write($content);
         return $response;
     }
 }

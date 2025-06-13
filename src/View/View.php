@@ -5,58 +5,52 @@ declare(strict_types=1);
 namespace App\View;
 
 use Psr\Http\Message\ResponseInterface as Response;
+use RuntimeException;
 
 class View
 {
+    private string $path;
+
     /**
-     * Genera una página HTML completa y la escribe en la respuesta.
+     * El constructor ahora es inyectado explícitamente por la
+     * configuración del contenedor en index.php.
+     *
+     * @param array $settings
+     */
+    public function __construct(private array $settings)
+    {
+        $this->path = $settings['templates']['path'];
+    }
+
+    /**
+     * Renderiza una plantilla y la escribe en la respuesta.
      *
      * @param Response $response   El objeto de respuesta PSR-7.
-     * @param string   $titulo     El título para la etiqueta <title>.
-     * @param string   $contenido  El HTML para el cuerpo de la página.
+     * @param string   $template   El nombre del archivo de la plantilla a renderizar.
+     * @param array    $data       Datos para pasar a la plantilla.
      * @return Response
      */
-    public function render(Response $response, string $titulo, string $contenido): Response
+    public function render(Response $response, string $template, array $data = []): Response
     {
-        $html = <<<HTML
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>{$titulo}</title>
-            <style>
-                body { 
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-                    background-color: #f0f2f5; 
-                    color: #1c1e21; 
-                    line-height: 1.6; 
-                    margin: 0;
-                    padding: 20px; 
-                }
-                .container { 
-                    max-width: 800px; 
-                    margin: 20px auto; 
-                    background: #fff; 
-                    padding: 2rem; 
-                    border-radius: 8px; 
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                    border: 1px solid #dddfe2;
-                }
-                h1 {
-                    color: #0d6efd;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                {$contenido}
-            </div>
-        </body>
-        </html>
-        HTML;
+        $templatePath = $this->path . '/' . $template;
 
-        $response->getBody()->write($html);
+        if (!file_exists($templatePath)) {
+            throw new RuntimeException("La plantilla '{$templatePath}' no existe.");
+        }
+
+        // Extrae los datos del array a variables individuales (ej: $data['titulo'] se convierte en $titulo)
+        extract($data);
+
+        // Inicia el buffer de salida para capturar el HTML renderizado
+        ob_start();
+        
+        // Incluye el archivo de la plantilla. Sus variables ahora son accesibles.
+        include $templatePath;
+        
+        // Obtiene el contenido del buffer y lo limpia
+        $output = ob_get_clean();
+
+        $response->getBody()->write($output);
         return $response;
     }
 }

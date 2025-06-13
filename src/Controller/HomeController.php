@@ -22,11 +22,8 @@ class HomeController
      */
     public function home(Request $request, Response $response, array $args): Response
     {
-        // Preparamos los datos
-        $tituloPagina = '¡Inyección de Dependencias!';
-        $contenidoHtml = '<h1>¡Éxito!</h1><p>Esta página fue renderizada por una instancia de <code>View</code> que fue inyectada automáticamente por el contenedor en nuestro <code>HomeController</code>.</p>';
-
-        // Usamos la vista que recibimos en el constructor
-        return $this->vista->render($response, $tituloPagina, $contenidoHtml);
+        // Ya no preparamos datos aquí, solo le decimos a la vista qué renderizar.
+        // La plantilla 'home.php' se encargará de todo.
+        return $this->vista->render($response, 'home.php');
     }
 }

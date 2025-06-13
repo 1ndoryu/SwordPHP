@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Define el tiempo de inicio de la ejecución para métricas de rendimiento.
+define('SWORD_START_TIME', microtime(true));
+
 // --- INICIO: MODO DEBUG ---
 // Fuerza la visualización de errores para el entorno de desarrollo.
 ini_set('display_errors', '1');

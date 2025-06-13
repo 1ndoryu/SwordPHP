@@ -28,7 +28,8 @@ class HomeController
         $dbVersion = $stmt->fetchColumn();
 
         return $this->view->render($response, 'home', [
-            'dbVersion' => $dbVersion
+            'dbVersion' => $dbVersion,
+            'executionTime' => number_format((microtime(true) - SWORD_START_TIME) * 1000, 3)
         ]);
     }
 }

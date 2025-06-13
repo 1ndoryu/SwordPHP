@@ -1,5 +1,8 @@
 <?php
-/** @var League\Plates\Template\Template $this */
+/**
+ * @var League\Plates\Template\Template $this
+ * @var string $executionTime
+ */
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -38,6 +41,10 @@
     <div class="container">
         <?= $this->section('content') ?>
     </div>
+
+    <footer class="container" style="text-align: center; margin-top: 2rem;">
+        <small>Tiempo de carga: <?= $this->e($executionTime) ?> ms</small>
+    </footer>
 </body>
 
 </html>

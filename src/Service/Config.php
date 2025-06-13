@@ -1,41 +1,37 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Service;
 
-use DirectoryIterator;
-
 class Config
 {
-    private array $items = [];
+    protected array $config = [];
 
-    public function __construct(string $configPath)
+    /**
+     * Constructor que recibe directamente el array de configuración.
+     *
+     * @param array $config El array con toda la configuración de la aplicación.
+     */
+    public function __construct(array $config)
     {
-        if (!is_dir($configPath)) {
-            // En un futuro, aquí podríamos lanzar una excepción o un log.
-            return;
-        }
-
-        $files = new DirectoryIterator($configPath);
-
-        foreach ($files as $file) {
-            if ($file->isDot() || $file->isDir() || $file->getExtension() !== 'php') {
-                continue;
-            }
-
-            $key = $file->getBasename('.php');
-            $this->items[$key] = require $file->getRealPath();
-        }
+        $this->config = $config;
     }
 
+    /**
+     * Obtiene un valor de la configuración usando notación de puntos.
+     * Ejemplo: get('view.path')
+     *
+     * @param string $key La clave a buscar (ej: 'database.host').
+     * @param mixed $default El valor por defecto a retornar si no se encuentra la clave.
+     * @return mixed
+     */
     public function get(string $key, $default = null)
     {
         $keys = explode('.', $key);
-        $value = $this->items;
+        $value = $this->config;
 
         foreach ($keys as $k) {
-            if (!isset($value[$k])) {
+            if (!is_array($value) || !array_key_exists($k, $value)) {
                 return $default;
             }
             $value = $value[$k];

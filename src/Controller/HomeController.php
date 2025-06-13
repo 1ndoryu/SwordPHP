@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller;
@@ -13,16 +14,12 @@ class HomeController
      * El contenedor de dependencias inyectará automáticamente
      * una instancia de View aquí.
      */
-    public function __construct(private View $vista)
-    {
-    }
-
+    public function __construct(private View $vista) {}
     /**
      * Utiliza la instancia de View inyectada para renderizar la página.
      */
-    public function home(Request $request, Response $response, array $args): Response
+    public function index(Request $request, Response $response, array $args): Response
     {
-        // Ya no preparamos datos aquí, solo le decimos a la vista qué renderizar.
         // La plantilla 'home.php' se encargará de todo.
         return $this->vista->render($response, 'home.php');
     }

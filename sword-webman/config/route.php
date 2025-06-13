@@ -2,20 +2,17 @@
 /**
  * This file is part of webman.
  *
- * Licensed under The MIT License
- * For full copyright and license information, please see the MIT-LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
+ * (c) 2020-2022 CRT. All rights reserved.
  *
- * @author    walkor<walkor@workerman.net>
- * @copyright walkor<walkor@workerman.net>
- * @link      http://www.workerman.net/
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 use Webman\Route;
+use app\controller\IndexController;
 
+// Define la ruta principal para que cargue la página de inicio.
+Route::get('/', [IndexController::class, 'index']);
 
-
-
-
-
+// Ruta de fallback para deshabilitar rutas por defecto si no se necesitan.
+Route::disableDefaultRoute();

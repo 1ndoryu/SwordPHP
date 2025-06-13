@@ -78,27 +78,27 @@ class UsuarioService
      */
     public function procesarLogin(Request $request): Response
     {
-        // Obtenemos el identificador (email/usuario) y la clave del formulario.
         $identificador = $request->post('identificador');
         $clave = $request->post('clave');
 
-        // Usamos el servicio para intentar autenticar al usuario.
         $usuario = $this->usuarioService->autenticarUsuario($identificador, $clave);
 
-        // Si la autenticación es exitosa...
         if ($usuario) {
-            // Regeneramos la sesión para proteger contra ataques de fijación de sesión.
-            $request->session()->regenerate();
-            // Guardamos el ID del usuario en la sesión para mantenerlo conectado.
-            $request->session()->set('usuarioId', $usuario->id);
+            // 1. Obtenemos el objeto sesión del framework.
+            // Esto asegura que la sesión se inicie correctamente antes de manipularla.
+            $session = $request->session();
 
-            // Redirigimos al usuario al futuro panel de administración.
-            // Crearemos esta ruta más adelante.
+            // 2. Regeneramos el ID de la sesión usando el método del framework.
+            // Esto previene ataques de fijación de sesión (session fixation).
+            // Es la forma correcta en Webman, en lugar de usar session_regenerate_id() de PHP.
+            $session->regenerate(true);
+
+            // 3. Guardamos la información del usuario en la sesión recién regenerada.
+            $session->set('usuarioId', $usuario->id);
+
             return redirect('/admin');
         }
 
-        // Si la autenticación falla, guardamos un mensaje de error en la sesión
-        // y redirigimos de vuelta al formulario de login.
         session()->set('error', 'Las credenciales proporcionadas no son correctas.');
         return redirect('/login');
     }

@@ -13,13 +13,7 @@
  */
 
 return [
-    // Global middleware
-    'global' => [
-        // Se añade el middleware de sesión para que se ejecute en todas las peticiones.
-        // Esto es crucial para la gestión de sesiones y la protección CSRF.
-        Webman\Middleware\Session::class
-    ],
-    // Middleware that acts on the app
+    // Middleware global.
     '' => [
         App\middleware\StaticFile::class
     ]

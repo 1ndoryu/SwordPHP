@@ -25,13 +25,13 @@
             <input type="hidden" name="_token" value="{{ session('_token') }}">
 
             <div style="margin-bottom: 15px;">
-                <label for="nombreUsuario">Nombre de Usuario:</label><br>
-                <input type="text" id="nombreUsuario" name="nombreUsuario" required style="width: 100%; padding: 8px;">
+                <label for="nombreusuario">Nombre de Usuario:</label><br>
+                <input type="text" id="nombreusuario" name="nombreusuario" required style="width: 100%; padding: 8px;">
             </div>
 
             <div style="margin-bottom: 15px;">
-                <label for="correoElectronico">Correo Electrónico:</label><br>
-                <input type="email" id="correoElectronico" name="correoElectronico" required style="width: 100%; padding: 8px;">
+                <label for="correoelectronico">Correo Electrónico:</label><br>
+                <input type="email" id="correoelectronico" name="correoelectronico" required style="width: 100%; padding: 8px;">
             </div>
 
             <div style="margin-bottom: 15px;">
@@ -40,8 +40,8 @@
             </div>
 
             <div style="margin-bottom: 15px;">
-                <label for="nombreMostrado">Nombre a Mostrar (Opcional):</label><br>
-                <input type="text" id="nombreMostrado" name="nombreMostrado" style="width: 100%; padding: 8px;">
+                <label for="nombremostrado">Nombre a Mostrar (Opcional):</label><br>
+                <input type="text" id="nombremostrado" name="nombremostrado" style="width: 100%; padding: 8px;">
             </div>
 
             <button type="submit" style="width: 100%; padding: 10px; background-color: #007BFF; color: white; border: none; border-radius: 4px; cursor: pointer;">

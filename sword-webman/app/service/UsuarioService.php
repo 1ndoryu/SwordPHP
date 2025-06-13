@@ -23,14 +23,10 @@ class UsuarioService
             return Usuario::create($datosUsuario);
 
         } catch (Throwable $e) {
-            // --- INICIO: CÓDIGO DE DEPURACIÓN TEMPORAL ---
-            // En lugar de retornar null, vamos a imprimir el mensaje de error real y detener la ejecución.
-            // ¡Esto es solo para depurar! Recuerda quitarlo después.
-            var_dump($e->getMessage());
-            exit;
-            // --- FIN: CÓDIGO DE DEPURACIÓN TEMPORAL ---
 
-            // return null; // Dejamos esto comentado por ahora.
+            exit;
+
+            return null; // Dejamos esto comentado por ahora.
         }
     }
 

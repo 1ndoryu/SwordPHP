@@ -41,10 +41,10 @@ class Usuario extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'nombreUsuario',
-        'correoElectronico',
+        'nombreusuario',
+        'correoelectronico',
         'clave',
-        'nombreMostrado',
+        'nombremostrado',
         'rol'
     ];
 
@@ -64,7 +64,7 @@ class Usuario extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fechaRegistro' => 'datetime',
+        'fecharegistro' => 'datetime',
     ];
 
     /**

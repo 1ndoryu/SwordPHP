@@ -81,11 +81,16 @@ class AuthController
         $usuario = $this->usuarioService->autenticarUsuario($identificador, $clave);
 
         if ($usuario) {
-            // CORRECCIÓN: Usamos la función nativa de PHP.
-            // El 'true' elimina el ID de sesión antiguo.
+            // CORRECCIÓN FINAL:
+            // 1. Obtenemos el objeto sesión del framework. Esto fuerza el inicio de la sesión.
+            $session = $request->session();
+
+            // 2. Ahora que la sesión está activa, regeneramos el ID de forma segura.
             session_regenerate_id(true);
 
-            $request->session()->set('usuarioId', $usuario->id);
+            // 3. Usamos el objeto sesión que ya obtuvimos para guardar los datos.
+            $session->set('usuarioId', $usuario->id);
+            
             return redirect('/admin');
         }
 

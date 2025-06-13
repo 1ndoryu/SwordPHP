@@ -15,6 +15,7 @@
 return [
     // Middleware global.
     '' => [
+        App\middleware\Session::class,
         App\middleware\StaticFile::class
     ]
 ];

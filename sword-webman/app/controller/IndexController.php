@@ -15,8 +15,14 @@ class IndexController
         $tiempoFin = microtime(true);
         $tiempoCarga = ($tiempoFin - $tiempoInicio) * 1000;
 
-        return view('index/index', [
+        $datosContenido = [
             'tiempoCarga' => number_format($tiempoCarga, 2)
-        ]);
+        ];
+
+        $datosLayout = [
+            'titulo' => 'Página de Inicio'
+        ];
+
+        return renderConLayout('index/index', $datosContenido, $datosLayout);
     }
 }

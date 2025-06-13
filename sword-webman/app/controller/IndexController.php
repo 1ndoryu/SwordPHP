@@ -30,4 +30,9 @@ class IndexController
     {
         return json(['code' => 0, 'msg' => 'ok']);
     }
+    
+    public function test(Request $request)
+    {
+        return json(['code' => 0, 'msg' => 'test ok']);
+    }
 }

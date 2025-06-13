@@ -60,5 +60,8 @@
     ]
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "barryvdh/laravel-ide-helper": "^3.5"
+  }
 }

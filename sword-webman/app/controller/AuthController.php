@@ -15,7 +15,6 @@ class AuthController
 
     /**
      * Inyectamos nuestro servicio en el controlador.
-     * Es una buena práctica para mantener el código desacoplado y fácil de probar.
      */
     public function __construct()
     {
@@ -30,7 +29,6 @@ class AuthController
      */
     public function mostrarFormularioRegistro(Request $request): Response
     {
-        // Renderiza la vista que crearemos en el siguiente paso.
         return view('auth.registro', ['titulo' => 'Crear una cuenta']);
     }
 
@@ -42,23 +40,56 @@ class AuthController
      */
     public function procesarRegistro(Request $request): Response
     {
-        // Obtenemos todos los datos enviados por POST.
         $datos = $request->post();
-
-        // En una aplicación real, aquí deberías añadir una capa de validación robusta
-        // para asegurar que 'nombreUsuario', 'correoElectronico' y 'clave' existen y son válidos.
-
         $usuario = $this->usuarioService->crearUsuario($datos);
 
         if ($usuario) {
-            // CAMBIO: Primero guardamos el mensaje en la sesión.
             session()->set('exito', '¡Cuenta creada correctamente! Ya puedes iniciar sesión.');
-            // Luego, retornamos la redirección.
             return redirect('/login');
         }
 
-        // CAMBIO: Hacemos lo mismo para el caso de error.
         session()->set('error', 'No se pudo crear la cuenta. El email o nombre de usuario puede que ya esté en uso.');
         return redirect('/registro');
+    }
+
+    /**
+     * Muestra el formulario de inicio de sesión.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function mostrarFormularioLogin(Request $request): Response
+    {
+        return view('auth.login', [
+            'titulo' => 'Iniciar Sesión',
+            'exito' => session()->pull('exito'),
+            'error' => session()->pull('error')
+        ]);
+    }
+
+    /**
+     * Procesa la solicitud de inicio de sesión.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function procesarLogin(Request $request): Response
+    {
+        $identificador = $request->post('identificador');
+        $clave = $request->post('clave');
+
+        $usuario = $this->usuarioService->autenticarUsuario($identificador, $clave);
+
+        if ($usuario) {
+            // CORRECCIÓN: Usamos la función nativa de PHP.
+            // El 'true' elimina el ID de sesión antiguo.
+            session_regenerate_id(true);
+
+            $request->session()->set('usuarioId', $usuario->id);
+            return redirect('/admin');
+        }
+
+        session()->set('error', 'Las credenciales proporcionadas no son correctas.');
+        return redirect('/login');
     }
 }

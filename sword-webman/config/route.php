@@ -13,10 +13,14 @@ use App\controller\IndexController;
 use App\controller\AuthController;
 
 // --- Rutas de Autenticación ---
-// Muestra el formulario de registro
+
 Route::get('/registro', [AuthController::class, 'mostrarFormularioRegistro']);
-// Procesa los datos del formulario de registro
+
 Route::post('/registro', [AuthController::class, 'procesarRegistro']);
+
+Route::get('/login', [AuthController::class, 'mostrarFormularioLogin']);
+
+Route::post('/login', [AuthController::class, 'procesarLogin']);
 
 
 // --- Rutas existentes ---

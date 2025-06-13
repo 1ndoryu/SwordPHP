@@ -9,10 +9,30 @@
  */
 
 use Webman\Route;
-use app\controller\IndexController;
+use App\controller\IndexController;
+use App\controller\AuthController;
 
-// Define la ruta principal para que cargue la página de inicio.
+// --- Rutas de Autenticación ---
+// Muestra el formulario de registro
+Route::get('/registro', [AuthController::class, 'mostrarFormularioRegistro']);
+// Procesa los datos del formulario de registro
+Route::post('/registro', [AuthController::class, 'procesarRegistro']);
+
+
+// --- Rutas existentes ---
 Route::get('/', [IndexController::class, 'index']);
 
-// Ruta de fallback para deshabilitar rutas por defecto si no se necesitan.
+Route::get('/view', [IndexController::class, 'view']);
+
+Route::get('/json', [IndexController::class, 'json']);
+
+Route::any('/test', [IndexController::class, 'test']);
+
+
+// --- Ruta Fallback (404) ---
+Route::fallback(function(){
+    return response('404 not found', 404);
+});
+
+// Desactiva la ruta por defecto de Webman para tener control total.
 Route::disableDefaultRoute();

@@ -41,8 +41,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica.
     - [ ] Este sistema deberá incluir un CRUD centralizado y un conjunto de funciones globales para facilitar la creación, actualización, borrado y gestión de metadatos de cualquier tipo de contenido desde los temas o plugins.
 
-## LLUVIA DE IDEAS 
-
+## LLUVIA DE IDEAS (Ideas que tienen que ser integradas en caso de que sean validas)
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO

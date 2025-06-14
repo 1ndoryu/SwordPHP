@@ -1,16 +1,4 @@
 <?php
-/**
- * This file is part of webman.
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the MIT-LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @author    walkor<walkor@workerman.net>
- * @copyright walkor<walkor@workerman.net>
- * @link      http://www.workerman.net/
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
- */
 
 use Dotenv\Dotenv;
 use support\Log;
@@ -49,6 +37,26 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path(false) . '/.env')) {
         Dotenv::createMutable(base_path(false))->load();
     }
 }
+
+// =================== INICIO: DEFINICIÓN DE RUTAS DEL PROYECTO ===================
+// El objetivo es definir una estructura de rutas clara y centralizada para
+// facilitar la separación entre el núcleo (Core) y el contenido (Content).
+
+// `base_path()` apunta al directorio 'swordCore'.
+// `PROJECT_ROOT` será el directorio padre que contendrá a 'swordCore' y 'swordContent'.
+define('PROJECT_ROOT', realpath(base_path() . '/..'));
+
+// Ruta al núcleo de la aplicación.
+define('SWORD_CORE_PATH', base_path());
+
+// Ruta a la carpeta de contenido del usuario.
+define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
+
+// Rutas específicas dentro de 'swordContent'.
+define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
+// ==================== FIN: DEFINICIÓN DE RUTAS DEL PROYECTO =====================
 
 Config::clear();
 support\App::loadAllConfig(['route']);
@@ -136,4 +144,3 @@ foreach (Util::scanDir($directory) as $path) {
     }
 }
 Route::load($paths);
-

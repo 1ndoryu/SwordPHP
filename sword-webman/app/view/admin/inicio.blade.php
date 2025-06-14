@@ -1,13 +1,11 @@
 @extends('layouts.admin')
 
-{{-- Define el título que aparecerá en la pestaña del navegador --}}
-@section('titulo', 'Dashboard')
-
-{{-- Define el título que aparecerá en la cabecera de la página --}}
+{{-- Define el título que aparecerá en la cabecera de la página del panel --}}
 @section('tituloPagina', 'Dashboard')
 
-{{-- Contenido principal de la página --}}
-@section('contenido')
+{{-- El contenido específico de esta página se inyecta en la sección 'contenidoPanel' del layout,
+     evitando el conflicto con la sección 'contenido' del layout padre. --}}
+@section('contenidoPanel')
 <div style="background-color: #fff; padding: 2rem; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
     <h3>¡Bienvenido al Panel de Administración de SwordPHP!</h3>
     <p>

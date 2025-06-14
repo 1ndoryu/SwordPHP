@@ -1,20 +1,41 @@
-# Hoja de Ruta Propuesta
-## Se pueden agregar subtareas
+# Hoja de Ruta del Proyecto SwordPHP
 
-- [x] **Autenticación y Gestión de Usuarios:** Creación de la tabla `usuarios`, sistema de registro e inicio de sesión funcional.
-- [ ] **Estructura del Panel de Administración (Admin):** Crear el layout básico del panel, rutas protegidas y un controlador inicial.
-    - [ ] No se que mas falta.
-- [ ] **Gestor de Contenido (CRUD Básico):** Implementar la creación, lectura, actualización y eliminación de "páginas" o "entradas".
-- [ ] **Sistema de Ruteo y Temas (Frontend):** Hacer que las páginas creadas sean visibles para el público.
-- [ ] **Sistema de Plugins (Avanzado):** Implementar un sistema para permitir la extensibilidad del core.
+## Concepto
+El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable.
 
-## Concepto 
+---
 
-Necesitamos hacer una alternativa wp, minimalista, eficiente, rapida, escribir la menor cantidad de codigo posible organizado y eficiente.
+## Fases del Proyecto
 
-# Lluvia de ideas
-## Estas ideas necesitan organizarse en la hoja de ruta si son validas
+- [x] **Fase 1: Fundación y Autenticación**
+    - [x] Configuración inicial del framework y la base de datos.
+    - [x] Creación del modelo y la migración para la tabla `usuarios`.
+    - [x] Implementación del sistema de registro, login y logout.
+    - [x] Creación de `UsuarioService` para manejar la lógica de negocio de los usuarios.
 
-- Necesito algo como los add_action('wp_ajax) de wordpress que hacian facil hacer funciones ajax
-- Necesito las funciones globales como wp current user, get_current_user_id, get user meta, get post meta, guardar metas facilmente, etc, etc. Pasito por pasito.
-- No es tan importante pero, encolar scripts y css facilmente. (Aun no se como agregar css y script aca. 
+- [x] **Fase 2: Estructura del Panel de Administración**
+    - [x] Creación de rutas protegidas para el panel.
+    - [x] Diseño de un layout principal de dos columnas (sidebar y contenido).
+    - [x] Creación de funciones de ayuda globales (ej: `usuarioActual()`).
+    - [x] Personalización de la cabecera del panel con información del usuario.
+
+- [ ] **Fase 3: Gestión de Assets (CSS/JS)**
+    - [ ] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS y JavaScript tanto en el panel como en el frontend.
+
+- [ ] **Fase 4: Gestor de Contenido (CRUD Básico)**
+    - [ ] Crear el modelo y la migración para la tabla `contenidos` (o `paginas`).
+    - [ ] Implementar la interfaz para crear, leer, actualizar y eliminar contenidos.
+    - [ ] **(Idea integrada)** Implementar un sistema de metadatos (como `post_meta`) para añadir campos personalizados a los contenidos.
+    - [ ] **(Idea integrada)** Crear un manejador de peticiones AJAX (similar a `wp_ajax`) para hacer las interacciones del CRUD más dinámicas que las funciones puedan usar en cualquier parte.
+
+- [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
+    - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido creado en el frontend.
+    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia del sitio público.
+
+- [ ] **Fase 6: Mejoras y Sistema de Plugins (Avanzado)**
+    - [ ] **(Idea integrada)** Ampliar el sistema de metadatos para usuarios (`user_meta`).
+    - [ ] Diseñar e implementar una arquitectura de plugins para permitir la extensibilidad del core sin modificarlo.
+
+## LLuvia de idea
+
+- [ ] Creo que lo de tipo de usuario admin vs normal debería ir en la fase 2 

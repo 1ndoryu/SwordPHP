@@ -137,7 +137,7 @@ if (!function_exists('registrarAccionAjax')) {
 }
 
 
-
+#Funciona el test
 registrarAccionAjax('test_sin_tema', function (support\Request $request) {
     $extra_data = $request->post('info', 'ninguna');
     return json([
@@ -147,3 +147,22 @@ registrarAccionAjax('test_sin_tema', function (support\Request $request) {
         'timestamp' => date('Y-m-d H:i:s')
     ]);
 });
+
+/*
+Ejemplo de uso.
+function mi_manejador_de_accion( \support\Request $request ) {
+    
+    // Aquí va tu lógica. Por ejemplo, obtener un dato enviado por POST.
+    $id_recibido = $request->post('id_item', 0);
+
+    // Es importante que la función siempre devuelva una respuesta.
+    // La función `json()` es una forma fácil de crear una respuesta JSON.
+    return json([
+        'success' => true,
+        'message' => 'La acción se ha ejecutado correctamente para el item: ' . $id_recibido
+    ]);
+}
+
+registrarAccionAjax('mi_accion_custom', 'mi_manejador_de_accion');
+
+*/

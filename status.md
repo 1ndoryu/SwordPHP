@@ -20,7 +20,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [x] Personalización de la cabecera del panel con información del usuario.
 
 - [ ] **Fase 3: Gestión de Assets (CSS/JS)**
-    - [ ] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS y JavaScript tanto en el panel como en el frontend.
+    - [ ] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS y JavaScript tanto en el panel como en el frontend. Tiene que poder encolar archivos individualmente y carpetas, tambien codigo y html, como en wordpress.
 
 - [ ] **Fase 4: Gestor de Contenido (CRUD Básico)**
     - [ ] Crear el modelo y la migración para la tabla `contenidos` (o `paginas`).
@@ -36,6 +36,6 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [ ] **(Idea integrada)** Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [ ] Diseñar e implementar una arquitectura de plugins para permitir la extensibilidad del core sin modificarlo.
 
-## LLuvia de idea
+## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas)
 
 - [ ] Creo que lo de tipo de usuario admin vs normal debería ir en la fase 2 

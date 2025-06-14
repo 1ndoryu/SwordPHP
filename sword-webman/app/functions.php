@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Archivo para funciones de ayuda (helpers) globales.
  */
@@ -41,4 +42,23 @@ function usuarioActual(): ?Usuario
 function idUsuarioActual(): ?int
 {
     return session('usuarioId');
+}
+
+/**
+ * Obtiene la instancia única del servicio de assets.
+ *
+ * Implementa un patrón Singleton para asegurar que solo exista una instancia
+ * de AssetService durante el ciclo de vida de la petición.
+ *
+ * @return \App\service\AssetService La instancia del servicio de assets.
+ */
+function assetService(): \App\service\AssetService
+{
+    static $instancia = null;
+
+    if ($instancia === null) {
+        $instancia = new \App\service\AssetService();
+    }
+
+    return $instancia;
 }

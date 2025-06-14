@@ -5,6 +5,7 @@ namespace App\middleware;
 use Webman\Http\Request;
 use Webman\Http\Response;
 use Webman\MiddlewareInterface;
+use support\Log; // <-- Asegúrate de añadir esta línea
 
 class AutenticacionMiddleware implements MiddlewareInterface
 {
@@ -17,7 +18,12 @@ class AutenticacionMiddleware implements MiddlewareInterface
      */
     public function process(Request $request, callable $handler): Response
     {
-        if ($request->session()->get('usuarioId')) {
+        $usuarioId = $request->session()->get('usuarioId');
+
+        // LOG DE DIAGNÓSTICO:
+        Log::channel('default')->info('[AutenticacionMiddleware] -> Verificando sesión. Usuario ID encontrado: ' . ($usuarioId ? $usuarioId : 'NINGUNO'));
+
+        if ($usuarioId) {
             // Si el 'usuarioId' existe en la sesión, el usuario está autenticado.
             // Le permitimos continuar hacia el controlador correspondiente.
             return $handler($request);

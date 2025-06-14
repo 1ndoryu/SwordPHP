@@ -39,27 +39,29 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path(false) . '/.env')) {
 }
 
 // =================== INICIO: DEFINICIÓN DE RUTAS DEL PROYECTO ===================
-// El objetivo es definir una estructura de rutas clara y centralizada para
-// facilitar la separación entre el núcleo (Core) y el contenido (Content).
-
-// `base_path()` apunta al directorio 'swordCore'.
-// `PROJECT_ROOT` será el directorio padre que contendrá a 'swordCore' y 'swordContent'.
 define('PROJECT_ROOT', realpath(base_path() . '/..'));
-
-// Ruta al núcleo de la aplicación.
 define('SWORD_CORE_PATH', base_path());
-
-// Ruta a la carpeta de contenido del usuario.
 define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
-
-// Rutas específicas dentro de 'swordContent'.
 define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
 define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
 define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
 // ==================== FIN: DEFINICIÓN DE RUTAS DEL PROYECTO =====================
 
 Config::clear();
-support\App::loadAllConfig(['route']);
+support\App::loadAllConfig(['route', 'theme']); // Aseguramos que la config del tema esté disponible
+
+// ==================== INICIO: CARGA DE FUNCTIONS.PHP DEL TEMA ====================
+// Cargar el functions.php del tema activo para permitir la personalización
+// y la adición de funcionalidades específicas del tema.
+$themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
+$activeTheme = $themeConfig['active_theme'];
+$themeFunctionsFile = SWORD_THEMES_PATH . '/' . $activeTheme . '/functions.php';
+
+if (file_exists($themeFunctionsFile)) {
+    require_once $themeFunctionsFile;
+}
+// ===================== FIN: CARGA DE FUNCTIONS.PHP DEL TEMA ======================
+
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }

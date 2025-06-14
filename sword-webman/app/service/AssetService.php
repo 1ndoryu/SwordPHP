@@ -16,6 +16,9 @@ class AssetService
     /** @var array<string, string> */
     private array $scripts = []; // Clave: identificador, Valor: ruta
 
+    /** @var array<string, array> */
+    private array $scriptsLocalizados = [];
+
     /** @var array<string> */
     private array $codigoCssEnLinea = [];
 
@@ -54,6 +57,19 @@ class AssetService
         if (!isset($this->scripts[$identificador])) {
             $this->scripts[$identificador] = $ruta;
         }
+    }
+
+    /**
+     * Pasa datos de PHP a JavaScript de forma segura.
+     * Crea un objeto JavaScript global con los datos proporcionados.
+     *
+     * @param string $nombreObjeto El nombre de la variable JavaScript que contendrá los datos.
+     * @param array $datos El array asociativo de datos a pasar.
+     * @return void
+     */
+    public function localizarScript(string $nombreObjeto, array $datos): void
+    {
+        $this->scriptsLocalizados[$nombreObjeto] = $datos;
     }
 
     /**
@@ -165,15 +181,33 @@ class AssetService
     public function imprimirAssetsFooter(): string
     {
         $html = '';
+
+        // Imprimir datos localizados ANTES de los scripts que podrían usarlos.
+        if (!empty($this->scriptsLocalizados)) {
+            $codigoLocalizado = '';
+            foreach ($this->scriptsLocalizados as $nombreObjeto => $datos) {
+                $jsonDatos = json_encode($datos, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                // Usamos 'const' para crear la variable global en JS.
+                $codigoLocalizado .= "const {$nombreObjeto} = {$jsonDatos};" . PHP_EOL;
+            }
+            $html .= '<script>' . PHP_EOL . $codigoLocalizado . '</script>' . PHP_EOL;
+        }
+
+        // Imprimir scripts encolados
         foreach ($this->scripts as $ruta) {
             $html .= '<script src="' . htmlspecialchars($ruta) . '"></script>' . PHP_EOL;
         }
+
+        // Imprimir código JS en línea
         if (!empty($this->codigoJsEnLinea)) {
             $html .= '<script>' . PHP_EOL . implode(PHP_EOL, $this->codigoJsEnLinea) . PHP_EOL . '</script>' . PHP_EOL;
         }
+
+        // Imprimir HTML arbitrario para el footer
         if (!empty($this->htmlFooter)) {
             $html .= implode(PHP_EOL, $this->htmlFooter) . PHP_EOL;
         }
+
         return $html;
     }
 }

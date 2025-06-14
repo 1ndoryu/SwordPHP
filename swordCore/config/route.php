@@ -7,6 +7,7 @@ use App\controller\AdminController;
 use App\controller\PaginaController;
 use App\middleware\AutenticacionMiddleware;
 use App\controller\AjaxController;
+use App\controller\PaginaPublicaController;
 use support\Request;
 use support\Log;
 
@@ -57,6 +58,12 @@ Route::get('/', [IndexController::class, 'index']);
 Route::get('/view', [IndexController::class, 'view']);
 Route::get('/json', [IndexController::class, 'json']);
 Route::any('/test', [IndexController::class, 'test']);
+
+// --- Ruteo Dinámico de Páginas del Frontend ---
+// Esta ruta debe ir después de todas las rutas específicas y antes del fallback.
+// Captura cualquier cadena que parezca un slug de página y la pasa al controlador público.
+// La expresión regular permite letras, números, guiones, guiones bajos y barras.
+Route::get('/{slug:[a-zA-Z0-9\-_\/]+}', [PaginaPublicaController::class, 'mostrar']);
 
 
 // --- Ruta Fallback (Manejo de 404) ---

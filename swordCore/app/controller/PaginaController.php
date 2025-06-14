@@ -54,30 +54,25 @@ class PaginaController
      * @param Request $request
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request)
     {
-        // 1. Crear la página con los datos principales
-        // Excluimos 'meta' para pasarlo al servicio de forma segura.
-        $datosPrincipales = $request->except(['meta', '_csrf']);
-        $pagina = $this->paginaService->crearPagina($datosPrincipales);
-
-        // 2. Si la página se creó correctamente, procesamos los metadatos.
-        if ($pagina) {
-            $metadatos = $request->post('meta', []);
-            if (is_array($metadatos)) {
-                foreach ($metadatos as $clave => $valor) {
-                    // Solo guardamos el metadato si el usuario introdujo un valor.
-                    if (trim($valor) !== '') {
-                        $pagina->guardarMeta($clave, $valor);
-                    }
-                }
-            }
+        // Validación (simplificada por ahora, se puede expandir)
+        $data = $request->post();
+        if (empty($data['titulo']) || empty($data['slug'])) {
+            return response('El título y el slug son obligatorios', 422);
         }
 
-        // Opcional: añadir un mensaje de éxito a la sesión.
-        return redirect('/panel/paginas');
-    }
+        $pagina = new Pagina();
+        $pagina->titulo = $request->post('titulo');
+        $pagina->slug = $request->post('slug');
+        $pagina->contenido = $request->post('contenido');
+        $pagina->estado = $request->post('estado');
 
+        $pagina->save();
+
+        // Redireccionar a la lista de páginas con un mensaje de éxito
+        return redirect('/panel/paginas')->with('success', 'Página creada con éxito.');
+    }
     /**
      * Muestra el formulario para editar una página existente.
      * @param Request $request

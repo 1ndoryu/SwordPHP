@@ -12,6 +12,7 @@
     {{-- Si existe un subtítulo, lo mostramos --}}
     @if($pagina->subtitulo)
         <h2 style="color: #666; font-weight: 300;">{{ $pagina->subtitulo }}</h2>
+        <p> usando swordCore\app\view\frontend\pagina.blade.php </p>
     @endif
 
     <div style="margin: 20px 0;"></div>
@@ -28,7 +29,6 @@
     <hr style="margin-top: 30px;">
 
     <div style="font-size: 0.9em; color: #888; text-align: right;">
-        <span>Publicado por: {{ $pagina->autor->nombre_mostrado ?? $pagina->autor->nombre_usuario }}</span> |
         <span>Fecha: {{ $pagina->created_at->format('d/m/Y') }}</span>
     </div>
 

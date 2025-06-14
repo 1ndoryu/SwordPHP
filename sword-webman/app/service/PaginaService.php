@@ -52,8 +52,8 @@ class PaginaService
         $this->validarDatos($datos);
 
         $datos['slug'] = $this->generarSlug($datos['titulo']);
-        $datos['idAutor'] = session('usuario.id'); // Asignar el autor de la sesión actual
-        $datos['tipoContenido'] = 'pagina'; // Hardcoded por ahora
+        $datos['idautor'] = session('usuario.id'); // Asignar el autor de la sesión actual
+        $datos['tipocontenido'] = 'pagina'; // Hardcoded por ahora
 
         return Pagina::create($datos);
     }

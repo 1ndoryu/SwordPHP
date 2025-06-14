@@ -14,9 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $subtitulo
  * @property string|null $contenido
  * @property string $slug
- * @property int $idAutor
+ * @property int $idautor
  * @property string $estado
- * @property string $tipoContenido
+ * @property string $tipocontenido
  * @property \Carbon\Carbon|null $created_at
  * @property \Carbon\Carbon|null $updated_at
  *
@@ -48,9 +48,9 @@ class Pagina extends Model
         'subtitulo',
         'contenido',
         'slug',
-        'idAutor',
+        'idautor',
         'estado',
-        'tipoContenido'
+        'tipocontenido'
     ];
 
     /**
@@ -76,6 +76,6 @@ class Pagina extends Model
      */
     public function autor(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class, 'idAutor');
+        return $this->belongsTo(Usuario::class, 'idautor');
     }
 }

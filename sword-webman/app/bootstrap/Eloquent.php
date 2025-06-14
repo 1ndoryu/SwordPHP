@@ -1,38 +1,43 @@
 <?php
 
-namespace App\bootstrap;
+namespace app\bootstrap;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Webman\Bootstrap as WebmanBootstrap;
+use Illuminate\Pagination\Paginator;
+use Webman\Bootstrap;
 
-class Eloquent implements WebmanBootstrap
+class Eloquent implements Bootstrap
 {
-    /**
-     * Inicia la cápsula de Eloquent para que esté disponible globalmente.
-     *
-     * @param $worker
-     * @return void
-     */
-    public static function start($worker): void
+    public static function start($worker)
     {
-        // Solo inicializamos la base de datos en los procesos worker, no en el proceso monitor.
-        if ($worker) {
-            $config = config('database');
-            $defaultConnection = $config['default'];
-            $connections = $config['connections'];
+        $capsule = new Capsule;
+        $connections = config('database.connections');
 
-            $capsule = new Capsule;
-            // Agrega la conexión por defecto.
-            $capsule->addConnection($connections[$defaultConnection]);
-
-            // Permite que Eloquent utilice el despachador de eventos.
-            // $capsule->setEventDispatcher(new \Illuminate\Events\Dispatcher(new \Illuminate\Container\Container));
-
-            // Hace que esta instancia de Capsule esté disponible globalmente a través de métodos estáticos.
-            $capsule->setAsGlobal();
-
-            // Inicia Eloquent ORM.
-            $capsule->bootEloquent();
+        foreach ($connections as $name => $config) {
+            $capsule->addConnection($config, $name);
         }
+
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+
+        // --- DEJA SOLAMENTE ESTA CONFIGURACIÓN PARA EL PAGINADOR ---
+
+        // 1. Le dice al Paginador que para renderizar, debe pedir la fábrica de vistas.
+        Paginator::viewFactoryResolver(function () {
+            // La fábrica ya está configurada gracias a nuestro cambio en config/view.php
+            return view(); 
+        });
+        
+        // 2. Le dice al Paginador cómo obtener la información de la URL actual.
+        Paginator::currentPathResolver(function () {
+            return request()->path();
+        });
+
+        Paginator::currentPageResolver(function ($pageName = 'page') {
+            return request()->input($pageName, 1);
+        });
+
+        // 3. Le dice al Paginador qué estilo de plantilla usar.
+        Paginator::useBootstrapFive();
     }
 }

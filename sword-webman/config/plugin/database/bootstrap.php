@@ -5,17 +5,13 @@ use Webman\Bootstrap;
 
 return new class implements Bootstrap
 {
-    public static function start($worker)
-    {
-        if ($worker) {
-            $config = config('database');
-            $connections = $config['connections'];
-            $default_connection = $config['default'];
-
-            $capsule = new Capsule;
-            $capsule->addConnection($connections[$default_connection]);
-            $capsule->setAsGlobal();
-            $capsule->bootEloquent();
-        }
-    }
+    /**
+     * Bootstrap para el plugin webman/database.
+     *
+     * NOTA: La lógica de inicialización de Eloquent ha sido centralizada en
+     * app/bootstrap/Eloquent.php para evitar configuraciones duplicadas y
+     * resolver problemas de paginación. Este fichero se deja intencionadamente
+     * vacío para no interferir.
+     */
+    public static function start($worker) {}
 };

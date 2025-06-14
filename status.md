@@ -27,7 +27,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - [x] Desarrollar un sistema de ruteo dinámico que muestra el contenido de las páginas publicadas en el frontend.
-    - [ ] **Refactorización Arquitectónica:** Separar la estructura de directorios en `swordCore` (el núcleo del CMS) y `swordContent` (temas, plugins, uploads) para reflejar la filosofía de WordPress.
+    - [ ] **Refactorización Arquitectónica:** Separar la estructura de directorios en `swordCore` (el núcleo del CMS) y `swordContent` (temas, plugins, uploads) para reflejar la filosofía de WordPress. (lo que tenemos hasta ahora permanecerá en su sitio, es decir, el core tendra su propias rutas y plantillas, mientras que del lado del content sera como wp)
     - [ ] Crear una estructura básica de "temas" que permita personalizar la apariencia. Cada tema debe poder tener su propio `functions.php`, plantillas de página, y assets (CSS/JS).
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**

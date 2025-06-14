@@ -54,8 +54,9 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 ## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas, si se te pide actualizar status.md integralas)
 
 - [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas.
-- [ ] El sistema de encolar script o cualquier cosa tiene que ser facil.
+- [ ] El sistema de encolar script o cualquier cosa tiene que ser facil como en wp, pero mas facil, aqui no se como lo hicimos pero no lo veo practico si literalmente lo tenemos que especificar en las clases.
 - [ ] Un sistema centralizado como en wp de medis, imagenes, archivos, etc, que se guarda por fecha y sera accesible desde el panel y los temas.
+- [ ] Separacion la carpeta sword-webman, se llamara swordCore o no se que nombre seria bueno para representar el nucleo, luego necesito una separación para swordContent donde estaran los plugin, temas, las subidas, etc, ese contenido dinamico que no es obligatorio para que el core funcione, tendra una estructura similar a wordpress
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

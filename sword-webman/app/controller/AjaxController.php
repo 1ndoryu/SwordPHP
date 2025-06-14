@@ -2,78 +2,41 @@
 
 namespace App\controller;
 
+use App\service\AjaxManagerService;
 use support\Request;
 use support\Response;
 
 /**
- * Controlador para gestionar todas las peticiones AJAX de la aplicación.
- * Utiliza un parámetro 'action' en la ruta para invocar dinámicamente
- * a métodos específicos con el prefijo 'action_'.
+ * El "Gatekeeper" de las llamadas AJAX.
+ * Su única responsabilidad es recibir la solicitud, determinar qué acción se solicita
+ * y pasarle el control al AjaxManagerService para su ejecución.
  */
 class AjaxController
 {
     /**
-     * Punto de entrada para todas las llamadas AJAX.
+     * Punto de entrada único para todas las llamadas AJAX.
      *
-     * @param Request $request La solicitud entrante.
-     * @param string $action El nombre de la acción a ejecutar.
-     * @return Response Una respuesta JSON.
-     */
-    public function handle(Request $request, string $action): Response
-    {
-        // Sanitiza la acción para prevenir vulnerabilidades de path traversal.
-        // Permite solo caracteres alfanuméricos, guiones bajos y guiones.
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $action)) {
-            return json(['success' => false, 'message' => 'Acción no válida.'], 400);
-        }
-
-        // Construye el nombre del método de acción (ej: 'action_mi_accion').
-        $nombreMetodo = 'action_' . str_replace('-', '_', $action);
-
-        // Verifica si el método de acción existe en esta clase y es privado.
-        // Forzamos que los métodos de acción sean privados para que solo sean
-        // accesibles a través del manejador 'handle', no directamente por la ruta.
-        if (method_exists($this, $nombreMetodo)) {
-            $reflection = new \ReflectionMethod($this, $nombreMetodo);
-            if ($reflection->isPrivate()) {
-                // Llama al método de acción correspondiente.
-                return $this->{$nombreMetodo}($request);
-            }
-        }
-
-        // Si la acción no se encuentra o no es un método privado, devuelve un error.
-        return json(['success' => false, 'message' => 'Acción no encontrada o no permitida.'], 404);
-    }
-
-    /**
-     * Acción de prueba para verificar que el sistema AJAX funciona.
+     * Espera un parámetro 'action' en la solicitud para determinar
+     * qué función registrada debe ejecutarse.
      *
      * @param Request $request
      * @return Response
      */
-    private function action_test(Request $request): Response
+    public function handle(Request $request): Response
     {
-        return json([
-            'success' => true,
-            'message' => 'Respuesta de prueba del manejador AJAX.',
-            'data' => [
-                'timestamp' => time(),
-                'received_params' => $request->all()
-            ]
-        ]);
-    }
+        // Obtenemos el nombre de la acción desde la solicitud.
+        // Asumimos que vendrá como un dato POST, que es lo más común para AJAX.
+        $action = $request->post('action');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Acciones para el CRUD de Páginas
-    |--------------------------------------------------------------------------
-    | Aquí se añadirán los métodos para crear, leer, actualizar y eliminar
-    | páginas vía AJAX. Por ejemplo:
-    |
-    | private function action_borrar_pagina(Request $request): Response
-    | {
-    |     // Lógica para borrar la página
-    | }
-    |
-    */
+        if (empty($action)) {
+            // Si no se especifica una acción, devolvemos un error.
+            return json([
+                'success' => false,
+                'message' => 'Error: No se ha especificado ninguna acción AJAX.'
+            ], 400); // 400 Bad Request
+        }
+
+        // Le pedimos al "Cerebro" que ejecute la acción.
+        return AjaxManagerService::ejecutarAccion($action, $request);
+    }
 }

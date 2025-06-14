@@ -119,3 +119,31 @@ if (!function_exists('old')) {
         return $old_input;
     }
 }
+
+if (!function_exists('registrarAccionAjax')) {
+    /**
+     * Registra una acción AJAX para que esté disponible en el sistema.
+     *
+     * Esta es una función de conveniencia (helper) que simplifica el registro de acciones
+     * desde cualquier parte del código, como el archivo functions.php de un tema.
+     *
+     * @param string $nombreAccion El nombre único para la acción AJAX.
+     * @param callable $callback La función que se ejecutará cuando se llame a esta acción.
+     */
+    function registrarAccionAjax(string $nombreAccion, callable $callback)
+    {
+        \App\service\AjaxManagerService::registrarAccion($nombreAccion, $callback);
+    }
+}
+
+
+
+registrarAccionAjax('test_sin_tema', function (support\Request $request) {
+    $extra_data = $request->post('info', 'ninguna');
+    return json([
+        'success' => true,
+        'message' => '¡Respuesta AJAX!',
+        'info_recibida' => $extra_data,
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+});

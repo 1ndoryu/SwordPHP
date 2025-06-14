@@ -14,8 +14,17 @@ use App\controller\AuthController;
 use App\controller\AdminController;
 use App\controller\PaginaController;
 use App\middleware\AutenticacionMiddleware;
+use App\controller\AjaxController;
 use support\Request;
 use support\Log;
+
+
+
+Route::post('/ajax', [AjaxController::class, 'handle']);
+
+Route::get('/test-ajax', function() {
+    return view('test/ajax');
+});
 
 // --- Rutas de Administración (Protegidas) ---
 

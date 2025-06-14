@@ -20,13 +20,6 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path() . '/.env')) {
     }
 }
 
-App::loadAllConfig(['route']);
-
-$errorReporting = config('app.error_reporting');
-if (isset($errorReporting)) {
-    error_reporting($errorReporting);
-}
-
 $runtimeProcessPath = runtime_path() . DIRECTORY_SEPARATOR . '/windows';
 $paths = [
     $runtimeProcessPath,
@@ -88,8 +81,6 @@ if (!\$appConfigFile = config_path('app.php')) {
 if (\$timezone = \$appConfig['default_timezone'] ?? '') {
     date_default_timezone_set(\$timezone);
 }
-
-App::loadAllConfig(['route']);
 
 worker_start('$processParam', $configParam);
 

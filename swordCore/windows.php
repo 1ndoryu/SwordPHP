@@ -9,6 +9,16 @@ use Dotenv\Dotenv;
 use support\App;
 use Workerman\Worker;
 
+// DEFINICIÓN DE CONSTANTES PARA EL SCRIPT MONITOR (windows.php)
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', realpath(base_path() . '/..'));
+    define('SWORD_CORE_PATH', base_path());
+    define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
+    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+    define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
+}
+
 ini_set('display_errors', 'on');
 error_reporting(E_ALL);
 
@@ -20,6 +30,7 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path() . '/.env')) {
     }
 }
 
+// Esta llamada ahora funcionará porque las constantes ya existen.
 App::loadAllConfig(['route']);
 
 $errorReporting = config('app.error_reporting');
@@ -73,6 +84,16 @@ use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
 use Webman\Config;
 use support\App;
+
+// DEFINICIÓN DE CONSTANTES PARA LOS SCRIPTS DE TRABAJADORES
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', realpath(base_path() . '/..'));
+    define('SWORD_CORE_PATH', base_path());
+    define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
+    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+    define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
+}
 
 ini_set('display_errors', 'on');
 error_reporting(E_ALL);

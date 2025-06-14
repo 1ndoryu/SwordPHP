@@ -39,12 +39,14 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path(false) . '/.env')) {
 }
 
 // =================== INICIO: DEFINICIÓN DE RUTAS DEL PROYECTO ===================
-define('PROJECT_ROOT', realpath(base_path() . '/..'));
-define('SWORD_CORE_PATH', base_path());
-define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
-define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
-define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
-define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
+if (!defined('PROJECT_ROOT')) {
+    define('PROJECT_ROOT', realpath(base_path() . '/..'));
+    define('SWORD_CORE_PATH', base_path());
+    define('SWORD_CONTENT_PATH', PROJECT_ROOT . '/swordContent');
+    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+    define('SWORD_UPLOADS_PATH', SWORD_CONTENT_PATH . '/uploads');
+}
 // ==================== FIN: DEFINICIÓN DE RUTAS DEL PROYECTO =====================
 
 Config::clear();

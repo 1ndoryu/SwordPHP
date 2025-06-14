@@ -44,9 +44,13 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 - [ ] No usaremos migraciones, usaremos la estructura similar en wordpress que no necesita de migraciones para nuevo contenido, etc. 
 
 
-# NOTAS IA
+# NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
+
+Es de total prioridad antes de proceder con cualquier tarea, reducir la cantidad de codigo si encuentras oportunidades de refactorización, tener la menor cantidad de codigo es importante sin perder capacidades.
 
 Siempre que tengas la posibilidad de recomendar una herramienta externa para ahorrar tiempo en hacer algo, hazlo.
+
+# NOTAS PARA LA IA -GENERICAS QUE SE APLICAN GENERALMENTE AGNOSTICAS AL TIPO DE PROYECTO
 
 Asume que todas las clases y funciones necesarias existen y están cargadas (autoloading). No uses class_exists() o function_exists(). Si no indico si un elemento es nuevo o existente, asúmelo como existente.
 

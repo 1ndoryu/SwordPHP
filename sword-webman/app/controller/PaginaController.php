@@ -58,9 +58,15 @@ class PaginaController
     {
         try {
             $this->paginaService->crearPagina($request->post());
-            return redirect('/admin/paginas')->with('success', 'Página creada con éxito.');
+            // Se "flashea" el mensaje de éxito a la sesión ANTES de redirigir.
+            session()->flash('success', 'Página creada con éxito.');
+            return redirect('/panel/paginas'); // O /admin/paginas según tu ruta
         } catch (Throwable $e) {
-            return redirect('/admin/paginas/create')->with('error', $e->getMessage())->with('inputs', $request->post());
+            // En caso de error, flasheamos el mensaje y los datos del formulario.
+            session()->flash('error', $e->getMessage());
+            // Esto es CLAVE para que la función old() funcione.
+            session()->flash('_old_input', $request->post());
+            return redirect('/panel/paginas/create'); // O /admin/paginas/create
         }
     }
 
@@ -76,7 +82,9 @@ class PaginaController
             $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
             return view('admin/paginas/edit', ['pagina' => $pagina]);
         } catch (NotFoundException $e) {
-            return redirect('/admin/paginas')->with('error', 'La página que intentas editar no existe.');
+            // Se flashea el mensaje de error a la sesión.
+            session()->flash('error', 'La página que intentas editar no existe.');
+            return redirect('/panel/paginas'); // O /admin/paginas
         }
     }
 
@@ -90,9 +98,15 @@ class PaginaController
     {
         try {
             $this->paginaService->actualizarPagina((int)$id, $request->post());
-            return redirect('/admin/paginas')->with('success', 'Página actualizada con éxito.');
+            // Se flashea el mensaje de éxito.
+            session()->flash('success', 'Página actualizada con éxito.');
+            return redirect('/panel/paginas'); // O /admin/paginas
         } catch (Throwable $e) {
-            return redirect('/admin/paginas/edit/' . $id)->with('error', $e->getMessage())->with('inputs', $request->post());
+            // En caso de error, flasheamos el mensaje y los datos del formulario.
+            session()->flash('error', $e->getMessage());
+            // Esto es CLAVE para que la función old() funcione.
+            session()->flash('_old_input', $request->post());
+            return redirect('/panel/paginas/edit/' . $id); // O /admin/paginas/edit/
         }
     }
 
@@ -106,9 +120,13 @@ class PaginaController
     {
         try {
             $this->paginaService->eliminarPagina((int)$id);
-            return redirect('/admin/paginas')->with('success', 'Página eliminada con éxito.');
+            // Se flashea el mensaje de éxito.
+            session()->flash('success', 'Página eliminada con éxito.');
+            return redirect('/panel/paginas'); // O /admin/paginas
         } catch (Throwable $e) {
-            return redirect('/admin/paginas')->with('error', $e->getMessage());
+            // Se flashea el mensaje de error.
+            session()->flash('error', $e->getMessage());
+            return redirect('/panel/paginas'); // O /admin/paginas
         }
     }
 }

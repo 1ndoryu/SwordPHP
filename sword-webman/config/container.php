@@ -1,15 +1,19 @@
 <?php
 /**
- * This file is part of webman.
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the MIT-LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @author    walkor<walkor@workerman.net>
- * @copyright walkor<walkor@workerman.net>
- * @link      http://www.workerman.net/
- * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * Fichero de configuración del contenedor de inyección de dependencias
  */
 
-return new Webman\Container;
+// Creamos el constructor del contenedor de PHP-DI
+$builder = new \DI\ContainerBuilder();
+
+// Le decimos que cargue las definiciones de config/dependence.php
+$builder->addDefinitions(config('dependence', []));
+
+// Activamos la inyección automática (autowiring)
+$builder->useAutowiring(true);
+
+// ¡CORRECCIÓN! Activamos el uso de atributos de PHP 8 en lugar de anotaciones
+$builder->useAttributes(true);
+
+// Construimos y devolvemos el contenedor final
+return $builder->build();

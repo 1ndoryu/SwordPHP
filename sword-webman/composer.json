@@ -35,7 +35,9 @@
     "webman/database": "^2.1",
     "illuminate/pagination": "^12.18",
     "illuminate/events": "^12.18",
-    "symfony/var-dumper": "^7.3"
+    "symfony/var-dumper": "^7.3",
+    "php-di/php-di": "^7.0",
+    "doctrine/annotations": "^2.0"
   },
   "suggest": {
     "ext-event": "For better performance. "

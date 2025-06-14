@@ -37,7 +37,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido de las páginas creadas en el frontend.
-    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y lógica del sitio público.
+    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y lógica del sitio público. Los temas como en wp deben de tener su propio function php, sus estilos, plantillas, como en wp. 
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).

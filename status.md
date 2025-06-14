@@ -5,11 +5,16 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 ---
 
+## Principios Arquitectónicos
+- **Instalación sin Migraciones:** No se utilizará un sistema de migraciones tradicional. Las tablas necesarias para el core del sistema (`usuarios`, `paginas`, `paginameta`, etc.) deben ser creadas mediante un script de instalación inicial, similar a como lo hace WordPress.
+
+---
+
 ## Fases del Proyecto
 
 - [x] **Fase 1: Fundación y Autenticación**
     - [x] Configuración inicial del framework y la base de datos.
-    - [x] Creación del modelo y la migración para la tabla `usuarios`.
+    - [x] Creación del modelo y la tabla `usuarios`.
     - [x] Implementación del sistema de registro, login y logout.
     - [x] Creación de `UsuarioService` para manejar la lógica de negocio de los usuarios.
 
@@ -18,32 +23,34 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [x] Diseño de un layout principal de dos columnas (sidebar y contenido).
     - [x] Creación de funciones de ayuda globales (ej: `usuarioActual()`).
     - [x] Personalización de la cabecera del panel con información del usuario.
+    - [ ] Implementar sistema de roles de usuario (admin/normal) y proteger rutas según el rol. Evitar que los usuarios normales o suscriptores, accedan al panel. El primer usuario en crearse tiene que ser admin, como en wp. 
 
 - [x] **Fase 3: Gestión de Assets (CSS/JS)**
-    - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS y JavaScript tanto en el panel como en el frontend. Tiene que poder encolar archivos individualmente y carpetas, tambien codigo y html, como en wordpress.
+    - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS, JS, código y HTML.
+    - [ ] Desarrollar una forma de "localizar" scripts (pasar datos PHP a JS de forma segura, como `wp_localize_script`).
 
-- [ ] **Fase 4: Gestor de Contenido (CRUD Básico)**
-    - [x] Crear el modelo y la migración para la tabla `contenidos` (o `paginas`).
-    - [x] Implementar la interfaz para crear, leer, actualizar y eliminar contenidos.
-    - [x] **(Idea integrada)** Implementar un sistema de metadatos (como `post_meta`) para añadir campos personalizados a los contenidos.
-    - [ ] **(Idea integrada)** Crear un manejador de peticiones AJAX (similar a `wp_ajax`) para hacer las interacciones del CRUD más dinámicas que las funciones puedan usar en cualquier parte.
+- [ ] **Fase 4: Gestor de Páginas (CRUD Básico)**
+    - [x] Crear el modelo y la tabla para `paginas`.
+    - [x] Implementar la interfaz para crear, leer, actualizar y eliminar páginas.
+    - [x] Implementar un sistema de metadatos (`pagina_meta`) para añadir campos personalizados a las páginas.
+    - [ ] Crear un manejador de peticiones AJAX (similar a `wp_ajax`) para hacer las interacciones del CRUD más dinámicas.
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
-    - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido creado en el frontend.
-    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y logica del sitio público.
+    - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido de las páginas creadas en el frontend.
+    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y lógica del sitio público.
 
-- [ ] **Fase 6: Mejoras y Sistema de Plugins (Avanzado)**
-    - [ ] **(Idea integrada)** Ampliar el sistema de metadatos para usuarios (`user_meta`).
+- [ ] **Fase 6: Mejoras y Extensibilidad**
+    - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
+    - [ ] Implementar CRUD para la gestión de usuarios en el panel.
     - [ ] Diseñar e implementar una arquitectura de plugins para permitir la extensibilidad del core sin modificarlo.
+
+- [ ] **Fase 7: Gestor de Contenido Avanzado**
+    - [ ] Diseñar e implementar un sistema de "Tipos de Contenido" (Post Types) para registrar y gestionar diferentes clases de contenido (ej: páginas, noticias, productos) de forma genérica.
+
 
 ## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas, si se te pide actualizar status.md integralas)
 
-- [ ] Creo que lo de tipo de usuario admin vs normal debería ir en la fase 2
-- [ ] Deben existir esa funcionalidad de wp de post type que facilitaba crear cualquier tipo de contenido
-- [ ] Una forma facil de pasar data del backend al front como en wp cuando encuelas valores dentro un array o algo
-- [ ] No usaremos migraciones, usaremos la estructura similar en wordpress que no necesita de migraciones para nuevo contenido pero las tablas deben crearse al momento de la instalacion, etc. 
-- [ ] Supongo que no hay que hacer un crud para cada tipo de contenido, los usuarios tambien necesitan mostrarse en el panel y ser modificables, pero esot no es urgente
-
+- [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas. 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

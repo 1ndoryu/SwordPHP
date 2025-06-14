@@ -12,28 +12,40 @@ use Webman\Route;
 use App\controller\IndexController;
 use App\controller\AuthController;
 use App\controller\AdminController;
+use App\controller\PaginaController;
 use App\middleware\AutenticacionMiddleware;
 use support\Request;
 use support\Log;
 
 // --- Rutas de Administración (Protegidas) ---
-// CORRECCIÓN FINAL: Se usa una ruta directa y se le aplica el middleware.
 
-/*
-Habia un problema en windows aca 
-
-Route::group('/panel', function () {
-    Route::get('/', [AdminController::class, 'inicio']);
-})->middleware([ 
-    AutenticacionMiddleware::class
-]);
-
-un problema complejo y poco común, pero al final logramos identificar que la causa era una incompatibilidad muy específica de la función Route::group en el entorno de ejecución en Windows. La solución final, que consiste en usar una ruta directa (Route::get) con su middleware aplicado directamente, es una forma robusta y limpia de evitar ese inconveniente.
-*/
-
+// Dashboard Principal
 Route::get('/panel', [AdminController::class, 'inicio'])->middleware([
     AutenticacionMiddleware::class
 ]);
+
+// ========== INICIO: Gestión de Páginas ==========
+// Se definen una por una para evitar problemas con Route::group en Windows
+// SE HA ELIMINADO ->where('id', '\d+') para compatibilidad
+Route::get('/panel/paginas', [PaginaController::class, 'index'])->middleware([
+    AutenticacionMiddleware::class
+]);
+Route::get('/panel/paginas/create', [PaginaController::class, 'create'])->middleware([
+    AutenticacionMiddleware::class
+]);
+Route::post('/panel/paginas/store', [PaginaController::class, 'store'])->middleware([
+    AutenticacionMiddleware::class
+]);
+Route::get('/panel/paginas/edit/{id}', [PaginaController::class, 'edit'])->middleware([ // SIN .where()
+    AutenticacionMiddleware::class
+]);
+Route::post('/panel/paginas/update/{id}', [PaginaController::class, 'update'])->middleware([ // SIN .where()
+    AutenticacionMiddleware::class
+]);
+Route::post('/panel/paginas/destroy/{id}', [PaginaController::class, 'destroy'])->middleware([ // SIN .where()
+    AutenticacionMiddleware::class
+]);
+// ========== FIN: Gestión de Páginas ==========
 
 
 // --- Rutas de Autenticación ---
@@ -44,7 +56,7 @@ Route::post('/login', [AuthController::class, 'procesarLogin']);
 Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 
-// --- Rutas existentes ---
+// --- Rutas públicas existentes ---
 Route::get('/', [IndexController::class, 'index']);
 Route::get('/view', [IndexController::class, 'view']);
 Route::get('/json', [IndexController::class, 'json']);

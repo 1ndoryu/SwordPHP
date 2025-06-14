@@ -12,4 +12,21 @@
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  */
 
-return [];
+return [
+    // Aquí puedes añadir tus definiciones.
+    // Ejemplo:
+    // App\service\UserService::class => function() {
+    //     return new App\service\UserService(new \App\model\User);
+    // }
+
+    // ============ INICIO: DEFINICIÓN AÑADIDA ============
+    // Le decimos al contenedor cómo construir PaginaController.
+    // Cuando se pida un PaginaController, primero debe crear un PaginaService
+    // y pasarlo al constructor del controlador.
+    \App\controller\PaginaController::class => function ($container) {
+        return new \App\controller\PaginaController(
+            $container->make(\App\service\PaginaService::class)
+        );
+    }
+    // ============ FIN: DEFINICIÓN AÑADIDA ============
+];

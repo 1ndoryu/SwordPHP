@@ -18,8 +18,13 @@
         </div>
         <nav class="panelSidebarNav">
             <ul>
-                <li><a href="/panel" class="activo">Dashboard</a></li>
-                {{-- Futuros enlaces del menú: Páginas, Usuarios, Ajustes, etc. --}}
+                {{-- Se ajusta la clase 'activo' para que sea dinámica --}}
+                <li><a href="/panel" class="{{ request()->path() == 'panel' ? 'activo' : '' }}">Dashboard</a></li>
+
+                {{-- =========== INICIO: ENLACE AÑADIDO =========== --}}
+                <li><a href="/panel/paginas" class="{{ str_starts_with(request()->path(), 'panel/paginas') ? 'activo' : '' }}">Páginas</a></li>
+                {{-- ============ FIN: ENLACE AÑADIDO ============ --}}
+
             </ul>
         </nav>
     </aside>
@@ -28,10 +33,6 @@
         <header class="panelContenidoCabecera">
             <h1>@yield('tituloPagina', 'Dashboard')</h1>
             
-            {{--
-              CAMBIO: Usamos la función usuarioActual() para mostrar info del usuario.
-              Obtenemos el objeto del usuario y mostramos su nombre.
-            --}}
             @php($usuario = usuarioActual())
             @if ($usuario)
                 <div class="infoUsuario">
@@ -43,6 +44,7 @@
 
         {{-- El contenido específico de cada página del panel se insertará aquí --}}
         <div class="contenidoPagina">
+            {{-- CAMBIO IMPORTANTE: La sección de contenido se llama 'contenidoPanel' --}}
             @yield('contenidoPanel')
         </div>
     </main>

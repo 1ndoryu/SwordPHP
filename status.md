@@ -1,7 +1,7 @@
 # Hoja de Ruta del Proyecto SwordPHP
 
 ## Concepto
-El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable.
+El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable. Tiene que ser facil para los desarrolladores de tema, conservar la esencia de wordpress de que en los temas, se puede hacer logica facil sin tocar la arquitectura y sin comprender como esta estructurado el tema, el usuario final no tiene que tocar nada ni modificar nada en nuestro cms o framework, tiene que enfocarse en construir su tema de la forma en la que quiera, sin arquictectura facilitandole funciones globales para su desarrollo (estas funciones no deben estar atadas a use /app ni nada)
 
 ---
 
@@ -27,13 +27,16 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 - [x] **Fase 3: Gestión de Assets (CSS/JS)**
     - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS, JS, código y HTML.
-    - [ ] Desarrollar una forma de "localizar" scripts (pasar datos PHP a JS de forma segura, como `wp_localize_script`).
+    - [x] Desarrollar una forma de "localizar" scripts (pasar datos PHP a JS de forma segura, como `wp_localize_script`).
 
 - [ ] **Fase 4: Gestor de Páginas (CRUD Básico)**
     - [x] Crear el modelo y la tabla para `paginas`.
     - [x] Implementar la interfaz para crear, leer, actualizar y eliminar páginas.
     - [x] Implementar un sistema de metadatos (`pagina_meta`) para añadir campos personalizados a las páginas.
-    - [ ] Crear un manejador de peticiones AJAX (similar a `wp_ajax`) para hacer las interacciones del CRUD más dinámicas.
+    - [ ] Crear un sistema que sea tan fácil de usar para un desarrollador de temas como add_action en WordPress, pero que por debajo sea lo más seguro y estructurado posible, sin obligar al usuario a tocar los archivos del núcleo del CMS.
+        - [ ] El "Cerebro" Central (AjaxManagerService): Un nuevo servicio que actúa como el registro central de todas las acciones AJAX. Es el equivalente al sistema de "hooks" de WordPress, pero contenido en una clase.
+        - [ ] La Función "Mágica" Fácil de Usar (registrar_accion_ajax): Una función global, simple, que cualquier desarrollador podrá usar en el functions.php de su tema. Esta será nuestra versión de add_action. (si se puede usar camelCase por favor seria genial, tipo registrarAcion(ajaxAccion_funcionN, ajaxFuncion_funcionNombre) ejemplo, es opcional y si dificulta algo no hacerlo) 
+        - [ ] El "Portero" (AjaxController): El controlador se simplifica al máximo. Su única misión es recibir la llamada, preguntar al "Cerebro" qué función ejecutar y devolver la respuesta. No sabe nada sobre las acciones en sí.
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido de las páginas creadas en el frontend.
@@ -51,6 +54,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 ## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas, si se te pide actualizar status.md integralas)
 
 - [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas.
+- [ ] El sistema de encolar script o cualquier cosa tiene que ser facil, 
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO

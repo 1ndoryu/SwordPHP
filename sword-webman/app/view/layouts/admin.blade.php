@@ -7,87 +7,16 @@
 
 {{-- Agregamos estilos básicos para el layout del panel --}}
 @section('estilos')
-<style>
-    body {
-        background-color: #f4f7f6;
-        margin: 0;
-        font-family: sans-serif;
-    }
-    .panel-contenedor {
-        display: flex;
-        min-height: 100vh;
-    }
-    .panel-sidebar {
-        width: 250px;
-        background-color: #2c3e50;
-        color: #ecf0f1;
-        padding-top: 20px;
-        flex-shrink: 0;
-    }
-    .panel-sidebar-header {
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        padding-bottom: 20px;
-    }
-    .panel-sidebar-nav ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .panel-sidebar-nav a {
-        display: block;
-        padding: 15px 20px;
-        color: #ecf0f1;
-        text-decoration: none;
-        transition: background-color 0.3s;
-    }
-    .panel-sidebar-nav a:hover, .panel-sidebar-nav a.activo {
-        background-color: #34495e;
-    }
-    .panel-contenido-principal {
-        flex-grow: 1;
-        padding: 30px;
-    }
-    .panel-contenido-cabecera {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    .panel-contenido-cabecera h1 {
-        margin: 0;
-    }
-    .info-usuario {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    .info-usuario span {
-        font-weight: bold;
-    }
-    .logout-btn {
-        display: inline-block;
-        padding: 8px 15px;
-        background-color: #e74c3c;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 0.9rem;
-    }
-    .logout-btn:hover {
-        background-color: #c0392b;
-    }
-</style>
+
 @endsection
 
 @section('contenido')
-<div class="panel-contenedor">
-    <aside class="panel-sidebar">
-        <div class="panel-sidebar-header">
+<div class="panelContenedor">
+    <aside class="panelSidebar">
+        <div class="panelSidebarHeader">
             SwordPHP
         </div>
-        <nav class="panel-sidebar-nav">
+        <nav class="panelSidebarNav">
             <ul>
                 <li><a href="/panel" class="activo">Dashboard</a></li>
                 {{-- Futuros enlaces del menú: Páginas, Usuarios, Ajustes, etc. --}}
@@ -95,8 +24,8 @@
         </nav>
     </aside>
 
-    <main class="panel-contenido-principal">
-        <header class="panel-contenido-cabecera">
+    <main class="panelContenidoPrincipal">
+        <header class="panelContenidoCabecera">
             <h1>@yield('tituloPagina', 'Dashboard')</h1>
             
             {{--
@@ -105,15 +34,15 @@
             --}}
             @php($usuario = usuarioActual())
             @if ($usuario)
-                <div class="info-usuario">
+                <div class="infoUsuario">
                     <span>Hola, {{ $usuario->nombremostrado ?: $usuario->nombreusuario }}</span>
-                    <a href="/logout" class="logout-btn">Cerrar Sesión</a>
+                    <a href="/logout" class="logoutBtn">Cerrar Sesión</a>
                 </div>
             @endif
         </header>
 
         {{-- El contenido específico de cada página del panel se insertará aquí --}}
-        <div class="contenido-pagina">
+        <div class="contenidoPagina">
             @yield('contenidoPanel')
         </div>
     </main>

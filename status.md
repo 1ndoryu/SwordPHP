@@ -40,6 +40,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 - [ ] Creo que lo de tipo de usuario admin vs normal debería ir en la fase 2
 - [ ] Deben existir esa funcionalidad de wp de post type que facilitaba crear cualquier tipo de contenido
+- [ ] Una forma facil de pasar data del backend al front como en wp cuando encuelas valores dentro un array o algo 
 
 
 # NOTAS IA

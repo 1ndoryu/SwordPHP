@@ -1,0 +1,71 @@
+body {
+    background-color: #f4f7f6;
+    margin: 0;
+    font-family: sans-serif;
+}
+.panelContenedor {
+    display: flex;
+    min-height: 100vh;
+}
+.panelSidebar {
+    width: 250px;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding-top: 20px;
+    flex-shrink: 0;
+}
+.panelSidebarHeader {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding-bottom: 20px;
+}
+.panelSidebarNav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.panelSidebarNav a {
+    display: block;
+    padding: 15px 20px;
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+.panelSidebarNav a:hover,
+.panelSidebarNav a.activo {
+    background-color: #34495e;
+}
+.panelContenidoPrincipal {
+    flex-grow: 1;
+    padding: 30px;
+}
+.panelContenidoCabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.panelContenidoCabecera h1 {
+    margin: 0;
+}
+.infoUsuario {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.infoUsuario span {
+    font-weight: bold;
+}
+.logoutBtn {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+.logoutBtn:hover {
+    background-color: #c0392b;
+}

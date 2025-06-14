@@ -20,15 +20,35 @@ class Eloquent implements Bootstrap
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
 
-        // --- DEJA SOLAMENTE ESTA CONFIGURACIÓN PARA EL PAGINADOR ---
+        // --- SOLUCIÓN ALTERNATIVA Y ROBUSTA PARA LA PAGINACIÓN ---
 
-        // 1. Le dice al Paginador que para renderizar, debe pedir la fábrica de vistas.
+        // El problema de "Call to undefined function app()" se debe a que este bootstrap
+        // se ejecuta ANTES de que los plugins (como webman/blade) hayan inicializado
+        // sus servicios y helpers globales como app().
+        
+        // La solución es construir manualmente la fábrica de vistas de Blade,
+        // sin depender de helpers que aún no existen en este punto del arranque.
         Paginator::viewFactoryResolver(function () {
-            // La fábrica ya está configurada gracias a nuestro cambio en config/view.php
-            return view(); 
+            // Leemos la misma configuración de vistas que usa la aplicación desde config/view.php
+            $config = config('view.options');
+            
+            // Creamos la instancia de Blade. Su clase es \Jenssegers\Blade\Blade
+            $blade = new \Jenssegers\Blade\Blade(
+                $config['view_path'], 
+                $config['cache_path']
+            );
+
+            // Es CRUCIAL registrar los "namespaces" para que el paginador encuentre las vistas
+            // que usan el prefijo `pagination::` (ej: 'pagination::bootstrap-5').
+            foreach ($config['namespaces'] ?? [] as $namespace => $path) {
+                $blade->addNamespace($namespace, $path);
+            }
+            
+            // Esta instancia de Blade es la "fábrica de vistas" que el paginador necesita.
+            return $blade;
         });
         
-        // 2. Le dice al Paginador cómo obtener la información de la URL actual.
+        // El resto de la configuración del paginador no necesita cambios.
         Paginator::currentPathResolver(function () {
             return request()->path();
         });
@@ -37,7 +57,8 @@ class Eloquent implements Bootstrap
             return request()->input($pageName, 1);
         });
 
-        // 3. Le dice al Paginador qué estilo de plantilla usar.
-        Paginator::useBootstrapFive();
+        // Establecemos las vistas de Bootstrap 5 por defecto.
+        Paginator::defaultView('pagination::bootstrap-5');
+        Paginator::defaultSimpleView('pagination::simple-bootstrap-5');
     }
 }

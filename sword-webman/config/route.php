@@ -17,10 +17,21 @@ use support\Request;
 use support\Log;
 
 // --- Rutas de Administración (Protegidas) ---
-// CAMBIO: Se renombró el grupo de '/admin' a '/panel'
+// CORRECCIÓN FINAL: Se usa una ruta directa y se le aplica el middleware.
+
+/*
+Habia un problema en windows aca 
+
 Route::group('/panel', function () {
     Route::get('/', [AdminController::class, 'inicio']);
-})->middleware([
+})->middleware([ 
+    AutenticacionMiddleware::class
+]);
+
+un problema complejo y poco común, pero al final logramos identificar que la causa era una incompatibilidad muy específica de la función Route::group en el entorno de ejecución en Windows. La solución final, que consiste en usar una ruta directa (Route::get) con su middleware aplicado directamente, es una forma robusta y limpia de evitar ese inconveniente.
+*/
+
+Route::get('/panel', [AdminController::class, 'inicio'])->middleware([
     AutenticacionMiddleware::class
 ]);
 

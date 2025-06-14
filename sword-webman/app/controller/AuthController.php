@@ -53,13 +53,15 @@ class AuthController
         if ($usuario) {
             $request->session()->set('usuarioId', $usuario->id);
             Log::channel('default')->info('[AuthController] -> Login exitoso. Usuario ID: ' . $usuario->id . '. Redirigiendo a /panel.');
-            
-            // CAMBIO: Redirigimos a la nueva ruta /panel.
-            return redirect('/panel');
+
+            // CORRECCIÓN: Construimos la respuesta de redirección manualmente.
+            $host = $request->header('host');
+            $url = 'http://' . $host . '/panel';
+            return new Response(302, ['Location' => $url]);
         }
 
         Log::channel('default')->warning('[AuthController] -> Login fallido para el identificador: ' . $identificador);
-        session()->set('error', 'Las credenciales proporcionadas no son correctas.');
+        // Para esta redirección de fallo, el helper debería funcionar, pero lo cambiaremos por consistencia si es necesario.
         return redirect('/login');
     }
 

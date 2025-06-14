@@ -9,8 +9,8 @@
     {{-- Aquí irán los estilos CSS específicos de cada página --}}
     @yield('estilos')
 
-    {{-- Imprime los estilos CSS encolados a través del AssetService --}}
-    {!! assetService()->imprimirEstilos() !!}
+    {{-- Imprime todos los assets del head (links, styles, html) encolados a través del AssetService --}}
+    {!! assetService()->imprimirAssetsHead() !!}
 </head>
 
 <body>
@@ -31,8 +31,8 @@
     {{-- Aquí irán los scripts de JavaScript específicos de cada página --}}
     @yield('scripts')
 
-    {{-- Imprime los scripts JS encolados a través del AssetService --}}
-    {!! assetService()->imprimirScripts() !!}
+    {{-- Imprime todos los assets del footer (scripts, html) encolados a través del AssetService --}}
+    {!! assetService()->imprimirAssetsFooter() !!}
 </body>
 
 </html>

@@ -53,7 +53,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 - [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas.
 - [ ] No es una idea, es un problema, cuando se reinicio y estoy en el panel sale InvalidArgumentException: Database connection [default] not configured. in C:\Users\1u\Documents\SwordPHP\sword-webman\vendor\illuminate\database\DatabaseManager.php:227
 Stack trace:tengo que volver al inicio y luego ir al panel y se arregla
-- [ ] Otro bug, cuando me intento registrar con un nuevo usuario dice que el usuario ya existe apesar que no
+- [x] Otro bug, cuando me intento registrar con un nuevo usuario dice que el usuario ya existe apesar que no
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO

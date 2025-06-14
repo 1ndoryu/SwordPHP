@@ -4,6 +4,7 @@ namespace App\service;
 
 use App\model\Usuario;
 use Throwable;
+use support\Log;
 
 class UsuarioService
 {
@@ -19,17 +20,21 @@ class UsuarioService
         try {
             // Se comprueba si es el primer usuario en registrarse.
             $esPrimerUsuario = Usuario::count() === 0;
-            
+
             // Se asigna el rol correspondiente.
             $datosUsuario['rol'] = $esPrimerUsuario ? 'admin' : 'suscriptor';
 
             // Se hashea la clave antes de guardar.
             $datosUsuario['clave'] = password_hash($datosUsuario['clave'], PASSWORD_BCRYPT);
-            
+
             return Usuario::create($datosUsuario);
         } catch (Throwable $e) {
-            // En un futuro, aquí podrías loguear el error específico.
-            // Por ahora, devolvemos null para indicar el fallo.
+            // Se añade un log detallado para diagnosticar el problema.
+            Log::channel('default')->error(
+                'Error al crear el usuario: ' . $e->getMessage(),
+                ['exception' => $e]
+            );
+            // Devolvemos null para mantener el comportamiento original.
             return null;
         }
     }

@@ -56,18 +56,26 @@ class PaginaController
      */
     public function store(Request $request): Response
     {
-        try {
-            $this->paginaService->crearPagina($request->post());
-            // Se "flashea" el mensaje de éxito a la sesión ANTES de redirigir.
-            session()->flash('success', 'Página creada con éxito.');
-            return redirect('/panel/paginas'); // O /admin/paginas según tu ruta
-        } catch (Throwable $e) {
-            // En caso de error, flasheamos el mensaje y los datos del formulario.
-            session()->flash('error', $e->getMessage());
-            // Esto es CLAVE para que la función old() funcione.
-            session()->flash('_old_input', $request->post());
-            return redirect('/panel/paginas/create'); // O /admin/paginas/create
+        // 1. Crear la página con los datos principales
+        // Excluimos 'meta' para pasarlo al servicio de forma segura.
+        $datosPrincipales = $request->except(['meta', '_csrf']);
+        $pagina = $this->paginaService->crearPagina($datosPrincipales);
+
+        // 2. Si la página se creó correctamente, procesamos los metadatos.
+        if ($pagina) {
+            $metadatos = $request->post('meta', []);
+            if (is_array($metadatos)) {
+                foreach ($metadatos as $clave => $valor) {
+                    // Solo guardamos el metadato si el usuario introdujo un valor.
+                    if (trim($valor) !== '') {
+                        $pagina->guardarMeta($clave, $valor);
+                    }
+                }
+            }
         }
+
+        // Opcional: añadir un mensaje de éxito a la sesión.
+        return redirect('/panel/paginas');
     }
 
     /**
@@ -90,24 +98,41 @@ class PaginaController
 
     /**
      * Actualiza una página existente en la base de datos.
+     *
      * @param Request $request
-     * @param $id
+     * @param int $id
      * @return Response
      */
     public function update(Request $request, $id): Response
     {
-        try {
-            $this->paginaService->actualizarPagina((int)$id, $request->post());
-            // Se flashea el mensaje de éxito.
-            session()->flash('success', 'Página actualizada con éxito.');
-            return redirect('/panel/paginas'); // O /admin/paginas
-        } catch (Throwable $e) {
-            // En caso de error, flasheamos el mensaje y los datos del formulario.
-            session()->flash('error', $e->getMessage());
-            // Esto es CLAVE para que la función old() funcione.
-            session()->flash('_old_input', $request->post());
-            return redirect('/panel/paginas/edit/' . $id); // O /admin/paginas/edit/
+        $pagina = $this->paginaService->obtenerPaginaPorId($id);
+        if (!$pagina) {
+            // En un futuro, se podría redirigir con un mensaje de error.
+            return response('Página no encontrada', 404);
         }
+
+        // 1. Actualizar los datos principales de la página (columnas de la tabla 'paginas')
+        // Se excluye el campo 'meta' para evitar errores de asignación masiva.
+        $datosPrincipales = $request->except(['meta', '_csrf']);
+        $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
+
+        // 2. Procesar y guardar los metadatos
+        $metadatos = $request->post('meta', []);
+        if (is_array($metadatos)) {
+            foreach ($metadatos as $clave => $valor) {
+                // Si el valor enviado está vacío, eliminamos el metadato si existe.
+                // De lo contrario, lo guardamos (el método se encarga de crear o actualizar).
+                if (trim($valor) === '') {
+                    $pagina->eliminarMeta($clave);
+                } else {
+                    $pagina->guardarMeta($clave, $valor);
+                }
+            }
+        }
+
+        // 3. Redirigir de vuelta al listado
+        // Opcional: añadir un mensaje de éxito a la sesión.
+        return redirect('/panel/paginas');
     }
 
     /**

@@ -23,14 +23,14 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS y JavaScript tanto en el panel como en el frontend. Tiene que poder encolar archivos individualmente y carpetas, tambien codigo y html, como en wordpress.
 
 - [ ] **Fase 4: Gestor de Contenido (CRUD Básico)**
-    - [ ] Crear el modelo y la migración para la tabla `contenidos` (o `paginas`).
-    - [ ] Implementar la interfaz para crear, leer, actualizar y eliminar contenidos.
-    - [ ] **(Idea integrada)** Implementar un sistema de metadatos (como `post_meta`) para añadir campos personalizados a los contenidos.
+    - [x] Crear el modelo y la migración para la tabla `contenidos` (o `paginas`).
+    - [x] Implementar la interfaz para crear, leer, actualizar y eliminar contenidos.
+    - [x] **(Idea integrada)** Implementar un sistema de metadatos (como `post_meta`) para añadir campos personalizados a los contenidos.
     - [ ] **(Idea integrada)** Crear un manejador de peticiones AJAX (similar a `wp_ajax`) para hacer las interacciones del CRUD más dinámicas que las funciones puedan usar en cualquier parte.
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido creado en el frontend.
-    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia del sitio público.
+    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y logica del sitio público.
 
 - [ ] **Fase 6: Mejoras y Sistema de Plugins (Avanzado)**
     - [ ] **(Idea integrada)** Ampliar el sistema de metadatos para usuarios (`user_meta`).
@@ -41,12 +41,13 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 - [ ] Creo que lo de tipo de usuario admin vs normal debería ir en la fase 2
 - [ ] Deben existir esa funcionalidad de wp de post type que facilitaba crear cualquier tipo de contenido
 - [ ] Una forma facil de pasar data del backend al front como en wp cuando encuelas valores dentro un array o algo
-- [ ] No usaremos migraciones, usaremos la estructura similar en wordpress que no necesita de migraciones para nuevo contenido, etc. 
+- [ ] No usaremos migraciones, usaremos la estructura similar en wordpress que no necesita de migraciones para nuevo contenido pero las tablas deben crearse al momento de la instalacion, etc. 
+- [ ] Supongo que no hay que hacer un crud para cada tipo de contenido, los usuarios tambien necesitan mostrarse en el panel y ser modificables, pero esot no es urgente
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 
-Es de total prioridad antes de proceder con cualquier tarea, reducir la cantidad de codigo si encuentras oportunidades de refactorización, tener la menor cantidad de codigo es importante sin perder capacidades.
+Es de total prioridad antes de proceder con cualquier tarea, reducir la cantidad de codigo si encuentras oportunidades de refactorización, simplificación, etc, tener la menor cantidad de codigo es importante sin perder capacidades.
 
 Siempre que tengas la posibilidad de recomendar una herramienta externa para ahorrar tiempo en hacer algo, hazlo.
 

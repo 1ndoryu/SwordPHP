@@ -2,33 +2,16 @@
 
 namespace App\model;
 
+use App\model\traits\GestionaMetadatos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Class Pagina
- * @package App\model
- *
- * @property int $id
- * @property string $titulo
- * @property string|null $subtitulo
- * @property string|null $contenido
- * @property string $slug
- * @property int $idautor
- * @property string $estado
- * @property string $tipocontenido
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
- *
- * @property-read Usuario $autor
- */
 class Pagina extends Model
 {
-    /**
-     * El nombre de la tabla asociada con el modelo.
-     *
-     * @var string
-     */
+    // Cargar el trait para habilitar la gestión de metadatos
+    use GestionaMetadatos;
+
     protected $table = 'paginas';
 
     /**
@@ -77,5 +60,14 @@ class Pagina extends Model
     public function autor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'idautor');
+    }
+
+    /**
+     * Define la relación con los metadatos de la página.
+     * Esta relación es requerida por el trait GestionaMetadatos.
+     */
+    public function metas(): HasMany
+    {
+        return $this->hasMany(PaginaMeta::class);
     }
 }

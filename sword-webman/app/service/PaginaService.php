@@ -66,19 +66,17 @@ class PaginaService
      * @return Pagina
      * @throws BusinessException|NotFoundException
      */
-    public function actualizarPagina(int $id, array $datos): Pagina
+    public function actualizarPagina(Pagina $pagina, array $datos): bool
     {
-        $pagina = $this->obtenerPaginaPorId($id);
+        // Asignación masiva de los datos validados
+        $pagina->fill($datos);
 
-        $this->validarDatos($datos);
-
-        // Si el título cambia, regenerar el slug
-        if (isset($datos['titulo']) && $datos['titulo'] !== $pagina->titulo) {
-            $datos['slug'] = $this->generarSlug($datos['titulo']);
+        // Generar slug si el título ha cambiado o si no existía un slug previo
+        if ($pagina->isDirty('titulo') || empty($pagina->slug)) {
+            $pagina->slug = \Illuminate\Support\Str::slug($pagina->titulo);
         }
 
-        $pagina->update($datos);
-        return $pagina;
+        return $pagina->save();
     }
 
     /**

@@ -9,13 +9,14 @@
 <div class="formulario-contenedor">
 
     <div class="cabecera-formulario">
-         {{-- El H1 ya lo pone el layout, aquí mostramos el título que se está editando --}}
-         <p>Editando: <strong>{{ $pagina->titulo }}</strong></p>
+        <p>Editando: <strong>{{ $pagina->titulo }}</strong></p>
+        {{-- La ruta del panel debe ser la correcta --}}
         <a href="/panel/paginas" class="btn-volver">
             &larr; Volver al listado
         </a>
     </div>
 
+    {{-- La ruta del panel debe ser la correcta --}}
     <form action="/panel/paginas/update/{{ $pagina->id }}" method="POST">
         @csrf
         <div class="cuerpo-formulario">
@@ -33,10 +34,17 @@
                 <input type="text" id="titulo" name="titulo" placeholder="Introduce el título" value="{{ old('titulo', $pagina->titulo) }}" required>
             </div>
 
-            {{-- Campo para el Subtítulo --}}
+            {{-- Asumo que 'subtitulo' es una columna en la tabla 'paginas' --}}
             <div class="grupo-formulario">
                 <label for="subtitulo">Subtítulo (Opcional)</label>
-                <input type="text" id="subtitulo" name="subtitulo" placeholder="Introduce el subtítulo" value="{{ old('subtitulo', $pagina->subtitulo) }}">
+                <input type="text" id="subtitulo" name="subtitulo" placeholder="Introduce el subtítulo" value="{{ old('subtitulo', $pagina->subtitulo ?? '') }}">
+            </div>
+
+            {{-- CAMPO DE METADATOS DE EJEMPLO --}}
+            <div class="grupo-formulario">
+                <label for="meta_autor_invitado">Autor Invitado (Metadato)</label>
+                <input type="text" id="meta_autor_invitado" name="meta[autor_invitado]" placeholder="Ej: Dr. Juan Pérez" value="{{ old('meta.autor_invitado', $pagina->obtenerMeta('autor_invitado')) }}">
+                <small>Este campo se guarda en la tabla de metadatos.</small>
             </div>
 
             {{-- Campo para el Contenido --}}

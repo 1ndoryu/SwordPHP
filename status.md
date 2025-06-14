@@ -1,62 +1,49 @@
 # Hoja de Ruta del Proyecto SwordPHP
 
 ## Concepto
-El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable. Tiene que ser facil para los desarrolladores de tema, conservar la esencia de wordpress de que en los temas, se puede hacer logica facil sin tocar la arquitectura y sin comprender como esta estructurado el tema, el usuario final no tiene que tocar nada ni modificar nada en nuestro cms o framework, tiene que enfocarse en construir su tema de la forma en la que quiera, sin arquictectura facilitandole funciones globales para su desarrollo (estas funciones no deben estar atadas a use /app ni nada)
+El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable. Tiene que ser fácil para los desarrolladores de temas conservar la esencia de WordPress: poder añadir lógica de forma sencilla en los temas sin necesidad de comprender o modificar la arquitectura del núcleo. El desarrollador de temas debe poder enfocarse en construir su tema, facilitándole funciones globales para su desarrollo (sin estar atadas a `use /App` ni a espacios de nombres complejos).
 
 ---
 
 ## Principios Arquitectónicos
-- **Instalación sin Migraciones:** No se utilizará un sistema de migraciones tradicional. Las tablas necesarias para el core del sistema (`usuarios`, `paginas`, `paginameta`, etc.) deben ser creadas mediante un script de instalación inicial, similar a como lo hace WordPress.
+- **Instalación sin Migraciones:** No se utilizará un sistema de migraciones tradicional. Las tablas necesarias para el core del sistema (`usuarios`, `paginas`, `opciones`, etc.) deben ser creadas mediante un script de instalación inicial, similar a como lo hace WordPress.
+- **Separación de Lógica y Presentación:** El núcleo (`Core`) debe estar completamente separado del contenido del usuario (`Content`), que incluye temas, plugins y archivos subidos.
 
 ---
 
 ## Fases del Proyecto
 
 - [x] **Fase 1: Fundación y Autenticación**
-    - [x] Configuración inicial del framework y la base de datos.
-    - [x] Creación del modelo y la tabla `usuarios`.
-    - [x] Implementación del sistema de registro, login y logout.
-    - [x] Creación de `UsuarioService` para manejar la lógica de negocio de los usuarios.
+    - Se configuró el framework y la base de datos, implementando un sistema robusto de registro, login/logout y un `UsuarioService` para manejar la lógica de negocio.
 
 - [x] **Fase 2: Estructura del Panel de Administración**
-    - [x] Creación de rutas protegidas para el panel.
-    - [x] Diseño de un layout principal de dos columnas (sidebar y contenido).
-    - [x] Creación de funciones de ayuda globales (ej: `usuarioActual()`).
-    - [x] Personalización de la cabecera del panel con información del usuario.
-    - [x] Implementar sistema de roles de usuario (admin/normal) y proteger rutas según el rol. Evitar que los usuarios normales o suscriptores, accedan al panel. El primer usuario en crearse tiene que ser admin, como en wp. 
+    - Se implementó un panel de administración con rutas protegidas, un layout base, y un sistema de roles de usuario (admin/suscriptor) para controlar el acceso.
 
-- [x] **Fase 3: Gestión de Assets (CSS/JS)**
-    - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS, JS, código y HTML.
-    - [x] Desarrollar una forma de "localizar" scripts (pasar datos PHP a JS de forma segura, como `wp_localize_script`).
+- [x] **Fase 3: Gestión de Assets y AJAX**
+    - Se desarrolló un `AssetService` para encolar CSS/JS y un `AjaxManagerService` con una función global `registrar_accion_ajax()` para crear un sistema de acciones AJAX seguro, centralizado y fácil de usar desde cualquier parte del código.
 
-- [x] **Fase 4: Gestor de Páginas (CRUD Básico)**
-    - [x] Crear el modelo y la tabla para `paginas`.
-    - [x] Implementar la interfaz para crear, leer, actualizar y eliminar páginas.
-    - [x] Implementar un sistema de metadatos (`pagina_meta`) para añadir campos personalizados a las páginas.
-    - [x] Crear un sistema que sea tan fácil de usar para un desarrollador de temas como add_action en WordPress, pero que por debajo sea lo más seguro y estructurado posible, sin obligar al usuario a tocar los archivos del núcleo del CMS.
-        - [x] El "Cerebro" Central (AjaxManagerService): Un nuevo servicio que actúa como el registro central de todas las acciones AJAX. Es el equivalente al sistema de "hooks" de WordPress, pero contenido en una clase.
-        - [x] La Función "Mágica" Fácil de Usar (registrar_accion_ajax): Una función global, simple, que cualquier desarrollador podrá usar en el functions.php de su tema. Esta será nuestra versión de add_action. (si se puede usar camelCase por favor seria genial, tipo registrarAcion(ajaxAccion_funcionN, ajaxFuncion_funcionNombre) ejemplo, es opcional y si dificulta algo no hacerlo) 
-        - [x] El "Portero" (AjaxController): El controlador se simplifica al máximo. Su única misión es recibir la llamada, preguntar al "Cerebro" qué función ejecutar y devolver la respuesta. No sabe nada sobre las acciones en sí.
+- [x] **Fase 4: Gestor de Páginas (CRUD)**
+    - Se implementó el CRUD completo para páginas, incluyendo un sistema de metadatos (`pagina_meta`) para añadir campos personalizados, sentando las bases para contenido extensible.
 
 - [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
-    - [ ] Desarrollar un sistema de ruteo dinámico que muestre el contenido de las páginas creadas en el frontend, podran usar plantillas (asi como en wp).
-    - [ ] Crear una estructura básica de "temas" para permitir personalizar la apariencia y lógica del sitio público. Los temas como en wp deben de tener su propio function php, sus estilos, plantillas, como en wp. 
+    - [x] Desarrollar un sistema de ruteo dinámico que muestra el contenido de las páginas publicadas en el frontend.
+    - [ ] **Refactorización Arquitectónica:** Separar la estructura de directorios en `swordCore` (el núcleo del CMS) y `swordContent` (temas, plugins, uploads) para reflejar la filosofía de WordPress.
+    - [ ] Crear una estructura básica de "temas" que permita personalizar la apariencia. Cada tema debe poder tener su propio `functions.php`, plantillas de página, y assets (CSS/JS).
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**
+    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos, organizados por fecha.
+    - [ ] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla.
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
-    - [ ] Implementar CRUD para la gestión de usuarios en el panel.
-    - [ ] Diseñar e implementar una arquitectura de plugins para permitir la extensibilidad del core sin modificarlo.
+    - [ ] Implementar un CRUD para la gestión de usuarios en el panel de administración.
+    - [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo.
 
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
-    - [ ] Diseñar e implementar un sistema de "Tipos de Contenido" (Post Types) para registrar y gestionar diferentes clases de contenido (ej: páginas, noticias, productos) de forma genérica.
+    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica.
+    - [ ] Este sistema deberá incluir un CRUD centralizado y un conjunto de funciones globales para facilitar la creación, actualización, borrado y gestión de metadatos de cualquier tipo de contenido desde los temas o plugins.
+
+## LLUVIA DE IDEAS 
 
 
-## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas, si se te pide actualizar status.md integralas)
-
-- [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas.
-- [ ] El sistema de encolar script o cualquier cosa tiene que ser facil como en wp, pero mas facil, aqui no se como lo hicimos pero no lo veo practico si literalmente lo tenemos que especificar en las clases.
-- [ ] Un sistema centralizado como en wp de medis, imagenes, archivos, etc, que se guarda por fecha y sera accesible desde el panel y los temas.
-- [ ] Separacion la carpeta sword-webman, se llamara swordCore o no se que nombre seria bueno para representar el nucleo, luego necesito una separación para swordContent donde estaran los plugin, temas, las subidas, etc, ese contenido dinamico que no es obligatorio para que el core funcione, tendra una estructura similar a wordpress
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

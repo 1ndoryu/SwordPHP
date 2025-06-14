@@ -114,6 +114,25 @@ class PaginaService
     }
 
     /**
+     * Encuentra una página publicada por su slug.
+     *
+     * @param string $slug
+     * @return Pagina
+     * @throws NotFoundException
+     */
+    public function obtenerPaginaPublicadaPorSlug(string $slug): Pagina
+    {
+        $pagina = Pagina::where('slug', $slug)
+            ->where('estado', 'publicado')
+            ->first();
+
+        if (!$pagina) {
+            throw new NotFoundException('Página no encontrada.');
+        }
+        return $pagina;
+    }
+
+    /**
      * Valida los datos de entrada.
      * @param array $datos
      * @throws BusinessException

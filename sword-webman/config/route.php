@@ -1,12 +1,4 @@
 <?php
-/**
- * This file is part of webman.
- *
- * (c) 2020-2022 CRT. All rights reserved.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 use Webman\Route;
 use App\controller\IndexController;
@@ -18,46 +10,41 @@ use App\controller\AjaxController;
 use support\Request;
 use support\Log;
 
+// --- Rutas Públicas y de Propósito General ---
 
-
+// Rutas para AJAX y pruebas
 Route::post('/ajax', [AjaxController::class, 'handle']);
-
 Route::get('/test-ajax', function() {
     return view('test/ajax');
 });
 
-// --- Rutas de Administración (Protegidas) ---
+// --- Grupo de Rutas del Panel de Administración ---
+// Todas las rutas dentro de este grupo tendrán el prefijo "/panel"
+// y estarán protegidas por el AutenticacionMiddleware.
 
-// Dashboard Principal
-Route::get('/panel', [AdminController::class, 'inicio'])->middleware([
-    AutenticacionMiddleware::class
-]);
+Route::group('/panel', function () {
 
-// ========== INICIO: Gestión de Páginas ==========
-// Se definen una por una para evitar problemas con Route::group en Windows
-// SE HA ELIMINADO ->where('id', '\d+') para compatibilidad
-Route::get('/panel/paginas', [PaginaController::class, 'index'])->middleware([
+    // Dashboard principal: Accede a través de GET /panel o /panel/
+    Route::get('', [AdminController::class, 'inicio']);
+    Route::get('/', [AdminController::class, 'inicio']);
+
+    // --- CRUD de Páginas ---
+    // La ruta base es /paginas, que se convierte en /panel/paginas
+    Route::group('/paginas', function () {
+        Route::get('', [PaginaController::class, 'index']);          // GET /panel/paginas
+        Route::get('/create', [PaginaController::class, 'create']);    // GET /panel/paginas/create
+        Route::post('/store', [PaginaController::class, 'store']);     // POST /panel/paginas/store
+        Route::get('/edit/{id}', [PaginaController::class, 'edit']);     // GET /panel/paginas/edit/{id}
+        Route::post('/update/{id}', [PaginaController::class, 'update']);  // POST /panel/paginas/update/{id}
+        Route::post('/destroy/{id}', [PaginaController::class, 'destroy']);// POST /panel/paginas/destroy/{id}
+    });
+
+})->middleware([
     AutenticacionMiddleware::class
 ]);
-Route::get('/panel/paginas/create', [PaginaController::class, 'create'])->middleware([
-    AutenticacionMiddleware::class
-]);
-Route::post('/panel/paginas/store', [PaginaController::class, 'store'])->middleware([
-    AutenticacionMiddleware::class
-]);
-Route::get('/panel/paginas/edit/{id}', [PaginaController::class, 'edit'])->middleware([ // SIN .where()
-    AutenticacionMiddleware::class
-]);
-Route::post('/panel/paginas/update/{id}', [PaginaController::class, 'update'])->middleware([ // SIN .where()
-    AutenticacionMiddleware::class
-]);
-Route::post('/panel/paginas/destroy/{id}', [PaginaController::class, 'destroy'])->middleware([ // SIN .where()
-    AutenticacionMiddleware::class
-]);
-// ========== FIN: Gestión de Páginas ==========
 
 
-// --- Rutas de Autenticación ---
+// --- Rutas de Autenticación (Públicas) ---
 Route::get('/registro', [AuthController::class, 'mostrarFormularioRegistro']);
 Route::post('/registro', [AuthController::class, 'procesarRegistro']);
 Route::get('/login', [AuthController::class, 'mostrarFormularioLogin']);
@@ -65,14 +52,14 @@ Route::post('/login', [AuthController::class, 'procesarLogin']);
 Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 
-// --- Rutas públicas existentes ---
+// --- Otras Rutas Públicas ---
 Route::get('/', [IndexController::class, 'index']);
 Route::get('/view', [IndexController::class, 'view']);
 Route::get('/json', [IndexController::class, 'json']);
 Route::any('/test', [IndexController::class, 'test']);
 
 
-// --- Ruta Fallback (404) ---
+// --- Ruta Fallback (Manejo de 404) ---
 Route::fallback(function(Request $request){
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     $logMessage = sprintf(

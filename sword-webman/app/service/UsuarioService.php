@@ -9,14 +9,23 @@ class UsuarioService
 {
     /**
      * Crea un nuevo usuario en la base de datos.
+     * Asigna el rol 'admin' al primer usuario y 'suscriptor' a los demás.
      *
-     * @param array $datosUsuario Los datos del usuario a crear. Debe incluir 'nombreUsuario', 'correoElectronico' y 'clave'.
-     * @return Usuario|null El modelo del usuario creado o null si falla la creación.
+     * @param array $datosUsuario Los datos del usuario a crear.
+     * @return Usuario|null El modelo del usuario creado o null si falla.
      */
     public function crearUsuario(array $datosUsuario): ?Usuario
     {
         try {
+            // Se comprueba si es el primer usuario en registrarse.
+            $esPrimerUsuario = Usuario::count() === 0;
+            
+            // Se asigna el rol correspondiente.
+            $datosUsuario['rol'] = $esPrimerUsuario ? 'admin' : 'suscriptor';
+
+            // Se hashea la clave antes de guardar.
             $datosUsuario['clave'] = password_hash($datosUsuario['clave'], PASSWORD_BCRYPT);
+            
             return Usuario::create($datosUsuario);
         } catch (Throwable $e) {
             // En un futuro, aquí podrías loguear el error específico.

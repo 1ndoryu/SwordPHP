@@ -23,7 +23,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [x] Diseño de un layout principal de dos columnas (sidebar y contenido).
     - [x] Creación de funciones de ayuda globales (ej: `usuarioActual()`).
     - [x] Personalización de la cabecera del panel con información del usuario.
-    - [ ] Implementar sistema de roles de usuario (admin/normal) y proteger rutas según el rol. Evitar que los usuarios normales o suscriptores, accedan al panel. El primer usuario en crearse tiene que ser admin, como en wp. 
+    - [x] Implementar sistema de roles de usuario (admin/normal) y proteger rutas según el rol. Evitar que los usuarios normales o suscriptores, accedan al panel. El primer usuario en crearse tiene que ser admin, como en wp. 
 
 - [x] **Fase 3: Gestión de Assets (CSS/JS)**
     - [x] Desarrollar un sistema sencillo para "encolar" y gestionar archivos CSS, JS, código y HTML.
@@ -50,7 +50,11 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 ## LLuvia de idea (Estas ideas deben organizarse en las fases si son validas, si se te pide actualizar status.md integralas)
 
-- [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas. 
+- [ ] Supongo que todos los posttype tendra un crud centralizado, que podra usar el wp_ajax, agregar metas, borrar metas, crear post, etc, etc, todo esto debe ser facil con funciones globables como en wordpress para cuando se hagan funciones personalizadas en los temas.
+- [ ] No es una idea, es un problema, cuando se reinicio y estoy en el panel sale InvalidArgumentException: Database connection [default] not configured. in C:\Users\1u\Documents\SwordPHP\sword-webman\vendor\illuminate\database\DatabaseManager.php:227
+Stack trace:tengo que volver al inicio y luego ir al panel y se arregla
+- [ ] Otro bug, cuando me intento registrar con un nuevo usuario dice que el usuario ya existe apesar que no
+
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

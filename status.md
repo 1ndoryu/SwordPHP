@@ -25,19 +25,18 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 - [x] **Fase 4: Gestor de Páginas (CRUD)**
     - Se implementó el CRUD completo para páginas, incluyendo un sistema de metadatos (`pagina_meta`) para añadir campos personalizados, sentando las bases para contenido extensible.
 
-- [ ] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
+- [x] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - [x] Desarrollar un sistema de ruteo dinámico que muestra el contenido de las páginas publicadas en el frontend.
     - [x] **Refactorización Arquitectónica:** Separar la estructura de directorios en `swordCore` (el núcleo del CMS) y `swordContent` (temas, plugins, uploads) para reflejar la filosofía de WordPress. (lo que tenemos hasta ahora permanecerá en su sitio, es decir, el core tendra su propias rutas y plantillas, mientras que del lado del content sera como wp)
     - [x] Enrutamiento dinamico de paginas creadas.
-    - [ ] Crear una estructura básica de "temas" que permita personalizar la apariencia. Cada tema debe poder tener su propio `functions.php`, plantillas de página, y assets (CSS/JS).
-    - [ ] En panel se tiene que elegir una pagina de inicio, crearemos una por defecto, pero como en wp, se deberia poder elegir una pagina de inicio para los temas.
+    - [x] Crear una estructura básica de "temas" que permita personalizar la apariencia. Cada tema debe poder tener su propio `functions.php`, plantillas de página, y assets (CSS/JS).
+    - [x] En panel se tiene que elegir una pagina de inicio, crearemos una por defecto, pero como en wp, se deberia poder elegir una pagina de inicio para los temas.
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**
     - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos, organizados por fecha.
-    - [ ] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla.
+    - [ ] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla y de pagina de manera global. 
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [ ] Implementar un CRUD para la gestión de usuarios en el panel de administración.
-    - [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo.
 
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica.
@@ -45,7 +44,9 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 ## LLUVIA DE IDEAS (Ideas que tienen que ser integradas en caso de que sean validas)
 
-
+- [ ] No es tan urgente, los temas deben funcionar como wp, poder tener varios, poder elegir uno, etc.
+- [ ] Llevar una lista de la funciones globables que ya existen en esta alternativa vs equivalente en wp. Por ejemplo el add_action supongo que su equivalente es registrarAccionAjax.
+- [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo. *TAREA PARA EL FINAL*
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

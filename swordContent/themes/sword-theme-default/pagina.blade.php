@@ -6,7 +6,8 @@
 
 {{-- Define el contenido de la página --}}
 @section('contenido')
-<h1>{{ $titulo }}</h1>
+{{-- CORRECCIÓN: Se utiliza $pagina->titulo en lugar de $titulo --}}
+<h1>{{ $pagina->titulo }}</h1> 
 <div>
     {!! $pagina->contenido !!}
 </div>

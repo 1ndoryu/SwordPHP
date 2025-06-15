@@ -32,6 +32,12 @@
 logs/
 *.tmp
 *.lock
+
+swordContent/media
+
+swordCore/public/swordContent/media
+
+
 # #################### #
 # # IDEs y Editores    #
 # #################### #

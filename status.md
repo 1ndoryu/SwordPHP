@@ -50,7 +50,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 ---
 
 ## Documentación
-- [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `registrarAccionAjax`, funciones de metadatos, etc.).
+- [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `ajaxAccion`, funciones de metadatos, etc.).
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO

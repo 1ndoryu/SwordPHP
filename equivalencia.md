@@ -1,6 +1,6 @@
 # Equivalencias de Funciones: SwordPHP vs. WordPress
 
-Este documento sirve como una hoja de referencia rápida para desarrolladores familiarizados con WordPress, detallando las funciones y conceptos equivalentes en SwordPHP en un formato de tablas comparativas. Tambien hay que hacer un sistema para que si se usa wp_enqueue_style por ejemplo, tambien funcine todas la funciones equivalentes de wordpress, se intentara que los temas sean compatibles.
+Este documento sirve como una hoja de referencia rápida para desarrolladores familiarizados con WordPress, detallando las funciones y conceptos equivalentes en SwordPHP en un formato de tablas comparativas. Tambien hay que hacer un sistema para que si se usa wp_enqueue_style por ejemplo, tambien funcione todas la funciones equivalentes de wordpress, se intentara que los temas sean compatibles.
 
 ---
 
@@ -17,9 +17,9 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 ### Tabla 2: Manejo de AJAX
 
-| Función SwordPHP                     | Equivalente WordPress               |
-| :----------------------------------- | :---------------------------------- |
-| `registrarAccionAjax('nombre', $cb)` | `add_action('wp_ajax_nombre', $cb)` |
+| Función SwordPHP            | Equivalente WordPress               |
+| :-------------------------- | :---------------------------------- |
+| `ajaxAccion('nombre', $cb)` | `add_action('wp_ajax_nombre', $cb)` |
 
 ### Tabla 3: Datos de Usuario
 

@@ -131,7 +131,7 @@ if (!function_exists('old')) {
     }
 }
 
-if (!function_exists('registrarAccionAjax')) {
+if (!function_exists('ajaxAccion')) {
     /**
      * Registra una acción AJAX para que esté disponible en el sistema.
      *
@@ -141,7 +141,7 @@ if (!function_exists('registrarAccionAjax')) {
      * @param string $nombreAccion El nombre único para la acción AJAX.
      * @param callable $callback La función que se ejecutará cuando se llame a esta acción.
      */
-    function registrarAccionAjax(string $nombreAccion, callable $callback)
+    function ajaxAccion(string $nombreAccion, callable $callback)
     {
         \App\service\AjaxManagerService::registrarAccion($nombreAccion, $callback);
     }
@@ -149,7 +149,7 @@ if (!function_exists('registrarAccionAjax')) {
 
 
 #Funciona el test
-registrarAccionAjax('test_sin_tema', function (support\Request $request) {
+ajaxAccion('test_sin_tema', function (support\Request $request) {
     $extra_data = $request->post('info', 'ninguna');
     return json([
         'success' => true,
@@ -174,7 +174,7 @@ function mi_manejador_de_accion( \support\Request $request ) {
     ]);
 }
 
-registrarAccionAjax('mi_accion_custom', 'mi_manejador_de_accion');
+ajaxAccion('mi_accion_custom', 'mi_manejador_de_accion');
 
 */
 

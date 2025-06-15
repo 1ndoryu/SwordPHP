@@ -36,10 +36,9 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
     - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
     - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
-    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes, y usuario.
+    - [x] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes,
     - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. 
-    - [ ] Bug: vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
-    - [ ] Bug al subir Error del servidor: SQLSTATE[23502]: Not null violation: 7 ERROR: el valor nulo en la columna «tamaño» de la relación «media» viola la restricción de no nulo DETAIL: La fila que falla contiene (1, 4, 00f78c00196ba1a25a2c82302f69cc50, 00f78c00196ba1a25a2c82302f69cc50-4.jpg, 2025/06/00f78c00196ba1a25a2c82302f69cc50-4.jpg, /swordContent/media/2025/06/00f78c00196ba1a25a2c82302f69cc50-4.j..., image/jpeg, null, null, null, 2025-06-15 19:29:29, 2025-06-15 19:29:29). (Connection: default, SQL: insert into "media" ("usuario_id", "titulo", "nombre_archivo", "ruta_archivo", "url_publica", "tipo_mime", "updated_at", "created_at") values (4, 00f78c00196ba1a25a2c82302f69cc50, 00f78c00196ba1a25a2c82302f69cc50-4.jpg, 2025/06/00f78c00196ba1a25a2c82302f69cc50-4.jpg, /swordContent/media/2025/06/00f78c00196ba1a25a2c82302f69cc50-4.jpg, image/jpeg, 2025-06-15 19:29:29, 2025-06-15 19:29:29) returning "id") y luego la iamgen al recargar no aparece en la galeria, comprobe que si se subio 
+    - [ ] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales. Registrar el 

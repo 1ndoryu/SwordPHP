@@ -3,106 +3,67 @@
 namespace App\service;
 
 use App\model\Media;
-use App\model\Usuario;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Webman\Http\UploadFile as File;
 
-/**
- * Servicio para gestionar la lógica de negocio de la biblioteca de medios.
- */
 class MediaService
 {
-    /**
-     * @var Media
-     */
-    protected $media;
-
-    public function __construct(Media $media)
-    {
-        $this->media = $media;
-    }
-
-    /**
-     * Sanitiza una cadena de texto para ser usada como un "slug".
-     *
-     * @param string $texto
-     * @return string
-     */
-    private function slugify(string $texto): string
-    {
-        // Reemplaza todo lo que no sean letras o números por guiones
-        $texto = preg_replace('~[^\pL\d]+~u', '-', $texto);
-        // Elimina guiones al principio y al final
-        $texto = trim($texto, '-');
-        // Convierte a minúsculas
-        $texto = strtolower($texto);
-        // Si queda vacío, devuelve 'archivo'
-        if (empty($texto)) {
-            return 'archivo';
-        }
-        return $texto;
-    }
-
-    /**
-     * Gestiona la subida de un archivo, lo valida, lo mueve y crea un registro en la BD.
-     *
-     * @param \Webman\Http\UploadFile $archivo El archivo subido.
-     * @param int $autorId El ID del usuario que sube el archivo.
-     * @return \App\model\Media El objeto Media creado.
-     * @throws \Exception Si hay un error en la subida o el archivo no es válido.
-     */
-
-    public function gestionarSubida(\Webman\Http\UploadFile $archivo, int $autorId): \App\model\Media
+    public function gestionarSubida(File $archivo, int $usuarioId): Media
     {
         if (!$archivo->isValid()) {
-            throw new \Exception('Error en la subida del archivo, código: ' . $archivo->getUploadErrorCode());
+            throw new \Exception('El archivo no es válido.');
         }
 
-        $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'video/mp4', 'image/webp'];
-        $tamañoMaximo = 15 * 1024 * 1024; // 15MB
-
-        $mimeType = $archivo->getUploadMimeType();
-        if (!in_array($mimeType, $tiposPermitidos)) {
-            throw new \Exception('Tipo de archivo no permitido: ' . $mimeType);
-        }
-
-        if ($archivo->getSize() > $tamañoMaximo) {
-            throw new \Exception('El archivo supera el tamaño máximo permitido de 15MB.');
-        }
-
-        $basePath = SWORD_CONTENT_PATH . '/media';
-        $baseUrl = rtrim(BASE_URL, '/') . '/swordContent/media';
-
-        $subdirectorioFecha = date('Y/m');
-        $directorioDestino = $basePath . '/' . $subdirectorioFecha;
-
-        if (!is_dir($directorioDestino) && !mkdir($directorioDestino, 0755, true)) {
-            throw new \Exception("No se pudo crear el directorio de destino: {$directorioDestino}");
+        $año = date('Y');
+        $mes = date('m');
+        $directorioBase = config('theme.path.content') . DIRECTORY_SEPARATOR . 'media';
+        $directorioDestino = $directorioBase . DIRECTORY_SEPARATOR . $año . DIRECTORY_SEPARATOR . $mes;
+        
+        if (!is_dir($directorioDestino)) {
+            mkdir($directorioDestino, 0755, true);
         }
 
         $nombreOriginal = pathinfo($archivo->getUploadName(), PATHINFO_FILENAME);
-        $extension = $archivo->getUploadExtension();
-        $nombreBaseSlug = $this->slugify($nombreOriginal);
+        $titulo = $this->sanitizarTitulo($nombreOriginal);
+        $extension = strtolower($archivo->getUploadExtension());
+        $nombreArchivo = $this->generarNombreUnico($titulo, $extension, $directorioDestino, $usuarioId);
+        
+        $rutaCompleta = $directorioDestino . DIRECTORY_SEPARATOR . $nombreArchivo;
 
-        $nombreArchivo = $nombreBaseSlug . '.' . $extension;
+        $archivo->move($rutaCompleta);
+
+        $rutaRelativa = $año . '/' . $mes . '/' . $nombreArchivo;
+        // Se añade la barra invertida para llamar a la función global
+        $urlPublica = \url_contenido('media/' . $rutaRelativa); // <-- LÍNEA CORREGIDA
+
+        $media = new Media();
+        $media->usuario_id = $usuarioId;
+        $media->titulo = $titulo;
+        $media->nombre_archivo = $nombreArchivo;
+        $media->ruta_archivo = $rutaRelativa;
+        $media->url_publica = $urlPublica;
+        $media->tipo_mime = $archivo->getUploadMimeType();
+        $media->tamaño = $archivo->getSize();
+        $media->save();
+
+        return $media;
+    }
+    
+    private function sanitizarTitulo(string $titulo): string
+    {
+        $titulo = preg_replace('/[^a-zA-Z0-9\s-]/', '', $titulo);
+        $titulo = str_replace(' ', '-', $titulo);
+        return strtolower($titulo);
+    }
+
+    private function generarNombreUnico(string $titulo, string $extension, string $directorio, int $usuarioId): string
+    {
+        $nombreBase = $titulo . '-' . $usuarioId;
+        $nombreArchivo = $nombreBase . '.' . $extension;
         $contador = 1;
-        while (file_exists($directorioDestino . '/' . $nombreArchivo)) {
-            $nombreArchivo = $nombreBaseSlug . '-' . $contador . '.' . $extension;
+        while (file_exists($directorio . DIRECTORY_SEPARATOR . $nombreArchivo)) {
+            $nombreArchivo = $nombreBase . '-' . $contador . '.' . $extension;
             $contador++;
         }
-
-        $archivo->move($directorioDestino . '/' . $nombreArchivo);
-
-        $rutaRelativa = $subdirectorioFecha . '/' . $nombreArchivo;
-        $urlPublica = $baseUrl . '/' . $rutaRelativa;
-        $titulo = ucfirst(str_replace(['-', '_'], ' ', $nombreOriginal));
-
-        return $this->media->create([
-            'autor_id' => $autorId,
-            'titulo' => $titulo,
-            'nombre_archivo' => $nombreArchivo,
-            'ruta_archivo' => $rutaRelativa,
-            'url_publica' => $urlPublica,
-            'tipo_mime' => $mimeType,
-        ]);
+        return $nombreArchivo;
     }
 }

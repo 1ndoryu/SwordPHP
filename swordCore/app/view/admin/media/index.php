@@ -1,189 +1,222 @@
 <?php
+// Usamos el método de carga de layouts que establecimos, es más limpio.
 include __DIR__ . '/../../layouts/admin-header.php';
 ?>
 
-<style>
-    #mediaDropZone {
-        border: 2px dashed #ccc;
-        border-radius: 5px;
-        padding: 40px;
-        text-align: center;
-        color: #777;
-        cursor: pointer;
-        transition: border-color 0.3s, background-color 0.3s;
-    }
+<div class="container-fluid">
+    <div class="row">
 
-    #mediaDropZone.dragover {
-        border-color: #007bff;
-        background-color: #f0f8ff;
-    }
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Medios</h1>
+            </div>
 
-    .upload-progress-item {
-        margin-bottom: 5px;
-        padding: 8px;
-        background: #f9f9f9;
-        border-radius: 3px;
-        font-size: 0.9em;
-    }
+            <p>Gestiona los archivos subidos a tu sitio.</p>
 
-    .media-card-img {
-        object-fit: cover;
-        height: 150px;
-    }
+            <ul class="nav nav-tabs mb-3" id="mediaTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="biblioteca-tab" data-bs-toggle="tab" data-bs-target="#biblioteca-pane" type="button" role="tab" aria-controls="biblioteca-pane" aria-selected="true">Biblioteca de medios</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="subir-tab" data-bs-toggle="tab" data-bs-target="#subir-pane" type="button" role="tab" aria-controls="subir-pane" aria-selected="false">Subir nuevo</button>
+                </li>
+            </ul>
 
-    .media-card-icon {
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8f9fa;
-        font-size: 48px;
-        color: #6c757d;
-    }
-</style>
+            <div class="tab-content" id="mediaTabsContent">
+                <div class="tab-pane fade show active" id="biblioteca-pane" role="tabpanel" aria-labelledby="biblioteca-tab">
+                    <div id="mediaGaleriaContenedor" class="row">
+                        
+                        <?php if (isset($mediaItems) && !$mediaItems->isEmpty()): ?>
+                            <?php foreach ($mediaItems as $item): ?>
+                                <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                                    <div class="card media-item h-100" data-id="<?= htmlspecialchars($item->id) ?>">
+                                        <?php $esImagen = strpos($item->tipo_mime, 'image/') === 0; ?>
+                                        <?php if ($esImagen): ?>
+                                            <img src="<?= htmlspecialchars($item->url_publica) ?>" class="card-img-top media-card-img" alt="<?= htmlspecialchars($item->titulo) ?>">
+                                        <?php else: ?>
+                                            <div class="media-card-icon"><i class="bi bi-file-earmark-text"></i></div>
+                                        <?php endif; ?>
+                                        <div class="card-body p-2">
+                                            <p class="card-text text-truncate small" title="<?= htmlspecialchars($item->titulo) ?>"><?= htmlspecialchars($item->titulo) ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12">
+                                <p>No se han encontrado medios en la biblioteca. Sube uno nuevo para empezar.</p>
+                            </div>
+                        <?php endif; ?>
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Biblioteca de Medios</h5>
-        <button id="anadirNuevoMedio" class="btn btn-success">Añadir nuevo</button>
-    </div>
-    <div class="card-body">
-        <input type="file" id="mediaUploadInput" multiple style="display: none;" accept="image/*,application/pdf,video/mp4">
+                    </div>
+                </div>
 
-        <div id="mediaDropZone">
-            <p>Arrastra y suelta archivos aquí para subirlos, o haz clic para seleccionarlos.</p>
-        </div>
-
-        <div id="uploadStatus" class="mt-3"></div>
-
-        <hr>
-
-        <div id="mediaGaleriaContenedor" class="row">
-        </div>
+                <div class="tab-pane fade" id="subir-pane" role="tabpanel" aria-labelledby="subir-tab">
+                    <input type="file" id="inputArchivos" multiple style="display: none;">
+                    <div id="zonaSubida" class="zona-subida-estilo">
+                        <p>Arrastra y suelta archivos aquí, o haz clic para seleccionarlos.</p>
+                    </div>
+                    <div id="progresoSubida" class="mt-3" style="display: none;">
+                        <div class="progress">
+                            <div id="barraProgreso" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
+                    <div id="mensajesSubida" class="mt-3"></div>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
 
+<style>
+.zona-subida-estilo {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+.zona-subida-estilo.dragover {
+    background-color: #e9ecef;
+    border-color: #0d6efd;
+}
+.media-item .media-card-img {
+    height: 120px;
+    object-fit: cover;
+}
+.media-item .media-card-icon {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    font-size: 3rem;
+    color: #6c757d;
+}
+</style>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const anadirBtn = document.getElementById('anadirNuevoMedio');
-        const uploadInput = document.getElementById('mediaUploadInput');
-        const dropZone = document.getElementById('mediaDropZone');
-        const uploadStatus = document.getElementById('uploadStatus');
-        const galeriaContenedor = document.getElementById('mediaGaleriaContenedor');
+document.addEventListener('DOMContentLoaded', function () {
+    const zonaSubida = document.getElementById('zonaSubida');
+    const inputArchivos = document.getElementById('inputArchivos');
+    const progresoSubida = document.getElementById('progresoSubida');
+    const barraProgreso = document.getElementById('barraProgreso');
+    const mensajesSubida = document.getElementById('mensajesSubida');
+    const mediaGaleriaContenedor = document.getElementById('mediaGaleriaContenedor');
+    const bibliotecaTab = new bootstrap.Tab(document.getElementById('biblioteca-tab'));
 
-        // Abre el selector de archivos al hacer clic en el botón o la zona de drop
-        anadirBtn.addEventListener('click', () => uploadInput.click());
-        dropZone.addEventListener('click', () => uploadInput.click());
-
-        // Gestiona los archivos seleccionados desde el input
-        uploadInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                gestionarArchivos(e.target.files);
-            }
-        });
-
-        // --- Lógica de Arrastrar y Soltar (Drag and Drop) ---
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('dragover');
-
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                gestionarArchivos(files);
-            }
-        });
-
-        // Evita que el navegador abra el archivo si se suelta fuera de la zona
-        ['dragover', 'drop'].forEach(eventName => {
-            window.addEventListener(eventName, e => e.preventDefault());
-        });
-
-
-        // --- Función para gestionar y subir los archivos ---
-        function gestionarArchivos(files) {
-            uploadStatus.innerHTML = ''; // Limpia los estados anteriores
-            const formData = new FormData();
-
-            for (const file of files) {
-                formData.append('archivos[]', file);
-                const statusItem = document.createElement('div');
-                statusItem.className = 'upload-progress-item';
-                statusItem.textContent = `Preparando: ${file.name}`;
-                uploadStatus.appendChild(statusItem);
-            }
-
-            // Muestra un mensaje de subiendo
-            uploadStatus.insertAdjacentHTML('afterbegin', '<div class="alert alert-info">Subiendo archivos...</div>');
-
-            fetch('/panel/media/subir', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(err => {
-                            throw new Error(err.mensaje || 'Error en la respuesta del servidor.')
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    uploadStatus.innerHTML = ''; // Limpia el estado
-                    if (data.exito) {
-                        uploadStatus.innerHTML = `<div class="alert alert-success">${data.media.length} archivo(s) subido(s) con éxito.</div>`;
-                        data.media.forEach(renderizarElementoMedia);
-                    } else {
-                        throw new Error(data.mensaje || 'Ocurrió un error durante la subida.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la subida:', error);
-                    uploadStatus.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
-                });
-        }
-
-        // --- Función para renderizar un elemento en la galería ---
-        function renderizarElementoMedia(mediaItem) {
-            const col = document.createElement('div');
-            col.className = 'col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 mb-3';
-
-            const card = document.createElement('div');
-            card.className = 'card h-100';
-
-            let previewHtml;
-            if (mediaItem.tipo_mime.startsWith('image/')) {
-                previewHtml = `<img src="${mediaItem.url_publica}" class="card-img-top media-card-img" alt="${mediaItem.titulo}">`;
-            } else {
-                // Asumiendo que Font Awesome está disponible en el panel
-                previewHtml = `<div class="media-card-icon"><i class="fas fa-file-alt"></i></div>`;
-            }
-
-            const cardBodyHtml = `
-            <div class="card-footer text-muted p-2">
-                <small class="d-block text-truncate" title="${mediaItem.titulo}">${mediaItem.titulo}</small>
-            </div>
-        `;
-
-            card.innerHTML = previewHtml + cardBodyHtml;
-            col.appendChild(card);
-
-            // Añade el nuevo elemento al principio de la galería
-            galeriaContenedor.prepend(col);
+    // --- Eventos para activar la subida ---
+    zonaSubida.addEventListener('click', () => inputArchivos.click());
+    inputArchivos.addEventListener('change', () => {
+        if (inputArchivos.files.length) {
+            subirArchivos(inputArchivos.files);
         }
     });
+
+    // --- Lógica de Arrastrar y Soltar (Drag and Drop) ---
+    zonaSubida.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zonaSubida.classList.add('dragover');
+    });
+    zonaSubida.addEventListener('dragleave', () => zonaSubida.classList.remove('dragover'));
+    zonaSubida.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zonaSubida.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            subirArchivos(e.dataTransfer.files);
+        }
+    });
+
+    // --- Función Principal de Subida ---
+    function subirArchivos(archivos) {
+        const formData = new FormData();
+        for (const archivo of archivos) {
+            formData.append('archivos[]', archivo);
+        }
+
+        // Resetear UI
+        mensajesSubida.innerHTML = '';
+        progresoSubida.style.display = 'block';
+        barraProgreso.style.width = '0%';
+        barraProgreso.textContent = '0%';
+        barraProgreso.setAttribute('aria-valuenow', '0');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/admin/media/subir', true);
+
+        // Evento de progreso
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                const porcentaje = (e.loaded / e.total) * 100;
+                barraProgreso.style.width = porcentaje.toFixed(2) + '%';
+                barraProgreso.textContent = porcentaje.toFixed(2) + '%';
+                barraProgreso.setAttribute('aria-valuenow', porcentaje);
+            }
+        };
+
+        // Evento al finalizar la subida
+        xhr.onload = function () {
+            progresoSubida.style.display = 'none';
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.exito) {
+                        mensajesSubida.innerHTML = `<div class="alert alert-success">Archivos subidos correctamente.</div>`;
+                        
+                        // Añadir nuevos elementos a la galería
+                        response.media.reverse().forEach(renderizarElementoMedia);
+                        
+                        // Cambiar a la pestaña de biblioteca para ver los resultados
+                        bibliotecaTab.show();
+                    } else {
+                        mensajesSubida.innerHTML = `<div class="alert alert-danger">Error: ${response.mensaje}</div>`;
+                    }
+                } catch (e) {
+                    mensajesSubida.innerHTML = `<div class="alert alert-danger">Error al procesar la respuesta del servidor.</div>`;
+                    console.error('Error al parsear JSON:', e, xhr.responseText);
+                }
+            } else {
+                let mensajeError = `Error del servidor: ${xhr.statusText || 'desconocido'}`;
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    mensajeError = errorResponse.mensaje || mensajeError;
+                } catch(e) { /* No es JSON, usar el statusText */ }
+                mensajesSubida.innerHTML = `<div class="alert alert-danger">${mensajeError}</div>`;
+            }
+        };
+
+        // Evento en caso de error de red
+        xhr.onerror = function () {
+            progresoSubida.style.display = 'none';
+            mensajesSubida.innerHTML = `<div class="alert alert-danger">Error de red al intentar subir los archivos.</div>`;
+        };
+        
+        xhr.send(formData);
+    }
+
+    // --- Función para renderizar un elemento en la galería ---
+    function renderizarElementoMedia(item) {
+        const esImagen = item.tipo_mime.startsWith('image/');
+        const previewHtml = esImagen 
+            ? `<img src="${item.url_publica}" class="card-img-top media-card-img" alt="${item.titulo}">`
+            : `<div class="media-card-icon"><i class="bi bi-file-earmark-text"></i></div>`;
+
+        const itemHtml = `
+            <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <div class="card media-item h-100" data-id="${item.id}">
+                    ${previewHtml}
+                    <div class="card-body p-2">
+                        <p class="card-text text-truncate small" title="${item.titulo}">${item.titulo}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        // Añadir al principio del contenedor
+        mediaGaleriaContenedor.insertAdjacentHTML('afterbegin', itemHtml);
+    }
+});
 </script>
 
 <?php

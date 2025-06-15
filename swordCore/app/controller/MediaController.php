@@ -2,6 +2,7 @@
 
 namespace App\controller;
 
+use App\model\Media;
 use App\service\MediaService;
 use support\Request;
 use support\Response;
@@ -17,7 +18,14 @@ class MediaController
 
     public function index(Request $request)
     {
-        return view('admin/media/index', ['name' => 'sword']);
+        // Obtenemos todos los medios, ordenados por fecha de creación descendente
+        $mediaItems = Media::orderBy('creado_en', 'desc')->get();
+
+        // Pasamos los medios a la vista
+        return view('admin/media/index', [
+            'name' => 'sword',
+            'mediaItems' => $mediaItems
+        ]);
     }
 
     public function subir(Request $request): Response
@@ -33,7 +41,7 @@ class MediaController
                 $archivos = [$archivos];
             }
 
-            $usuarioId = $request->session()->get('usuario_id');
+            $usuarioId = idUsuarioActual();
             if (!$usuarioId) {
                 return new Response(401, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'No autorizado. Se requiere iniciar sesión.']));
             }
@@ -51,7 +59,8 @@ class MediaController
 
             return new Response(201, ['Content-Type' => 'application/json'], json_encode(['exito' => true, 'media' => $resultadosExitosos]));
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            error_log($e);
             return new Response(500, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Error del servidor: ' . $e->getMessage()]));
         }
     }

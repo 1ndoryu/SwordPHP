@@ -38,7 +38,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes, y usuario.
     - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. 
-    - [ ] Bug al intentar subir un archivo sale Error: "No autorizado. Se requiere iniciar sesión."
+    - [x] Bug en el index de galeria media:120  Uncaught ReferenceError: bootstrap is not defined at HTMLDocument.<anonymous> (media:120:27)
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales. Registrar el 

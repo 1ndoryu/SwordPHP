@@ -46,8 +46,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 ## LLUVIA DE IDEAS (Ideas que tienen que ser integradas en caso de que sean validas)
 
 - [ ] No es tan urgente, los temas deben funcionar como wp, poder tener varios, poder elegir uno, etc.
-- [ ] 
-- [ ] Llevar una lista de la funciones globables que ya existen en esta alternativa vs equivalente en wp. Por ejemplo el add_action supongo que su equivalente es registrarAccionAjax. 
+- [ ] Llevar una lista de la funciones globales que ya existen en esta alternativa vs equivalente en wp. Por ejemplo el add_action supongo que su equivalente es registrarAccionAjax. Necesito saber si las funciones para añadir metas a un post, o un usuario, recuperar la id un usuario o su info, etc (que son globales en wp) existen aca, se ordenaran en un md con una tabla del nombre de la funcion y al lado el equivalente en php.
 - [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo, tiene que ser lo mas parecida a wordpress para que los desarrolladores se sientan comodos. *TAREA PARA EL FINAL*
 - [ ] Para despues no tan importante, falta el editar usuarios en el panel
 

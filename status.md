@@ -34,7 +34,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**
     - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos, organizados por fecha.
-    - [ ] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla y de pagina de manera global. 
+    - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla y de pagina de manera global. 
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [ ] Implementar un CRUD para la gestión de usuarios en el panel de administración. *Creo que esto esta listo*
 

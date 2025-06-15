@@ -37,6 +37,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
     - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla y de pagina de manera global. 
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración. 
+    - [x] Cambiar de blade a php nativo.
 
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica.

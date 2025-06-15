@@ -412,3 +412,45 @@ if (!function_exists('eliminarMetaUser')) {
         return $usuario->eliminarMeta($meta_key);
     }
 }
+
+if (!function_exists('getHeader')) {
+    /**
+     * Carga el archivo header del tema.
+     *
+     * Busca 'layouts/header.php' o 'layouts/header-{name}.php' en el directorio del tema activo.
+     *
+     * @param string|null $name El nombre de la cabecera especializada.
+     */
+    function getHeader($name = null)
+    {
+        $template = $name ? "layouts/header-{$name}.php" : 'layouts/header.php';
+        $header_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+
+        if (file_exists($header_path)) {
+            include $header_path;
+        } else {
+            trigger_error(sprintf('El archivo de cabecera "%s" no se encuentra en el tema activo.', $template), E_USER_WARNING);
+        }
+    }
+}
+
+if (!function_exists('getFooter')) {
+    /**
+     * Carga el archivo footer del tema.
+     *
+     * Busca 'layouts/footer.php' o 'layouts/footer-{name}.php' en el directorio del tema activo.
+     *
+     * @param string|null $name El nombre del pie de página especializado.
+     */
+    function getFooter($name = null)
+    {
+        $template = $name ? "layouts/footer-{$name}.php" : 'layouts/footer.php';
+        $footer_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+
+        if (file_exists($footer_path)) {
+            include $footer_path;
+        } else {
+            trigger_error(sprintf('El archivo de pie de página "%s" no se encuentra en el tema activo.', $template), E_USER_WARNING);
+        }
+    }
+}

@@ -2,9 +2,9 @@
 // 1. Define el título que usará el header.php.
 // La variable $pagina es pasada desde el controlador.
 $titulo = $pagina->titulo;
+# require_once __DIR__ . '/../../swordCore/start.php';
 
-// 2. Incluye la cabecera global del sitio.
-include 'layouts/header.php';
+getHeader();
 ?>
 
 <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
@@ -24,6 +24,6 @@ include 'layouts/header.php';
 <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <?php
-// 3. Incluye el pie de página global del sitio.
-include 'layouts/footer.php';
+
+gerFooter();
 ?>

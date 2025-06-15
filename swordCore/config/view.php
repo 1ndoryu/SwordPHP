@@ -1,5 +1,7 @@
 <?php
-use support\view\Blade;
+
+# use support\view\Blade;
+use support\view\SwordBlade;
 
 /**
  * Configuración del motor de vistas.
@@ -13,20 +15,23 @@ $themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
 $activeTheme = $themeConfig['active_theme'];
 
 // Definir las rutas para las vistas, priorizando el tema.
+// Código modificado en swordCore/config/view.php
+
 $viewPaths = [
-    SWORD_THEMES_PATH . '/' . $activeTheme,
-    app_path() . '/view',
+    // Se reemplazan todas las barras por el separador correcto del SO
+    str_replace(['/', '\\'], DIRECTORY_SEPARATOR, SWORD_THEMES_PATH . '/' . $activeTheme),
+    str_replace(['/', '\\'], DIRECTORY_SEPARATOR, app_path() . '/view'),
 ];
 
 return [
-    'handler' => Blade::class,
+    'handler' => SwordBlade::class,
     'options' => [
         // Se utiliza el array de rutas para las vistas.
         'view_path' => $viewPaths,
 
         // Ruta de caché para las vistas compiladas.
         'cache_path' => runtime_path() . '/views',
-        
+
         // Se preserva la configuración de namespaces.
         // Esto es importante para componentes como la paginación.
         'namespaces' => [

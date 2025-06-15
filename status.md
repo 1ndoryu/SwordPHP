@@ -3,6 +3,8 @@
 ## Concepto
 El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modular, increíblemente rápida y que siga las mejores prácticas de desarrollo para ser fácilmente mantenible y escalable. Tiene que ser fácil para los desarrolladores de temas conservar la esencia de WordPress: poder añadir lógica de forma sencilla en los temas sin necesidad de comprender o modificar la arquitectura del núcleo. El desarrollador de temas debe poder enfocarse en construir su tema, facilitándole funciones globales para su desarrollo (sin estar atadas a `use /App` ni a espacios de nombres complejos).
 
+Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalencia.md. Hay que corregir para no usar metodos, sino directamente funciones como wp.
+
 ---
 
 ## Principios Arquitectónicos
@@ -48,7 +50,7 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 ---
 
 ## Documentación
-- [ ] Crear un documento (`equivalencias-wp.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `registrarAccionAjax`, funciones de metadatos, etc.). *Urgente primero para saber que hacer*
+- [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `registrarAccionAjax`, funciones de metadatos, etc.).
 
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO

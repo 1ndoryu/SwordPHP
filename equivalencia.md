@@ -29,7 +29,15 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 | `idUsuarioActual()`         | `get_current_user_id()` |
 | `!is_null(usuarioActual())` | `is_user_logged_in()`   |
 
-### Tabla 4: Metadatos de Páginas (Post Meta)
+### Tabla 4: Metadatos de Usuario (User Meta)
+
+| Función / Lógica SwordPHP | Equivalente WordPress                    |
+| :------------------------ | :--------------------------------------- |
+| `obtenerMetaUser()`       | `get_user_meta()`                        |
+| `guardarMetaUser()`       | `update_user_meta()` / `add_user_meta()` |
+| `eliminarMetaUser()`      | `delete_user_meta()`                     |
+
+### Tabla 5: Metadatos de Páginas (Post Meta)
 
 | Método SwordPHP (`$pagina->...`)  | Equivalente WordPress                |
 | :-------------------------------- | :----------------------------------- |
@@ -37,15 +45,17 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 | `->obtenerMeta('clave')`          | `get_post_meta($post_id, ..., true)` |
 | `->eliminarMeta('clave')`         | `delete_post_meta($post_id, ...)`    |
 
-### Tabla 5: Opciones del Sitio
+### Tabla 6: Opciones del Sitio
 
 | Método SwordPHP (`$opcionService->...`) | Equivalente WordPress            |
 | :-------------------------------------- | :------------------------------- |
 | `->guardarOpcion('nombre', 'valor')`    | `update_option('name', 'value')` |
 | `->obtenerOpcion('nombre')`             | `get_option('name')`             |
 
-### Tabla 6: Plantillas (Theming)
-# Esto hay que ajustar, tiene ser header() y footer() aca en SwordPHP 
+### Tabla 7: Plantillas (Theming)
+
+# Esto hay que ajustar, tiene ser header() y footer() aca en SwordPHP
+
 | Concepto SwordPHP               | Equivalente WordPress |
 | :------------------------------ | :-------------------- |
 | `include 'layouts/header.php';` | `get_header()`        |
@@ -56,6 +66,7 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 ## ❌ Funcionalidades Faltantes
 
 La siguiente tabla muestra funciones clave de WordPress que aún no tienen un equivalente global directo en SwordPHP.
+
 # Identificadas, si falta, agregar
 
 | Función SwordPHP | Equivalente WordPress |
@@ -64,9 +75,6 @@ La siguiente tabla muestra funciones clave de WordPress que aún no tienen un eq
 | `(No existe)`    | `do_action()`         |
 | `(No existe)`    | `add_filter()`        |
 | `(No existe)`    | `apply_filters()`     |
-| `(No existe)`    | `get_user_meta()`     |
-| `(No existe)`    | `update_user_meta()`  |
-| `(No existe)`    | `delete_user_meta()`  |
 | `(No existe)`    | `get_permalink()`     |
 | `(No existe)`    | `the_title()`         |
 | `(No existe)`    | `the_content()`       |

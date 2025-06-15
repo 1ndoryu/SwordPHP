@@ -10,6 +10,11 @@ use support\view\Raw;
 use support\view\Twig;
 use Webman\View;
 use support\Container;
+use App\model\Opcion;
+use App\model\Pagina;
+use App\service\AssetService;
+use App\service\OpcionService;
+use App\service\AjaxManagerService;
 
 // IDEA: Hacer una carpeta functions o otro nombre mejor, e incluirla toda en functions.php, y alli organizaremos funciones globales eficientemente
 /**
@@ -344,4 +349,66 @@ function renderizarPaginacion(int $paginaActual, int $totalPaginas, string $base
     $html .= '</ul></nav>';
 
     return $html;
+}
+
+
+
+
+
+// ... (resto de funciones existentes sin cambios)
+
+if (!function_exists('obtenerMetaUsuario')) {
+    /**
+     * Obtiene un metadato de usuario.
+     *
+     * @param int $usuario_id El ID del usuario.
+     * @param string $meta_key La clave del metadato.
+     * @param bool $single Si se debe devolver un solo valor.
+     * @return mixed
+     */
+    function obtenerMetaUsuario(int $usuario_id, string $meta_key, bool $single = true)
+    {
+        $usuario = Usuario::find($usuario_id);
+        if (!$usuario) {
+            return null;
+        }
+        return $usuario->obtenerMeta($meta_key, $single);
+    }
+}
+
+if (!function_exists('guardarMetaUser')) {
+    /**
+     * Guarda (crea o actualiza) un metadato de usuario.
+     *
+     * @param int $usuario_id El ID del usuario.
+     * @param string $meta_key La clave del metadato.
+     * @param mixed $meta_value El valor del metadato.
+     * @return bool
+     */
+    function guardarMetaUser(int $usuario_id, string $meta_key, $meta_value): bool
+    {
+        $usuario = Usuario::find($usuario_id);
+        if (!$usuario) {
+            return false;
+        }
+        return $usuario->guardarMeta($meta_key, $meta_value);
+    }
+}
+
+if (!function_exists('eliminarMetaUser')) {
+    /**
+     * Elimina un metadato de usuario.
+     *
+     * @param int $usuario_id El ID del usuario.
+     * @param string $meta_key La clave del metadato.
+     * @return bool
+     */
+    function eliminarMetaUser(int $usuario_id, string $meta_key): bool
+    {
+        $usuario = Usuario::find($usuario_id);
+        if (!$usuario) {
+            return false;
+        }
+        return $usuario->eliminarMeta($meta_key);
+    }
 }

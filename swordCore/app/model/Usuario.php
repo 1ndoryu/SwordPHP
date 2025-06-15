@@ -2,7 +2,9 @@
 
 namespace App\model;
 
+use App\model\traits\GestionaMetadatos;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Usuario
@@ -21,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Usuario extends Model
 {
+    use GestionaMetadatos;
+
     /**
      * El nombre de la tabla asociada con el modelo.
      *
@@ -74,4 +78,14 @@ class Usuario extends Model
      * @var bool
      */
     public $timestamps = true;
+
+    /**
+     * Define la relación "uno a muchos" con los metadatos del usuario.
+     *
+     * @return HasMany
+     */
+    public function metas(): HasMany
+    {
+        return $this->hasMany(UsuarioMeta::class, 'usuario_id');
+    }
 }

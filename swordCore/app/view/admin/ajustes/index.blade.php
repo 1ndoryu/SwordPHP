@@ -1,8 +1,9 @@
 @extends('layouts.admin')
 
-@section('titulo', 'Ajustes Generales')
+@section('tituloPagina', 'Ajustes')
 
-@section('contenido')
+
+@section('contenidoPanel')
 <div class="container">
     <div class="card">
         <div class="card-header">

@@ -69,8 +69,8 @@ Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 
 // --- Ruteo Dinámico de Páginas del Frontend ---
-// Captura cualquier slug y lo pasa al controlador público.
-Route::get('/{slug:[a-zA-Z0-9\-_\/]+}', [PaginaPublicaController::class, 'mostrar']);
+// CORRECCIÓN: Se elimina la barra (/) de la expresión regular para que no capture rutas de varios niveles como '/panel/ajustes'.
+Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar']);
 
 
 // --- Ruta Fallback (Manejo de 404) ---

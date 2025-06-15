@@ -5,6 +5,12 @@
  */
 
 use App\model\Usuario;
+use support\view\Blade;
+use support\view\Raw;
+use support\view\Twig;
+use Webman\View;
+use support\Container;
+
 // IDEA: Hacer una carpeta functions o otro nombre mejor, e incluirla toda en functions.php, y alli organizaremos funciones globales eficientemente
 /**
  * Obtiene el modelo del usuario actualmente autenticado.
@@ -166,3 +172,87 @@ function mi_manejador_de_accion( \support\Request $request ) {
 registrarAccionAjax('mi_accion_custom', 'mi_manejador_de_accion');
 
 */
+
+
+
+if (!function_exists('view')) {
+    /**
+     * Render a view.
+     *
+     * @param string $template
+     * @param array $vars
+     * @param string|null $app
+     * @return \support\Response
+     */
+    function view(string $template, array $vars = [], string $app = null): \support\Response
+    {
+        return \support\view\View::render($template, $vars, $app);
+    }
+}
+
+
+if (!function_exists('blade')) {
+    /**
+     * @param $template
+     * @param array $vars
+     * @param string|null $app
+     * @return Blade
+     */
+    function blade($template, array $vars = [], string $app = null): Blade
+    {
+        return \support\view\View::handler(Blade::class, [
+            'template' => $template,
+            'vars' => $vars,
+            'app' => $app
+        ]);
+    }
+}
+
+
+if (!function_exists('raw')) {
+    /**
+     * @param $template
+     * @param array $vars
+     * @param string|null $app
+     * @return Raw
+     */
+    function raw($template, array $vars = [], string $app = null): Raw
+    {
+        return \support\view\View::handler(Raw::class, [
+            'template' => $template,
+            'vars' => $vars,
+            'app' => $app
+        ]);
+    }
+}
+
+
+if (!function_exists('twig')) {
+    /**
+     * @param $template
+     * @param array $vars
+     * @param string|null $app
+     * @return Twig
+     */
+    function twig($template, array $vars = [], string $app = null): Twig
+    {
+        return \support\view\View::handler(Twig::class, [
+            'template' => $template,
+            'vars' => $vars,
+            'app' => $app
+        ]);
+    }
+}
+
+if (!function_exists('container')) {
+    /**
+     * Obtiene una instancia del contenedor de dependencias.
+     *
+     * @param string $id
+     * @return mixed
+     */
+    function container(string $id)
+    {
+        return Container::get($id);
+    }
+}

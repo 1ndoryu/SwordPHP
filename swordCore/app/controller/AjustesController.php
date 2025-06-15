@@ -27,8 +27,6 @@ class AjustesController
      */
     public function index(Request $request): Response
     {
-        assetService()->encolarDirectorio('/css/panel', 'css');
-        assetService()->encolarDirectorio('/js/panel', 'js');
         
         $paginasPublicadas = $this->paginaService->obtenerPaginasPublicadas();
         $paginaInicioActualSlug = $this->opcionService->obtenerOpcion('pagina_de_inicio_slug');

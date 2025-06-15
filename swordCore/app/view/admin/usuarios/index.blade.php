@@ -29,14 +29,17 @@
                 <tr>
                     <td>{{ $usuario->id }}</td>
                     <td>
-                        <a>{{ $usuario->nombre_usuario }}</a>
+                        <a>{{ $usuario->nombremostrado ?: $usuario->nombreusuario }}</a>
                         <br>
                         <small>Último acceso: {{ $usuario->updated_at->diffForHumans() }}</small>
                     </td>
-                    <td>{{ $usuario->email }}</td>
+                    <td>{{ $usuario->correoelectronico }}</td>
                     <td>
-                        {{-- La lógica de roles se implementará más adelante --}}
-                        <span class="badge badge-success">Administrador</span>
+                        @if($usuario->rol === 'admin')
+                            <span class="badge badge-success">Administrador</span>
+                        @else
+                            <span class="badge badge-info">{{ ucfirst($usuario->rol) }}</span>
+                        @endif
                     </td>
                     <td>{{ $usuario->created_at->format('d/m/Y') }}</td>
                     <td class="project-actions text-right">

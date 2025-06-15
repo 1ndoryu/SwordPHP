@@ -23,8 +23,6 @@ class UsuarioController
      */
     public function index(Request $request): Response
     {
-        assetService()->encolarDirectorio('/css/panel', 'css');
-        assetService()->encolarDirectorio('/js/panel', 'js');
         
         $usuarios = $this->usuarioService->obtenerUsuariosPaginados();
         return view('admin/usuarios/index', [

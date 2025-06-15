@@ -16,8 +16,7 @@ class AdminController
     public function inicio(Request $request): Response
     {
 
-        assetService()->encolarDirectorio('/css/panel', 'css');
-        assetService()->encolarDirectorio('/js/panel', 'js');
+
 
         // Más adelante, aquí obtendremos datos del usuario, estadísticas, etc.
         // Por ahora, simplemente renderizamos la vista del dashboard.

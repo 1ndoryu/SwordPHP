@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@section('estilos')
+    @parent
+    @php
+        assetService()->encolarDirectorio('/css/panel', 'css');
+    @endphp
+@endsection
+
+@section('scripts')
+    @parent
+    @php
+        assetService()->encolarDirectorio('/js/panel', 'js');
+    @endphp
+@endsection
+
 {{-- Define el título que aparecerá en la pestaña del navegador --}}
 @section('titulo')
 @yield('tituloPagina', 'Panel de Administración') | SwordPHP

@@ -3,7 +3,7 @@
 $tituloPagina = 'Crear Nueva Página';
 
 // 2. Incluye la cabecera del panel.
-include __DIR__ . '/../layouts/admin-header.php';
+include __DIR__ . '/../../layouts/admin-header.php';
 ?>
 
 <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
@@ -86,5 +86,5 @@ include __DIR__ . '/../layouts/admin-header.php';
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.
-include __DIR__ . '/../layouts/admin-footer.php';
+include __DIR__ . '/../../layouts/admin-footer.php';
 ?>

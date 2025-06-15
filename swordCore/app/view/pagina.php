@@ -16,7 +16,9 @@ include 'layouts/header.php';
     // Esto es necesario para contenido de editores de texto enriquecido (WYSIWYG).
     // Asegúrate de que el contenido se sanitiza ANTES de guardarlo en la base de datos.
     echo $pagina->contenido;
+    
     ?>
+    <p>cargando desde core</p>
 </div>
 <hr>
 

@@ -8,7 +8,7 @@
 </main>
 </div> <?php
         // Imprime las etiquetas <script> de los JS encolados.
-        //assetService()->imprimirScripts();
+        assetService()->imprimirAssetsFooter();
         ?>
 
 </body>

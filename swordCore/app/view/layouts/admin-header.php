@@ -27,7 +27,7 @@ $usuario = usuarioActual();
 
     <?php
     // Imprime las etiquetas <link> de los CSS encolados.
-    assetService()->imprimirAssetsFooter();
+    assetService()->imprimirAssetsHead();
     ?>
 </head>
 

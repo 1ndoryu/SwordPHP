@@ -40,7 +40,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. 
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
-    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
+    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales. Registrar el 
 
 - [ ] **Fase 8: Gestión de Temas**
     - [ ] Desarrollar la gestión completa de temas desde el panel de administración (ver, activar).

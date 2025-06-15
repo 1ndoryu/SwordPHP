@@ -10,6 +10,7 @@ use support\view\Raw;
 use support\view\Twig;
 use Webman\View;
 use support\Container;
+use App\service\TipoContenidoService;
 use App\model\Opcion;
 use App\model\Pagina;
 use App\service\AssetService;
@@ -506,3 +507,4 @@ if (! function_exists('url_contenido')) {
         return rtrim($basePath, '/') . '/' . $rutaLimpia;
     }
 }
+

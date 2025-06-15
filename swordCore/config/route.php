@@ -9,6 +9,7 @@ use App\controller\AuthController;
 use App\controller\AdminController;
 use App\controller\PaginaController;
 use App\controller\AjaxController;
+use App\controller\MediaController;
 use support\Log;
 
 // Ruta principal (raíz del sitio)
@@ -54,9 +55,9 @@ $panelGroup = Route::group('/panel', function () {
     Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
     
 
-    Route::group('/media', function () {
-        Route::get('', [App\controller\MediaController::class, 'index']);
-    });
+    // Media
+    Route::get('/media', [MediaController::class, 'index']);
+    Route::post('/media/subir', [MediaController::class, 'subir']);
 
     // Rutas para Usuarios
     Route::get('/usuarios', [\App\controller\UsuarioController::class, 'index']);

@@ -2,23 +2,57 @@
 
 namespace App\controller;
 
+use App\service\MediaService;
 use support\Request;
-use Webman\Http\Response;
+use support\Response;
 
 class MediaController
 {
-    /**
-     * Muestra la página principal de la biblioteca de medios.
-     *
-     * @param Request $request
-     * @return Response
-     */
-    public function index(Request $request): Response
+    protected $mediaService;
+
+    public function __construct(MediaService $mediaService)
     {
-        // Más adelante, aquí obtendremos los archivos de la base de datos.
-        // Por ahora, simplemente renderizamos la vista.
-        return view('admin/media/index', [
-            'tituloPagina' => 'Biblioteca de Medios'
-        ]);
+        $this->mediaService = $mediaService;
+    }
+
+    public function index(Request $request)
+    {
+        return view('admin/media/index', ['name' => 'sword']);
+    }
+
+    public function subir(Request $request): Response
+    {
+        try {
+            $archivos = $request->file('archivos');
+
+            if (empty($archivos)) {
+                return new Response(400, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'No se han enviado archivos.']));
+            }
+
+            if (!is_array($archivos)) {
+                $archivos = [$archivos];
+            }
+
+            $usuarioId = $request->session()->get('usuario_id');
+            if (!$usuarioId) {
+                return new Response(401, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'No autorizado. Se requiere iniciar sesión.']));
+            }
+
+            $resultadosExitosos = [];
+            foreach ($archivos as $archivo) {
+                $media = $this->mediaService->gestionarSubida($archivo, $usuarioId);
+                $resultadosExitosos[] = [
+                    'id' => $media->id,
+                    'url_publica' => $media->url_publica,
+                    'titulo' => $media->titulo,
+                    'tipo_mime' => $media->tipo_mime,
+                ];
+            }
+
+            return new Response(201, ['Content-Type' => 'application/json'], json_encode(['exito' => true, 'media' => $resultadosExitosos]));
+
+        } catch (\Exception $e) {
+            return new Response(500, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Error del servidor: ' . $e->getMessage()]));
+        }
     }
 }

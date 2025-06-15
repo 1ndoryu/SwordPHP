@@ -41,7 +41,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [x] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
-    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales. Registrar el tipo solo se hará a través de codigo como en wp, mas adelante se hara desde el panel pero por ahora no. Lo que si hara es que cuando cuando se registre el post type, debe aparecer en el panel la sesion de ese post type y su contenido. Para esto creo que hay que centralizar la forma en la que se imprime los contenido, como wordpress tendran forma de lista, la forma primitiva actual como se imprimen las paginas, esta bien, solo hay que centralizarla y mas adelante yo la perfecciono.
+    - [x] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
 
 - [ ] **Fase 8: Gestión de Temas**
     - [ ] Desarrollar la gestión completa de temas desde el panel de administración (ver, activar).

@@ -50,7 +50,13 @@ if (!defined('PROJECT_ROOT')) {
 // ==================== FIN: DEFINICIÓN DE RUTAS DEL PROYECTO =====================
 
 Config::clear();
-support\App::loadAllConfig(['route', 'theme']); // Aseguramos que la config del tema esté disponible
+
+// =================== CORRECCIÓN FINAL: CARGA DE CONFIGURACIÓN ===================
+// Se cargan todas las configuraciones EXCEPTO route.php.
+// El fichero route.php tiene su propio cargador (Route::load) al final de este script,
+// y cargarlo aquí prematuramente causa el error "addRoute() on null",
+// ya que el servicio de rutas aún no está inicializado.
+support\App::loadAllConfig(['route']);
 
 // ==================== INICIO: CARGA DE FUNCTIONS.PHP DEL TEMA ====================
 // Cargar el functions.php del tema activo para permitir la personalización

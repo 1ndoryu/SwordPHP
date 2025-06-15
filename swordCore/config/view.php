@@ -1,42 +1,32 @@
 <?php
 
-use support\view\NativePhpView; // <-- Cambiamos la clase importada
+use support\view\NativePhpView;
 
 /**
  * Configuración del motor de vistas.
  *
- * Fichero ajustado para usar plantillas PHP nativas
- * y mantener la estructura de temas.
+ * Fichero ajustado para usar plantillas PHP nativas y mantener la estructura de temas.
  */
 
-// Se mantiene la lógica para obtener la ruta del tema activo.
+// Se obtiene la configuración del tema para determinar el tema activo.
 $themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
 $activeTheme = $themeConfig['active_theme'];
 
-// Se mantiene la definición de las rutas de las vistas, priorizando el tema.
-// La clase NativePhpView usará estas mismas rutas para encontrar los archivos .php
+// Se construyen las rutas donde se buscarán las vistas, dando prioridad al tema activo.
 $viewPaths = [
-    // Busca primero en el directorio del tema activo.
-    str_replace(['/', '\\'], DIRECTORY_SEPARATOR, SWORD_THEMES_PATH . '/' . $activeTheme),
-    // Luego busca en el directorio de vistas del core.
-    str_replace(['/', '\\'], DIRECTORY_SEPARATOR, app_path() . '/view'),
+    // 1. Directorio de vistas del tema activo.
+    SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $activeTheme,
+    // 2. Directorio de vistas del núcleo (fallback).
+    app_path() . DIRECTORY_SEPARATOR . 'view',
 ];
 
 return [
-    // El manejador de vistas por defecto. Actualmente se usa PHP nativo.
     'handler' => NativePhpView::class,
-
     'options' => [
-        // Directorio de caché, usado por el caché de esquema de BD y por Blade si se activa.
         'cache_path' => runtime_path('views'),
-
-        // Rutas donde se buscarán las vistas. Necesario para el paginador.
-        'view_path' => [
-            base_path() . '/app/view'
-        ],
-
-        // 'Namespaces' permiten agrupar vistas. El paginador de Laravel usa esto
-        // para encontrar sus plantillas (ej. 'pagination::bootstrap-5').
+        // Se corrige la clave 'view_path' para que use el array con las rutas del tema y del core.
+        // Esto soluciona el problema de que solo se cargaban las vistas del core.
+        'view_path' => $viewPaths,
         'namespaces' => [
             'pagination' => base_path() . '/app/view/vendor/pagination',
         ],

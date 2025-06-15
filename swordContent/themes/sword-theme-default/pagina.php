@@ -25,5 +25,5 @@ getHeader();
 
 <?php
 
-gerFooter();
+getFooter();
 ?>

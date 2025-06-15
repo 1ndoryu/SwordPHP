@@ -456,40 +456,64 @@ if (!function_exists('getFooter')) {
     }
 }
 
-if (!function_exists('renderizarMenuLateralAdmin')) {
-    /**
-     * Renderiza el menú de navegación lateral para el panel de administración.
-     * Esta función se crea como parte de una refactorización para centralizar la
-     * lógica del menú y facilitar futuras modificaciones.
-     *
-     * @return string El HTML del menú de navegación.
-     */
-    function renderizarMenuLateralAdmin(): string
-    {
-        $rutaActual = request()->path();
-
-        $elementosMenu = [
-            ['etiqueta' => 'Dashboard', 'url' => '/panel', 'es_activo' => $rutaActual === 'panel'],
-            ['etiqueta' => 'Páginas', 'url' => '/panel/paginas', 'es_activo' => str_starts_with($rutaActual, 'panel/paginas')],
-            ['etiqueta' => 'Medios', 'url' => '/panel/media', 'es_activo' => str_starts_with($rutaActual, 'panel/media')],
-            ['etiqueta' => 'Usuarios', 'url' => '/panel/usuarios', 'es_activo' => str_starts_with($rutaActual, 'panel/usuarios')],
-            ['etiqueta' => 'Ajustes', 'url' => '/panel/ajustes', 'es_activo' => $rutaActual === 'panel/ajustes'],
-        ];
-
-        $html = '<ul>';
-        foreach ($elementosMenu as $elemento) {
-            $claseActivo = $elemento['es_activo'] ? 'activo' : '';
-            $html .= sprintf(
-                '<li><a href="%s" class="%s">%s</a></li>',
-                htmlspecialchars($elemento['url']),
-                htmlspecialchars($claseActivo),
-                htmlspecialchars($elemento['etiqueta'])
-            );
-        }
-        $html .= '</ul>';
-
-        return $html;
+/**
+ * Genera el HTML para el menú lateral del panel de administración.
+ * El menú ahora se genera dinámicamente basado en los tipos de contenido registrados.
+ *
+ * @param Request $request La instancia de la petición actual para determinar la URL activa.
+ * @return string El HTML del menú.
+ */
+function renderizarMenuLateralAdmin()
+{
+    $request = request();
+    if (!$request) {
+        return '';
     }
+
+    // 1. Empezar con los items estáticos, incluyendo "Páginas"
+    $menuItems = [
+        'inicio' => ['url' => '/panel', 'icon' => 'fa-solid fa-house', 'text' => 'Inicio'],
+        'paginas' => ['url' => '/panel/paginas', 'icon' => 'fa-solid fa-file-lines', 'text' => 'Páginas'],
+    ];
+
+    // 2. Obtener y añadir los OTROS tipos de contenido
+    $tiposDeContenido = TipoContenidoService::getInstancia()->obtenerTodos();
+    foreach ($tiposDeContenido as $slug => $config) {
+        // Nos aseguramos de no añadir 'paginas' si estuviera registrado por error
+        if ($slug === 'paginas') {
+            continue;
+        }
+        $menuItems[$slug] = [
+            'url'   => '/panel/' . $slug,
+            'icon'  => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
+            'text'  => $config['labels']['name'] ?? ucfirst($slug),
+        ];
+    }
+
+    // 3. Añadir el resto de items estáticos
+    $menuItems['media'] = ['url' => '/panel/media', 'icon' => 'fa-solid fa-photo-film', 'text' => 'Medios'];
+    $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'icon' => 'fa-solid fa-users', 'text' => 'Usuarios'];
+    $menuItems['ajustes'] = ['url' => '/panel/ajustes', 'icon' => 'fa-solid fa-gears', 'text' => 'Ajustes'];
+
+    // 4. Lógica para renderizar el HTML (sin cambios)
+    $html = '';
+    foreach ($menuItems as $key => $item) {
+        $isActive = (str_starts_with($request->path(), $item['url']) && $item['url'] !== '/panel') || $request->path() === $item['url'];
+        if ($item['url'] === '/panel' && $request->path() !== '/panel') {
+            $isActive = false;
+        }
+        $activeClass = $isActive ? 'active' : '';
+        $html .= <<<HTML
+            <li class="nav-item">
+                <a class="nav-link {$activeClass}" href="{$item['url']}">
+                    <i class="nav-icon {$item['icon']}"></i>
+                    <span>{$item['text']}</span>
+                </a>
+            </li>
+HTML;
+    }
+
+    return $html;
 }
 
 if (! function_exists('url_contenido')) {
@@ -499,7 +523,7 @@ if (! function_exists('url_contenido')) {
      * @param string $ruta La ruta relativa al recurso desde la raíz de swordContent.
      * @return string La URL relativa completa (ej: /swordContent/media/archivo.jpg).
      */
-    function url_contenido($ruta = ''): string 
+    function url_contenido($ruta = ''): string
     {
         $basePath = '/swordContent';
         $rutaLimpia = ltrim($ruta, '/');
@@ -508,3 +532,37 @@ if (! function_exists('url_contenido')) {
     }
 }
 
+/**
+ * Registra un nuevo tipo de contenido en el sistema.
+ * Es una función de conveniencia (wrapper) para el método registrar de TipoContenidoService.
+ *
+ * @param string $slug El identificador único para el tipo de contenido (ej: 'noticias').
+ * @param array $argumentos La configuración para el tipo de contenido.
+ */
+function registrarTipoContenido(string $slug, array $argumentos)
+{
+    TipoContenidoService::getInstancia()->registrar($slug, $argumentos);
+}
+
+// -- Registros de Tipos de Contenido por Defecto --
+
+registrarTipoContenido(
+    'proyectos', // El slug para la URL: /panel/proyectos
+    [
+        'labels' => [
+            'name'               => 'Proyectos',
+            'singular_name'      => 'Proyecto',
+            'add_new_item'       => 'Añadir nuevo proyecto',
+            'edit_item'          => 'Editar proyecto',
+            'new_item'           => 'Nuevo proyecto',
+            'view_item'          => 'Ver proyecto',
+            'search_items'       => 'Buscar proyectos',
+            'not_found'          => 'No se encontraron proyectos',
+            'not_found_in_trash' => 'No se encontraron proyectos en la papelera',
+        ],
+        'public'       => true,
+        'has_archive'  => true,
+        'menu_icon'    => 'fa-solid fa-briefcase', // Icono de FontAwesome
+        'supports'     => ['title', 'editor'], 
+    ]
+);

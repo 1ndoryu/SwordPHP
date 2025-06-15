@@ -39,7 +39,7 @@ $usuario = usuarioActual();
                 SwordPHP
             </div>
             <nav class="panelSidebarNav">
-                <?php echo renderizarMenuLateralAdmin(); ?>
+                <?php echo renderizarMenuLateralAdmin() ?>
             </nav>
         </aside>
 

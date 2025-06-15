@@ -1,7 +1,13 @@
 <?php
 
-namespace Sword\SwordCore\app\service;
+namespace App\service;
 
+/**
+ * Servicio de Registro Central para Tipos de Contenido (Post Types).
+ *
+ * Implementa el patrón Singleton para garantizar una única fuente de verdad
+ * para todos los tipos de contenido registrados durante una petición.
+ */
 class TipoContenidoService
 {
     private static ?TipoContenidoService $instancia = null;
@@ -18,6 +24,14 @@ class TipoContenidoService
     private function __clone() {}
 
     /**
+     * Previene la deserialización de la instancia.
+     */
+    public function __wakeup()
+    {
+        throw new \Exception("No se puede deserializar un singleton.");
+    }
+
+    /**
      * Obtiene la instancia única del servicio.
      */
     public static function getInstancia(): self
@@ -31,11 +45,12 @@ class TipoContenidoService
     /**
      * Registra un nuevo tipo de contenido en el sistema.
      *
-     * @param string $slug El identificador único para el tipo de contenido.
+     * @param string $slug El identificador único para el tipo de contenido (ej: 'noticias').
      * @param array $argumentos La configuración para el tipo de contenido.
      */
     public function registrar(string $slug, array $argumentos): void
     {
+        // Aquí se podrían añadir validaciones para los argumentos en el futuro.
         $this->tiposDeContenido[$slug] = $argumentos;
     }
 

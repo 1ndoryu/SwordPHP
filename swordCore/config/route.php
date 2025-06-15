@@ -1,4 +1,5 @@
 <?php
+
 use Webman\Route;
 use App\middleware\AutenticacionMiddleware;
 use App\service\OpcionService;
@@ -9,6 +10,8 @@ use App\controller\AuthController;
 use App\controller\AdminController;
 use App\controller\PaginaController;
 use App\controller\AjaxController;
+use App\controller\TipoContenidoController;
+use App\service\TipoContenidoService;
 use App\controller\MediaController;
 use support\Log;
 
@@ -22,14 +25,14 @@ Route::get('/', function (Request $request) {
     if ($slugPaginaInicio) {
         return container(PaginaPublicaController::class)->mostrar($request, $slugPaginaInicio);
     }
-    
+
     // De lo contrario, mostramos la página de bienvenida por defecto del sistema.
     return container(IndexController::class)->index($request);
 });
 
 // Rutas para AJAX y pruebas
 Route::post('/ajax', [AjaxController::class, 'handle']);
-Route::get('/test-ajax', function() {
+Route::get('/test-ajax', function () {
     return view('test/ajax');
 });
 
@@ -50,10 +53,30 @@ $panelGroup = Route::group('/panel', function () {
         Route::post('/destroy/{id}', [PaginaController::class, 'destroy']);
     });
 
+    $tiposDeContenido = TipoContenidoService::getInstancia()->obtenerTodos();
+    if (!empty($tiposDeContenido)) {
+        $slugs = array_keys($tiposDeContenido);
+        // Filtramos 'paginas' por si acaso, aunque ya no debería estar registrado
+        $slugs = array_filter($slugs, fn($slug) => $slug !== 'paginas');
+
+        if (!empty($slugs)) {
+            $slugRegex = implode('|', $slugs);
+            Route::group('/{slug:' . $slugRegex . '}', function () {
+                Route::get('', [TipoContenidoController::class, 'index']);
+                Route::get('/crear', [TipoContenidoController::class, 'create']);
+                Route::post('/crear', [TipoContenidoController::class, 'store']);
+                Route::get('/editar/{id:\d+}', [TipoContenidoController::class, 'edit']);
+                Route::post('/editar/{id:\d+}', [TipoContenidoController::class, 'update']);
+                Route::post('/eliminar/{id:\d+}', [TipoContenidoController::class, 'destroy']);
+            });
+        }
+    }
+
+
     // Ajustes Generales
     Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);
     Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
-    
+
 
     // Media
     Route::get('/media', [MediaController::class, 'index']);
@@ -82,7 +105,7 @@ Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar'
 
 
 // --- Ruta Fallback (Manejo de 404) ---
-Route::fallback(function(Request $request){
+Route::fallback(function (Request $request) {
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     $logMessage = sprintf(
         "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",

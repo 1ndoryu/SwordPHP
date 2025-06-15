@@ -24,14 +24,13 @@ class PaginaPublicaController
      */
     public function mostrar(Request $request, string $slug): Response
     {
-        // El servicio ya lanza NotFoundException si no encuentra la página publicada,
-        // así que no necesitamos un try-catch. El manejador de excepciones
-        // global se encargará de la respuesta 404.
+        // LÍNEA DE DEPURACIÓN: Muestra las rutas de vista y detiene la ejecución.
+        //dd(config('view.options.view_path'));
+
+        // El resto de tu código...
         $pagina = $this->paginaService->obtenerPaginaPublicadaPorSlug($slug);
 
-        // Por ahora, renderizamos una vista genérica.
-        // Más adelante, esto interactuará con el sistema de temas.
-        return view('frontend.pagina', [
+        return view('pagina', [
             'pagina' => $pagina,
             'titulo' => $pagina->titulo
         ]);

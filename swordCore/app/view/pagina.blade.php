@@ -12,7 +12,7 @@
     {{-- Si existe un subtítulo, lo mostramos --}}
     @if($pagina->subtitulo)
         <h2 style="color: #666; font-weight: 300;">{{ $pagina->subtitulo }}</h2>
-        <p> usando swordCore\app\view\frontend\pagina.blade.php </p>
+        <p> usando swordCore\app\view\pagina.blade.php! </p>
     @endif
 
     <div style="margin: 20px 0;"></div>

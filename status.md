@@ -37,7 +37,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
     - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [x] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes,
-    - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. 
+    - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*
     - [ ] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**

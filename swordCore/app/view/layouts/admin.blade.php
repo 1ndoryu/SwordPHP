@@ -24,7 +24,7 @@
                 {{-- =========== INICIO: ENLACE AÑADIDO =========== --}}
                 <li><a href="/panel/paginas" class="{{ str_starts_with(request()->path(), 'panel/paginas') ? 'activo' : '' }}">Páginas</a></li>
                 {{-- ============ FIN: ENLACE AÑADIDO ============ --}}
-
+                <li><a href="/panel/ajustes" class="{{ request()->path() == 'panel/ajustes' ? 'activo' : '' }}">Ajustes</a></li>
             </ul>
         </nav>
     </aside>

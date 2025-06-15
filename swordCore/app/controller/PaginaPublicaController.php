@@ -4,7 +4,8 @@ namespace App\controller;
 
 use App\service\PaginaService;
 use support\Request;
-use Webman\Http\Response;
+use support\Response;
+use Webman\Exception\NotFoundException; // Importar la excepción
 
 class PaginaPublicaController
 {
@@ -17,22 +18,21 @@ class PaginaPublicaController
 
     /**
      * Muestra una página pública basada en su slug.
-     *
-     * @param Request $request
-     * @param string $slug
-     * @return Response
      */
     public function mostrar(Request $request, string $slug): Response
     {
-        // LÍNEA DE DEPURACIÓN: Muestra las rutas de vista y detiene la ejecución.
-        //dd(config('view.options.view_path'));
+        try {
+            $pagina = $this->paginaService->obtenerPaginaPublicadaPorSlug($slug);
 
-        // El resto de tu código...
-        $pagina = $this->paginaService->obtenerPaginaPublicadaPorSlug($slug);
+            // Si se encuentra la página, se renderiza la vista correspondiente.
+            // La vista a utilizar puede estar definida en los metadatos de la página.
+            $plantilla = $pagina->obtenerMeta('plantilla_vista') ?? 'pagina';
 
-        return view('pagina', [
-            'pagina' => $pagina,
-            'titulo' => $pagina->titulo
-        ]);
+            return view($plantilla, ['pagina' => $pagina]);
+
+        } catch (NotFoundException $e) {
+            // Si la página no se encuentra, se devuelve una respuesta 404.
+            return response("<h1>404 | Página No Encontrada</h1>", 404);
+        }
     }
 }

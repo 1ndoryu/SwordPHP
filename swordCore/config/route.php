@@ -1,17 +1,30 @@
 <?php
-
 use Webman\Route;
+use App\middleware\AutenticacionMiddleware;
+use App\service\OpcionService;
 use App\controller\IndexController;
+use App\controller\PaginaPublicaController;
+use support\Request;
 use App\controller\AuthController;
 use App\controller\AdminController;
 use App\controller\PaginaController;
-use App\middleware\AutenticacionMiddleware;
 use App\controller\AjaxController;
-use App\controller\PaginaPublicaController;
-use support\Request;
 use support\Log;
 
-// --- Rutas Públicas y de Propósito General ---
+// Ruta principal (raíz del sitio)
+Route::get('/', function (Request $request) {
+    /** @var OpcionService $opcionService */
+    $opcionService = container(OpcionService::class);
+    $slugPaginaInicio = $opcionService->obtenerOpcion('pagina_de_inicio_slug');
+
+    // Si se ha configurado una página de inicio estática y tiene un slug, la mostramos.
+    if ($slugPaginaInicio) {
+        return container(PaginaPublicaController::class)->mostrar($request, $slugPaginaInicio);
+    }
+    
+    // De lo contrario, mostramos la página de bienvenida por defecto del sistema.
+    return container(IndexController::class)->index($request);
+});
 
 // Rutas para AJAX y pruebas
 Route::post('/ajax', [AjaxController::class, 'handle']);
@@ -20,27 +33,29 @@ Route::get('/test-ajax', function() {
 });
 
 // --- Grupo de Rutas del Panel de Administración ---
-// Todas las rutas dentro de este grupo tendrán el prefijo "/panel"
-// y estarán protegidas por el AutenticacionMiddleware.
+$panelGroup = Route::group('/panel', function () {
 
-Route::group('/panel', function () {
-
-    // Dashboard principal: Accede a través de GET /panel o /panel/
+    // Dashboard principal
     Route::get('', [AdminController::class, 'inicio']);
     Route::get('/', [AdminController::class, 'inicio']);
 
     // --- CRUD de Páginas ---
-    // La ruta base es /paginas, que se convierte en /panel/paginas
     Route::group('/paginas', function () {
-        Route::get('', [PaginaController::class, 'index']);          // GET /panel/paginas
-        Route::get('/create', [PaginaController::class, 'create']);    // GET /panel/paginas/create
-        Route::post('/store', [PaginaController::class, 'store']);     // POST /panel/paginas/store
-        Route::get('/edit/{id}', [PaginaController::class, 'edit']);     // GET /panel/paginas/edit/{id}
-        Route::post('/update/{id}', [PaginaController::class, 'update']);  // POST /panel/paginas/update/{id}
-        Route::post('/destroy/{id}', [PaginaController::class, 'destroy']);// POST /panel/paginas/destroy/{id}
+        Route::get('', [PaginaController::class, 'index']);
+        Route::get('/create', [PaginaController::class, 'create']);
+        Route::post('/store', [PaginaController::class, 'store']);
+        Route::get('/edit/{id}', [PaginaController::class, 'edit']);
+        Route::post('/update/{id}', [PaginaController::class, 'update']);
+        Route::post('/destroy/{id}', [PaginaController::class, 'destroy']);
     });
 
-})->middleware([
+     // Ajustes Generales
+    Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);
+    Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
+
+});
+// Se aplica el middleware al grupo de rutas del panel.
+$panelGroup->middleware([
     AutenticacionMiddleware::class
 ]);
 
@@ -53,16 +68,8 @@ Route::post('/login', [AuthController::class, 'procesarLogin']);
 Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 
-// --- Otras Rutas Públicas ---
-Route::get('/', [IndexController::class, 'index']);
-Route::get('/view', [IndexController::class, 'view']);
-Route::get('/json', [IndexController::class, 'json']);
-Route::any('/test', [IndexController::class, 'test']);
-
 // --- Ruteo Dinámico de Páginas del Frontend ---
-// Esta ruta debe ir después de todas las rutas específicas y antes del fallback.
-// Captura cualquier cadena que parezca un slug de página y la pasa al controlador público.
-// La expresión regular permite letras, números, guiones, guiones bajos y barras.
+// Captura cualquier slug y lo pasa al controlador público.
 Route::get('/{slug:[a-zA-Z0-9\-_\/]+}', [PaginaPublicaController::class, 'mostrar']);
 
 

@@ -30,6 +30,17 @@ Estructura de la tabla paginas
  */
 class PaginaService
 {
+
+    /**
+     * Obtiene todas las páginas con estado 'publicado'.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection|static[]
+     */
+    public function obtenerPaginasPublicadas()
+    {
+        return Pagina::where('estado', 'publicado')->get();
+    }
+
     /**
      * Obtiene una lista paginada de páginas.
      *

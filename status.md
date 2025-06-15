@@ -7,48 +7,49 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 ## Principios Arquitectónicos
 - **Instalación sin Migraciones:** No se utilizará un sistema de migraciones tradicional. Las tablas necesarias para el core del sistema (`usuarios`, `paginas`, `opciones`, etc.) deben ser creadas mediante un script de instalación inicial, similar a como lo hace WordPress.
-- **Separación de Lógica y Presentación:** El núcleo (`Core`) debe estar completamente separado del contenido del usuario (`Content`), que incluye temas, plugins y archivos subidos.
+- **Separación de Lógica y Presentación:** El núcleo (`swordCore`) debe estar completamente separado del contenido del usuario (`swordContent`), que incluye temas, plugins y archivos subidos.
 
 ---
 
 ## Fases del Proyecto
 
 - [x] **Fase 1: Fundación y Autenticación**
-    - Se configuró el framework y la base de datos, implementando un sistema robusto de registro, login/logout y un `UsuarioService` para manejar la lógica de negocio.
+    - Configuración del framework, la base de datos y el sistema de autenticación.
 
 - [x] **Fase 2: Estructura del Panel de Administración**
-    - Se implementó un panel de administración con rutas protegidas, un layout base, y un sistema de roles de usuario (admin/suscriptor) para controlar el acceso.
+    - Implementación del panel de administración con rutas protegidas y roles de usuario.
 
 - [x] **Fase 3: Gestión de Assets y AJAX**
-    - Se desarrolló un `AssetService` para encolar CSS/JS y un `AjaxManagerService` con una función global `registrar_accion_ajax()` para crear un sistema de acciones AJAX seguro, centralizado y fácil de usar desde cualquier parte del código.
+    - Creación de servicios para encolar assets (CSS/JS) y para manejar acciones AJAX de forma segura.
 
 - [x] **Fase 4: Gestor de Páginas (CRUD)**
-    - Se implementó el CRUD completo para páginas, incluyendo un sistema de metadatos (`pagina_meta`) para añadir campos personalizados, sentando las bases para contenido extensible.
+    - Implementación del CRUD de páginas, incluyendo un sistema de metadatos (`pagina_meta`).
 
 - [x] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
-    - [x] Desarrollar un sistema de ruteo dinámico que muestra el contenido de las páginas publicadas en el frontend.
-    - [x] **Refactorización Arquitectónica:** Separar la estructura de directorios en `swordCore` (el núcleo del CMS) y `swordContent` (temas, plugins, uploads) para reflejar la filosofía de WordPress. (lo que tenemos hasta ahora permanecerá en su sitio, es decir, el core tendra su propias rutas y plantillas, mientras que del lado del content sera como wp)
-    - [x] Enrutamiento dinamico de paginas creadas.
-    - [x] Crear una estructura básica de "temas" que permita personalizar la apariencia. Cada tema debe poder tener su propio `functions.php`, plantillas de página, y assets (CSS/JS).
-    - [x] En panel se tiene que elegir una pagina de inicio, crearemos una por defecto, pero como en wp, se deberia poder elegir una pagina de inicio para los temas.
+    - Desarrollo del ruteo dinámico, estructura básica de temas, y separación arquitectónica de `swordCore` y `swordContent`.
 
 - [ ] **Fase 6: Mejoras y Extensibilidad**
-    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos, organizados por fecha.
-    - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, permitiendo encolar scripts y estilos de forma sencilla y de pagina de manera global. 
+    - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración.
+    - [x] Cambiar el motor de plantillas de Blade a PHP nativo.
+    - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
+    - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
     - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
-    - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración. 
-    - [x] Cambiar de blade a php nativo.
-
+    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos.
+    
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
-    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica.
-    - [ ] Este sistema deberá incluir un CRUD centralizado y un conjunto de funciones globales para facilitar la creación, actualización, borrado y gestión de metadatos de cualquier tipo de contenido desde los temas o plugins.
+    - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
 
-## LLUVIA DE IDEAS (Ideas que tienen que ser integradas en caso de que sean validas)
+- [ ] **Fase 8: Gestión de Temas**
+    - [ ] Desarrollar la gestión completa de temas desde el panel de administración (ver, activar).
 
-- [ ] No es tan urgente, los temas deben funcionar como wp, poder tener varios, poder elegir uno, etc.
-- [ ] Llevar una lista de la funciones globales que ya existen en esta alternativa vs equivalente en wp. Por ejemplo el add_action supongo que su equivalente es registrarAccionAjax. Necesito saber si las funciones para añadir metas a un post, o un usuario, recuperar la id un usuario o su info, etc (que son globales en wp) existen aca, se ordenaran en un md con una tabla del nombre de la funcion y al lado el equivalente en php.
-- [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo, tiene que ser lo mas parecida a wordpress para que los desarrolladores se sientan comodos. *TAREA PARA EL FINAL*
-- [ ] Para despues no tan importante, falta el editar usuarios en el panel
+- [ ] **Fase 9: Arquitectura de Plugins**
+    - [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo, manteniendo una experiencia de desarrollo similar a la de WordPress. *TAREA PARA EL FINAL*
+
+---
+
+## Documentación
+- [ ] Crear un documento (`equivalencias-wp.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `registrarAccionAjax`, funciones de metadatos, etc.). *Urgente primero para saber que hacer*
+
 
 # NOTAS IA -ESPECIFICAS PARA ESTE PROYECTO
 

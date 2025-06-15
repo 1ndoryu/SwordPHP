@@ -1,41 +1,36 @@
 <?php
 
-# use support\view\Blade;
-use support\view\SwordBlade;
+use support\view\NativePhpView; // <-- Cambiamos la clase importada
 
 /**
  * Configuración del motor de vistas.
  *
- * Fichero corregido para soportar temas y mantener la configuración
- * de 'namespaces' para la paginación.
+ * Fichero ajustado para usar plantillas PHP nativas
+ * y mantener la estructura de temas.
  */
 
-// Cargar la configuración del tema para obtener el tema activo.
+// Se mantiene la lógica para obtener la ruta del tema activo.
 $themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
 $activeTheme = $themeConfig['active_theme'];
 
-// Definir las rutas para las vistas, priorizando el tema.
-// Código modificado en swordCore/config/view.php
-
+// Se mantiene la definición de las rutas de las vistas, priorizando el tema.
+// La clase NativePhpView usará estas mismas rutas para encontrar los archivos .php
 $viewPaths = [
-    // Se reemplazan todas las barras por el separador correcto del SO
+    // Busca primero en el directorio del tema activo.
     str_replace(['/', '\\'], DIRECTORY_SEPARATOR, SWORD_THEMES_PATH . '/' . $activeTheme),
+    // Luego busca en el directorio de vistas del core.
     str_replace(['/', '\\'], DIRECTORY_SEPARATOR, app_path() . '/view'),
 ];
 
 return [
-    'handler' => SwordBlade::class,
+    // 1. El cambio principal: apuntamos a nuestro nuevo renderizador.
+    'handler' => NativePhpView::class,
+    
     'options' => [
-        // Se utiliza el array de rutas para las vistas.
+        // 2. Mantenemos tu definición de 'view_path' ya que es correcta.
         'view_path' => $viewPaths,
 
-        // Ruta de caché para las vistas compiladas.
-        'cache_path' => runtime_path() . '/views',
-
-        // Se preserva la configuración de namespaces.
-        // Esto es importante para componentes como la paginación.
-        'namespaces' => [
-            'pagination' => base_path() . '/vendor/illuminate/pagination/resources/views'
-        ]
+        // 3. 'cache_path' y 'namespaces' se eliminan.
+        //    No son necesarios para plantillas PHP nativas.
     ]
 ];

@@ -19,7 +19,6 @@ include 'layouts/header.php';
     ?>
 </div>
 <hr>
-<p>✅ Vista cargada desde: sword-theme-default</p>
 
 <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 

@@ -191,24 +191,6 @@ if (!function_exists('view')) {
 }
 
 
-if (!function_exists('blade')) {
-    /**
-     * @param $template
-     * @param array $vars
-     * @param string|null $app
-     * @return Blade
-     */
-    function blade($template, array $vars = [], string $app = null): Blade
-    {
-        return \support\view\View::handler(Blade::class, [
-            'template' => $template,
-            'vars' => $vars,
-            'app' => $app
-        ]);
-    }
-}
-
-
 if (!function_exists('raw')) {
     /**
      * @param $template

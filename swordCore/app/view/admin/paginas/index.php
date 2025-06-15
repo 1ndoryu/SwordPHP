@@ -3,12 +3,11 @@
 $tituloPagina = 'Gestión de Páginas';
 
 // 2. Incluye la cabecera del panel.
-// La variable $paginas es pasada desde el controlador.
+// Las variables $paginas, $paginaActual, y $totalPaginas son pasadas desde el controlador.
 include __DIR__ . '/../../layouts/admin-header.php';
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
+<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <div class="vista-listado">
 
@@ -20,8 +19,7 @@ include __DIR__ . '/../../layouts/admin-header.php';
         </div>
     </div>
 
-    <?php // Bloque para mostrar mensajes de éxito o error 
-    ?>
+    <?php // Bloque para mostrar mensajes de éxito o error ?>
     <?php if (session()->has('success')): ?>
         <div class="alerta alerta-exito" role="alert">
             <?php echo htmlspecialchars(session('success')); ?>
@@ -47,8 +45,8 @@ include __DIR__ . '/../../layouts/admin-header.php';
             </thead>
             <tbody>
                 <?php
-                // Conversión del bucle @forelse de Blade.
-                if ($paginas->count() > 0):
+                // Se comprueba si la colección de páginas no está vacía.
+                if (!$paginas->isEmpty()):
                     foreach ($paginas as $pagina):
                 ?>
                         <tr>
@@ -56,8 +54,7 @@ include __DIR__ . '/../../layouts/admin-header.php';
                             <td><?php echo htmlspecialchars($pagina->titulo); ?></td>
                             <td><?php echo htmlspecialchars($pagina->autor->nombre ?? 'N/A'); ?></td>
                             <td>
-                                <?php // Clases genéricas para los badges de estado 
-                                ?>
+                                <?php // Clases genéricas para los badges de estado ?>
                                 <?php if ($pagina->estado == 'publicado'): ?>
                                     <span class="badge badge-publicado">Publicado</span>
                                 <?php else: ?>
@@ -80,7 +77,7 @@ include __DIR__ . '/../../layouts/admin-header.php';
                         </tr>
                     <?php
                     endforeach;
-                else: // Equivalente a @empty
+                else: // Si no hay páginas que mostrar
                     ?>
                     <tr>
                         <td colspan="6" style="text-align: center;">No se encontraron páginas.</td>
@@ -91,15 +88,15 @@ include __DIR__ . '/../../layouts/admin-header.php';
 
         <div class="paginacion">
             <?php
-            // La paginación sigue funcionando igual.
-            echo $paginas->links();
+            // Llamamos a nuestra nueva función de paginación nativa.
+            // Las variables $paginaActual y $totalPaginas son pasadas desde el controlador.
+            echo renderizarPaginacion($paginaActual, $totalPaginas);
             ?>
         </div>
     </div>
 </div>
 
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
+<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

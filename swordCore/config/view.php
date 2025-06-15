@@ -23,14 +23,22 @@ $viewPaths = [
 ];
 
 return [
-    // 1. El cambio principal: apuntamos a nuestro nuevo renderizador.
+    // El manejador de vistas por defecto. Actualmente se usa PHP nativo.
     'handler' => NativePhpView::class,
-    
-    'options' => [
-        // 2. Mantenemos tu definición de 'view_path' ya que es correcta.
-        'view_path' => $viewPaths,
 
-        // 3. 'cache_path' y 'namespaces' se eliminan.
-        //    No son necesarios para plantillas PHP nativas.
+    'options' => [
+        // Directorio de caché, usado por el caché de esquema de BD y por Blade si se activa.
+        'cache_path' => runtime_path('views'),
+
+        // Rutas donde se buscarán las vistas. Necesario para el paginador.
+        'view_path' => [
+            base_path() . '/app/view'
+        ],
+
+        // 'Namespaces' permiten agrupar vistas. El paginador de Laravel usa esto
+        // para encontrar sus plantillas (ej. 'pagination::bootstrap-5').
+        'namespaces' => [
+            'pagination' => base_path() . '/app/view/vendor/pagination',
+        ],
     ]
 ];

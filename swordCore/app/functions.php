@@ -292,3 +292,56 @@ if (!function_exists('rutaTema')) {
 
 
 
+/**
+ * Renderiza los controles de paginación en HTML usando PHP nativo.
+ *
+ * @param int $paginaActual La página que se está mostrando actualmente.
+ * @param int $totalPaginas El número total de páginas disponibles.
+ * @param string $baseUrl La URL base para los enlaces de paginación (sin el query string).
+ * @return string El HTML de la paginación.
+ */
+function renderizarPaginacion(int $paginaActual, int $totalPaginas, string $baseUrl = ''): string
+{
+    if ($totalPaginas <= 1) {
+        return '';
+    }
+
+    // Si no se provee una URL base, se usa la ruta actual.
+    // Esto hace que la función sea reutilizable en diferentes secciones.
+    if (empty($baseUrl)) {
+        $baseUrl = request()->path();
+    }
+
+    // Se asegura de que la URL base no tenga una barra al final.
+    $baseUrl = rtrim($baseUrl, '/');
+
+    // Construcción del HTML
+    $html = '<nav aria-label="Navegación de páginas"><ul class="pagination">';
+
+    // Botón "Anterior"
+    $esPrimeraPagina = ($paginaActual <= 1);
+    $html .= '<li class="page-item' . ($esPrimeraPagina ? ' disabled' : '') . '">';
+    $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual - 1)) . '" aria-label="Anterior">&lsaquo;</a>';
+    $html .= '</li>';
+
+    // Enlaces numéricos de las páginas
+    // Nota: Para sistemas con muchísimas páginas, se podría mejorar para mostrar un rango (ej. 1 ... 5, 6, 7 ... 20)
+    for ($i = 1; $i <= $totalPaginas; $i++) {
+        $esPaginaActual = ($i == $paginaActual);
+        if ($esPaginaActual) {
+            $html .= '<li class="page-item active" aria-current="page"><span class="page-link">' . $i . '</span></li>';
+        } else {
+            $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . $i) . '">' . $i . '</a></li>';
+        }
+    }
+
+    // Botón "Siguiente"
+    $esUltimaPagina = ($paginaActual >= $totalPaginas);
+    $html .= '<li class="page-item' . ($esUltimaPagina ? ' disabled' : '') . '">';
+    $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual + 1)) . '" aria-label="Siguiente">&rsaquo;</a>';
+    $html .= '</li>';
+
+    $html .= '</ul></nav>';
+
+    return $html;
+}

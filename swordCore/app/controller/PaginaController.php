@@ -2,6 +2,7 @@
 
 namespace App\controller;
 
+use App\model\Pagina;
 use App\service\PaginaService;
 use support\Request;
 use support\Response;
@@ -34,12 +35,42 @@ class PaginaController
      * @param Request $request
      * @return Response
      */
+
     public function index(Request $request): Response
     {
-        $paginas = $this->paginaService->obtenerPaginasPaginadas();
-        return view('admin/paginas/index', ['paginas' => $paginas]);
-    }
+        // --- Lógica de Paginación Nativa ---
+        $porPagina = 10;
+        $paginaActual = (int)$request->input('page', 1);
 
+        $totalItems = Pagina::count();
+        $totalPaginas = (int)ceil($totalItems / $porPagina);
+
+        if ($paginaActual > $totalPaginas && $totalItems > 0) {
+            $paginaActual = $totalPaginas;
+        }
+        if ($paginaActual < 1) {
+            $paginaActual = 1;
+        }
+
+        $offset = ($paginaActual - 1) * $porPagina;
+
+        // Se utiliza with('autor') para cargar la relación y evitar consultas N+1.
+        // Se ordena por fecha de creación descendente para mostrar las más nuevas primero.
+        $paginas = Pagina::with('autor')
+            ->orderBy('created_at', 'desc')
+            ->offset($offset)
+            ->limit($porPagina)
+            ->get();
+        // --- Fin de la Lógica de Paginación ---
+
+        // Renderiza la vista, pasando todos los datos necesarios.
+        return view('admin/paginas/index', [
+            'paginas' => $paginas,
+            'tituloPagina' => 'Gestión de Páginas', // Título que la vista espera.
+            'paginaActual' => $paginaActual,
+            'totalPaginas' => $totalPaginas,
+        ]);
+    }
     /**
      * Muestra el formulario para crear una nueva página.
      * @param Request $request

@@ -15,7 +15,7 @@
     <title><?php echo htmlspecialchars($titulo ?? 'SwordPHP'); ?></title>
     <?php
     // Imprime los <link> de los estilos CSS encolados para el tema.
-    assetService()->imprimirAssetsHead();
+    echo assetService()->imprimirAssetsHead();
     ?>
 </head>
 

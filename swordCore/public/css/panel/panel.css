@@ -6,6 +6,7 @@ body {
 .panelContenedor {
     display: flex;
     min-height: 100vh;
+    width: 100%;
 }
 .panelSidebar {
     width: 250px;

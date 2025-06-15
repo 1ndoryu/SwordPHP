@@ -10,7 +10,7 @@
 
 <?php
 // Imprime las etiquetas <script> de los JS encolados para el tema.
-assetService()->imprimirAssetsFooter();
+echo assetService()->imprimirAssetsFooter();
 ?>
 
 </body>

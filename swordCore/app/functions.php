@@ -493,16 +493,16 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
 
 if (! function_exists('url_contenido')) {
     /**
-     * Genera una URL completa para un recurso dentro del directorio de contenido (swordContent).
+     * Genera una URL relativa a la raíz para un recurso dentro de swordContent.
      *
      * @param string $ruta La ruta relativa al recurso desde la raíz de swordContent.
-     * @return string La URL completa.
+     * @return string La URL relativa completa (ej: /swordContent/media/archivo.jpg).
      */
-    function url_contenido($ruta = '') {
-        $esquema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'];
-        $basePath = rtrim(str_replace($_SERVER['DOCUMENT_ROOT'], '', SWORD_CONTENT_PATH), '/');
+    function url_contenido($ruta = ''): string 
+    {
+        $basePath = '/swordContent';
         $rutaLimpia = ltrim($ruta, '/');
-        return "{$esquema}://{$host}{$basePath}/{$rutaLimpia}";
+        // Asegura que no haya doble barra si $ruta empieza con '/'
+        return rtrim($basePath, '/') . '/' . $rutaLimpia;
     }
 }

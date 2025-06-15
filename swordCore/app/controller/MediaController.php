@@ -19,7 +19,7 @@ class MediaController
     public function index(Request $request)
     {
         // Obtenemos todos los medios, ordenados por fecha de creación descendente
-        $mediaItems = Media::orderBy('creado_en', 'desc')->get();
+        $mediaItems = Media::orderBy('created_at', 'desc')->get();
 
         // Pasamos los medios a la vista
         return view('admin/media/index', [

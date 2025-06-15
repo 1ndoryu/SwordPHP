@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Representa un archivo en la biblioteca de medios.
  *
  * @property int $id
- * @property int $autor_id
+ * @property int $usuario_id
  * @property string|null $titulo
  * @property string $nombre_archivo
  * @property string $ruta_archivo
@@ -51,7 +51,7 @@ class Media extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'autor_id',
+        'media_id',
         'titulo',
         'nombre_archivo',
         'ruta_archivo',
@@ -77,6 +77,6 @@ class Media extends Model
      */
     public function autor(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class, 'autor_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 }

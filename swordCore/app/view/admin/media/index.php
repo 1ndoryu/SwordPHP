@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
         barraProgreso.setAttribute('aria-valuenow', '0');
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/admin/media/subir', true);
+        xhr.open('POST', '/panel/media/subir', true);
 
         xhr.upload.onprogress = function (e) {
             if (e.lengthComputable) {

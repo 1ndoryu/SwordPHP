@@ -490,3 +490,19 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
         return $html;
     }
 }
+
+if (! function_exists('url_contenido')) {
+    /**
+     * Genera una URL completa para un recurso dentro del directorio de contenido (swordContent).
+     *
+     * @param string $ruta La ruta relativa al recurso desde la raíz de swordContent.
+     * @return string La URL completa.
+     */
+    function url_contenido($ruta = '') {
+        $esquema = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        $basePath = rtrim(str_replace($_SERVER['DOCUMENT_ROOT'], '', SWORD_CONTENT_PATH), '/');
+        $rutaLimpia = ltrim($ruta, '/');
+        return "{$esquema}://{$host}{$basePath}/{$rutaLimpia}";
+    }
+}

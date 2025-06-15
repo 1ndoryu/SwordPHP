@@ -35,8 +35,9 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [x] Cambiar el motor de plantillas de Blade a PHP nativo.
     - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
     - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
-    - [ ] Ampliar el sistema de metadatos para usuarios (`user_meta`).
-    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos.
+    - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
+    - [ ] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes, y usuario.
+    - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. 
     
 - [ ] **Fase 7: Gestor de Contenido Avanzado**
     - [ ] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
@@ -48,6 +49,10 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [ ] Diseñar e implementar una arquitectura de **plugins** para permitir la extensibilidad del core sin modificarlo, manteniendo una experiencia de desarrollo similar a la de WordPress. *TAREA PARA EL FINAL*
 
 ---
+
+## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
+
+- [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se. 
 
 ## Documentación
 - [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `ajaxAccion`, funciones de metadatos, etc.).

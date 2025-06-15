@@ -51,14 +51,16 @@ class Media extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'media_id',
+        'usuario_id',
         'titulo',
         'nombre_archivo',
         'ruta_archivo',
         'url_publica',
         'tipo_mime',
         'descripcion',
+        'tamaño',
     ];
+
 
     /**
      * Los atributos que deben ser convertidos a tipos nativos.

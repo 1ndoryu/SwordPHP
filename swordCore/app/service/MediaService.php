@@ -45,7 +45,8 @@ class MediaService
         $media->ruta_archivo = $rutaRelativa; // Guardar con slashes uniformes.
         $media->url_publica = $urlPublica;
         $media->tipo_mime = $archivo->getUploadMimeType();
-        
+        $media->tamaño = $archivo->getSize();
+
         $media->save();
 
         return $media;

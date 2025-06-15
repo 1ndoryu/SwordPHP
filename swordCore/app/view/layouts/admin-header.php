@@ -39,12 +39,7 @@ $usuario = usuarioActual();
                 SwordPHP
             </div>
             <nav class="panelSidebarNav">
-                <ul>
-                    <li><a href="/panel" class="<?php echo request()->path() == 'panel' ? 'activo' : ''; ?>">Dashboard</a></li>
-                    <li><a href="/panel/paginas" class="<?php echo str_starts_with(request()->path(), 'panel/paginas') ? 'activo' : ''; ?>">Páginas</a></li>
-                    <li><a href="/panel/usuarios" class="<?php echo str_starts_with(request()->path(), 'panel/usuarios') ? 'activo' : ''; ?>">Usuarios</a></li>
-                    <li><a href="/panel/ajustes" class="<?php echo request()->path() == 'panel/ajustes' ? 'activo' : ''; ?>">Ajustes</a></li>
-                </ul>
+                <?php echo renderizarMenuLateralAdmin(); ?>
             </nav>
         </aside>
 

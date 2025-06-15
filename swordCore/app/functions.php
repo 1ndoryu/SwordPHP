@@ -454,3 +454,39 @@ if (!function_exists('getFooter')) {
         }
     }
 }
+
+if (!function_exists('renderizarMenuLateralAdmin')) {
+    /**
+     * Renderiza el menú de navegación lateral para el panel de administración.
+     * Esta función se crea como parte de una refactorización para centralizar la
+     * lógica del menú y facilitar futuras modificaciones.
+     *
+     * @return string El HTML del menú de navegación.
+     */
+    function renderizarMenuLateralAdmin(): string
+    {
+        $rutaActual = request()->path();
+
+        $elementosMenu = [
+            ['etiqueta' => 'Dashboard', 'url' => '/panel', 'es_activo' => $rutaActual === 'panel'],
+            ['etiqueta' => 'Páginas', 'url' => '/panel/paginas', 'es_activo' => str_starts_with($rutaActual, 'panel/paginas')],
+            ['etiqueta' => 'Medios', 'url' => '/panel/media', 'es_activo' => str_starts_with($rutaActual, 'panel/media')],
+            ['etiqueta' => 'Usuarios', 'url' => '/panel/usuarios', 'es_activo' => str_starts_with($rutaActual, 'panel/usuarios')],
+            ['etiqueta' => 'Ajustes', 'url' => '/panel/ajustes', 'es_activo' => $rutaActual === 'panel/ajustes'],
+        ];
+
+        $html = '<ul>';
+        foreach ($elementosMenu as $elemento) {
+            $claseActivo = $elemento['es_activo'] ? 'activo' : '';
+            $html .= sprintf(
+                '<li><a href="%s" class="%s">%s</a></li>',
+                htmlspecialchars($elemento['url']),
+                htmlspecialchars($claseActivo),
+                htmlspecialchars($elemento['etiqueta'])
+            );
+        }
+        $html .= '</ul>';
+
+        return $html;
+    }
+}

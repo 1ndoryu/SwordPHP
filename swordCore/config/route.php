@@ -49,10 +49,15 @@ $panelGroup = Route::group('/panel', function () {
         Route::post('/destroy/{id}', [PaginaController::class, 'destroy']);
     });
 
-     // Ajustes Generales
+    // Ajustes Generales
     Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);
     Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
     
+
+    Route::group('/media', function () {
+        Route::get('', [App\controller\MediaController::class, 'index']);
+    });
+
     // Rutas para Usuarios
     Route::get('/usuarios', [\App\controller\UsuarioController::class, 'index']);
 });

@@ -52,7 +52,9 @@ $panelGroup = Route::group('/panel', function () {
      // Ajustes Generales
     Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);
     Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
-
+    
+    // Rutas para Usuarios
+    Route::get('/usuarios', [\App\controller\UsuarioController::class, 'index']);
 });
 // Se aplica el middleware al grupo de rutas del panel.
 $panelGroup->middleware([

@@ -8,21 +8,6 @@ use support\exception\BusinessException;
 use Webman\Exception\NotFoundException;
 
 
-/*
-Estructura de la tabla paginas
-| column_name   | data_type                   | character_maximum_length | is_nullable | column_default                      |
-| ------------- | --------------------------- | ------------------------ | ----------- | ----------------------------------- |
-| id            | bigint                      | null                     | NO          | nextval('paginas_id_seq'::regclass) |
-| titulo        | character varying           | 255                      | NO          | null                                |
-| subtitulo     | character varying           | 255                      | YES         | null                                |
-| contenido     | text                        | null                     | YES         | null                                |
-| slug          | character varying           | 255                      | NO          | null                                |
-| idautor       | bigint                      | null                     | YES         | null                                |
-| estado        | character varying           | 50                       | NO          | 'borrador'::character varying       |
-| tipocontenido | character varying           | 50                       | NO          | 'pagina'::character varying         |
-| created_at    | timestamp without time zone | null                     | YES         | null                                |
-| updated_at    | timestamp without time zone | null                     | YES         | null                                |
-*/
 
 /**
  * Class PaginaService

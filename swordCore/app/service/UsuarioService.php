@@ -74,4 +74,16 @@ class UsuarioService
 
         return null;
     }
+
+    /**
+     * Obtiene una lista paginada de todos los usuarios.
+     *
+     * @param int $porPagina
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function obtenerUsuariosPaginados(int $porPagina = 15)
+    {
+        // Ordenamos por fecha de creación descendente para ver los más nuevos primero.
+        return Usuario::latest()->paginate($porPagina);
+    }
 }

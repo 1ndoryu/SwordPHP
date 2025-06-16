@@ -48,20 +48,40 @@ class TipoContenidoController
     {
         $this->getConfigOr404($slug);
 
-        $pagina = new Pagina;
-        $pagina->titulo = $request->post('titulo');
-        $pagina->contenido = $request->post('contenido', '');
-        $pagina->slug = $this->generarSlug($request->post('titulo'));
-        $pagina->tipocontenido = $slug;
+        try {
+            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $slug) {
+                // 1. Crear la entrada principal
+                $pagina = new Pagina;
+                $pagina->titulo = $request->post('titulo');
+                $pagina->contenido = $request->post('contenido', '');
+                $pagina->slug = $this->generarSlug($request->post('titulo'));
+                $pagina->tipocontenido = $slug;
+                $pagina->idautor = idUsuarioActual();
+                $pagina->estado = $request->post('estado', 'borrador');
+                $pagina->save();
 
-        // Corrección: Asignar el ID del autor correctamente
-        $pagina->idautor = idUsuarioActual();
+                // 2. Procesar y guardar los metadatos
+                $metadatosFormulario = $request->post('meta', []);
+                if (is_array($metadatosFormulario)) {
+                    foreach ($metadatosFormulario as $meta) {
+                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
+                            // Usamos el método del trait para crear/actualizar el meta
+                            $pagina->guardarMeta(trim($meta['clave']), $meta['valor']);
+                        }
+                    }
+                }
+            });
 
-        $pagina->save();
-
-        // Mejora: Añadir mensaje de éxito para una mejor retroalimentación al usuario
-        session()->flash('success', 'Entrada creada con éxito.');
-        return redirect('/panel/' . $slug);
+            // CORRECCIÓN: Usar set() en lugar de flash()
+            session()->set('success', 'Entrada creada con éxito.');
+            return redirect('/panel/' . $slug);
+        } catch (\Throwable $e) {
+            // CORRECCIÓN: Usar set() en lugar de flash()
+            session()->set('error', 'Error al crear la entrada: ' . $e->getMessage());
+            // Guardamos el input para repoblar el formulario
+            session()->set('_old_input', $request->post());
+            return redirect('/panel/' . $slug . '/crear');
+        }
     }
 
     /**
@@ -70,7 +90,12 @@ class TipoContenidoController
     public function edit(Request $request, string $slug, int $id): Response
     {
         $config = $this->getConfigOr404($slug);
-        $entrada = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
+
+        // Precargamos la relación 'metas' para que estén disponibles en la vista.
+        $entrada = Pagina::with('metas')
+            ->where('id', $id)
+            ->where('tipocontenido', $slug)
+            ->firstOrFail();
 
         return view('admin/tipoContenido/edit', [
             'entrada' => $entrada,
@@ -85,14 +110,51 @@ class TipoContenidoController
     public function update(Request $request, string $slug, int $id): Response
     {
         $this->getConfigOr404($slug);
-        $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
 
-        $pagina->titulo = $request->post('titulo');
-        $pagina->contenido = $request->post('contenido', '');
-        $pagina->slug = $this->generarSlug($request->post('titulo'), $id);
-        $pagina->save();
+        try {
+            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $slug, $id) {
+                // 1. Obtener y actualizar la entrada principal
+                $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
 
-        return redirect('/panel/' . $slug);
+                $pagina->titulo = $request->post('titulo');
+                $pagina->contenido = $request->post('contenido', '');
+                $pagina->slug = $this->generarSlug($request->post('titulo'), $id);
+                $pagina->estado = $request->post('estado', 'borrador');
+                $pagina->save();
+
+                // 2. Borrar metadatos antiguos para sincronizar
+                $pagina->metas()->delete();
+
+                // 3. Procesar y guardar los nuevos metadatos
+                $metadatosFormulario = $request->post('meta', []);
+                $nuevosMetadatosParaInsertar = [];
+
+                if (is_array($metadatosFormulario)) {
+                    foreach ($metadatosFormulario as $meta) {
+                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
+                            $nuevosMetadatosParaInsertar[] = [
+                                'pagina_id'  => $pagina->id,
+                                'meta_key'   => trim($meta['clave']),
+                                'meta_value' => $meta['valor'],
+                            ];
+                        }
+                    }
+                }
+
+                if (!empty($nuevosMetadatosParaInsertar)) {
+                    \App\model\PaginaMeta::insert($nuevosMetadatosParaInsertar);
+                }
+            });
+
+            // CORRECCIÓN: Usar set() en lugar de flash()
+            session()->set('success', 'Entrada actualizada con éxito.');
+            return redirect('/panel/' . $slug);
+        } catch (\Throwable $e) {
+            // CORRECCIÓN: Usar set() en lugar de flash()
+            session()->set('error', 'Error al actualizar la entrada: ' . $e->getMessage());
+            session()->set('_old_input', $request->post());
+            return redirect('/panel/' . $slug . '/editar/' . $id);
+        }
     }
 
     /**

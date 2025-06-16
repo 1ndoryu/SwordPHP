@@ -1,26 +1,74 @@
 <?php
-// Usar los labels del array de configuración para que la vista sea genérica.
+// 1. Define las variables y el título usando la configuración genérica.
 $labels = $config['labels'];
+$tituloPagina = htmlspecialchars($labels['edit_item'] ?? 'Editar Entrada');
+$errorMessage = session()->pull('error'); // Obtenemos el mensaje de error si existe
+
+// 2. Incluye la cabecera del panel.
 echo partial('layouts/admin-header', []);
 ?>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><?= htmlspecialchars($labels['edit_item'] ?? 'Editar entrada') ?></h1>
+<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+
+<div class="formulario-contenedor">
+
+    <div class="cabecera-formulario">
+        <p>Editando "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?>": <strong><?php echo htmlspecialchars($entrada->titulo ?? ''); ?></strong></p>
+        <a href="/panel/<?php echo $slug; ?>" class="btn-volver">
+            &larr; Volver al listado
+        </a>
+    </div>
+
+    <form action="/panel/<?php echo $slug; ?>/editar/<?php echo htmlspecialchars($entrada->id ?? ''); ?>" method="POST">
+        <?php echo csrf_field(); ?>
+        <div class="cuerpo-formulario">
+
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alerta alerta-error" role="alert">
+                    <?php echo htmlspecialchars($errorMessage); ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="grupo-formulario">
+                <label for="titulo">Título</label>
+                <input type="text" id="titulo" name="titulo" placeholder="Introduce el título" value="<?php echo htmlspecialchars(old('titulo', $entrada->titulo ?? '')); ?>" required>
+            </div>
+
+            <div class="grupo-formulario">
+                <label for="contenido">Contenido</label>
+                <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', $entrada->contenido ?? '')); ?></textarea>
+            </div>
+
+            <div class="grupo-formulario">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado">
+                    <?php $estadoActual = old('estado', $entrada->estado ?? 'borrador'); ?>
+                    <option value="borrador" <?php echo $estadoActual == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                    <option value="publicado" <?php echo $estadoActual == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
+                </select>
+            </div>
+
+            <?php
+            // El controlador ya ha cargado los metadatos en la relación $entrada->metas.
+            // Se los pasamos directamente al componente.
+            echo partial(
+                'admin/components/gestor-metadatos',
+                ['metadatos' => $entrada->metas]
+            );
+            ?>
+
+        </div>
+
+        <div class="pie-formulario">
+            <button type="submit" class="btn-principal">Actualizar <?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?></button>
+            <a href="/panel/<?php echo $slug; ?>" class="btn-secundario">Cancelar</a>
+        </div>
+    </form>
 </div>
 
-<form action="/panel/<?= $slug ?>/editar/<?= htmlspecialchars($entrada->id ?? '') ?>" method="POST">
-    <?php echo csrf_field(); ?>
-    <input type="hidden" name="_method" value="PUT">
+<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
-    <div class="mb-3">
-        <label for="titulo" class="form-label">Título</label>
-        <input type="text" class="form-control" id="titulo" name="titulo" value="<?= htmlspecialchars($entrada->titulo ?? '') ?>" required>
-    </div>
-    <div class="mb-3">
-        <label for="contenido" class="form-label">Contenido</label>
-        <textarea class="form-control" id="contenido" name="contenido" rows="10"><?= htmlspecialchars($entrada->contenido ?? '') ?></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary">Actualizar</button>
-</form>
-
-<?php echo partial('layouts/admin-footer', []); ?>
+<?php
+// 3. Incluye el pie de página para cerrar la estructura.
+echo partial('layouts/admin-footer', []);
+?>

@@ -40,7 +40,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*
     - [x] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
-- [ ] **Fase 7: Gestor de Contenido Avanzado**
+- [x] **Fase 7: Gestor de Contenido Avanzado**
     - [x] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
 
 - [ ] **Fase 8: Gestión de Temas**
@@ -53,9 +53,6 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 
-- [ ] Bug detectado, al crear una pagina o un contenido dinamico no se guardar el autor. 
-- [ ] Bug, al dar click a editar una pagina sale ErrorException: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\Users\1u\Documents\SwordPHP\swordCore\app\view\admin\paginas\edit.php:52
-Stack trace: #0 [internal function]: {closure}() *no sale cuando edito un ctp o post type
 - [ ] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 

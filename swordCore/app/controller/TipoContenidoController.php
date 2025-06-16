@@ -52,9 +52,15 @@ class TipoContenidoController
         $pagina->titulo = $request->post('titulo');
         $pagina->contenido = $request->post('contenido', '');
         $pagina->slug = $this->generarSlug($request->post('titulo'));
-        $pagina->tipocontenido = $slug; // <- Clave: Se asigna el tipo de contenido.
+        $pagina->tipocontenido = $slug;
+
+        // Corrección: Asignar el ID del autor correctamente
+        $pagina->idautor = idUsuarioActual();
+
         $pagina->save();
 
+        // Mejora: Añadir mensaje de éxito para una mejor retroalimentación al usuario
+        session()->flash('success', 'Entrada creada con éxito.');
         return redirect('/panel/' . $slug);
     }
 

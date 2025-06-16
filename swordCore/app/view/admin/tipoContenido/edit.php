@@ -1,4 +1,3 @@
-
 <?php
 // Usar los labels del array de configuración para que la vista sea genérica.
 $labels = $config['labels'];
@@ -9,14 +8,17 @@ include __DIR__ . '/../../layouts/admin-header.php';
     <h1 class="h2"><?= htmlspecialchars($labels['edit_item'] ?? 'Editar entrada') ?></h1>
 </div>
 
-<form action="/panel/<?= $slug ?>/editar/<?= $entrada->id ?>" method="POST">
+<form action="/panel/<?= $slug ?>/editar/<?= htmlspecialchars($entrada->id ?? '') ?>" method="POST">
+    <?php echo csrf_field(); ?>
+    <input type="hidden" name="_method" value="PUT">
+
     <div class="mb-3">
         <label for="titulo" class="form-label">Título</label>
-        <input type="text" class="form-control" id="titulo" name="titulo" value="<?= htmlspecialchars($entrada->titulo) ?>" required>
+        <input type="text" class="form-control" id="titulo" name="titulo" value="<?= htmlspecialchars($entrada->titulo ?? '') ?>" required>
     </div>
     <div class="mb-3">
         <label for="contenido" class="form-label">Contenido</label>
-        <textarea class="form-control" id="contenido" name="contenido" rows="10"><?= htmlspecialchars($entrada->contenido) ?></textarea>
+        <textarea class="form-control" id="contenido" name="contenido" rows="10"><?= htmlspecialchars($entrada->contenido ?? '') ?></textarea>
     </div>
     <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>

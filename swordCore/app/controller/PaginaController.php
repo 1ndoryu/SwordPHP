@@ -86,27 +86,52 @@ class PaginaController
      * @param Request $request
      * @return Response
      */
-
     public function store(Request $request)
     {
-        // Validación (simplificada por ahora, se puede expandir)
+        // Validación
         $data = $request->post();
-        if (empty($data['titulo']) || empty($data['slug'])) {
-            return response('El título y el slug son obligatorios', 422);
+        if (empty($data['titulo'])) {
+            session()->flash('error', 'El campo Título es obligatorio.');
+            session()->flash('_old_input', $request->post());
+            return redirect('/panel/paginas/create');
         }
 
         $pagina = new Pagina();
+        // Asignación de campos básicos
         $pagina->titulo = $request->post('titulo');
-        $pagina->slug = $request->post('slug');
+        $pagina->subtitulo = $request->post('subtitulo');
         $pagina->contenido = $request->post('contenido');
         $pagina->estado = $request->post('estado');
 
-        $pagina->autor_id = session('usuario_id');
+        // Corrección 1: Asignar el ID del autor correctamente
+        $pagina->idautor = idUsuarioActual();
+
+        // Corrección 2: Generar el slug a partir del título
+        $slugBase = \Illuminate\Support\Str::slug($request->post('titulo'));
+        $slug = $slugBase;
+        $contador = 1;
+        // Bucle para asegurar slug único
+        while (Pagina::where('slug', $slug)->exists()) {
+            $slug = $slugBase . '-' . $contador++;
+        }
+        $pagina->slug = $slug;
 
         $pagina->save();
 
-        // Redireccionar a la lista de páginas con un mensaje de éxito
-        return redirect('/panel/paginas')->with('success', 'Página creada con éxito.');
+        // Mejora: Procesar metadatos que antes se ignoraban
+        $metadatos = $request->post('meta', []);
+        if (is_array($metadatos)) {
+            foreach ($metadatos as $clave => $valor) {
+                // Guardar meta solo si tiene un valor
+                if (trim($valor) !== '') {
+                    $pagina->guardarMeta($clave, $valor);
+                }
+            }
+        }
+
+        // Corrección 3: Usar flash en la sesión para el mensaje de éxito
+        session()->flash('success', 'Página creada con éxito.');
+        return redirect('/panel/paginas');
     }
     /**
      * Muestra el formulario para editar una página existente.

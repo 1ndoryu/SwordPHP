@@ -1,3 +1,5 @@
+Hola gemini, estas son tus instrucciones.
+
 # Hoja de Ruta del Proyecto SwordPHP
 
 ## Concepto

@@ -51,7 +51,7 @@ No usar tailwild ni boostrap
 - [x] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
 - [ ] Ya se hizo el componente, falta aplicarlo a el resto de vistas pero, hay un bug, primero, al cargar el edit en paginas, no aparecen las metas que ya existen, y segundo, al intentar guardar una meta sale Error: Call to undefined method Workerman\Protocols\Http\Session::flash() in C:\Users\1u\Documents\SwordPHP\swordCore\app\controller\PaginaController.php:193
 Stack trace:
-#0 C:\Users\1u\Documents\SwordPHP\swordCore\vendor\workerman\webman-framework\src\App.php(336): App\controller\PaginaController->update()
+#0 C:\Users\1u\Documents\SwordPHP\swordCore\vendor\workerman\webman-framework\src\App.php(336): App\controller\PaginaController->update() y en pagina controller sale Undefined method 'withInput'.intelephense(P1013)
 #1 C:\Users\1u\Documents\SwordPHP\swordCore\vendor\workerman\webman-framework\src\App.php(359): Webman\App::Webman\{closure}()
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*

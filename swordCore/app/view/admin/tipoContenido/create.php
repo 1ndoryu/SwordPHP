@@ -1,25 +1,22 @@
 <?php
-// 1. Define las variables y el título usando la configuración genérica.
+
 $labels = $config['labels'];
 $tituloPagina = htmlspecialchars($labels['add_new_item'] ?? 'Añadir Nuevo');
-$errorMessage = session()->pull('error'); // Obtenemos el mensaje de error si existe
+$errorMessage = session()->pull('error');
 
-// 2. Incluye la cabecera del panel.
 echo partial('layouts/admin-header', []);
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+<form action="/panel/<?php echo $slug; ?>/crear" method="POST">
+    <div class="formulario-contenedor">
 
-<div class="formulario-contenedor">
+        <div class="cabecera-formulario">
+            <p>Rellena los campos para crear una nueva entrada de "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Contenido'); ?>"</p>
+            <a href="/panel/<?php echo $slug; ?>" class="btnN">
+                &larr; Volver al listado
+            </a>
+        </div>
 
-    <div class="cabecera-formulario">
-        <p>Rellena los campos para crear una nueva entrada de "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Contenido'); ?>"</p>
-        <a href="/panel/<?php echo $slug; ?>" class="btnN">
-            &larr; Volver al listado
-        </a>
-    </div>
-
-    <form action="/panel/<?php echo $slug; ?>/crear" method="POST">
         <?php echo csrf_field(); ?>
         <div class="cuerpo-formulario">
 
@@ -39,16 +36,7 @@ echo partial('layouts/admin-header', []);
                 <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
             </div>
 
-            <div class="grupo-formulario">
-                <label for="estado">Estado</label>
-                <select id="estado" name="estado">
-                    <option value="borrador" <?php echo old('estado', 'borrador') == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
-                    <option value="publicado" <?php echo old('estado') == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
-                </select>
-            </div>
-
             <?php
-            // Prepara los metadatos antiguos (si existen por un error de validación) para el componente.
             $old_meta_array = old('meta', []);
             $metadatos_para_componente = collect($old_meta_array)->map(function ($item) {
                 return (object) [
@@ -64,17 +52,23 @@ echo partial('layouts/admin-header', []);
             ?>
 
         </div>
+    </div>
+
+    <div class="segundoContenedor">
+        <div class="grupo-formulario estado">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <option value="borrador" <?php echo old('estado', 'borrador') == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                <option value="publicado" <?php echo old('estado') == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
+            </select>
+        </div>
 
         <div class="pie-formulario">
-            <button type="submit" class="btn-principal">Crear <?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?></button>
-            <a href="/panel/<?php echo $slug; ?>" class="btn-secundario">Cancelar</a>
+            <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>
-    </form>
-</div>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+    </div>
+</form>
 
 <?php
-// 3. Incluye el pie de página para cerrar la estructura.
 echo partial('layouts/admin-footer', []);
 ?>

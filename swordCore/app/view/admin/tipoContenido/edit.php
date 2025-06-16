@@ -1,15 +1,14 @@
 <?php
-// 1. Define las variables y el título usando la configuración genérica.
+
 $labels = $config['labels'];
 $tituloPagina = htmlspecialchars($labels['edit_item'] ?? 'Editar Entrada');
-$errorMessage = session()->pull('error'); // Obtenemos el mensaje de error si existe
+$errorMessage = session()->pull('error');
 
-// 2. Incluye la cabecera del panel.
+
 echo partial('layouts/admin-header', []);
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
+
 <form action="/panel/<?php echo $slug; ?>/editar/<?php echo htmlspecialchars($entrada->id ?? ''); ?>" method="POST">
     <div class="formulario-contenedor">
 
@@ -43,8 +42,6 @@ echo partial('layouts/admin-header', []);
 
 
             <?php
-            // El controlador ya ha cargado los metadatos en la relación $entrada->metas.
-            // Se los pasamos directamente al componente.
             echo partial(
                 'admin/components/gestor-metadatos',
                 ['metadatos' => $entrada->metas]
@@ -55,7 +52,6 @@ echo partial('layouts/admin-header', []);
     </div>
 
     <div class="segundoContenedor">
-
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">
@@ -71,10 +67,8 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 </form>
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
+
 
 <?php
-// 3. Incluye el pie de página para cerrar la estructura.
 echo partial('layouts/admin-footer', []);
 ?>

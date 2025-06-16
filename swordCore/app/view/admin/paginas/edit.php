@@ -1,24 +1,26 @@
 <?php
+
+// Se define el título de la página y se obtiene un posible mensaje de error de la sesión.
 $tituloPagina = 'Editar Página';
+$errorMessage = session()->pull('error');
+
+// Se incluye la cabecera del panel de administración.
 echo partial('layouts/admin-header', []);
 ?>
 
-<div class="formulario-contenedor">
+<form action="/panel/paginas/update/<?php echo htmlspecialchars($pagina->id ?? ''); ?>" method="POST">
+    <div class="formulario-contenedor">
 
-    <div class="cabecera-formulario">
-        <p>Editando: <strong><?php echo htmlspecialchars($pagina->titulo ?? ''); ?></strong></p>
-        <a href="/panel/paginas" class="btnN">
-            &larr; Volver al listado
-        </a>
-    </div>
+        <div class="cabecera-formulario">
+            <p>Editando "Página": <strong><?php echo htmlspecialchars($pagina->titulo ?? ''); ?></strong></p>
+            <a href="/panel/paginas" class="btnN">
+                &larr; Volver al listado
+            </a>
+        </div>
 
-    <form action="/panel/paginas/update/<?php echo htmlspecialchars($pagina->id ?? ''); ?>" method="POST">
-        <?php
-        echo csrf_field();
-        ?>
+        <?php echo csrf_field(); ?>
         <div class="cuerpo-formulario">
 
-            <?php // REFACTOR: Mostrar mensaje de error pasado desde el controlador. ?>
             <?php if (!empty($errorMessage)): ?>
                 <div class="alerta alerta-error" role="alert">
                     <?php echo htmlspecialchars($errorMessage); ?>
@@ -40,17 +42,6 @@ echo partial('layouts/admin-header', []);
                 <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', $pagina->contenido ?? '')); ?></textarea>
             </div>
 
-            <div class="grupo-formulario">
-                <label for="estado">Estado</label>
-                <select id="estado" name="estado">
-                    <?php
-                    $estadoActual = old('estado', $pagina->estado ?? 'borrador');
-                    ?>
-                    <option value="borrador" <?php echo $estadoActual == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
-                    <option value="publicado" <?php echo $estadoActual == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
-                </select>
-            </div>
-
             <?php
             echo partial(
                 'admin/components/gestor-metadatos',
@@ -59,14 +50,26 @@ echo partial('layouts/admin-header', []);
             ?>
 
         </div>
+    </div>
+
+    <div class="segundoContenedor">
+        <div class="grupo-formulario estado">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <?php $estadoActual = old('estado', $pagina->estado ?? 'borrador'); ?>
+                <option value="borrador" <?php echo $estadoActual == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                <option value="publicado" <?php echo $estadoActual == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
+            </select>
+        </div>
 
         <div class="pie-formulario">
-            <button type="submit" class="btn-principal">Guardar Cambios</button>
-            <a href="/panel/paginas" class="btn-secundario">Cancelar</a>
+            <button class="btnN icono"><?php echo icon('borrar') ?></button>
+            <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>
-    </form>
-</div>
+    </div>
+</form>
 
 <?php
+// Se incluye el pie de página del panel de administración.
 echo partial('layouts/admin-footer', []);
 ?>

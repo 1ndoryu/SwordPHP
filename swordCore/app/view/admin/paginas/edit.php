@@ -63,7 +63,9 @@ echo partial('layouts/admin-header', []);
         </div>
 
         <div class="pie-formulario">
-            <button class="btnN icono"><?php echo icon('borrar') ?></button>
+            <button type="button" class="btnN icono IconoRojo" onclick="eliminarRecurso('/panel/paginas/destroy/<?php echo htmlspecialchars($pagina->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta página? Esta acción no se puede deshacer.')">
+                <?php echo icon('borrar'); ?>
+            </button>
             <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>
     </div>

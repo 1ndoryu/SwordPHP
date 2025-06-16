@@ -45,7 +45,7 @@ class PaginaService
     {
         // CORRECCIÓN: Usar el nombre de la relación correcto 'metas' en lugar de 'metadatos'.
         $pagina = Pagina::with('metas')->find($id);
-        
+
         if (!$pagina) {
             throw new NotFoundException('Página no encontrada.');
         }
@@ -64,7 +64,7 @@ class PaginaService
         $this->validarDatos($datos);
 
         $datos['slug'] = $this->generarSlug($datos['titulo']);
-        $datos['idautor'] = session('usuario.id');
+        $datos['idautor'] = idUsuarioActual();
         $datos['tipocontenido'] = 'pagina';
 
         return Pagina::create($datos);
@@ -99,7 +99,7 @@ class PaginaService
     {
         $pagina = $this->obtenerPaginaPorId($id);
         // CORRECCIÓN: Usar el nombre de la relación correcto 'metas'.
-        $pagina->metas()->delete(); 
+        $pagina->metas()->delete();
         return $pagina->delete();
     }
 

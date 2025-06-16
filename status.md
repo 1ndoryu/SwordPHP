@@ -1,4 +1,4 @@
-Hola gemini, estas son tus instrucciones, sigue la ruta.
+Hola gemini, estas son tus instrucciones, sigue la ruta, elige inteligente la tarea debes hacer.
 
 # Hoja de Ruta del Proyecto SwordPHP
 
@@ -49,10 +49,14 @@ No usar tailwild ni boostrap
 ---
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
-
+- [ ] Cosas que faltan respecto a los formularios de pagina y contenido: 
+    - [ ] El boton de eliminar en los edit de pagina y contenido tiene que funcionar 
+    - [ ] Deberia poder modificarse el slug de las paginas y contenido
+    - [ ] Al dar click a agregar meta se guarda el formulario
+- [ ] Sistema de plantillas, como en wordpress, las paginas entiendo que en el estado actual tienen una plantilla por defecto al parecer es pagina.php, pero debe poder elegirse con libertad cualquier otra, en wp se idenfican con un comentario arriba de la pagina, pero quiero una forma mas eficiente en esta alternativa.
+- [ ] Implementar la edición de usuarios en el panel de administración. 
+- [ ] Galeria en panel de los archivos subidos, que se pueda borrar, modificar, etc, como en wp pero muy comodamente.
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
-- [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
-- [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*
 
 ## Documentación
 - [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `ajaxAccion`, funciones de metadatos, etc.).

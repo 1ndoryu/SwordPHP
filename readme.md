@@ -31,7 +31,7 @@ El objetivo de Sword es combinar la simplicidad y extensibilidad que los desarro
 
 ## 🚀 Pila Tecnológica
 
--   **Framework Principal:** [Webman](https://www.workerman.net/webman)
+-   **Basado principalmente en:** [Webman](https://www.workerman.net/webman)
 -   **ORM de Base de Datos:** [Illuminate Database (Eloquent)](https://laravel.com/docs/11.x/eloquent)
 -   **Motor de Plantillas:** PHP Nativo (para máxima velocidad y flexibilidad)
 -   **Gestor de Dependencias:** [Composer](https://getcomposer.org/)

@@ -36,7 +36,6 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
     - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [x] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes,
-    
     - [x] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
 - [x] **Fase 7: Gestor de Contenido Avanzado**

@@ -42,7 +42,8 @@ class PaginaController
         $porPagina = 10;
         $paginaActual = (int)$request->input('page', 1);
 
-        $totalItems = Pagina::count();
+        // CORRECCIÓN: Contar solo las entradas cuyo tipo de contenido es 'pagina'.
+        $totalItems = Pagina::where('tipocontenido', 'pagina')->count();
         $totalPaginas = (int)ceil($totalItems / $porPagina);
 
         if ($paginaActual > $totalPaginas && $totalItems > 0) {
@@ -54,9 +55,11 @@ class PaginaController
 
         $offset = ($paginaActual - 1) * $porPagina;
 
+        // CORRECCIÓN: Obtener solo las entradas cuyo tipo de contenido es 'pagina'.
         // Se utiliza with('autor') para cargar la relación y evitar consultas N+1.
         // Se ordena por fecha de creación descendente para mostrar las más nuevas primero.
         $paginas = Pagina::with('autor')
+            ->where('tipocontenido', 'pagina') // <-- AÑADIDO
             ->orderBy('created_at', 'desc')
             ->offset($offset)
             ->limit($porPagina)

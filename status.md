@@ -48,8 +48,8 @@ No usar tailwild ni boostrap
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 
-- [x] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
-- [ ] al intentar añadir una pagina sale Error: Call to a member function count() on array in C:\Users\1u\Documents\SwordPHP\swordCore\app\view\admin\components\gestor-metadatos.php:50 Stack trace:
+- [ ] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
+    - [ ] Ya esta listo en las paginas, ahora falta en los contenidos dinamicos. 
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
 - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*

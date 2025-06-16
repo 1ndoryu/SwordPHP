@@ -1,6 +1,6 @@
 <?php
 // Usamos el método de carga de layouts que establecimos.
-include __DIR__ . '/../../layouts/admin-header.php';
+echo partial('layouts/admin-header', []);
 
 // Capturamos el JavaScript para encolarlo correctamente en el footer.
 ob_start();
@@ -201,5 +201,5 @@ assetService()->agregarJsEnLinea($scriptContenido);
 </style>
 
 <?php
-include __DIR__ . '/../../layouts/admin-footer.php';
+echo partial('layouts/admin-footer', []);
 ?>

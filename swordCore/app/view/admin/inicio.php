@@ -5,7 +5,7 @@ $tituloPagina = 'Dashboard';
 
 // 2. Incluye la cabecera común del panel de administración.
 // Esto reemplaza a @extends('layouts.admin')
-include __DIR__ . '/../layouts/admin-header.php';
+echo partial('layouts/admin-header', []);
 ?>
 
 <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
@@ -22,5 +22,5 @@ include __DIR__ . '/../layouts/admin-header.php';
 
 <?php
 // 3. Incluye el pie de página común del panel para cerrar la página.
-include __DIR__ . '/../layouts/admin-footer.php';
+echo partial('layouts/admin-footer', []);
 ?>

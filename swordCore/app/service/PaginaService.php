@@ -7,15 +7,12 @@ use Illuminate\Support\Str;
 use support\exception\BusinessException;
 use Webman\Exception\NotFoundException;
 
-
-
 /**
  * Class PaginaService
  * @package App\service
  */
 class PaginaService
 {
-
     /**
      * Obtiene todas las páginas con estado 'publicado'.
      *
@@ -38,7 +35,7 @@ class PaginaService
     }
 
     /**
-     * Encuentra una página por su ID.
+     * Encuentra una página por su ID, incluyendo sus metadatos (a través de la relación 'metas').
      *
      * @param int $id
      * @return Pagina
@@ -46,7 +43,9 @@ class PaginaService
      */
     public function obtenerPaginaPorId(int $id): Pagina
     {
-        $pagina = Pagina::find($id);
+        // CORRECCIÓN: Usar el nombre de la relación correcto 'metas' en lugar de 'metadatos'.
+        $pagina = Pagina::with('metas')->find($id);
+        
         if (!$pagina) {
             throw new NotFoundException('Página no encontrada.');
         }
@@ -65,8 +64,8 @@ class PaginaService
         $this->validarDatos($datos);
 
         $datos['slug'] = $this->generarSlug($datos['titulo']);
-        $datos['idautor'] = session('usuario.id'); // Asignar el autor de la sesión actual
-        $datos['tipocontenido'] = 'pagina'; // Hardcoded por ahora
+        $datos['idautor'] = session('usuario.id');
+        $datos['tipocontenido'] = 'pagina';
 
         return Pagina::create($datos);
     }
@@ -74,17 +73,14 @@ class PaginaService
     /**
      * Actualiza una página existente.
      *
-     * @param int $id
+     * @param Pagina $pagina
      * @param array $datos
-     * @return Pagina
-     * @throws BusinessException|NotFoundException
+     * @return bool
      */
     public function actualizarPagina(Pagina $pagina, array $datos): bool
     {
-        // Asignación masiva de los datos validados
         $pagina->fill($datos);
 
-        // Generar slug si el título ha cambiado o si no existía un slug previo
         if ($pagina->isDirty('titulo') || empty($pagina->slug)) {
             $pagina->slug = \Illuminate\Support\Str::slug($pagina->titulo);
         }
@@ -102,12 +98,13 @@ class PaginaService
     public function eliminarPagina(int $id): ?bool
     {
         $pagina = $this->obtenerPaginaPorId($id);
+        // CORRECCIÓN: Usar el nombre de la relación correcto 'metas'.
+        $pagina->metas()->delete(); 
         return $pagina->delete();
     }
 
     /**
      * Genera un slug único para un título.
-     * Si el slug ya existe, le añade un sufijo numérico.
      *
      * @param string $titulo
      * @return string
@@ -155,7 +152,5 @@ class PaginaService
         if (empty($datos['titulo'])) {
             throw new BusinessException('El campo título es obligatorio.');
         }
-
-        // Aquí se podrían añadir más validaciones en el futuro.
     }
 }

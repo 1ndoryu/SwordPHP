@@ -1,7 +1,7 @@
 <?php
 // Usar los labels del array de configuración para que la vista sea genérica.
 $labels = $config['labels'];
-include __DIR__ . '/../../layouts/admin-header.php';
+echo partial('layouts/admin-header', []);
 ?>
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -23,4 +23,4 @@ include __DIR__ . '/../../layouts/admin-header.php';
     <button type="submit" class="btn btn-primary">Actualizar</button>
 </form>
 
-<?php include __DIR__ . '/../../layouts/admin-footer.php'; ?>
+<?php echo partial('layouts/admin-footer', []); ?>

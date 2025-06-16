@@ -586,3 +586,27 @@ function icon($nombre)
     return '<i class="icono icono-default"></i>'; // Icono por defecto si no se encuentra
 }
 initIconos();
+
+
+use support\Response;
+
+/**
+ * INICIO DE LA NUEVA FUNCIÓN
+ * Hemos añadido esta función para simplificar la inclusión de vistas parciales.
+ */
+if (!function_exists('partial')) {
+    /**
+     * Renderiza una vista parcial (componente) y devuelve su contenido como un string de HTML.
+     * Es ideal para incluir componentes reutilizables dentro de otras vistas.
+     *
+     * @param string $template La ruta de la plantilla a renderizar (ej: 'admin/components/gestor-metadatos').
+     * @param array $vars Las variables que se pasarán a la plantilla.
+     * @return string El HTML renderizado.
+     */
+    function partial(string $template, array $vars = []): string
+    {
+        // Llama directamente al método render de la clase NativePhpView,
+        // que está configurada en tu proyecto para devolver un string.
+        return \support\view\NativePhpView::render($template, $vars);
+    }
+}

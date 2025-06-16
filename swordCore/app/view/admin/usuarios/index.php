@@ -3,7 +3,7 @@
 $tituloPagina = 'Gestión de Usuarios';
 
 // 2. Incluye la cabecera del panel.
-include __DIR__ . '/../../layouts/admin-header.php';
+echo partial('layouts/admin-header', []);
 ?>
 
 <div class="vistaListado">
@@ -99,5 +99,5 @@ include __DIR__ . '/../../layouts/admin-header.php';
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.
-include __DIR__ . '/../../layouts/admin-footer.php';
+echo partial('layouts/admin-footer', []);
 ?>

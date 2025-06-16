@@ -5,6 +5,8 @@ El objetivo es desarrollar una alternativa a WordPress que sea minimalista, modu
 
 Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalencia.md. Hay que corregir para no usar metodos, sino directamente funciones como wp.
 
+No usar tailwild ni boostrap
+
 ---
 
 ## Principios Arquitectónicos
@@ -31,12 +33,7 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
     - Desarrollo del ruteo dinámico, estructura básica de temas, y separación arquitectónica de `swordCore` y `swordContent`.
 
 - [x] **Fase 6: Mejoras y Extensibilidad**
-    - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración.
-    - [x] Cambiar el motor de plantillas de Blade a PHP nativo.
-    - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
-    - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
-    - [x] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes,
-    - [x] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
+    - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración, cambiar el motor de plantillas de Blade a PHP nativo, refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas, ampliar el sistema de metadatos para usuarios (`user_meta`), implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos.
     
 - [x] **Fase 7: Gestor de Contenido Avanzado**
     - [x] Diseñar un sistema de **"Tipos de Contenido" (Post Types)** que permita registrar y gestionar diferentes clases de contenido (ej: noticias, productos) de forma genérica, con su CRUD y funciones globales.
@@ -51,8 +48,11 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 
-- [ ] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
-- [ ] En el index pagina aparece contenido de otros post type, deberia aparecer solo de paginas.
+- [x] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
+- [ ] Ya se hizo el componente, falta aplicarlo a el resto de vistas pero, hay un bug, primero, al cargar el edit en paginas, no aparecen las metas que ya existen, y segundo, al intentar guardar una meta sale Error: Call to undefined method Workerman\Protocols\Http\Session::flash() in C:\Users\1u\Documents\SwordPHP\swordCore\app\controller\PaginaController.php:193
+Stack trace:
+#0 C:\Users\1u\Documents\SwordPHP\swordCore\vendor\workerman\webman-framework\src\App.php(336): App\controller\PaginaController->update()
+#1 C:\Users\1u\Documents\SwordPHP\swordCore\vendor\workerman\webman-framework\src\App.php(359): Webman\App::Webman\{closure}()
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
 - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*

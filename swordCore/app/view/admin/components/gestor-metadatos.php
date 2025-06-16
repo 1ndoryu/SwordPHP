@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Componente para gestionar metadatos (campos personalizados).
  *
@@ -17,19 +18,21 @@ $metadatos = $metadatos ?? collect([]);
 
 <div id="gestorMetadatosContenedor" class="gestorMetadatos">
     <h4>Campos Personalizados</h4>
-    
+
     <div id="metadatosExistentes">
         <?php foreach ($metadatos as $index => $meta): ?>
             <div class="metaPar">
                 <div class="metaPar-clave">
                     <label for="meta_clave_<?= $index ?>">Nombre del campo</label>
-                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente. ?>
+                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente. 
+                    ?>
                     <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($meta->meta_key ?? '') ?>" placeholder="ej: autor_invitado">
                 </div>
                 <div class="metaPar-valor">
                     <label for="meta_valor_<?= $index ?>">Valor</label>
-                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente. ?>
-                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="2" placeholder="Valor del campo"><?= htmlspecialchars($meta->meta_value ?? '') ?></textarea>
+                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente. 
+                    ?>
+                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="1" placeholder="Valor del campo"><?= htmlspecialchars($meta->meta_value ?? '') ?></textarea>
                 </div>
                 <div class="metaPar-accion">
                     <button type="button" class="eliminarMetaPar" title="Eliminar campo">&times;</button>
@@ -38,19 +41,19 @@ $metadatos = $metadatos ?? collect([]);
         <?php endforeach; ?>
     </div>
 
-    <button type="button" id="agregarMetaBtn">Agregar Campo</button>
+    <button type="button " class="btnN" id="agregarMetaBtn">Agregar Campo</button>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const contenedor = document.getElementById('gestorMetadatosContenedor');
-    if (!contenedor) return;
+    document.addEventListener('DOMContentLoaded', function() {
+        const contenedor = document.getElementById('gestorMetadatosContenedor');
+        if (!contenedor) return;
 
-    const agregarBtn = document.getElementById('agregarMetaBtn');
-    let metaIndex = <?= $metadatos->count() ?>;
+        const agregarBtn = document.getElementById('agregarMetaBtn');
+        let metaIndex = <?= $metadatos->count() ?>;
 
-    agregarBtn.addEventListener('click', function () {
-        const nuevoParHtml = `
+        agregarBtn.addEventListener('click', function() {
+            const nuevoParHtml = `
             <div class="metaPar">
                 <div class="metaPar-clave">
                     <label for="meta_clave_${metaIndex}">Nombre del campo</label>
@@ -58,80 +61,92 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="metaPar-valor">
                     <label for="meta_valor_${metaIndex}">Valor</label>
-                    <textarea id="meta_valor_${metaIndex}" name="meta[${metaIndex}][valor]" rows="2" placeholder="Valor del campo"></textarea>
+                    <textarea id="meta_valor_${metaIndex}" name="meta[${metaIndex}][valor]" rows="1" placeholder="Valor del campo"></textarea>
                 </div>
                 <div class="metaPar-accion">
                     <button type="button" class="eliminarMetaPar" title="Eliminar campo">&times;</button>
                 </div>
             </div>
         `;
-        document.getElementById('metadatosExistentes').insertAdjacentHTML('beforeend', nuevoParHtml);
-        metaIndex++;
-    });
+            document.getElementById('metadatosExistentes').insertAdjacentHTML('beforeend', nuevoParHtml);
+            metaIndex++;
+        });
 
-    contenedor.addEventListener('click', function (e) {
-        if (e.target && e.target.classList.contains('eliminarMetaPar')) {
-            e.target.closest('.metaPar').remove();
-        }
+        contenedor.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('eliminarMetaPar')) {
+                e.target.closest('.metaPar').remove();
+            }
+        });
     });
-});
 </script>
 
 <style>
     .gestorMetadatos {
-        border: 1px solid #ccc;
+        border: 1px solid #cccccc;
         padding: 15px;
-        margin-top: 20px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
     }
+
     .gestorMetadatos h4 {
         margin-top: 0;
         margin-bottom: 15px;
         border-bottom: 1px solid #eee;
         padding-bottom: 10px;
     }
+
     .metaPar {
         display: flex;
-        gap: 15px;
+        gap: 10px;
         align-items: flex-end;
         margin-bottom: 15px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 15px;
     }
+
     .metaPar:last-child {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
-    .metaPar-clave, .metaPar-valor {
+
+    .metaPar-clave,
+    .metaPar-valor {
         display: flex;
         flex-direction: column;
         width: 100%;
     }
+
     .metaPar-clave {
         flex: 1;
     }
+
     .metaPar-valor {
         flex: 2;
     }
+
     .metaPar-accion {
         margin-left: auto;
     }
+
     .metaPar label {
         font-size: 0.9em;
         margin-bottom: 4px;
         color: #333;
         font-weight: bold;
     }
-    .metaPar input[type="text"], .metaPar textarea {
+
+    .metaPar input[type="text"],
+    .metaPar textarea {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ccc;
+        border-bottom: unset !important;
+        border: 1px solid #ccc !important;
         border-radius: 3px;
         box-sizing: border-box;
+        margin: 0px;
+        padding: 6px 10px !important;
+        height: 32px;
+        color: unset !important;
     }
-    #agregarMetaBtn, .eliminarMetaPar {
+
+
+    .eliminarMetaPar {
         cursor: pointer;
         padding: 5px 10px;
         border: 1px solid #aaa;
@@ -139,14 +154,18 @@ document.addEventListener('DOMContentLoaded', function () {
         border-radius: 3px;
         font-size: 1em;
     }
+
     #agregarMetaBtn {
         margin-top: 10px;
     }
+
     .eliminarMetaPar {
         background-color: #ffebee;
         color: #c62828;
         border-color: #ef9a9a;
         line-height: 1;
         padding: 8px 12px;
+        height: 14px;
+        font-size: 20px;
     }
 </style>

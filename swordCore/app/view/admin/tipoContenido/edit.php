@@ -37,7 +37,7 @@ echo partial('layouts/admin-header', []);
 
             <div class="grupo-formulario">
                 <label for="contenido">Contenido</label>
-                <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', $entrada->contenido ?? '')); ?></textarea>
+                <textarea id="contenido" name="contenido" rows="5" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', $entrada->contenido ?? '')); ?></textarea>
             </div>
 
 
@@ -66,8 +66,8 @@ echo partial('layouts/admin-header', []);
         </div>
 
         <div class="pie-formulario">
-            <button type="submit" class="btn-principal">Actualizar <?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?></button>
-            <a href="/panel/<?php echo $slug; ?>" class="btn-secundario">Cancelar</a>
+            <button class="btnN icono"><?php echo icon('borrar') ?></button>
+            <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>
     </div>
 </form>

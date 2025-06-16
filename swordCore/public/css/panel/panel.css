@@ -1,7 +1,7 @@
 :root {
     /* Colores */
-    --color-fondo-claro: #f4f7f6;
-    --color-fondo-principal: #f2f1ee;
+    --color-fondo-claro: #eeeeee;
+    --color-fondo-principal: #eeeeee;
     --color-texto-oscuro: #000000d4;
     --color-texto-claro: #ecf0f1;
     --color-texto-sidebar-nav: #2d2d2c;
@@ -128,6 +128,7 @@ a.btnCrear {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
 }
 
 .contenidoAcciones {
@@ -241,13 +242,15 @@ a.btnCrear {
 }
 
 .btnN {
-    display: inline-block;
+    display: flex;
     padding: 7px var(--gap-elementos-medio);
     background-color: var(--color-alerta);
     color: #f2f1ee;
     text-decoration: none;
     border-radius: var(--radius);
     font-size: 11px;
+    align-items: center;
+    justify-content: center;
 }
 
 .grupo-formulario label {
@@ -281,7 +284,7 @@ textarea#contenido {
 .segundoContenedor {
     padding: var(--padding-general);
     background: var(--color-fondo-contenido);
-    border-radius: var(--borde);
+    border-radius: var(--radius);
 }
 
 .contenidoPagina {
@@ -293,6 +296,7 @@ textarea#contenido {
 
 .segundoContenedor {
     height: fit-content;
+    padding: 10px 15px;
 }
 
 .contenidoPagina form {
@@ -307,4 +311,41 @@ textarea#contenido {
     flex-direction: row;
     align-items: center;
     gap: 10px;
+}
+
+.pie-formulario {
+    display: flex;
+    justify-content: flex-end;
+}
+
+button.btnN.icono.verde {
+    background-color: var(--color-exito);
+    padding: 7px;
+}
+
+.btnN.icono {
+    padding: 7px;
+}
+
+.pie-formulario button {
+    width: -webkit-fill-available;
+}
+.pie-formulario {
+    display: flex;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+.panelSidebarHeader.iconoB.iconoLogo {
+    background: unset;
+}
+
+.vistaListado {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: var(--padding-general);
+    background: var(--color-fondo-contenido);
+    border-radius: var(--radius);
 }

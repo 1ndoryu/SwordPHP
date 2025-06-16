@@ -1,2 +1,3 @@
 *.py
-status.md
+/status
+

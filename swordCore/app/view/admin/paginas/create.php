@@ -64,10 +64,19 @@ echo partial('layouts/admin-header', []);
             </div>
 
             <?php
-            // CORRECCIÓN: Usar el componente de metadatos para consistencia.
+            // Se transforma el 'old input' (que es un array) a una colección de objetos
+            // para que sea compatible con lo que espera el gestor de metadatos.
+            $old_meta_array = old('meta', []);
+            $metadatos_para_componente = collect($old_meta_array)->map(function ($item) {
+                return (object) [
+                    'meta_key' => $item['clave'] ?? null,
+                    'meta_value' => $item['valor'] ?? null,
+                ];
+            });
+
             echo partial(
                 'admin/components/gestor-metadatos',
-                ['metadatos' => old('meta', [])]
+                ['metadatos' => $metadatos_para_componente]
             );
             ?>
 

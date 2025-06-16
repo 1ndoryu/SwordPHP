@@ -13,6 +13,7 @@ use App\controller\AjaxController;
 use App\controller\TipoContenidoController;
 use App\service\TipoContenidoService;
 use App\controller\MediaController;
+use App\controller\UsuarioController;
 use support\Log;
 
 // Ruta principal (raíz del sitio)
@@ -83,7 +84,14 @@ $panelGroup = Route::group('/panel', function () {
     Route::post('/media/subir', [MediaController::class, 'subir']);
 
     // Rutas para Usuarios
-    Route::get('/usuarios', [\App\controller\UsuarioController::class, 'index']);
+    Route::group('/usuarios', function () {
+        Route::get('', [UsuarioController::class, 'index']);
+        Route::get('/crear', [UsuarioController::class, 'create']);
+        Route::post('/crear', [UsuarioController::class, 'store']);
+        Route::get('/editar/{id:\d+}', [UsuarioController::class, 'edit']);
+        Route::post('/update/{id:\d+}', [UsuarioController::class, 'update']);
+        Route::post('/eliminar/{id:\d+}', [UsuarioController::class, 'destroy']);
+    });
 });
 // Se aplica el middleware al grupo de rutas del panel.
 $panelGroup->middleware([

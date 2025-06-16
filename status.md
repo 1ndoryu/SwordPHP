@@ -50,9 +50,9 @@ No usar tailwild ni boostrap
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 - [ ] Cosas que faltan respecto a los formularios de pagina y contenido: 
-    - [ ] El boton de eliminar en los edit de pagina y contenido tiene que funcionar 
-    - [ ] Deberia poder modificarse el slug de las paginas y contenido
+    - [ ] Deberia poder modificarse el slug de las paginas y contenido, y esto debe manejarse correctamente, ¿que pasa si se colocan 2 slug iguales?
     - [ ] Al dar click a agregar meta se guarda el formulario
+    - [ ] La pagina de inicio en la lista de paginas deberia marcarse en el titulo algo asi titulo - pagina inicio y las paginas deben tener un boton de establecer como pagina de inicio.
 - [ ] Sistema de plantillas, como en wordpress, las paginas entiendo que en el estado actual tienen una plantilla por defecto al parecer es pagina.php, pero debe poder elegirse con libertad cualquier otra, en wp se idenfican con un comentario arriba de la pagina, pero quiero una forma mas eficiente en esta alternativa.
 - [ ] Implementar la edición de usuarios en el panel de administración. 
 - [ ] Galeria en panel de los archivos subidos, que se pueda borrar, modificar, etc, como en wp pero muy comodamente.

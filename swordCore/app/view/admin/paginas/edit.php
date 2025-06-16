@@ -1,5 +1,4 @@
 <?php
-
 $tituloPagina = 'Editar Página';
 echo partial('layouts/admin-header', []);
 ?>
@@ -19,11 +18,10 @@ echo partial('layouts/admin-header', []);
         ?>
         <div class="cuerpo-formulario">
 
-            <?php
-            if (session()->has('error')):
-            ?>
+            <?php // REFACTOR: Mostrar mensaje de error pasado desde el controlador. ?>
+            <?php if (!empty($errorMessage)): ?>
                 <div class="alerta alerta-error" role="alert">
-                    <?php echo htmlspecialchars(session('error') ?? ''); ?>
+                    <?php echo htmlspecialchars($errorMessage); ?>
                 </div>
             <?php endif; ?>
 
@@ -31,7 +29,6 @@ echo partial('layouts/admin-header', []);
                 <label for="titulo">Título</label>
                 <input type="text" id="titulo" name="titulo" placeholder="Introduce el título" value="<?php echo htmlspecialchars(old('titulo', $pagina->titulo ?? '')); ?>" required>
             </div>
-
 
             <div class="grupo-formulario">
                 <label for="subtitulo">Subtítulo (Opcional)</label>
@@ -42,7 +39,6 @@ echo partial('layouts/admin-header', []);
                 <label for="contenido">Contenido</label>
                 <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', $pagina->contenido ?? '')); ?></textarea>
             </div>
-
 
             <div class="grupo-formulario">
                 <label for="estado">Estado</label>
@@ -56,7 +52,6 @@ echo partial('layouts/admin-header', []);
             </div>
 
             <?php
-
             echo partial(
                 'admin/components/gestor-metadatos',
                 ['metadatos' => $pagina->metas]
@@ -71,9 +66,6 @@ echo partial('layouts/admin-header', []);
         </div>
     </form>
 </div>
-
-<?php 
-?>
 
 <?php
 echo partial('layouts/admin-footer', []);

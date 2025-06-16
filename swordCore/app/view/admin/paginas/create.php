@@ -6,7 +6,8 @@ $tituloPagina = 'Crear Nueva Página';
 echo partial('layouts/admin-header', []);
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+?>
 
 <div class="formulario-contenedor">
 
@@ -19,52 +20,41 @@ echo partial('layouts/admin-header', []);
 
     <form action="/panel/paginas/store" method="POST">
         <?php
-        // Reemplazo de @csrf. Esta función imprime el input oculto con el token.
         echo csrf_field();
         ?>
         <div class="cuerpo-formulario">
 
-            <?php
-            // Bloque para mostrar mensajes de error de validación.
-            // La variable $errors es inyectada por el framework al redirigir con errores.
-            // Se añade isset() por seguridad.
-            if (isset($errors) && $errors->any()):
+            <?php // REFACTOR: Mostrar mensaje de error pasado desde el controlador. 
             ?>
-                <div class="alerta alerta-error">
-                    <ul>
-                        <?php foreach ($errors->all() as $error): ?>
-                            <li><?php echo htmlspecialchars($error); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+            <?php if (!empty($errorMessage)): ?>
+                <div class="alerta alerta-error" role="alert">
+                    <?php echo htmlspecialchars($errorMessage); ?>
                 </div>
             <?php endif; ?>
 
-            <?php // Campo para el Título ?>
+            <?php // Campo para el Título 
+            ?>
             <div class="grupo-formulario">
                 <label for="titulo">Título</label>
                 <input type="text" id="titulo" name="titulo" placeholder="Introduce el título" value="<?php echo htmlspecialchars(old('titulo', '')); ?>" required>
             </div>
-            
-            <?php // Asumo que 'subtitulo' es una columna en la tabla 'paginas' ?>
+
+            <?php // Campo para el Subtítulo 
+            ?>
             <div class="grupo-formulario">
                 <label for="subtitulo">Subtítulo (Opcional)</label>
                 <input type="text" id="subtitulo" name="subtitulo" placeholder="Introduce el subtítulo" value="<?php echo htmlspecialchars(old('subtitulo', '')); ?>">
             </div>
 
-            <?php // CAMPO DE METADATOS DE EJEMPLO ?>
-            <div class="grupo-formulario">
-                <label for="meta_autor_invitado">Autor Invitado (Metadato)</label>
-                <input type="text" id="meta_autor_invitado" name="meta[autor_invitado]" placeholder="Ej: Dr. Juan Pérez" value="<?php echo htmlspecialchars(old('meta.autor_invitado', '')); ?>">
-                <small>Este campo se guarda en la tabla de metadatos.</small>
-            </div>
-
-            <?php // Campo para el Contenido ?>
+            <?php // Campo para el Contenido 
+            ?>
             <div class="grupo-formulario">
                 <label for="contenido">Contenido</label>
                 <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
             </div>
 
-            <?php // Campo para el Estado ?>
+            <?php // Campo para el Estado 
+            ?>
             <div class="grupo-formulario">
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado">
@@ -72,6 +62,14 @@ echo partial('layouts/admin-header', []);
                     <option value="publicado" <?php echo old('estado') == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
                 </select>
             </div>
+
+            <?php
+            // CORRECCIÓN: Usar el componente de metadatos para consistencia.
+            echo partial(
+                'admin/components/gestor-metadatos',
+                ['metadatos' => old('meta', [])]
+            );
+            ?>
 
         </div>
 
@@ -82,7 +80,8 @@ echo partial('layouts/admin-header', []);
     </form>
 </div>
 
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

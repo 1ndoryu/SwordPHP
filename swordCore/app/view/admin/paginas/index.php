@@ -16,16 +16,15 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <?php // Bloque para mostrar mensajes de éxito o error 
-    ?>
-    <?php if (session()->has('success')): ?>
+    <?php // REFACTOR: Mostrar mensajes pasados desde el controlador ?>
+    <?php if (!empty($successMessage)): ?>
         <div class="alerta alertaExito" role="alert">
-            <?php echo htmlspecialchars(session('success')); ?>
+            <?php echo htmlspecialchars($successMessage); ?>
         </div>
     <?php endif; ?>
-    <?php if (session()->has('error')): ?>
+    <?php if (!empty($errorMessage)): ?>
         <div class="alerta alertaError" role="alert">
-            <?php echo htmlspecialchars(session('error')); ?>
+            <?php echo htmlspecialchars($errorMessage); ?>
         </div>
     <?php endif; ?>
 
@@ -53,7 +52,7 @@ echo partial('layouts/admin-header', []);
                                 <span><?php echo htmlspecialchars($pagina->autor->nombre ?? 'Wan'); ?></span>
                             </div>
                             <div class="infoItem">
-                               
+                                
                                 <?php if ($pagina->estado == 'publicado'): ?>
                                     <span class="badge badgePublicado">Publicado</span>
                                 <?php else: ?>
@@ -61,7 +60,7 @@ echo partial('layouts/admin-header', []);
                                 <?php endif; ?>
                             </div>
                             <div class="infoItem">
-                               
+                                
                                 <span><?php echo htmlspecialchars($pagina->created_at->format('d/m/Y H:i')); ?></span>
                             </div>
                         </div>

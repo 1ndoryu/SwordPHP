@@ -23,13 +23,13 @@ $metadatos = $metadatos ?? collect([]);
             <div class="metaPar">
                 <div class="metaPar-clave">
                     <label for="meta_clave_<?= $index ?>">Nombre del campo</label>
-                    <?php // CORRECCIÓN: Añadir ?? '' para evitar error si $meta->clave es null ?>
-                    <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($meta->clave ?? '') ?>" placeholder="ej: autor_invitado">
+                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente. ?>
+                    <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($meta->meta_key ?? '') ?>" placeholder="ej: autor_invitado">
                 </div>
                 <div class="metaPar-valor">
                     <label for="meta_valor_<?= $index ?>">Valor</label>
-                    <?php // CORRECCIÓN: Añadir ?? '' para evitar error si $meta->valor es null (Esta es la línea 26 del error) ?>
-                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="2" placeholder="Valor del campo"><?= htmlspecialchars($meta->valor ?? '') ?></textarea>
+                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente. ?>
+                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="2" placeholder="Valor del campo"><?= htmlspecialchars($meta->meta_value ?? '') ?></textarea>
                 </div>
                 <div class="metaPar-accion">
                     <button type="button" class="eliminarMetaPar" title="Eliminar campo">&times;</button>

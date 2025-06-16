@@ -59,81 +59,116 @@ class PaginaController
             ->offset($offset)
             ->limit($porPagina)
             ->get();
+
+        $successMessage = $request->session()->pull('success');
+        $errorMessage = $request->session()->pull('error');
         
         return view('admin/paginas/index', [
             'paginas' => $paginas,
             'tituloPagina' => 'Gestión de Páginas',
             'paginaActual' => $paginaActual,
             'totalPaginas' => $totalPaginas,
+            'successMessage' => $successMessage,
+            'errorMessage' => $errorMessage,
         ]);
     }
+
     /**
      * Muestra el formulario para crear una nueva página.
      * @param Request $request
      * @return Response
      */
+
     public function create(Request $request): Response
     {
-        return view('admin/paginas/create');
-    }
+        // REFACTOR: Extraer mensajes de error de la sesión para pasarlos a la vista.
+        $errorMessage = $request->session()->pull('error');
 
+        return view('admin/paginas/create', [
+            'tituloPagina' => 'Crear Nueva Página',
+            'errorMessage' => $errorMessage
+        ]);
+    }
     /**
      * Almacena una nueva página en la base de datos.
      * @param Request $request
      * @return Response
      */
+
     public function store(Request $request)
     {
-        // Esta lógica aún necesita ser actualizada para manejar los metadatos del nuevo componente.
         $data = $request->post();
+
+        // Validación básica
         if (empty($data['titulo'])) {
-            session()->flash('error', 'El campo Título es obligatorio.');
-            session()->flash('_old_input', $request->post());
+            $request->session()->set('error', 'El campo Título es obligatorio.');
+            $request->session()->set('_old_input', $request->post());
             return redirect('/panel/paginas/create');
         }
 
-        $pagina = new Pagina();
-        $pagina->titulo = $request->post('titulo');
-        $pagina->subtitulo = $request->post('subtitulo');
-        $pagina->contenido = $request->post('contenido');
-        $pagina->estado = $request->post('estado');
-        $pagina->idautor = idUsuarioActual();
+        try {
+            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request) {
+                // 1. Crear la página principal
+                $datosPrincipales = $request->except(['meta', '_csrf']);
+                $pagina = $this->paginaService->crearPagina($datosPrincipales);
 
-        $slugBase = \Illuminate\Support\Str::slug($request->post('titulo'));
-        $slug = $slugBase;
-        $contador = 1;
-        while (Pagina::where('slug', $slug)->exists()) {
-            $slug = $slugBase . '-' . $contador++;
-        }
-        $pagina->slug = $slug;
+                // 2. Procesar y guardar los metadatos
+                $metadatosFormulario = $request->post('meta', []);
+                $nuevosMetadatosParaInsertar = [];
 
-        $pagina->save();
+                if (is_array($metadatosFormulario)) {
+                    foreach ($metadatosFormulario as $meta) {
+                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && strlen(trim($meta['clave'])) <= 255) {
+                            $clave = trim($meta['clave']);
+                            $valor = $meta['valor'] ?? '';
 
-        $metadatos = $request->post('meta', []);
-        if (is_array($metadatos)) {
-            foreach ($metadatos as $clave => $valor) {
-                if (trim($valor) !== '') {
-                    $pagina->guardarMeta($clave, $valor);
+                            if ($valor !== '') {
+                                $nuevosMetadatosParaInsertar[] = [
+                                    'pagina_id'  => $pagina->id,
+                                    'meta_key'   => $clave,
+                                    'meta_value' => $valor,
+                                ];
+                            }
+                        }
+                    }
                 }
-            }
-        }
 
-        session()->flash('success', 'Página creada con éxito.');
-        return redirect('/panel/paginas');
+                if (!empty($nuevosMetadatosParaInsertar)) {
+                    PaginaMeta::insert($nuevosMetadatosParaInsertar);
+                }
+            });
+
+            $request->session()->set('success', 'Página creada con éxito.');
+            return redirect('/panel/paginas');
+        } catch (\Exception $e) {
+            $request->session()->set('error', 'Error al crear la página: ' . $e->getMessage());
+            $request->session()->set('_old_input', $request->post());
+            return redirect('/panel/paginas/create');
+        }
     }
+
     /**
      * Muestra el formulario para editar una página existente.
      * @param Request $request
      * @param $id
      * @return Response
      */
+
     public function edit(Request $request, $id): Response
     {
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
-            return view('admin/paginas/edit', ['pagina' => $pagina]);
+
+            // REFACTOR: Extraer mensaje de error de la sesión.
+            $errorMessage = $request->session()->pull('error');
+
+            return view('admin/paginas/edit', [
+                'pagina' => $pagina,
+                'tituloPagina' => 'Editar Página',
+                'errorMessage' => $errorMessage
+            ]);
         } catch (NotFoundException $e) {
-            session()->flash('error', 'La página que intentas editar no existe.');
+            $request->session()->set('error', 'La página que intentas editar no existe.');
             return redirect('/panel/paginas');
         }
     }
@@ -148,13 +183,12 @@ class PaginaController
     {
         try {
             \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $id) {
-                
-                $pagina = $this->paginaService->obtenerPaginaPorId($id);
+
+                $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
                 $datosPrincipales = $request->except(['meta', '_csrf']);
                 $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
 
-                // CORRECCIÓN: Usar el nombre de la relación correcto 'metas'.
                 $pagina->metas()->delete();
 
                 $metadatosFormulario = $request->post('meta', []);
@@ -165,13 +199,12 @@ class PaginaController
                         if (isset($meta['clave']) && trim($meta['clave']) !== '' && strlen(trim($meta['clave'])) <= 255) {
                             $clave = trim($meta['clave']);
                             $valor = $meta['valor'] ?? '';
+
                             if ($valor !== '') {
                                 $nuevosMetadatosParaInsertar[] = [
                                     'pagina_id'  => $pagina->id,
-                                    'clave'      => $clave,
-                                    'valor'      => $valor,
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
+                                    'meta_key'   => $clave, // CORRECCIÓN: Nombre de columna correcto.
+                                    'meta_value' => $valor, // CORRECCIÓN: Nombre de columna correcto.
                                 ];
                             }
                         }
@@ -183,15 +216,18 @@ class PaginaController
                 }
             });
 
-            session()->flash('success', 'Página actualizada con éxito.');
+            // CORRECCIÓN: Usar el método set() de la sesión a través del objeto Request.
+            $request->session()->set('success', 'Página actualizada con éxito.');
             return redirect('/panel/paginas');
-
         } catch (NotFoundException $e) {
-            session()->flash('error', 'La página que intentas actualizar no existe.');
+            // CORRECCIÓN: Usar el método set() de la sesión.
+            $request->session()->set('error', 'La página que intentas actualizar no existe.');
             return redirect('/panel/paginas');
         } catch (Throwable $e) {
-            session()->flash('error', 'Ocurrió un error al actualizar la página: ' . $e->getMessage());
-            return redirect('/panel/paginas/edit/' . $id)->withInput($request->all());
+            // CORRECCIÓN: Usar set() para el mensaje de error y para guardar el "old input".
+            $request->session()->set('error', 'Ocurrió un error al actualizar la página: ' . $e->getMessage());
+            $request->session()->set('_old_input', $request->all());
+            return redirect('/panel/paginas/edit/' . $id);
         }
     }
 
@@ -201,15 +237,17 @@ class PaginaController
      * @param $id
      * @return Response
      */
-    public function destroy(Request $request, $id): Response
+    public function destroy(Request $request, $id)
     {
         try {
             $this->paginaService->eliminarPagina((int)$id);
-            session()->flash('success', 'Página eliminada con éxito.');
-            return redirect('/panel/paginas');
-        } catch (Throwable $e) {
-            session()->flash('error', $e->getMessage());
-            return redirect('/panel/paginas');
+            $request->session()->set('success', 'Página eliminada con éxito.');
+        } catch (NotFoundException $e) {
+            $request->session()->set('error', 'La página que intentas eliminar no existe.');
+        } catch (\Exception $e) {
+            $request->session()->set('error', 'Ocurrió un error al eliminar la página: ' . $e->getMessage());
         }
+
+        return redirect('/panel/paginas');
     }
 }

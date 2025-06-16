@@ -1,0 +1,211 @@
+<?php
+
+use support\view\Raw;
+use support\view\Twig;
+use App\service\TipoContenidoService;
+
+
+if (!function_exists('view')) {
+    /**
+     * Render a view.
+     *
+     * @param string $template
+     * @param array $vars
+     * @param string|null $app
+     * @return \support\Response
+     */
+    function view(string $template, array $vars = [], string $app = null): \support\Response
+    {
+        return \support\view\View::render($template, $vars, $app);
+    }
+}
+
+
+if (!function_exists('raw')) {
+    /**
+     * @param $template
+     * @param array $vars
+     * @param string|null $app
+     * @return Raw
+     */
+    function raw($template, array $vars = [], string $app = null): Raw
+    {
+        return \support\view\View::handler(Raw::class, [
+            'template' => $template,
+            'vars' => $vars,
+            'app' => $app
+        ]);
+    }
+}
+
+
+if (!function_exists('twig')) {
+    /**
+     * @param $template
+     * @param array $vars
+     * @param string|null $app
+     * @return Twig
+     */
+    function twig($template, array $vars = [], string $app = null): Twig
+    {
+        return \support\view\View::handler(Twig::class, [
+            'template' => $template,
+            'vars' => $vars,
+            'app' => $app
+        ]);
+    }
+}
+
+if (!function_exists('renderizarPaginacion')) {
+    /**
+     * Renderiza los controles de paginación en HTML usando PHP nativo.
+     *
+     * @param int $paginaActual La página que se está mostrando actualmente.
+     * @param int $totalPaginas El número total de páginas disponibles.
+     * @param string $baseUrl La URL base para los enlaces de paginación (sin el query string).
+     * @return string El HTML de la paginación.
+     */
+    function renderizarPaginacion(int $paginaActual, int $totalPaginas, string $baseUrl = ''): string
+    {
+        if ($totalPaginas <= 1) {
+            return '';
+        }
+
+        if (empty($baseUrl)) {
+            $baseUrl = request()->path();
+        }
+
+        $baseUrl = rtrim($baseUrl, '/');
+
+        $html = '<nav aria-label="Navegación de páginas"><ul class="pagination">';
+
+        $esPrimeraPagina = ($paginaActual <= 1);
+        $html .= '<li class="page-item' . ($esPrimeraPagina ? ' disabled' : '') . '">';
+        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual - 1)) . '" aria-label="Anterior">&lsaquo;</a>';
+        $html .= '</li>';
+
+        for ($i = 1; $i <= $totalPaginas; $i++) {
+            $esPaginaActual = ($i == $paginaActual);
+            if ($esPaginaActual) {
+                $html .= '<li class="page-item active" aria-current="page"><span class="page-link">' . $i . '</span></li>';
+            } else {
+                $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . $i) . '">' . $i . '</a></li>';
+            }
+        }
+
+        $esUltimaPagina = ($paginaActual >= $totalPaginas);
+        $html .= '<li class="page-item' . ($esUltimaPagina ? ' disabled' : '') . '">';
+        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual + 1)) . '" aria-label="Siguiente">&rsaquo;</a>';
+        $html .= '</li>';
+
+        $html .= '</ul></nav>';
+
+        return $html;
+    }
+}
+
+if (!function_exists('getHeader')) {
+    /**
+     * Carga el archivo header del tema.
+     *
+     * @param string|null $name El nombre de la cabecera especializada.
+     */
+    function getHeader($name = null)
+    {
+        $template = $name ? "layouts/header-{$name}.php" : 'layouts/header.php';
+        $header_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+
+        if (file_exists($header_path)) {
+            include $header_path;
+        } else {
+            trigger_error(sprintf('El archivo de cabecera "%s" no se encuentra en el tema activo.', $template), E_USER_WARNING);
+        }
+    }
+}
+
+if (!function_exists('getFooter')) {
+    /**
+     * Carga el archivo footer del tema.
+     *
+     * @param string|null $name El nombre del pie de página especializado.
+     */
+    function getFooter($name = null)
+    {
+        $template = $name ? "layouts/footer-{$name}.php" : 'layouts/footer.php';
+        $footer_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+
+        if (file_exists($footer_path)) {
+            include $footer_path;
+        } else {
+            trigger_error(sprintf('El archivo de pie de página "%s" no se encuentra en el tema activo.', $template), E_USER_WARNING);
+        }
+    }
+}
+
+if (!function_exists('renderizarMenuLateralAdmin')) {
+    /**
+     * Genera el HTML para el menú lateral del panel de administración.
+     *
+     * @return string El HTML del menú.
+     */
+    function renderizarMenuLateralAdmin()
+    {
+        $request = request();
+        if (!$request) {
+            return '';
+        }
+
+        $menuItems = [
+            'inicio' => ['url' => '/panel', 'icon' => 'fa-solid fa-house', 'text' => 'Inicio'],
+            'paginas' => ['url' => '/panel/paginas', 'icon' => 'fa-solid fa-file-lines', 'text' => 'Páginas'],
+        ];
+
+        $tiposDeContenido = TipoContenidoService::getInstancia()->obtenerTodos();
+        foreach ($tiposDeContenido as $slug => $config) {
+            if ($slug === 'paginas') {
+                continue;
+            }
+            $menuItems[$slug] = [
+                'url'   => '/panel/' . $slug,
+                'icon'  => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
+                'text'  => $config['labels']['name'] ?? ucfirst($slug),
+            ];
+        }
+
+        $menuItems['media'] = ['url' => '/panel/media', 'icon' => 'fa-solid fa-photo-film', 'text' => 'Medios'];
+        $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'icon' => 'fa-solid fa-users', 'text' => 'Usuarios'];
+        $menuItems['ajustes'] = ['url' => '/panel/ajustes', 'icon' => 'fa-solid fa-gears', 'text' => 'Ajustes'];
+
+        $html = '';
+        foreach ($menuItems as $key => $item) {
+            $isActive = (str_starts_with($request->path(), $item['url']) && $item['url'] !== '/panel') || $request->path() === $item['url'];
+            if ($item['url'] === '/panel' && $request->path() !== '/panel') {
+                $isActive = false;
+            }
+            $activeClass = $isActive ? 'active' : '';
+            $html .= <<<HTML
+                <li class="nav-item">
+                    <a class="nav-link {$activeClass}" href="{$item['url']}">
+                        <span>{$item['text']}</span>
+                    </a>
+                </li>
+HTML;
+        }
+
+        return $html;
+    }
+}
+
+if (!function_exists('partial')) {
+    /**
+     * Renderiza una vista parcial (componente) y devuelve su contenido como un string de HTML.
+     *
+     * @param string $template La ruta de la plantilla a renderizar.
+     * @param array $vars Las variables que se pasarán a la plantilla.
+     * @return string El HTML renderizado.
+     */
+    function partial(string $template, array $vars = []): string
+    {
+        return \support\view\NativePhpView::render($template, $vars);
+    }
+}

@@ -30,14 +30,13 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 - [x] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
     - Desarrollo del ruteo dinámico, estructura básica de temas, y separación arquitectónica de `swordCore` y `swordContent`.
 
-- [ ] **Fase 6: Mejoras y Extensibilidad**
+- [x] **Fase 6: Mejoras y Extensibilidad**
     - [x] Implementar un CRUD para la gestión de usuarios en el panel de administración.
     - [x] Cambiar el motor de plantillas de Blade a PHP nativo.
     - [x] Refinar el `AssetService` para que sea fácilmente utilizable desde el `functions.php` de los temas.
-    - [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
     - [x] Ampliar el sistema de metadatos para usuarios (`user_meta`).
     - [x] Implementar un gestor de medios (`Media Library`) centralizado para subir y gestionar archivos. Tiene soportar varios tipos de archivos como en wp. Se guardan en swordContent en media y adentro estarán carpetas ordenadas por año, mes,
-    - [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*
+    
     - [x] vale, hice un acceso directo de swordContent en la carpeta public, me preocupa si eso hace que el codigo del tema sea visible cosa que no debería. 
     
 - [x] **Fase 7: Gestor de Contenido Avanzado**
@@ -54,7 +53,10 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 
 - [ ] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
+- [ ] En el index pagina aparece contenido de otros post type, deberia aparecer solo de paginas.
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
+- [ ] Implementar la edición de usuarios en el panel de administración. *dejar para el final*
+- [ ] Galeria en panel de los archivos subidos, se pueden borrar, modificar, etc, como en wp. *dejar para el final*
 
 ## Documentación
 - [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `ajaxAccion`, funciones de metadatos, etc.).

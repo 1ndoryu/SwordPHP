@@ -53,7 +53,11 @@ Progresivamente ir haciendo las equivalencias de wp siguiendo de guia equivalenc
 
 ## Lluvias de ideas (tareas de faltan incluir en el flujo y ordenar sin validas)
 
-- [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se. 
+- [ ] Bug detectado, al crear una pagina o un contenido dinamico no se guardar el autor. 
+- [ ] Bug, al dar click a editar una pagina sale ErrorException: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\Users\1u\Documents\SwordPHP\swordCore\app\view\admin\paginas\edit.php:52
+Stack trace: #0 [internal function]: {closure}() *no sale cuando edito un ctp o post type
+- [ ] Al crear una pagina los metadatos hay que mejorarla para que se puedan agregar varios metadatos si se quiere y el nombre de estos metadatos, igual cuando creas un contenido de cualquier post type, usar el mismo componente. 
+- [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 
 ## Documentación
 - [x] Crear un documento (`equivalencias.md`) que compare las funciones globales de SwordPHP con sus equivalentes en WordPress (ej: `add_action` vs `ajaxAccion`, funciones de metadatos, etc.).

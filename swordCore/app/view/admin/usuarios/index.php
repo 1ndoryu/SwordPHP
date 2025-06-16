@@ -1,86 +1,97 @@
 <?php
-// 1. Define el título que usará el admin-header.php
-// La variable $titulo es pasada desde el controlador.
-$tituloPagina = $titulo;
+// 1. Define el título de la página.
+$tituloPagina = 'Gestión de Usuarios';
 
 // 2. Incluye la cabecera del panel.
 include __DIR__ . '/../../layouts/admin-header.php';
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+<div class="vistaListado">
 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title"><?php echo htmlspecialchars($titulo); ?></h3>
-        <div class="card-tools">
-            <a href="/panel/usuarios/crear" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Añadir Nuevo Usuario
+    <div class="cabeceraVista">
+        <div class="accionesVista">
+            <a href="/panel/usuarios/crear" class="btnCrear">
+                Añadir
             </a>
         </div>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-striped projects">
-            <thead>
-                <tr>
-                    <th style="width: 1%">#</th>
-                    <th style="width: 30%">Nombre de Usuario</th>
-                    <th>Correo Electrónico</th>
-                    <th>Rol</th>
-                    <th>Miembro desde</th>
-                    <th style="width: 20%"></th>
-                </tr>
-            </thead>
-            <tbody>
+
+    <?php // Bloque para mostrar mensajes de éxito o error ?>
+    <?php if (session()->has('success')): ?>
+        <div class="alerta alertaExito" role="alert">
+            <?php echo htmlspecialchars(session('success')); ?>
+        </div>
+    <?php endif; ?>
+    <?php if (session()->has('error')): ?>
+        <div class="alerta alertaError" role="alert">
+            <?php echo htmlspecialchars(session('error')); ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="contenidoVista">
+
+        <div class="listaContenido">
+            <?php
+            // Se comprueba si la colección de usuarios no está vacía.
+            if ($usuarios->count() > 0):
+                foreach ($usuarios as $usuario):
+            ?>
+                    <div class="contenidoCard">
+                        <div class="contenidoInfo">
+                            <div class="infoItem iconoB iconoG">
+                                <?php echo icon('user'); ?>
+                            </div>
+                            <div class="infoItem infoTitulo">
+                                <span><?php echo htmlspecialchars($usuario->nombremostrado ?: $usuario->nombreusuario); ?></span>
+                            </div>
+                            <div class="infoItem">
+                                <span><?php echo htmlspecialchars($usuario->correoelectronico); ?></span>
+                            </div>
+                            <div class="infoItem">
+                                <?php if ($usuario->rol === 'admin'): ?>
+                                    <span class="badge badgePublicado">Administrador</span>
+                                <?php else: ?>
+                                    <span class="badge badgeBorrador"><?php echo htmlspecialchars(ucfirst($usuario->rol)); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="infoItem">
+                                <span><?php echo htmlspecialchars($usuario->created_at->format('d/m/Y')); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="contenidoAcciones">
+                            <a href="/panel/usuarios/editar/<?php echo htmlspecialchars($usuario->id); ?>" class="iconoB btnEditar">
+                                <?php echo icon('edit'); ?>
+                            </a>
+
+                            <form action="/panel/usuarios/eliminar/<?php echo htmlspecialchars($usuario->id); ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">
+                                <?php echo csrf_field(); ?>
+                                <button type="submit" class="iconoB IconoRojo btnEliminar">
+                                    <?php echo icon('borrar'); ?>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 <?php
-                // Conversión del bucle @forelse de Blade
-                if ($usuarios->count() > 0):
-                    foreach ($usuarios as $usuario):
+                endforeach;
+            else: // Si no hay usuarios que mostrar
                 ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($usuario->id); ?></td>
-                    <td>
-                        <a><?php echo htmlspecialchars($usuario->nombremostrado ?: $usuario->nombreusuario); ?></a>
-                        <br>
-                        <small>Último acceso: <?php echo htmlspecialchars($usuario->updated_at->diffForHumans()); ?></small>
-                    </td>
-                    <td><?php echo htmlspecialchars($usuario->correoelectronico); ?></td>
-                    <td>
-                        <?php if ($usuario->rol === 'admin'): ?>
-                        <span class="badge badge-success">Administrador</span>
-                        <?php else: ?>
-                        <span class="badge badge-info"><?php echo htmlspecialchars(ucfirst($usuario->rol)); ?></span>
-                        <?php endif; ?>
-                    </td>
-                    <td><?php echo htmlspecialchars($usuario->created_at->format('d/m/Y')); ?></td>
-                    <td class="project-actions text-right">
-                        <a class="btn btn-info btn-sm" href="/panel/usuarios/editar/<?php echo htmlspecialchars($usuario->id); ?>">
-                            <i class="fas fa-pencil-alt"></i> Editar
-                        </a>
-                        <button class="btn btn-danger btn-sm" data-id="<?php echo htmlspecialchars($usuario->id); ?>" data-url="/panel/usuarios/eliminar">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
-                </tr>
-                <?php
-                    endforeach;
-                else:
-                    // Esto equivale a la sección @empty de Blade
-                ?>
-                <tr>
-                    <td colspan="6" class="text-center">No hay usuarios registrados.</td>
-                </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
-    <div class="card-footer clearfix">
-        <?php
-        // Conversión de la paginación.
-        // El método links() generará el HTML de la paginación.
-        if ($usuarios->hasPages()) {
-            echo $usuarios->links();
-        }
-        ?>
+                <div class="alerta alertaInfo" style="text-align: center;">
+                    No se encontraron usuarios.
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="paginacion">
+            <?php
+            // Adaptamos la paginación al nuevo helper.
+            // Asumimos que el objeto $usuarios es un paginador de Laravel/Symfony.
+            if ($usuarios->hasPages()) {
+                // Pasamos la página actual y el total de páginas al helper.
+                echo renderizarPaginacion($usuarios->currentPage(), $usuarios->lastPage());
+            }
+            ?>
+        </div>
     </div>
 </div>
 

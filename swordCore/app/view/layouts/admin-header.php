@@ -24,7 +24,9 @@ $usuario = usuarioActual();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($tituloPagina ?? 'Panel de Administración'); ?> | SwordPHP</title>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet">
     <?php
     // Imprime las etiquetas <link> de los CSS encolados.
     echo assetService()->imprimirAssetsHead();
@@ -35,8 +37,8 @@ $usuario = usuarioActual();
 
     <div class="panelContenedor">
         <aside class="panelSidebar">
-            <div class="panelSidebarHeader">
-                SwordPHP
+            <div class="panelSidebarHeader iconoB iconoLogo">
+                <?php echo icon('logosword') ?>
             </div>
             <nav class="panelSidebarNav">
                 <?php echo renderizarMenuLateralAdmin() ?>

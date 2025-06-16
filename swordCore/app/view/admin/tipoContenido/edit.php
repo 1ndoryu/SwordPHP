@@ -8,18 +8,19 @@ $errorMessage = session()->pull('error'); // Obtenemos el mensaje de error si ex
 echo partial('layouts/admin-header', []);
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+?>
+<form action="/panel/<?php echo $slug; ?>/editar/<?php echo htmlspecialchars($entrada->id ?? ''); ?>" method="POST">
+    <div class="formulario-contenedor">
 
-<div class="formulario-contenedor">
+        <div class="cabecera-formulario">
+            <p>Editando "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?>": <strong><?php echo htmlspecialchars($entrada->titulo ?? ''); ?></strong></p>
+            <a href="/panel/<?php echo $slug; ?>" class="btnN">
+                &larr; Volver al listado
+            </a>
+        </div>
 
-    <div class="cabecera-formulario">
-        <p>Editando "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?>": <strong><?php echo htmlspecialchars($entrada->titulo ?? ''); ?></strong></p>
-        <a href="/panel/<?php echo $slug; ?>" class="btn-volver">
-            &larr; Volver al listado
-        </a>
-    </div>
 
-    <form action="/panel/<?php echo $slug; ?>/editar/<?php echo htmlspecialchars($entrada->id ?? ''); ?>" method="POST">
         <?php echo csrf_field(); ?>
         <div class="cuerpo-formulario">
 
@@ -39,14 +40,7 @@ echo partial('layouts/admin-header', []);
                 <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', $entrada->contenido ?? '')); ?></textarea>
             </div>
 
-            <div class="grupo-formulario">
-                <label for="estado">Estado</label>
-                <select id="estado" name="estado">
-                    <?php $estadoActual = old('estado', $entrada->estado ?? 'borrador'); ?>
-                    <option value="borrador" <?php echo $estadoActual == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
-                    <option value="publicado" <?php echo $estadoActual == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
-                </select>
-            </div>
+
 
             <?php
             // El controlador ya ha cargado los metadatos en la relación $entrada->metas.
@@ -58,15 +52,27 @@ echo partial('layouts/admin-header', []);
             ?>
 
         </div>
+    </div>
+
+    <div class="segundoContenedor">
+
+        <div class="grupo-formulario estado">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <?php $estadoActual = old('estado', $entrada->estado ?? 'borrador'); ?>
+                <option value="borrador" <?php echo $estadoActual == 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                <option value="publicado" <?php echo $estadoActual == 'publicado' ? 'selected' : ''; ?>>Publicado</option>
+            </select>
+        </div>
 
         <div class="pie-formulario">
             <button type="submit" class="btn-principal">Actualizar <?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?></button>
             <a href="/panel/<?php echo $slug; ?>" class="btn-secundario">Cancelar</a>
         </div>
-    </form>
-</div>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+    </div>
+</form>
+<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

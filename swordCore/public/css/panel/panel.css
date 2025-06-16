@@ -169,9 +169,6 @@ a.btnCrear {
 }
 
 .contenidoPagina {
-    padding: var(--padding-general);
-    background: var(--color-fondo-contenido);
-    border-radius: var(--borde);
 }
 
 .panelSidebarNav ul {
@@ -225,4 +222,89 @@ a.btnCrear {
 
 .logoutBtn:hover {
     background-color: var(--color-alerta-hover);
+}
+
+.formulario-contenedor {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.cabecera-formulario p {
+    color: unset;
+    font-size: 13px;
+}
+.cabecera-formulario {
+    display: flex;
+    justify-content: space-between;
+}
+
+.btnN {
+    display: inline-block;
+    padding: 7px var(--gap-elementos-medio);
+    background-color: var(--color-alerta);
+    color: #f2f1ee;
+    text-decoration: none;
+    border-radius: var(--radius);
+    font-size: 11px;
+}
+
+.grupo-formulario label {
+    font-size: 14px;
+    color: unset;
+    font-weight: 600;
+}
+
+.cuerpo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.grupo-formulario input,
+textarea {
+    color: #000000b3 !important;
+}
+
+.grupo-formulario input,
+textarea {
+    color: #000000b3 !important;
+    border-bottom: 1px #0000002b solid !important;
+}
+
+textarea#contenido {
+    font-size: 13px !important;
+}
+
+.formulario-contenedor,
+.segundoContenedor {
+    padding: var(--padding-general);
+    background: var(--color-fondo-contenido);
+    border-radius: var(--borde);
+}
+
+.contenidoPagina {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+.segundoContenedor {
+    height: fit-content;
+}
+
+.contenidoPagina form {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+.grupo-formulario.estado {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }

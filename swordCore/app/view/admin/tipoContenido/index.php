@@ -17,16 +17,15 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <?php // Bloque para mostrar mensajes de éxito o error (copiado de la vista de páginas) 
-    ?>
-    <?php if (session()->has('success')): ?>
+    <?php // CORRECCIÓN: Mostrar mensajes pasados desde el controlador ?>
+    <?php if (!empty($successMessage)): ?>
         <div class="alerta alertaExito" role="alert">
-            <?php echo htmlspecialchars(session('success')); ?>
+            <?php echo htmlspecialchars($successMessage); ?>
         </div>
     <?php endif; ?>
-    <?php if (session()->has('error')): ?>
+    <?php if (!empty($errorMessage)): ?>
         <div class="alerta alertaError" role="alert">
-            <?php echo htmlspecialchars(session('error')); ?>
+            <?php echo htmlspecialchars($errorMessage); ?>
         </div>
     <?php endif; ?>
 
@@ -35,15 +34,13 @@ echo partial('layouts/admin-header', []);
         <div class="listaContenido">
             <?php
             // Se comprueba si la colección de entradas no está vacía.
-            // Se usa la variable $entradas en lugar de $paginas.
-            if (!empty($entradas)):
+            if (!$entradas->isEmpty()):
                 foreach ($entradas as $entrada):
             ?>
                     <div class="contenidoCard">
                         <div class="contenidoInfo">
                             <div class="infoItem iconoB iconoG">
-                                <?php echo icon('file'); // O puedes usar icon('file') como en páginas 
-                                ?>
+                                <?php echo icon('file'); ?>
                             </div>
                             <div class="infoItem infoTitulo">
                                 <span><?php echo htmlspecialchars($entrada->titulo); ?></span>
@@ -55,16 +52,15 @@ echo partial('layouts/admin-header', []);
                                 <span class="badge badgeBorrador"><?php echo htmlspecialchars($entrada->slug); ?></span>
                             </div>
                             <div class="infoItem">
-                                <span><?php echo htmlspecialchars($entrada->estado); ?></span>
+                                <?php if ($entrada->estado == 'publicado'): ?>
+                                    <span class="badge badgePublicado">Publicado</span>
+                                <?php else: ?>
+                                    <span class="badge badgeBorrador">Borrador</span>
+                                <?php endif; ?>
                             </div>
-
-
-
                             <div class="infoItem">
                                 <span><?php echo htmlspecialchars($entrada->created_at->format('d/m/Y H:i')); ?></span>
                             </div>
-
-
                         </div>
 
                         <div class="contenidoAcciones">
@@ -91,19 +87,17 @@ echo partial('layouts/admin-header', []);
         </div>
 
         <?php
-        // Se asume que podrías pasar variables de paginación también a esta vista.
-        // Si no usas paginación aquí, puedes eliminar este bloque.
+        // Ahora el controlador siempre pasa estas variables, por lo que la paginación funcionará.
         if (isset($paginaActual) && isset($totalPaginas)):
         ?>
             <div class="paginacion">
-                <?php echo renderizarPaginacion($paginaActual, $totalPaginas); ?>
+                <?php echo renderizarPaginacion($paginaActual, $totalPaginas, "/panel/$slug"); ?>
             </div>
         <?php endif; ?>
     </div>
 </div>
 
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
+<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

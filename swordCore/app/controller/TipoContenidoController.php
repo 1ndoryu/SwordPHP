@@ -18,13 +18,41 @@ class TipoContenidoController
     public function index(Request $request, string $slug): Response
     {
         $config = $this->getConfigOr404($slug);
-        $entradas = Pagina::where('tipocontenido', $slug)->orderBy('id', 'desc')->get();
+
+        // Implementar paginación
+        $porPagina = 10;
+        $paginaActual = (int)$request->input('page', 1);
+        $totalItems = Pagina::where('tipocontenido', $slug)->count();
+        $totalPaginas = (int)ceil($totalItems / $porPagina);
+
+        if ($paginaActual > $totalPaginas && $totalItems > 0) {
+            $paginaActual = $totalPaginas;
+        }
+        if ($paginaActual < 1) {
+            $paginaActual = 1;
+        }
+
+        $offset = ($paginaActual - 1) * $porPagina;
+
+        $entradas = Pagina::where('tipocontenido', $slug)
+            ->orderBy('id', 'desc')
+            ->offset($offset)
+            ->limit($porPagina)
+            ->get();
+
+        // Extraer mensajes "flasheados" de la sesión
+        $successMessage = $request->session()->pull('success');
+        $errorMessage = $request->session()->pull('error');
 
         // Las vistas se unificarán en el siguiente paso.
         return view('admin/tipoContenido/index', [
             'entradas' => $entradas,
             'config' => $config,
             'slug' => $slug,
+            'paginaActual' => $paginaActual,
+            'totalPaginas' => $totalPaginas,
+            'successMessage' => $successMessage,
+            'errorMessage' => $errorMessage,
         ]);
     }
 

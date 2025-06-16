@@ -7,7 +7,7 @@ echo partial('layouts/admin-header', []);
 
     <div class="cabecera-formulario">
         <p>Editando: <strong><?php echo htmlspecialchars($pagina->titulo ?? ''); ?></strong></p>
-        <a href="/panel/paginas" class="btn-volver">
+        <a href="/panel/paginas" class="btnN">
             &larr; Volver al listado
         </a>
     </div>

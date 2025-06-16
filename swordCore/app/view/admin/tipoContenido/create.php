@@ -14,7 +14,7 @@ echo partial('layouts/admin-header', []);
 
     <div class="cabecera-formulario">
         <p>Rellena los campos para crear una nueva entrada de "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Contenido'); ?>"</p>
-        <a href="/panel/<?php echo $slug; ?>" class="btn-volver">
+        <a href="/panel/<?php echo $slug; ?>" class="btnN">
             &larr; Volver al listado
         </a>
     </div>

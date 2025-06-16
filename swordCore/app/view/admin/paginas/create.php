@@ -13,7 +13,7 @@ echo partial('layouts/admin-header', []);
 
     <div class="cabecera-formulario">
         <p>Rellena los campos para crear una nueva página</p>
-        <a href="/panel/paginas" class="btn-volver">
+        <a href="/panel/paginas" class="btnN">
             &larr; Volver al listado
         </a>
     </div>

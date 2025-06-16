@@ -449,3 +449,93 @@ input:focus, textarea:focus {
 }
 
 /* Evita el scroll en el body cuando un menú está abierto */
+/* Ocultamos el select original */
+select {
+    display: none;
+}
+
+/* Contenedor principal del select personalizado */
+.custom-select-container {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* La caja que se ve (el "select" falso) */
+.custom-select-trigger {
+    border: none;
+    background: transparent;
+    color: #333;
+    font-size: 13px;
+    padding: 8px 1.5rem 8px 0; /* Ajuste para que el texto no se monte en la flecha */
+    display: block;
+    width: 100%;
+    position: relative;
+    user-select: none; /* Evita que el texto se seleccione */
+}
+
+/* Flecha del select (usando tu SVG) */
+.custom-select-trigger::after {
+    content: '';
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1em;
+    height: 1em;
+    background-image: url("data:image/svg+xml;charset=UTF8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: transform 0.2s ease;
+}
+
+/* Gira la flecha cuando el select está abierto */
+.custom-select-container.open .custom-select-trigger::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* Lista de opciones */
+.custom-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-radius: 4px;
+    z-index: 10;
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    /* Por defecto está oculta */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+}
+
+/* Muestra las opciones cuando el contenedor tiene la clase "open" */
+.custom-select-container.open .custom-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Estilo para cada opción */
+.custom-option {
+    background-color: #f2f1ee;
+    color: #333;
+    padding: 6px 10px;
+}
+
+/* Estilo para las opciones al pasar el ratón por encima (hover) */
+.custom-option:hover {
+    background-color: #f0f0f0; /* Un color ligeramente diferente al pasar el ratón */
+}
+
+/* Estilo para la opción seleccionada */
+.custom-option.selected {
+    /* background-color: #e0e0e0; */
+    font-weight: 700;
+}

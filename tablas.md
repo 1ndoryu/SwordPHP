@@ -19,16 +19,16 @@ Estructura de la tabla de usuarios
 
 | column_name       | data_type                | character_maximum_length | is_nullable | column_default                       |
 | ----------------- | ------------------------ | ------------------------ | ----------- | ------------------------------------ |
+| updated_at        | timestamp with time zone | null                     | YES         | null                                 |
+| fecharegistro     | timestamp with time zone | null                     | NO          | CURRENT_TIMESTAMP                    |
+| created_at        | timestamp with time zone | null                     | YES         | null                                 |
 | id                | integer                  | null                     | NO          | nextval('usuarios_id_seq'::regclass) |
+| nombremostrado    | character varying        | 250                      | YES         | null                                 |
+| remember_token    | character varying        | 100                      | YES         | null                                 |
+| rol               | character varying        | 50                       | NO          | 'suscriptor'::character varying      |
 | nombreusuario     | character varying        | 60                       | NO          | null                                 |
 | correoelectronico | character varying        | 100                      | NO          | null                                 |
 | clave             | character varying        | 255                      | NO          | null                                 |
-| nombremostrado    | character varying        | 250                      | YES         | null                                 |
-| fecharegistro     | timestamp with time zone | null                     | NO          | CURRENT_TIMESTAMP                    |
-| rol               | character varying        | 50                       | NO          | 'suscriptor'::character varying      |
-| remember_token    | character varying        | 100                      | YES         | null                                 |
-| created_at        | timestamp with time zone | null                     | YES         | null                                 |
-| updated_at        | timestamp with time zone | null                     | YES         | null                                 |
 
 Estructura de opciones
 
@@ -48,3 +48,29 @@ Estructura de paginameta
 | pagina_id   | integer           | null                     | NO          | null                                        |
 | meta_key    | character varying | 255                      | NO          | null                                        |
 | meta_value  | text              | null                     | YES         | null                                        |
+
+| column_name       | data_type                   | character_maximum_length | is_nullable | column_default                    |
+| ----------------- | --------------------------- | ------------------------ | ----------- | --------------------------------- |
+| id                | integer                     | null                     | NO          | nextval('media_id_seq'::regclass) |
+| usuario_id        | integer                     | null                     | NO          | null                              |
+| tamaño            | integer                     | null                     | NO          | null                              |
+| created_at        | timestamp without time zone | null                     | YES         | CURRENT_TIMESTAMP                 |
+| updated_at        | timestamp without time zone | null                     | YES         | CURRENT_TIMESTAMP                 |
+| url_publica       | character varying           | 512                      | NO          | null                              |
+| tipo_mime         | character varying           | 100                      | NO          | null                              |
+| texto_alternativo | character varying           | 255                      | YES         | null                              |
+| descripcion       | text                        | null                     | YES         | null                              |
+| titulo            | character varying           | 255                      | NO          | null                              |
+| nombre_archivo    | character varying           | 255                      | NO          | null                              |
+| ruta_archivo      | character varying           | 512                      | NO          | null                              |
+
+SELECT
+   column_name,
+   data_type,
+   character_maximum_length,
+   is_nullable,
+   column_default
+FROM
+   information_schema.columns
+WHERE
+   table_name = 'media';

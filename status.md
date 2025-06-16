@@ -54,7 +54,7 @@ No usar tailwild ni boostrap
     - [ ] Al dar click a agregar meta se guarda el formulario
     - [ ] La pagina de inicio en la lista de paginas deberia marcarse en el titulo algo asi titulo - pagina inicio y las paginas deben tener un boton de establecer como pagina de inicio.
 - [ ] Sistema de plantillas, como en wordpress, las paginas entiendo que en el estado actual tienen una plantilla por defecto al parecer es pagina.php, pero debe poder elegirse con libertad cualquier otra, en wp se idenfican con un comentario arriba de la pagina, pero quiero una forma mas eficiente en esta alternativa.
-- [ ] Implementar la edición de usuarios en el panel de administración. 
+- [x] Implementar la edición de usuarios en el panel de administración. 
 - [ ] Galeria en panel de los archivos subidos, que se pueda borrar, modificar, etc, como en wp pero muy comodamente.
 - [ ] function.php se esta haciendo muy largo, hay que ordenarlo archivos mas pequeños, tal vez una carpeta de utils, no se.
 

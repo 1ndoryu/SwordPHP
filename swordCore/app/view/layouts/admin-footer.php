@@ -8,7 +8,7 @@
 </main>
 </div> <?php
         // Imprime las etiquetas <script> de los JS encolados.
-        echo assetService()->imprimirAssetsFooter();
+        echo sw_admin_footer();
         ?>
 
 </body>

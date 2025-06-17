@@ -14,9 +14,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($titulo ?? 'SwordPHP'); ?></title>
     <?php
-    // Imprime los <link> de los estilos CSS encolados para el tema.
-    echo assetService()->imprimirAssetsHead();
+    sw_head()
     ?>
+    
 </head>
 
 <body>

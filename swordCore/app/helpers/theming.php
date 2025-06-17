@@ -156,3 +156,64 @@ if (!function_exists('obtenerEnlacePermanente')) {
         return $baseUrl . '/' . $entrada->slug;
     }
 }
+
+
+if (!function_exists('sw_head')) {
+    /**
+     * Dispara la acción 'sw_head' e imprime los assets del head.
+     * Análogo a wp_head(). Debe colocarse antes de la etiqueta </head>.
+     */
+    function sw_head()
+    {
+        // Imprime los <link> y <style> de los CSS encolados.
+        echo assetService()->imprimirAssetsHead();
+
+        // Hook para que plugins o el tema puedan inyectar contenido en el <head>.
+        hacerAccion('sw_head');
+    }
+}
+
+if (!function_exists('sw_footer')) {
+    /**
+     * Dispara la acción 'sw_footer' e imprime los assets del footer.
+     * Análogo a wp_footer(). Debe colocarse antes de la etiqueta </body>.
+     */
+    function sw_footer()
+    {
+        // Imprime los <script> de los JS encolados.
+        echo assetService()->imprimirAssetsFooter();
+
+        // Hook para que plugins o el tema puedan inyectar contenido en el <footer>.
+        hacerAccion('sw_footer');
+    }
+}
+
+if (!function_exists('sw_admin_head')) {
+    /**
+     * Dispara la acción 'admin_head' e imprime los assets del head del panel.
+     * Debe colocarse antes de la etiqueta </head> en el layout del panel.
+     */
+    function sw_admin_head()
+    {
+        // Imprime los <link> y <style> de los CSS encolados para el panel.
+        echo assetService()->imprimirAssetsHead();
+        
+        // Hook para que plugins puedan inyectar contenido en el <head> del panel.
+        hacerAccion('admin_head');
+    }
+}
+
+if (!function_exists('sw_admin_footer')) {
+    /**
+     * Dispara la acción 'admin_footer' e imprime los assets del footer del panel.
+     * Debe colocarse antes de la etiqueta </body> en el layout del panel.
+     */
+    function sw_admin_footer()
+    {
+        // Hook para que plugins puedan añadir contenido antes de cerrar el body del panel.
+        hacerAccion('admin_footer');
+
+        // Imprime las etiquetas <script> de los JS encolados.
+        echo assetService()->imprimirAssetsFooter();
+    }
+}

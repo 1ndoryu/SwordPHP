@@ -51,10 +51,10 @@ function miPluginEjemplo_agregarContenidoFooter()
             $posicionEstilos = 'bottom: 10px; right: 10px;';
             break;
     }
-    
+
     // 4. Imprimir el HTML. Saneamos los valores antes de imprimirlos.
     $estilosFinales = 'position: fixed; ' . $posicionEstilos . ' padding: 15px; border-radius: 5px; font-family: sans-serif; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); ' . htmlspecialchars($estilosCSS);
-    
+
     echo '<div style="' . $estilosFinales . '">';
     echo htmlspecialchars($textoBanner);
     echo '</div>';
@@ -189,7 +189,7 @@ function miPluginEjemplo_registrarShortcodes()
 
     // Shortcode con atributos: [saludo_personalizado nombre="Gemini"]
     agregarShortcode('saludo_personalizado', 'miPluginEjemplo_callbackSaludoPersonalizado');
-    
+
     // Shortcode que envuelve contenido: [caja borde="blue"]Este es el contenido[/caja]
     agregarShortcode('caja', 'miPluginEjemplo_callbackCaja');
 }
@@ -237,9 +237,51 @@ function miPluginEjemplo_callbackCaja($atributos, $contenido = null)
     // Permitimos personalizar el color del borde con un atributo.
     $colorBorde = isset($atributos['borde']) ? htmlspecialchars($atributos['borde']) : '#ccc';
     $estilos = "border: 1px solid {$colorBorde}; padding: 15px; margin: 1em 0; border-radius: 4px; background-color: #f9f9f9;";
-    
+
     // Se procesan shortcodes anidados dentro del contenido.
     $contenidoProcesado = procesarShortcodes($contenido);
 
     return "<div style='{$estilos}'>{$contenidoProcesado}</div>";
+}
+
+/**
+ * 7. Registrar el widget del dashboard para este plugin.
+ */
+function miPluginEjemplo_registrarWidgetDashboard()
+{
+    agregarWidgetDashboard(
+        'plugin_ejemplo_resumen',
+        'Resumen del Plugin Ejemplo',
+        'miPluginEjemplo_renderizarWidgetDashboard',
+        1, // Columna 1
+        20 // Prioridad
+    );
+}
+miPluginEjemplo_registrarWidgetDashboard();
+
+/**
+ * 8. Función que renderiza el contenido del widget del dashboard.
+ * Muestra el estado actual de la configuración del banner.
+ */
+function miPluginEjemplo_renderizarWidgetDashboard()
+{
+    $slugPlugin = 'plugin-ejemplo';
+
+    // Obtenemos los valores guardados
+    $bannerActivo = (bool) obtenerOpcionPlugin($slugPlugin, 'banner_activo', true);
+    $textoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '¡Hola desde el Plugin de Ejemplo!');
+    $urlAjustes = '/panel/ajustes/plugin-ejemplo';
+
+    echo '<p><strong>Estado del banner:</strong> ';
+    if ($bannerActivo) {
+        echo '<span style="color: green;">Activado</span>';
+    } else {
+        echo '<span style="color: red;">Desactivado</span>';
+    }
+    echo '</p>';
+
+    echo '<p><strong>Texto actual del banner:</strong></p>';
+    echo '<blockquote style="margin: 0 0 1rem 0; padding: 10px; background-color: #f9f9f9; border-left: 3px solid #ccc;">' . htmlspecialchars($textoBanner) . '</blockquote>';
+
+    echo '<a href="' . htmlspecialchars($urlAjustes) . '" class="btnN">Configurar el plugin</a>';
 }

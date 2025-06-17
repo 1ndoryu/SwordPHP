@@ -1,14 +1,14 @@
 :root {
     /* Colores */
-    --color-fondo-claro: #eeeeee;
-    --color-fondo-principal: #eeeeee;
+    --color-fondo-claro: #f8f8f8;
+    --color-fondo-principal: #f8f8f8;
     --color-texto-oscuro: #000000d4;
     --color-texto-claro: #ecf0f1;
     --color-texto-sidebar-nav: #2d2d2c;
     --color-exito: #65bd82;
     --color-alerta: #111111;
     --color-alerta-hover: #111111;
-    --color-fondo-contenido: #f6f6f6;
+    --color-fondo-contenido: #fffdfd;
 
     /* Espaciado */
     --padding-general: 20px;
@@ -34,7 +34,6 @@ body {
     display: flex;
     min-height: 100vh;
     width: 1150px;
-    background: var(--color-fondo-principal);
     color: var(--color-texto-oscuro);
     padding: 0px 40px;
 }
@@ -377,4 +376,53 @@ span.btnN.desactivado {
     background: var(--color-fondo-contenido);
     border-radius: var(--radius);
     min-height: 200px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.dashboard-columna {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.widget-caja {
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.dashboard-grid p {
+    color: #000000d4;
+}
+
+.widget-caja h3.widget-titulo {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 15px;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.widget-caja .widget-contenido {
+    padding: 15px;
+}
+
+.widget-caja .widget-contenido p:first-child {
+    margin-top: 0;
+}
+
+.widget-caja .widget-contenido p:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive: en pantallas pequeñas, las columnas se apilan */
+@media (max-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
 }

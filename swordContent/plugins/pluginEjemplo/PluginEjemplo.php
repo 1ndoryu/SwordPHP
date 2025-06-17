@@ -23,12 +23,39 @@ agregarAccion('pieDePagina', 'miPluginEjemplo_agregarContenidoFooter');
 function miPluginEjemplo_agregarContenidoFooter()
 {
     $slugPlugin = 'plugin-ejemplo';
-    $nombreOpcion = 'texto_banner';
-    // Obtenemos la opción guardada, con un valor por defecto si no existe.
-    $textoBanner = obtenerOpcionPlugin($slugPlugin, $nombreOpcion, '🔌 ¡Hola desde el Plugin de Ejemplo! (Valor por defecto)');
 
-    echo '<div style="position: fixed; bottom: 10px; right: 10px; background: #007bff; color: white; padding: 15px; border-radius: 5px; font-family: sans-serif; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">';
-    // Saneamos el valor ANTES de imprimirlo en el HTML.
+    // 1. Comprobar si el banner está activado en los ajustes.
+    if (!obtenerOpcionPlugin($slugPlugin, 'banner_activo', true)) {
+        return; // No hacer nada si el banner está desactivado.
+    }
+
+    // 2. Obtener las opciones del banner.
+    $textoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
+    $posicion = obtenerOpcionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
+    $estilosCSS = obtenerOpcionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
+
+    // 3. Construir los estilos en línea basados en la posición.
+    $posicionEstilos = '';
+    switch ($posicion) {
+        case 'bottom-left':
+            $posicionEstilos = 'bottom: 10px; left: 10px;';
+            break;
+        case 'top-right':
+            $posicionEstilos = 'top: 10px; right: 10px;';
+            break;
+        case 'top-left':
+            $posicionEstilos = 'top: 10px; left: 10px;';
+            break;
+        case 'bottom-right':
+        default:
+            $posicionEstilos = 'bottom: 10px; right: 10px;';
+            break;
+    }
+    
+    // 4. Imprimir el HTML. Saneamos los valores antes de imprimirlos.
+    $estilosFinales = 'position: fixed; ' . $posicionEstilos . ' padding: 15px; border-radius: 5px; font-family: sans-serif; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2); ' . htmlspecialchars($estilosCSS);
+    
+    echo '<div style="' . $estilosFinales . '">';
     echo htmlspecialchars($textoBanner);
     echo '</div>';
 }
@@ -73,12 +100,6 @@ function miPluginEjemplo_registrarPagina()
 }
 miPluginEjemplo_registrarPagina();
 
-/**
- * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
- * Ahora gestiona el guardado y usa el helper de formularios estandarizado.
- *
- * @return string El HTML de la página.
- */
 /**
  * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
  * Ahora gestiona el guardado de varias opciones y usa el helper de formularios estandarizado.
@@ -156,4 +177,69 @@ function miPluginEjemplo_renderizarPagina()
         'descripcionFormulario' => 'Desde aquí puedes configurar las opciones del plugin de ejemplo.',
         'textoBoton' => 'Guardar Todos los Ajustes'
     ]);
+}
+
+/**
+ * 6. Registrar los shortcodes del plugin.
+ */
+function miPluginEjemplo_registrarShortcodes()
+{
+    // Shortcode simple: [saludo]
+    agregarShortcode('saludo', 'miPluginEjemplo_callbackSaludo');
+
+    // Shortcode con atributos: [saludo_personalizado nombre="Gemini"]
+    agregarShortcode('saludo_personalizado', 'miPluginEjemplo_callbackSaludoPersonalizado');
+    
+    // Shortcode que envuelve contenido: [caja borde="blue"]Este es el contenido[/caja]
+    agregarShortcode('caja', 'miPluginEjemplo_callbackCaja');
+}
+// Ejecutar la función de registro de shortcodes.
+miPluginEjemplo_registrarShortcodes();
+
+/**
+ * Función de callback para el shortcode [saludo].
+ *
+ * @param array $atributos Atributos del shortcode (no usado aquí).
+ * @param string|null $contenido Contenido envuelto por el shortcode (no usado aquí).
+ * @return string El HTML de reemplazo.
+ */
+function miPluginEjemplo_callbackSaludo($atributos, $contenido = null)
+{
+    return "<strong>¡Hola desde el shortcode de ejemplo!</strong>";
+}
+
+/**
+ * Función de callback para el shortcode [saludo_personalizado].
+ *
+ * @param array $atributos Atributos del shortcode.
+ * @param string|null $contenido Contenido envuelto por el shortcode (no usado aquí).
+ * @return string El HTML de reemplazo.
+ */
+function miPluginEjemplo_callbackSaludoPersonalizado($atributos, $contenido = null)
+{
+    // Establecemos un valor por defecto para el atributo 'nombre'.
+    $nombre = $atributos['nombre'] ?? 'Mundo';
+    return "¡Hola, " . htmlspecialchars($nombre) . "!";
+}
+
+/**
+ * Función de callback para el shortcode [caja].
+ *
+ * @param array $atributos Atributos del shortcode.
+ * @param string|null $contenido Contenido envuelto por el shortcode.
+ * @return string El HTML de reemplazo.
+ */
+function miPluginEjemplo_callbackCaja($atributos, $contenido = null)
+{
+    if (is_null($contenido)) {
+        return '';
+    }
+    // Permitimos personalizar el color del borde con un atributo.
+    $colorBorde = isset($atributos['borde']) ? htmlspecialchars($atributos['borde']) : '#ccc';
+    $estilos = "border: 1px solid {$colorBorde}; padding: 15px; margin: 1em 0; border-radius: 4px; background-color: #f9f9f9;";
+    
+    // Se procesan shortcodes anidados dentro del contenido.
+    $contenidoProcesado = procesarShortcodes($contenido);
+
+    return "<div style='{$estilos}'>{$contenidoProcesado}</div>";
 }

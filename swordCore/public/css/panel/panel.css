@@ -367,3 +367,14 @@ span.btnN.desactivado {
 .themes span.btnN.desactivado {
     background: var(--color-exito);
 }
+
+.containerInicioAdmin {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: var(--padding-general);
+    background: var(--color-fondo-contenido);
+    border-radius: var(--radius);
+    min-height: 200px;
+}

@@ -20,6 +20,7 @@ require_once __DIR__ . '/helpers/hooks.php';
 require_once __DIR__ . '/helpers/plugin.php';
 require_once __DIR__ . '/helpers/formPlugin.php';
 require_once __DIR__ . '/helpers/theming.php';
+require_once __DIR__ . '/helpers/shortcode.php';
 
 if (!function_exists('ajaxAccion')) {
     /**

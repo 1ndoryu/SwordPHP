@@ -349,3 +349,18 @@ button.btnN.icono.verde {
     background: var(--color-fondo-contenido);
     border-radius: var(--radius);
 }
+
+.contenidoAcciones.themes button {
+    width: -webkit-fill-available !important;
+}
+.contenidoAcciones.themes {
+    min-width: 80px;
+}
+
+span.btnN.desactivado {
+    width: 100%;
+}
+
+.themes span.btnN.desactivado {
+    background: var(--color-exito);
+}

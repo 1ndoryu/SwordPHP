@@ -84,4 +84,48 @@ class TemaService
 
         return $datosTema;
     }
+
+    /**
+     * Activa un tema específico escribiendo su slug en el archivo de configuración.
+     *
+     * @param string $slug El identificador (directorio) del tema a activar.
+     * @return bool Devuelve true si la operación fue exitosa, false en caso contrario.
+     * @throws \Exception Si el tema no existe o si hay problemas de permisos de escritura.
+     */
+    public function activarTema(string $slug): bool
+    {
+        // 1. Validar que el tema a activar realmente existe.
+        $temasDisponibles = $this->obtenerTemasDisponibles();
+        if (!isset($temasDisponibles[$slug])) {
+            throw new \Exception("El tema '{$slug}' no es un tema válido o no se pudo encontrar.");
+        }
+
+        // 2. Modificar el archivo de configuración de forma segura.
+        $rutaConfig = config_path('theme.php');
+
+        if (!is_writable($rutaConfig)) {
+            // Es crucial verificar los permisos para evitar errores fatales.
+            throw new \Exception("Error de permisos: el archivo '{$rutaConfig}' no tiene permisos de escritura.");
+        }
+
+        $contenidoConfig = file_get_contents($rutaConfig);
+
+        // 3. Usar una expresión regular para reemplazar únicamente el valor de 'active_theme'.
+        // Esto es robusto contra diferentes espaciados y tipos de comillas (' o ").
+        $nuevoContenido = preg_replace(
+            "/('active_theme'\\s*=>\\s*)['\"].*?['\"]/",
+            "$1'{$slug}'",
+            $contenidoConfig,
+            1, // Realizar solo un reemplazo
+            $reemplazos
+        );
+
+        // 4. Verificar que el reemplazo se realizó correctamente.
+        if ($reemplazos === 0) {
+            throw new \Exception("No se pudo encontrar la clave 'active_theme' en el archivo de configuración.");
+        }
+
+        // 5. Escribir el nuevo contenido de vuelta en el archivo.
+        return file_put_contents($rutaConfig, $nuevoContenido) !== false;
+    }
 }

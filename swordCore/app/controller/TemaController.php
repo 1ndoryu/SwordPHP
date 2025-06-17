@@ -5,6 +5,8 @@ namespace App\controller;
 use App\service\TemaService;
 use support\Request;
 use support\Response;
+use support\Log;
+use Throwable;
 
 /**
  * Controlador para la gestión de temas desde el panel de administración.
@@ -39,7 +41,7 @@ class TemaController
 
         // Obtenemos el slug del tema activo desde la configuración.
         $temaActivoSlug = config('theme.active_theme', '');
-
+        
         // Obtenemos posibles mensajes flash de la sesión.
         $mensajeExito = $request->session()->pull('success');
         $mensajeError = $request->session()->pull('error');
@@ -51,5 +53,26 @@ class TemaController
             'mensajeExito' => $mensajeExito,
             'mensajeError' => $mensajeError,
         ]);
+    }
+
+    /**
+     * Procesa la solicitud para activar un nuevo tema.
+     *
+     * @param Request $request
+     * @param string $slug El slug del tema a activar.
+     * @return Response Una redirección a la página de temas.
+     */
+    public function activar(Request $request, string $slug): Response
+    {
+        try {
+            $this->temaService->activarTema($slug);
+            $request->session()->set('success', "Tema '{$slug}' activado. El sistema se recargará para aplicar los cambios.");
+
+        } catch (Throwable $e) {
+            Log::error('Error al activar el tema: ' . $e->getMessage());
+            $request->session()->set('error', 'Error al activar el tema: ' . $e->getMessage());
+        }
+
+        return redirect('/panel/temas');
     }
 }

@@ -14,6 +14,6 @@ return [
      * que se encuentra en `swordContent/themes/`.
      * SwordPHP buscará las plantillas y assets en este directorio.
      */
-    'active_theme' => 'sword-theme-default',
+    'active_theme' => 'default-theme-two',
 
 ];

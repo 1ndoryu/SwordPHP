@@ -14,6 +14,7 @@ use App\controller\TipoContenidoController;
 use App\service\TipoContenidoService;
 use App\controller\MediaController;
 use App\controller\UsuarioController;
+use App\controller\TemaController;
 use support\Log;
 
 // Ruta principal (raíz del sitio)
@@ -73,6 +74,9 @@ $panelGroup = Route::group('/panel', function () {
         }
     }
 
+    // Temas
+    Route::get('/temas', [TemaController::class, 'index']);
+    Route::post('/temas/activar/{slug}', [TemaController::class, 'activar']);
 
     // Ajustes Generales
     Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);

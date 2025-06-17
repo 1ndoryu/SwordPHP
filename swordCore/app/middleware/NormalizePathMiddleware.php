@@ -20,9 +20,9 @@ class NormalizePathMiddleware implements MiddlewareInterface
     public function process(Request $request, callable $handler): Response
     {
         // LOG DE DIAGNÓSTICO:
-        Log::channel('default')->info(
+        /*Log::channel('default')->info(
             '[NormalizePathMiddleware] -> Ruta recibida. Path: ' . $request->path() . ' | Full URL: ' . $request->fullUrl()
-        );
+        );*/
 
         $path = $request->path();
 

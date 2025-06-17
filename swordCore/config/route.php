@@ -128,14 +128,14 @@ Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar'
 // --- Ruta Fallback (Manejo de 404) ---
 Route::fallback(function (Request $request) {
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    $logMessage = sprintf(
+    /*$logMessage = sprintf(
         "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
         $request->getRealIp(),
         $request->fullUrl(),
         $request->header('user-agent'),
         $cabecerasComoString
-    );
-    Log::channel('default')->warning($logMessage);
+    ); */
+    // Log::channel('default')->warning($logMessage);
     return response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada en el servidor.</p>", 404);
 });
 

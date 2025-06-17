@@ -2,50 +2,54 @@
 
 namespace App\controller;
 
-use App\service\PaginaService;
+use App\service\SwordQuery;
 use support\Request;
 use support\Response;
-use Webman\Exception\NotFoundException; // Importar la excepción
 
 class PaginaPublicaController
 {
-    private PaginaService $paginaService;
-
-    public function __construct(PaginaService $paginaService)
-    {
-        $this->paginaService = $paginaService;
-    }
-
     /**
      * Muestra una página pública basada en su slug.
+     *
+     * @param Request $request
+     * @param string $slug
+     * @return Response
      */
     public function mostrar(Request $request, string $slug): Response
     {
-        try {
-            $pagina = $this->paginaService->obtenerPaginaPublicadaPorSlug($slug);
+        global $swordConsultaPrincipal;
 
-            // Plantilla por defecto.
-            $plantillaAUsar = 'pagina';
+        // 1. Crear la consulta principal para la página/entrada solicitada.
+        // Se busca por slug en cualquier tipo de contenido que esté publicado.
+        $argumentos = [
+            'name' => $slug,
+            'post_status' => 'publicado',
+        ];
+        $swordConsultaPrincipal = new SwordQuery($argumentos);
 
-            // Obtener el nombre del archivo de la plantilla desde los metadatos.
-            $nombreArchivoPlantilla = $pagina->obtenerMeta('_plantilla_pagina');
-
-            if (!empty($nombreArchivoPlantilla)) {
-                // Construir la ruta completa al archivo de plantilla dentro del tema activo.
-                $rutaCompletaPlantilla = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . config('theme.active_theme') . DIRECTORY_SEPARATOR . $nombreArchivoPlantilla;
-
-                // ¡Importante! Verificar que el archivo de plantilla realmente existe antes de usarlo.
-                if (is_file($rutaCompletaPlantilla)) {
-                    // El nombre de la vista es el nombre del archivo sin la extensión .php
-                    $plantillaAUsar = pathinfo($nombreArchivoPlantilla, PATHINFO_FILENAME);
-                }
-            }
-
-            // Renderizar la vista, ya sea la personalizada o la por defecto.
-            return view($plantillaAUsar, ['pagina' => $pagina]);
-        } catch (NotFoundException $e) {
-            // Si la página no se encuentra, se devuelve una respuesta 404.
+        // 2. Si la consulta no encuentra ninguna entrada, es un 404.
+        if ($swordConsultaPrincipal->totalEntradas === 0) {
             return response("<h1>404 | Página No Encontrada</h1>", 404);
         }
+
+        // 3. Accedemos a la primera entrada solo para determinar la plantilla a usar.
+        $entradaParaPlantilla = $swordConsultaPrincipal->entradas->first();
+        
+        // Plantilla por defecto. Si la entrada es de un tipo de contenido diferente
+        // a 'pagina', podríamos tener lógica para buscar plantillas como 'single-{tipoContenido}.php'.
+        // Por ahora, usamos 'pagina.php' como fallback general.
+        $plantillaAUsar = 'pagina';
+        $nombreArchivoPlantilla = $entradaParaPlantilla->obtenerMeta('_plantilla_pagina');
+
+        if (!empty($nombreArchivoPlantilla)) {
+            $rutaCompletaPlantilla = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . config('theme.active_theme') . DIRECTORY_SEPARATOR . $nombreArchivoPlantilla;
+            if (is_file($rutaCompletaPlantilla)) {
+                $plantillaAUsar = pathinfo($nombreArchivoPlantilla, PATHINFO_FILENAME);
+            }
+        }
+        
+        // 4. Renderizar la vista. La plantilla ahora es responsable de ejecutar el loop
+        // (`hayEntradas`, `laEntrada`, etc.) usando la variable global $swordConsultaPrincipal.
+        return view($plantillaAUsar, []);
     }
 }

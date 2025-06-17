@@ -1,29 +1,46 @@
 <?php
-// 1. Define el título que usará el header.php.
-// La variable $pagina es pasada desde el controlador.
-$titulo = $pagina->titulo;
-# require_once __DIR__ . '/../../swordCore/start.php';
+// 1. Inicia el loop de SwordPHP.
+if (hayEntradas()) :
+    while (hayEntradas()) :
+        laEntrada();
 
-getHeader();
+        // 2. Define el título que usará el header.php.
+        // Se obtiene después de iniciar la entrada en el loop.
+        $titulo = obtenerElTitulo();
+
+        // 3. Carga la cabecera del tema.
+        getHeader();
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
+        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        ?>
 
-<h1><?php echo htmlspecialchars(aplicarFiltro('elTitulo', $pagina->titulo, $pagina)); ?></h1>
-<div>
+        <h1><?php elTitulo(); ?></h1>
+        <div>
+            <?php
+            // La función elContenido() se encarga de mostrar el contenido
+            // y aplicará los filtros necesarios en el futuro (ej. para shortcodes).
+            elContenido();
+            ?>
+        </div>
+        <hr>
+        <p>✅ Vista cargada desde: default-theme-two</p>
+
+        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        ?>
+
     <?php
-    // NOTA DE SEGURIDAD: Se usa 'echo' directamente para renderizar HTML.
-    // Esto es necesario para contenido de editores de texto enriquecido (WYSIWYG).
-    // Asegúrate de que el contenido se sanitiza ANTES de guardarlo en la base de datos.
-    echo $pagina->contenido;
+    endwhile; // Fin del loop principal.
+else :
+    // Opcional: Contenido a mostrar si no se encuentran entradas.
+    $titulo = 'Contenido no encontrado';
+    getHeader();
     ?>
-</div>
-<hr>
-<p>✅ Vista cargada desde: sword-theme-two</p>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
-
+    <h1>Contenido no encontrado</h1>
+    <p>Lo sentimos, no pudimos encontrar lo que buscabas.</p>
 <?php
+endif; // Fin de la comprobación hayEntradas().
 
+// Carga el pie de página del tema.
 getFooter();
 ?>

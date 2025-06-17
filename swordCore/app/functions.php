@@ -19,6 +19,7 @@ require_once __DIR__ . '/helpers/asset.php';
 require_once __DIR__ . '/helpers/hooks.php';
 require_once __DIR__ . '/helpers/plugin.php';
 require_once __DIR__ . '/helpers/formPlugin.php';
+require_once __DIR__ . '/helpers/theming.php';
 
 if (!function_exists('ajaxAccion')) {
     /**

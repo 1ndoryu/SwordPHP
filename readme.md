@@ -147,17 +147,29 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 
 ## 🗺️ Hoja de Ruta (Roadmap)
 
--   [x] **Fase 1: Fundación y Autenticación**
--   [x] **Fase 2: Estructura del Panel de Administración**
--   [x] **Fase 3: Gestión de Assets y AJAX**
--   [x] **Fase 4: Gestor de Páginas (CRUD)**
--   [x] **Fase 5: Sistema de Ruteo y Temas (Frontend)**
--   [x] **Fase 6: Mejoras y Extensibilidad** (CRUD de Usuarios, Gestor de Medios, Metadatos de Usuario).
--   [x] **Fase 7: Gestor de Contenido Avanzado (Tipos de Contenido)**
--   [ ] **Fase 8: Gestión de Temas** - Desarrollar la gestión completa de temas desde el panel (ver, activar, eliminar).
--   [ ] **Fase 9: Sistema de Plantillas** - Permitir seleccionar plantillas de página desde el editor (similar a las plantillas de página de WordPress).
--   [ ] **Fase 10: Mejoras en Formularios** - Permitir edición de slugs, validación de slugs únicos, etc.
--   [ ] **Fase 11: Arquitectura de Plugins** - Diseñar e implementar el sistema de plugins. _Tarea a largo plazo._
+- [x] **Fase 1: Fundación del Sistema**
+    - Autenticación, estructura del panel de administración y CRUD de páginas.
+
+- [x] **Fase 2: Sistema de Temas y Ruteo**
+    - Separación arquitectónica (`swordCore`/`swordContent`) y carga de `functions.php`.
+
+- [x] **Fase 3: Gestión de Contenido Avanzada**
+    - Implementación de Tipos de Contenido Personalizados, Gestor de Medios, CRUD de Usuarios y Metadatos.
+
+- [x] **Fase 4: Gestión de Temas desde el Panel**
+    - Funcionalidad para visualizar y activar temas directamente desde la interfaz de administración.
+
+- [ ] **Fase 5: Estabilización y Mejoras de UI**
+    - Corrección de bugs reportados y mejoras en la experiencia de usuario del panel.
+
+- [ ] **Fase 6: Sistema de Plantillas de Página**
+    - Permitir que los temas registren diferentes plantillas y poder seleccionarlas desde el editor de páginas.
+
+- [ ] **Fase 7: Arquitectura de Plugins**
+    - Diseñar e implementar el sistema de plugins, incluyendo "hooks" (acciones y filtros) para extender el núcleo.
+
+- [ ] **Fase 8: Funciones de Theming Avanzadas**
+    - Implementar un "loop" de contenido y funciones de plantilla (`the_title`, `the_content`, etc.) para facilitar la creación de temas.
 
 ---
 

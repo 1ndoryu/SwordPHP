@@ -4,11 +4,11 @@ $labels = $config['labels'];
 $tituloPagina = htmlspecialchars($labels['add_new_item'] ?? 'Añadir Nuevo');
 $errorMessage = session()->pull('error');
 
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 <form action="/panel/<?php echo $slug; ?>/crear" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Rellena los campos para crear una nueva entrada de "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Contenido'); ?>"</p>
@@ -33,7 +33,7 @@ echo partial('layouts/admin-header', []);
 
             <div class="grupo-formulario">
                 <label for="contenido">Contenido</label>
-                <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
+                <textarea id="contenido" name="contenido" rows="5" placeholder="Escribe el contenido aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
             </div>
 
             <?php
@@ -54,7 +54,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">

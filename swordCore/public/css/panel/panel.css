@@ -25,21 +25,18 @@
 }
 
 body {
-    background-color: var(--color-fondo-principal);
+    background: hsl(0 0% 2% / 1);
     margin: 0;
-    font-family: var(--fuente-base);
 }
 
 .panelContenedor {
     display: flex;
     min-height: 100vh;
     width: 1150px;
-    color: var(--color-texto-oscuro);
     padding: 0px 40px;
 }
 
 .panelSidebar {
-    color: var(--color-texto-claro);
     padding-top: var(--padding-general);
     flex-shrink: 0;
     min-width: 130px;
@@ -66,11 +63,11 @@ nav.panelSidebarNav {
 
 a.btnCrear {
     text-decoration: unset;
-    color: var(--color-fondo-principal);
-    background: var(--color-exito);
+    background: var(--blanco);
     padding: 7px var(--gap-elementos-pequeno);
     border-radius: var(--radius);
     font-size: 12px;
+    color: #111111;
 }
 
 .infoItem span {
@@ -90,17 +87,24 @@ a.btnCrear {
 .contenidoCard {
     display: flex;
     flex-direction: row;
-    padding: 6px 10px;
-    border-bottom: #dedede 1px solid;
+    padding: 6px 15px;
+    /* border-bottom: #dedede 1px solid; */
     cursor: pointer;
+    border: var(--borde);
+    border-radius: var(--radius);
+    background: var(--fondo);
 }
 
 .accionesVista {
     display: flex;
 }
 
+.infoItem.iconoB.iconoG {
+    border: var(--borde);
+    display: none;
+}
+
 .iconoB {
-    background: #f2f1ee;
     padding: 7px 7px;
     border-radius: var(--radius);
     display: flex;
@@ -109,7 +113,7 @@ a.btnCrear {
 }
 
 .iconoB svg {
-    color: #0000009c !important;
+    color: var(--blanco) !important;
     height: 14px;
     width: 14px;
 }
@@ -139,13 +143,13 @@ a.btnCrear {
 
 .contenidoInfo div {
     width: 100%;
-    text-align-last: center;
 }
 
 .listaContenido {
     display: flex;
     gap: 10px;
     flex-direction: column;
+    width: 100%;
 }
 
 .panelSidebarHeader {
@@ -179,7 +183,7 @@ a.btnCrear {
 
 .panelSidebarNav a {
     display: block;
-    color: var(--color-texto-sidebar-nav);
+    color: var(--blanco);
     text-decoration: none;
     transition: background-color 0.3s;
 }
@@ -264,26 +268,8 @@ a.btnCrear {
     gap: 15px;
 }
 
-.grupo-formulario input,
-textarea {
-    color: #000000b3 !important;
-}
-
-.grupo-formulario input,
-textarea {
-    color: #000000b3 !important;
-    border-bottom: 1px #0000002b solid !important;
-}
-
 textarea#contenido {
     font-size: 13px !important;
-}
-
-.formulario-contenedor,
-.segundoContenedor {
-    padding: var(--padding-general);
-    background: var(--color-fondo-contenido);
-    border-radius: var(--radius);
 }
 
 .contenidoPagina {
@@ -297,6 +283,9 @@ textarea#contenido {
     height: fit-content;
     padding: 10px 15px;
     min-width: 190px;
+    display: flex;
+    flex-direction: column;
+    width: unset;
 }
 
 .contenidoPagina form {
@@ -342,16 +331,6 @@ button.btnN.icono.verde {
     background: unset;
 }
 
-.vistaListado {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    padding: var(--padding-general);
-    background: var(--color-fondo-contenido);
-    border-radius: var(--radius);
-}
-
 .contenidoAcciones.themes button {
     width: -webkit-fill-available !important;
 }
@@ -368,14 +347,7 @@ span.btnN.desactivado {
 }
 
 .containerInicioAdmin {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     width: 100%;
-    padding: var(--padding-general);
-    background: var(--color-fondo-contenido);
-    border-radius: var(--radius);
-    min-height: 200px;
 }
 
 .dashboard-grid {
@@ -392,24 +364,16 @@ span.btnN.desactivado {
 }
 
 .widget-caja {
-    background-color: #f8f8f8;
-    border-radius: 4px;
-}
-
-.dashboard-grid p {
-    color: #000000d4;
+    display: flex;
+    flex-direction: column;
+    width: unset;
 }
 
 .widget-caja h3.widget-titulo {
     font-size: 16px;
     font-weight: 600;
-    padding: 12px 15px;
+    padding: 0px 0px;
     margin: 0;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.widget-caja .widget-contenido {
-    padding: 15px;
 }
 
 .widget-caja .widget-contenido p:first-child {
@@ -426,3 +390,4 @@ span.btnN.desactivado {
         grid-template-columns: 1fr;
     }
 }
+

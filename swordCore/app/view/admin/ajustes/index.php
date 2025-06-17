@@ -28,7 +28,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
             </div>
         <?php endif; ?>
 
-        <div class="card">
+        <div class="bloque card">
             <div class="card-header">
                 <h3 class="card-title">Ajustes Generales</h3>
             </div>
@@ -59,7 +59,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
             </div>
         </div>
 
-        <div class="card">
+        <div class="bloque card">
             <div class="card-header">
                 <h3 class="card-title">Formato de Fecha y Hora</h3>
             </div>
@@ -89,7 +89,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
             </div>
         </div>
 
-        <div class="card">
+        <div class="bloque card">
             <div class="card-header">
                 <h3 class="card-title">Ajustes de Lectura</h3>
             </div>
@@ -111,7 +111,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
             </div>
         </div>
 
-        <div class="card">
+        <div class="bloque card">
             <div class="card-header">
                 <h3 class="card-title">Ajustes Varios</h3>
             </div>
@@ -131,7 +131,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
             </div>
         </div>
 
-        <div class="card">
+        <div class="bloque card">
             <button type="submit" class="btnN btn-primario">Guardar todos los cambios</button>
         </div>
 
@@ -167,12 +167,13 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
 
     .card {
         padding: var(--padding-general);
-        background: var(--color-fondo-contenido);
         border-radius: var(--radius);
         display: flex;
         flex-direction: column;
         gap: 15px;
+        width: 100%;
     }
+
 
     .card-header {}
 
@@ -229,7 +230,15 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
         font-weight: bold;
         margin-bottom: 5px;
         gap: 10px;
-        color: #000000d4;
+        font-size: 13px;
+        /* color: #000000d4; */
+        color: var(--blanco);
+    }
+
+    .grupo-formulario.opcionFormAjuste {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 </style>
 

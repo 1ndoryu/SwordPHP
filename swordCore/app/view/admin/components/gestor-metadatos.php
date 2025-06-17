@@ -16,7 +16,7 @@
 $metadatos = $metadatos ?? collect([]);
 ?>
 
-<div id="gestorMetadatosContenedor" class="gestorMetadatos">
+<div class="bloque gestorMetadatos" id="gestorMetadatosContenedor">
     <h4>Campos Personalizados</h4>
 
     <div id="metadatosExistentes">
@@ -85,15 +85,16 @@ $metadatos = $metadatos ?? collect([]);
 
 <style>
     .gestorMetadatos {
-        border: 1px solid #cccccc;
-        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
 
     .gestorMetadatos h4 {
         margin-top: 0;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
+        margin-bottom: 10px;
+        /* border-bottom: 1px solid #eee; */
+        /* padding-bottom: 10px; */
     }
 
     .metaPar {
@@ -131,15 +132,13 @@ $metadatos = $metadatos ?? collect([]);
     .metaPar label {
         font-size: 0.9em;
         margin-bottom: 4px;
-        color: #333;
         font-weight: bold;
     }
 
     .metaPar input[type="text"],
     .metaPar textarea {
         width: 100%;
-        border-bottom: unset !important;
-        border: 1px solid #ccc !important;
+        border: var(--borde);
         border-radius: 3px;
         box-sizing: border-box;
         margin: 0px;
@@ -148,27 +147,15 @@ $metadatos = $metadatos ?? collect([]);
         color: unset !important;
     }
 
-
     .eliminarMetaPar {
-        cursor: pointer;
-        padding: 5px 10px;
-        border: 1px solid #aaa;
-        background-color: #f0f0f0;
-        border-radius: 3px;
-        font-size: 1em;
-    }
-
-    #agregarMetaBtn {
-        margin-top: 10px;
-    }
-
-    .eliminarMetaPar {
-        background-color: #ffebee;
-        color: #c62828;
-        border-color: #ef9a9a;
         line-height: 1;
         padding: 8px 12px;
         height: 14px;
         font-size: 20px;
+        border: var(--borde);
+    }
+
+    #agregarMetaBtn {
+        margin-top: 10px;
     }
 </style>

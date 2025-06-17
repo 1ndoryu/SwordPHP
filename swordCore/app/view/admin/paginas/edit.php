@@ -5,11 +5,11 @@ $tituloPagina = 'Editar Página';
 $errorMessage = session()->pull('error');
 
 // Se incluye la cabecera del panel de administración.
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 <form action="/panel/paginas/update/<?php echo htmlspecialchars($pagina->id ?? ''); ?>" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Editando "Página": <strong><?php echo htmlspecialchars($pagina->titulo ?? ''); ?></strong></p>
@@ -44,7 +44,7 @@ echo partial('layouts/admin-header', []);
 
             <div class="grupo-formulario">
                 <label for="contenido">Contenido</label>
-                <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', $pagina->contenido ?? '')); ?></textarea>
+                <textarea id="contenido" name="contenido" rows="5" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', $pagina->contenido ?? '')); ?></textarea>
             </div>
 
             <?php
@@ -57,7 +57,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
 
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>

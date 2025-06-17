@@ -4,10 +4,10 @@ $labels = $config['labels'];
 $tituloPagina = htmlspecialchars($labels['name'] ?? 'Contenidos Genéricos');
 
 // 2. Incluye la cabecera del panel.
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
-<div class="vistaListado">
+<div class="bloque vistaListado">
 
     <div class="cabeceraVista">
         <div class="accionesVista">

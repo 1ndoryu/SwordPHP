@@ -5,11 +5,11 @@ $tituloPagina = 'Editar Usuario';
 // La variable $errorMessage es pasada directamente desde el controlador.
 
 // 2. Incluye la cabecera del panel de administración.
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 <form action="/panel/usuarios/update/<?php echo htmlspecialchars($usuario->id ?? ''); ?>" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Editando Usuario: <strong><?php echo htmlspecialchars($usuario->nombremostrado ?: $usuario->nombreusuario); ?></strong></p>
@@ -69,7 +69,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
         <div class="grupo-formulario estado">
             <label for="rol">Rol del Usuario</label>
             <select id="rol" name="rol">

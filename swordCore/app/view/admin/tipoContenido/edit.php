@@ -5,12 +5,12 @@ $tituloPagina = htmlspecialchars($labels['edit_item'] ?? 'Editar Entrada');
 $errorMessage = session()->pull('error');
 
 
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 
 <form action="/panel/<?php echo $slug; ?>/editar/<?php echo htmlspecialchars($entrada->id ?? ''); ?>" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Editando "<?php echo htmlspecialchars($labels['singular_name'] ?? 'Entrada'); ?>": <strong><?php echo htmlspecialchars($entrada->titulo ?? ''); ?></strong></p>
@@ -56,7 +56,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
 
 
         <div class="grupo-formulario estado">

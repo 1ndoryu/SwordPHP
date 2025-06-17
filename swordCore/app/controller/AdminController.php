@@ -23,8 +23,7 @@ class AdminController
             'bienvenida_sword',
             'Bienvenido a SwordPHP',
             function () {
-                echo '<p>Este es el panel de administración de tu nuevo sitio. Desde aquí puedes gestionar tu contenido.</p>';
-                echo '<p>Esta es una demostración del nuevo sistema de widgets del dashboard.</p>';
+                echo '<p>Este es el panel de administración de tu nuevo sitio. Desde aquí puedes gestionar tu contenido. Esta es una demostración del nuevo sistema de widgets del dashboard.</p>';
             },
             1, // Columna
             1  // Prioridad (el número más bajo se muestra primero)

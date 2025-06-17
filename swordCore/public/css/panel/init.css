@@ -462,17 +462,22 @@ select {
     font-weight: 500;
 }
 
+.custom-select-container {
+    border: var(--borde);
+    border-radius: var(--radius);
+    padding: 0px 10px;
+}
+
 /* La caja que se ve (el "select" falso) */
 .custom-select-trigger {
     border: none;
     background: transparent;
-    color: #333;
     font-size: 13px;
-    padding: 6px 1.5rem 8px 0; /* Ajuste para que el texto no se monte en la flecha */
+    padding: 6px 1.5rem 8px 0;
     display: block;
     width: 100%;
     position: relative;
-    user-select: none; /* Evita que el texto se seleccione */
+    user-select: none;
 }
 
 /* Flecha del select (usando tu SVG) */

@@ -5,11 +5,11 @@ $tituloPagina = 'Añadir Nuevo Usuario';
 // La variable $errorMessage es pasada directamente desde el controlador.
 
 // 2. Incluye la cabecera del panel de administración.
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 <form action="/panel/usuarios/crear" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Rellena los campos para crear un nuevo usuario</p>
@@ -75,7 +75,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
         <div class="grupo-formulario estado">
             <label for="rol">Rol del Usuario</label>
             <select id="rol" name="rol">

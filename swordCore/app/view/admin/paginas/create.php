@@ -3,11 +3,11 @@
 $tituloPagina = 'Crear Nueva Página';
 $errorMessage = session()->pull('error');
 
-echo partial('layouts/admin-header', []);
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
 ?>
 
 <form action="/panel/paginas/store" method="POST">
-    <div class="formulario-contenedor">
+    <div class="bloque formulario-contenedor">
 
         <div class="cabecera-formulario">
             <p>Rellena los campos para crear una nueva página</p>
@@ -37,7 +37,7 @@ echo partial('layouts/admin-header', []);
 
             <div class="grupo-formulario">
                 <label for="contenido">Contenido</label>
-                <textarea id="contenido" name="contenido" rows="10" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
+                <textarea id="contenido" name="contenido" rows="5" placeholder="Escribe el contenido de la página aquí..."><?php echo htmlspecialchars(old('contenido', '')); ?></textarea>
             </div>
 
             <?php
@@ -58,7 +58,7 @@ echo partial('layouts/admin-header', []);
         </div>
     </div>
 
-    <div class="segundoContenedor">
+    <div class="bloque segundoContenedor">
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">

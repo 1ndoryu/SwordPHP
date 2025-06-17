@@ -73,55 +73,87 @@ function miPluginEjemplo_registrarPagina()
 }
 miPluginEjemplo_registrarPagina();
 
-
 /**
  * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
- * Ahora también gestiona el guardado de los datos y usa el helper de formularios.
+ * Ahora gestiona el guardado y usa el helper de formularios estandarizado.
+ *
+ * @return string El HTML de la página.
+ */
+/**
+ * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
+ * Ahora gestiona el guardado de varias opciones y usa el helper de formularios estandarizado.
  *
  * @return string El HTML de la página.
  */
 function miPluginEjemplo_renderizarPagina()
 {
     $slugPlugin = 'plugin-ejemplo';
-    $nombreOpcion = 'texto_banner';
     $mensajeExito = '';
 
-    // Si el formulario ha sido enviado, guardamos los datos.
+    // Definimos los nombres de las opciones para iterar sobre ellas.
+    $nombresOpciones = ['texto_banner', 'banner_activo', 'banner_posicion', 'banner_estilos_css'];
+
+    // Si el formulario ha sido enviado, guardamos todos los datos.
     if (request()->method() === 'POST') {
-        $valorOpcion = request()->post($nombreOpcion, '');
-        guardarOpcionPlugin($slugPlugin, $nombreOpcion, $valorOpcion);
-        $mensajeExito = '<div class="alerta alertaExito" style="margin-bottom: 1rem;">Ajustes guardados correctamente.</div>';
+        foreach ($nombresOpciones as $nombreOpcion) {
+            // Los checkboxes no enviados no estarán en el POST, así que les damos un valor por defecto de '0'.
+            $valor = request()->post($nombreOpcion, ($nombreOpcion === 'banner_activo' ? '0' : ''));
+            guardarOpcionPlugin($slugPlugin, $nombreOpcion, $valor);
+        }
+        $mensajeExito = 'Ajustes guardados correctamente.';
     }
 
-    // Obtenemos el valor actual de la opción para mostrarlo en el campo.
-    $valorActual = obtenerOpcionPlugin($slugPlugin, $nombreOpcion, 'Valor de ejemplo');
+    // Obtenemos los valores actuales de todas las opciones para mostrarlos en los campos.
+    $valorTextoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
+    $valorBannerActivo = (bool) obtenerOpcionPlugin($slugPlugin, 'banner_activo', true);
+    $valorBannerPosicion = obtenerOpcionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
+    $valorBannerEstilos = obtenerOpcionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
 
-    // Usamos el nuevo helper para renderizar el campo de texto.
-    $campoTexto = renderFormPlugin([
-        'tipo' => 'text',
-        'name' => $nombreOpcion,
-        'label' => 'Texto del Banner',
-        'value' => $valorActual,
-        'placeholder' => 'Introduce un texto...',
-        'descripcion' => 'Este texto se mostrará en el banner del pie de página.'
+    // Definimos los campos para el formulario en un array.
+    $campos = [
+        [
+            'tipo' => 'checkbox',
+            'name' => 'banner_activo',
+            'label' => 'Activar Banner',
+            'estaMarcado' => $valorBannerActivo,
+            'descripcion' => 'Marca esta casilla para mostrar el banner en el pie de página.'
+        ],
+        [
+            'tipo' => 'text',
+            'name' => 'texto_banner',
+            'label' => 'Texto del Banner',
+            'value' => $valorTextoBanner,
+            'placeholder' => 'Introduce un texto...'
+        ],
+        [
+            'tipo' => 'select',
+            'name' => 'banner_posicion',
+            'label' => 'Posición del Banner',
+            'value' => $valorBannerPosicion,
+            'opciones' => [
+                'bottom-right' => 'Abajo a la Derecha',
+                'bottom-left' => 'Abajo a la Izquierda',
+                'top-right' => 'Arriba a la Derecha',
+                'top-left' => 'Arriba a la Izquierda',
+            ],
+            'descripcion' => 'Elige en qué esquina de la pantalla aparecerá el banner.'
+        ],
+        [
+            'tipo' => 'textarea',
+            'name' => 'banner_estilos_css',
+            'label' => 'Estilos CSS Personalizados',
+            'value' => $valorBannerEstilos,
+            'atributos' => ['rows' => 3],
+            'placeholder' => 'ej: background: #ff0000; color: white;',
+            'descripcion' => 'Añade CSS personalizado para el contenedor del banner (sin las etiquetas <style>).'
+        ],
+    ];
+
+    // Renderizamos el formulario completo usando el helper.
+    return renderizarFormularioAjustesPlugin([
+        'campos' => $campos,
+        'mensajeExito' => $mensajeExito,
+        'descripcionFormulario' => 'Desde aquí puedes configurar las opciones del plugin de ejemplo.',
+        'textoBoton' => 'Guardar Todos los Ajustes'
     ]);
-
-    // Construimos el HTML final del formulario.
-    $html = '
-        <div class="formulario-contenedor" style="flex: 1; max-width: none;">
-            <div class="cuerpo-formulario">
-                ' . $mensajeExito . '
-                <p>Desde aquí puedes configurar el comportamiento del plugin.</p>
-                <hr>
-                <form method="POST" action="">
-                    ' . csrf_field() . '
-                    ' . $campoTexto . '
-                    <div class="pie-formulario" style="justify-content: flex-start;">
-                        <button type="submit" class="btnN">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    ';
-    return $html;
 }

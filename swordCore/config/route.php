@@ -16,6 +16,7 @@ use App\controller\MediaController;
 use App\controller\PluginController;
 use App\controller\UsuarioController;
 use App\controller\TemaController;
+use App\controller\PluginPageController;
 use support\Log;
 
 // Ruta principal (raíz del sitio)
@@ -87,10 +88,13 @@ $panelGroup = Route::group('/panel', function () {
         Route::post('/desactivar/{slug}', [PluginController::class, 'desactivar']);
     });
 
-    // Ajustes Generales
-    Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);
-    Route::post('/ajustes/guardar', [App\controller\AjustesController::class, 'guardar']);
-
+    // Ajustes
+    Route::group('/ajustes', function () {
+        Route::get('', [App\controller\AjustesController::class, 'index']);
+        Route::post('/guardar', [App\controller\AjustesController::class, 'guardar']);
+        // Ruta genérica para las páginas de ajustes de los plugins.
+        Route::get('/{slug}', [PluginPageController::class, 'mostrar']);
+    });
 
     // Media
     Route::get('/media', [MediaController::class, 'index']);
@@ -129,12 +133,12 @@ Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar'
 Route::fallback(function (Request $request) {
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     /*$logMessage = sprintf(
-        "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
-        $request->getRealIp(),
-        $request->fullUrl(),
-        $request->header('user-agent'),
-        $cabecerasComoString
-    ); */
+    "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
+    $request->getRealIp(),
+    $request->fullUrl(),
+    $request->header('user-agent'),
+    $cabecerasComoString
+  ); */
     // Log::channel('default')->warning($logMessage);
     return response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada en el servidor.</p>", 404);
 });

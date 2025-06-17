@@ -166,9 +166,9 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
                 continue;
             }
             $menuItems[$slug] = [
-                'url'  => '/panel/' . $slug,
-                'icon'  => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
-                'text'  => $config['labels']['name'] ?? ucfirst($slug),
+                'url' => '/panel/' . $slug,
+                'icon' => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
+                'text' => $config['labels']['name'] ?? ucfirst($slug),
             ];
         }
 
@@ -178,7 +178,8 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
         $menuItems['temas'] = ['url' => '/panel/temas', 'icon' => 'fa-solid fa-palette', 'text' => 'Temas'];
         $menuItems['ajustes'] = ['url' => '/panel/ajustes', 'icon' => 'fa-solid fa-gears', 'text' => 'Ajustes'];
 
-
+        // Aplicamos un filtro para que los plugins puedan añadir/modificar items del menú.
+        $menuItems = aplicarFiltro('menuLateralAdmin', $menuItems);
 
         $html = '';
         foreach ($menuItems as $key => $item) {
@@ -188,11 +189,11 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
             }
             $activeClass = $isActive ? 'active' : '';
             $html .= <<<HTML
-            <li class="nav-item">
-                <a class="nav-link {$activeClass}" href="{$item['url']}">
-                    <span>{$item['text']}</span>
-                </a>
-            </li>
+      <li class="nav-item">
+        <a class="nav-link {$activeClass}" href="{$item['url']}">
+          <span>{$item['text']}</span>
+        </a>
+      </li>
 HTML;
         }
 

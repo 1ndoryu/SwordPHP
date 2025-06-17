@@ -16,8 +16,6 @@ if (!defined('SWORD_CORE_PATH')) {
 
 /**
  * 1. Usar una acción para añadir contenido al pie de página.
- *
- * Esta función se engancha a la acción 'pieDePagina' que añadimos en el footer.php.
  */
 agregarAccion('pieDePagina', 'miPluginEjemplo_agregarContenidoFooter');
 
@@ -28,20 +26,74 @@ function miPluginEjemplo_agregarContenidoFooter()
     echo '</div>';
 }
 
-
 /**
  * 2. Usar un filtro para modificar el título de la página.
- *
- * Esta función se engancha al filtro 'elTitulo' que añadimos en pagina.php.
- * Acepta 2 argumentos: el título a modificar y el objeto de la página actual.
  */
 agregarFiltro('elTitulo', 'miPluginEjemplo_modificarTitulo', 10, 2);
 
 function miPluginEjemplo_modificarTitulo($tituloActual, $pagina)
 {
-    // Añadimos un prefijo al título original.
     $nuevoTitulo = "[Plugin] " . $tituloActual;
-
-    // Devolvemos el título modificado para que sea mostrado.
     return $nuevoTitulo;
+}
+
+/**
+ * 3. Añadir el enlace al menú del panel de administración.
+ */
+agregarFiltro('menuLateralAdmin', 'miPluginEjemplo_agregarMenuAdmin');
+
+function miPluginEjemplo_agregarMenuAdmin($menuItems)
+{
+    $menuItems['plugin_ejemplo_settings'] = [
+        'url' => '/panel/ajustes/plugin-ejemplo',
+        'text' => 'Ajustes del Plugin',
+    ];
+    return $menuItems;
+}
+
+/**
+ * 4. Registrar la página de ajustes del plugin.
+ */
+function miPluginEjemplo_registrarPagina()
+{
+    agregarPaginaAdmin(
+        'plugin-ejemplo', // El slug debe coincidir con el de la URL
+        [
+            'page_title' => 'Ajustes del Plugin Ejemplo',
+            'callback' => 'miPluginEjemplo_renderizarPagina',
+        ]
+    );
+}
+miPluginEjemplo_registrarPagina();
+
+
+/**
+ * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
+ *
+ * @return string El HTML de la página.
+ */
+function miPluginEjemplo_renderizarPagina()
+{
+    // Por ahora, el formulario no guarda nada, eso lo haremos en el siguiente paso.
+    $html = '
+        <div class="formulario-contenedor" style="flex: 1; max-width: none;">
+            <div class="cuerpo-formulario">
+                <p>Desde aquí puedes configurar el comportamiento del plugin.</p>
+                <hr>
+                <form method="POST" action="">
+                    ' . csrf_field() . '
+                    <div class="grupo-formulario">
+                        <label for="opcion_ejemplo"><strong>Texto del Banner</strong></label>
+                        <input type="text" id="opcion_ejemplo" name="opcion_ejemplo" value="Valor de ejemplo" placeholder="Introduce un texto...">
+                        <small>Este texto se podría mostrar en el banner del pie de página.</small>
+                    </div>
+
+                    <div class="pie-formulario" style="justify-content: flex-start;">
+                        <button type="submit" class="btnN">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    ';
+    return $html;
 }

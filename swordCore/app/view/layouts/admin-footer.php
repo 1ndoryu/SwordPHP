@@ -8,7 +8,7 @@
 </main>
 </div> <?php
         // Imprime las etiquetas <script> de los JS encolados.
-        echo sw_admin_footer();
+        sw_admin_footer();
         ?>
 
 </body>

@@ -9,7 +9,7 @@
 ?>
 
 <?php
-echo sw_footer(); // Imprime los scripts y estilos encolados
+sw_footer(); // Imprime los scripts y estilos encolados
 hacerAccion('pieDePagina');
 ?>
 

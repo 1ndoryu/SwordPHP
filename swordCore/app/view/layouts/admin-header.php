@@ -29,7 +29,7 @@ $usuario = usuarioActual();
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@200..900&display=swap" rel="stylesheet">
     <?php
     // Imprime las etiquetas <link> de los CSS encolados.
-    echo sw_admin_head();
+    sw_admin_head();
     ?>
 </head>
 

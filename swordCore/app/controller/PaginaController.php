@@ -126,44 +126,40 @@ class PaginaController
 
         try {
             \Illuminate\Database\Capsule\Manager::transaction(function () use ($request) {
-                // 1. Crear la página principal, excluyendo los campos meta.
+                // 1. Crear la página principal.
                 $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
                 $pagina = $this->paginaService->crearPagina($datosPrincipales);
 
-                // 2. Procesar y guardar los metadatos del gestor de campos.
-                $metadatosFormulario = $request->post('meta', []);
-                $nuevosMetadatosParaInsertar = [];
+                // 2. Reconstruir la lista completa de metadatos a partir del formulario.
+                $metadatosParaInsertar = [];
 
+                // Añadir los campos personalizados del gestor.
+                $metadatosFormulario = $request->post('meta', []);
                 if (is_array($metadatosFormulario)) {
                     foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && strlen(trim($meta['clave'])) <= 255) {
-                            $clave = trim($meta['clave']);
-                            $valor = $meta['valor'] ?? '';
-
-                            if ($valor !== '') {
-                                $nuevosMetadatosParaInsertar[] = [
-                                    'pagina_id'  => $pagina->id,
-                                    'meta_key'   => $clave,
-                                    'meta_value' => $valor,
-                                ];
-                            }
+                        if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                            $metadatosParaInsertar[] = [
+                                'pagina_id'  => $pagina->id,
+                                'meta_key'   => trim($meta['clave']),
+                                'meta_value' => $meta['valor'] ?? '',
+                            ];
                         }
                     }
                 }
 
-                // 3. Añadir el metadato de la plantilla seleccionada.
+                // Añadir el metadato de la plantilla si se ha seleccionado uno.
                 $plantillaSeleccionada = $request->post('_plantilla_pagina');
                 if (!empty($plantillaSeleccionada)) {
-                    $nuevosMetadatosParaInsertar[] = [
+                    $metadatosParaInsertar[] = [
                         'pagina_id'  => $pagina->id,
                         'meta_key'   => '_plantilla_pagina',
                         'meta_value' => $plantillaSeleccionada,
                     ];
                 }
 
-                // 4. Insertar todos los metadatos en lote.
-                if (!empty($nuevosMetadatosParaInsertar)) {
-                    PaginaMeta::insert($nuevosMetadatosParaInsertar);
+                // 3. Insertar todos los metadatos en una única consulta.
+                if (!empty($metadatosParaInsertar)) {
+                    PaginaMeta::insert($metadatosParaInsertar);
                 }
             });
 
@@ -175,7 +171,6 @@ class PaginaController
             return redirect('/panel/paginas/create');
         }
     }
-
     /**
      * Muestra el formulario para editar una página existente.
      * @param Request $request
@@ -217,47 +212,44 @@ class PaginaController
 
                 $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
-                // Excluimos los datos meta del guardado de la tabla principal
+                // 1. Actualiza los datos principales de la página.
                 $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
                 $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
 
-                // Borramos los metadatos antiguos para sincronizar
+                // 2. Sincroniza todos los metadatos. Primero, los eliminamos todos.
                 $pagina->metas()->delete();
 
-                // Recolectamos los metadatos del gestor de campos personalizados
-                $metadatosFormulario = $request->post('meta', []);
-                $nuevosMetadatosParaInsertar = [];
+                // 3. Reconstruimos la lista de metadatos a partir del formulario.
+                $metadatosParaInsertar = [];
 
+                // Añadimos los campos personalizados del gestor de metadatos.
+                $metadatosFormulario = $request->post('meta', []);
                 if (is_array($metadatosFormulario)) {
                     foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && strlen(trim($meta['clave'])) <= 255) {
-                            $clave = trim($meta['clave']);
-                            $valor = $meta['valor'] ?? '';
-
-                            if ($valor !== '') {
-                                $nuevosMetadatosParaInsertar[] = [
-                                    'pagina_id'  => $pagina->id,
-                                    'meta_key'   => $clave,
-                                    'meta_value' => $valor,
-                                ];
-                            }
+                        // Solo guardamos si la clave tiene un valor.
+                        if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                            $metadatosParaInsertar[] = [
+                                'pagina_id'  => $pagina->id,
+                                'meta_key'   => trim($meta['clave']),
+                                'meta_value' => $meta['valor'] ?? '' // Permitimos guardar valores vacíos.
+                            ];
                         }
                     }
                 }
 
-                // Añadimos el metadato de la plantilla a la inserción en lote
+                // Añadimos el metadato de la plantilla, solo si se ha seleccionado una.
                 $plantillaSeleccionada = $request->post('_plantilla_pagina');
                 if (!empty($plantillaSeleccionada)) {
-                    $nuevosMetadatosParaInsertar[] = [
+                    $metadatosParaInsertar[] = [
                         'pagina_id'  => $pagina->id,
                         'meta_key'   => '_plantilla_pagina',
                         'meta_value' => $plantillaSeleccionada,
                     ];
                 }
 
-                // Insertamos todos los metadatos en una sola consulta
-                if (!empty($nuevosMetadatosParaInsertar)) {
-                    PaginaMeta::insert($nuevosMetadatosParaInsertar);
+                // 4. Hacemos una única inserción en lote si hay metadatos que guardar.
+                if (!empty($metadatosParaInsertar)) {
+                    PaginaMeta::insert($metadatosParaInsertar);
                 }
             });
 

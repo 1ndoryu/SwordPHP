@@ -50,7 +50,7 @@ echo partial('layouts/admin-header', []);
             <?php
             echo partial(
                 'admin/components/gestor-metadatos',
-                ['metadatos' => $pagina->metas]
+                ['metadatos' => $pagina->metas->where('meta_key', '!=', '_plantilla_pagina')]
             );
             ?>
 

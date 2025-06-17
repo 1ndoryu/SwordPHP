@@ -1,6 +1,7 @@
 <?php
 
 use App\service\PluginPageService;
+use App\service\OpcionService;
 
 if (!function_exists('agregarPaginaAdmin')) {
     /**
@@ -15,5 +16,41 @@ if (!function_exists('agregarPaginaAdmin')) {
     function agregarPaginaAdmin(string $slug, array $opciones)
     {
         PluginPageService::getInstancia()->registrar($slug, $opciones);
+    }
+}
+
+if (!function_exists('obtenerOpcionPlugin')) {
+    /**
+     * Obtiene una opción guardada por un plugin.
+     * Añade un prefijo automático para evitar colisiones.
+     *
+     * @param string $slugPlugin El slug del plugin que guarda la opción.
+     * @param string $nombreOpcion El nombre de la opción.
+     * @param mixed $valorPorDefecto Valor a devolver si la opción no existe.
+     * @return mixed
+     */
+    function obtenerOpcionPlugin(string $slugPlugin, string $nombreOpcion, $valorPorDefecto = null)
+    {
+        $opcionService = new OpcionService();
+        $clavePrefijada = "plugin_{$slugPlugin}_{$nombreOpcion}";
+        return $opcionService->obtenerOpcion($clavePrefijada, $valorPorDefecto);
+    }
+}
+
+if (!function_exists('guardarOpcionPlugin')) {
+    /**
+     * Guarda una opción para un plugin.
+     * Añade un prefijo automático para evitar colisiones.
+     *
+     * @param string $slugPlugin El slug del plugin que guarda la opción.
+     * @param string $nombreOpcion El nombre de la opción.
+     * @param mixed $valor El valor a guardar.
+     * @return bool
+     */
+    function guardarOpcionPlugin(string $slugPlugin, string $nombreOpcion, $valor): bool
+    {
+        $opcionService = new OpcionService();
+        $clavePrefijada = "plugin_{$slugPlugin}_{$nombreOpcion}";
+        return $opcionService->guardarOpcion($clavePrefijada, $valor);
     }
 }

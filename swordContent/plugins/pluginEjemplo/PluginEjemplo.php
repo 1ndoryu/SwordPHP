@@ -16,13 +16,20 @@ if (!defined('SWORD_CORE_PATH')) {
 
 /**
  * 1. Usar una acción para añadir contenido al pie de página.
+ * Ahora usa el valor guardado en las opciones.
  */
 agregarAccion('pieDePagina', 'miPluginEjemplo_agregarContenidoFooter');
 
 function miPluginEjemplo_agregarContenidoFooter()
 {
+    $slugPlugin = 'plugin-ejemplo';
+    $nombreOpcion = 'texto_banner';
+    // Obtenemos la opción guardada, con un valor por defecto si no existe.
+    $textoBanner = obtenerOpcionPlugin($slugPlugin, $nombreOpcion, '🔌 ¡Hola desde el Plugin de Ejemplo! (Valor por defecto)');
+
     echo '<div style="position: fixed; bottom: 10px; right: 10px; background: #007bff; color: white; padding: 15px; border-radius: 5px; font-family: sans-serif; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">';
-    echo '🔌 ¡Hola desde el Plugin de Ejemplo! (Acción: pieDePagina)';
+    // Saneamos el valor ANTES de imprimirlo en el HTML.
+    echo htmlspecialchars($textoBanner);
     echo '</div>';
 }
 
@@ -69,25 +76,46 @@ miPluginEjemplo_registrarPagina();
 
 /**
  * 5. Función que se encarga de renderizar el HTML de la página de ajustes.
+ * Ahora también gestiona el guardado de los datos y usa el helper de formularios.
  *
  * @return string El HTML de la página.
  */
 function miPluginEjemplo_renderizarPagina()
 {
-    // Por ahora, el formulario no guarda nada, eso lo haremos en el siguiente paso.
+    $slugPlugin = 'plugin-ejemplo';
+    $nombreOpcion = 'texto_banner';
+    $mensajeExito = '';
+
+    // Si el formulario ha sido enviado, guardamos los datos.
+    if (request()->method() === 'POST') {
+        $valorOpcion = request()->post($nombreOpcion, '');
+        guardarOpcionPlugin($slugPlugin, $nombreOpcion, $valorOpcion);
+        $mensajeExito = '<div class="alerta alertaExito" style="margin-bottom: 1rem;">Ajustes guardados correctamente.</div>';
+    }
+
+    // Obtenemos el valor actual de la opción para mostrarlo en el campo.
+    $valorActual = obtenerOpcionPlugin($slugPlugin, $nombreOpcion, 'Valor de ejemplo');
+
+    // Usamos el nuevo helper para renderizar el campo de texto.
+    $campoTexto = renderFormPlugin([
+        'tipo' => 'text',
+        'name' => $nombreOpcion,
+        'label' => 'Texto del Banner',
+        'value' => $valorActual,
+        'placeholder' => 'Introduce un texto...',
+        'descripcion' => 'Este texto se mostrará en el banner del pie de página.'
+    ]);
+
+    // Construimos el HTML final del formulario.
     $html = '
         <div class="formulario-contenedor" style="flex: 1; max-width: none;">
             <div class="cuerpo-formulario">
+                ' . $mensajeExito . '
                 <p>Desde aquí puedes configurar el comportamiento del plugin.</p>
                 <hr>
                 <form method="POST" action="">
                     ' . csrf_field() . '
-                    <div class="grupo-formulario">
-                        <label for="opcion_ejemplo"><strong>Texto del Banner</strong></label>
-                        <input type="text" id="opcion_ejemplo" name="opcion_ejemplo" value="Valor de ejemplo" placeholder="Introduce un texto...">
-                        <small>Este texto se podría mostrar en el banner del pie de página.</small>
-                    </div>
-
+                    ' . $campoTexto . '
                     <div class="pie-formulario" style="justify-content: flex-start;">
                         <button type="submit" class="btnN">Guardar Cambios</button>
                     </div>

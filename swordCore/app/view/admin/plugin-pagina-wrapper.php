@@ -6,7 +6,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Ajuste
 <?php // -- COMIENZO DEL CONTENIDO DEL PLUGIN -- 
 ?>
 
-<div class="wrap">
+<div class="wrapPlugin">
     <?php
     // La variable $contenidoPaginaPlugin es el HTML generado por el callback del plugin.
     // Usamos echo directamente porque se espera que el callback genere HTML seguro.

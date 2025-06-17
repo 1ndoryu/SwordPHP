@@ -81,9 +81,11 @@ class PaginaService
     {
         $pagina->fill($datos);
 
-        if ($pagina->isDirty('titulo') || empty($pagina->slug)) {
-            $pagina->slug = \Illuminate\Support\Str::slug($pagina->titulo);
-        }
+        // Determina el slug base. Prioriza el campo 'slug' del formulario.
+        // Si está vacío, usa el título de la página como base.
+        $baseParaSlug = !empty($datos['slug']) ? $datos['slug'] : $pagina->titulo;
+
+        $pagina->slug = $this->asegurarSlugUnico($baseParaSlug, $pagina->id);
 
         return $pagina->save();
     }
@@ -104,19 +106,41 @@ class PaginaService
     }
 
     /**
-     * Genera un slug único para un título.
+     * Genera un slug para un nuevo registro.
      *
      * @param string $titulo
      * @return string
      */
     private function generarSlug(string $titulo): string
     {
-        $slug = Str::slug($titulo);
-        $slugOriginal = $slug;
+        return $this->asegurarSlugUnico($titulo);
+    }
+
+    /**
+     * Sanitiza un texto base y asegura que el slug resultante sea único en la tabla 'paginas'.
+     *
+     * @param string $textoBase El texto a convertir en slug (ej: un título o un slug personalizado).
+     * @param int|null $idExcluir El ID del registro a excluir de la comprobación de unicidad (usado en actualizaciones).
+     * @return string El slug único y sanitizado.
+     */
+    private function asegurarSlugUnico(string $textoBase, ?int $idExcluir = null): string
+    {
+        $slug = Str::slug($textoBase);
+        $slugBase = $slug;
         $contador = 1;
 
-        while (Pagina::where('slug', $slug)->exists()) {
-            $slug = "{$slugOriginal}-{$contador}";
+        while (true) {
+            $query = Pagina::where('slug', $slug);
+
+            if ($idExcluir !== null) {
+                $query->where('id', '!=', $idExcluir);
+            }
+
+            if (!$query->exists()) {
+                break;
+            }
+
+            $slug = "{$slugBase}-{$contador}";
             $contador++;
         }
 

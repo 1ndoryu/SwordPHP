@@ -6,15 +6,16 @@ use App\model\Pagina;
 use App\service\TipoContenidoService;
 use support\Request;
 use support\Response;
+use Illuminate\Support\Str;
 
 /**
- * Controlador genérico para gestionar las operaciones CRUD de los tipos de contenido.
- */
+ * Controlador genérico para gestionar las operaciones CRUD de los tipos de contenido.
+ */
 class TipoContenidoController
 {
     /**
-     * Muestra la lista de entradas para un tipo de contenido específico.
-     */
+     * Muestra la lista de entradas para un tipo de contenido específico.
+     */
     public function index(Request $request, string $slug): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -57,8 +58,8 @@ class TipoContenidoController
     }
 
     /**
-     * Muestra el formulario para crear una nueva entrada.
-     */
+     * Muestra el formulario para crear una nueva entrada.
+     */
     public function create(Request $request, string $slug): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -70,8 +71,8 @@ class TipoContenidoController
     }
 
     /**
-     * Almacena una nueva entrada en la base de datos.
-     */
+     * Almacena una nueva entrada en la base de datos.
+     */
     public function store(Request $request, string $slug): Response
     {
         $this->getConfigOr404($slug);
@@ -113,8 +114,8 @@ class TipoContenidoController
     }
 
     /**
-     * Muestra el formulario para editar una entrada existente.
-     */
+     * Muestra el formulario para editar una entrada existente.
+     */
     public function edit(Request $request, string $slug, int $id): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -133,8 +134,8 @@ class TipoContenidoController
     }
 
     /**
-     * Actualiza una entrada existente en la base de datos.
-     */
+     * Actualiza una entrada existente en la base de datos.
+     */
     public function update(Request $request, string $slug, int $id): Response
     {
         $this->getConfigOr404($slug);
@@ -146,7 +147,11 @@ class TipoContenidoController
 
                 $pagina->titulo = $request->post('titulo');
                 $pagina->contenido = $request->post('contenido', '');
-                $pagina->slug = $this->generarSlug($request->post('titulo'), $id);
+                
+                // Usa el slug del formulario si se proporciona, si no, usa el título
+                $baseParaSlug = $request->post('slug', $request->post('titulo'));
+                $pagina->slug = $this->generarSlug($baseParaSlug, $id);
+
                 $pagina->estado = $request->post('estado', 'borrador');
                 $pagina->save();
 
@@ -174,20 +179,19 @@ class TipoContenidoController
                 }
             });
 
-            // CORRECCIÓN: Usar set() en lugar de flash()
             session()->set('success', 'Entrada actualizada con éxito.');
             return redirect('/panel/' . $slug);
         } catch (\Throwable $e) {
-            // CORRECCIÓN: Usar set() en lugar de flash()
             session()->set('error', 'Error al actualizar la entrada: ' . $e->getMessage());
             session()->set('_old_input', $request->post());
             return redirect('/panel/' . $slug . '/editar/' . $id);
         }
     }
 
+
     /**
-     * Elimina una entrada, asegurándose de que coincida con el tipo de contenido.
-     */
+     * Elimina una entrada, asegurándose de que coincida con el tipo de contenido.
+     */
     public function destroy(Request $request, string $slug, int $id): Response
     {
         $this->getConfigOr404($slug);
@@ -198,8 +202,8 @@ class TipoContenidoController
     }
 
     /**
-     * Obtiene la configuración del tipo de contenido o aborta con un error 404 si no existe.
-     */
+     * Obtiene la configuración del tipo de contenido o aborta con un error 404 si no existe.
+     */
     private function getConfigOr404(string $slug): array
     {
         $config = TipoContenidoService::getInstancia()->obtener($slug);
@@ -210,29 +214,27 @@ class TipoContenidoController
     }
 
     /**
-     * Genera un slug único para un título.
-     * Nota: Esta lógica podría moverse a un servicio o trait en el futuro para reutilizarse.
-     */
-    private function generarSlug(string $titulo, int $id = null): string
+     * Genera un slug único para un título o texto base.
+     */
+    private function generarSlug(string $textoBase, ?int $idExcluir = null): string
     {
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $titulo)));
-        $query = Pagina::where('slug', $slug);
+        $slug = Str::slug($textoBase);
+        $slugBase = $slug;
+        $contador = 1;
 
-        if ($id !== null) {
-            $query->where('id', '!=', $id);
-        }
+        while (true) {
+            $query = Pagina::where('slug', $slug);
 
-        if ($query->exists()) {
-            $i = 1;
-            do {
-                $newSlug = $slug . '-' . $i;
-                $newQuery = Pagina::where('slug', $newSlug);
-                if ($id !== null) {
-                    $newQuery->where('id', '!=', $id);
-                }
-                $i++;
-            } while ($newQuery->exists());
-            return $newSlug;
+            if ($idExcluir !== null) {
+                $query->where('id', '!=', $idExcluir);
+            }
+
+            if (!$query->exists()) {
+                break;
+            }
+
+            $slug = "{$slugBase}-{$contador}";
+            $contador++;
         }
 
         return $slug;

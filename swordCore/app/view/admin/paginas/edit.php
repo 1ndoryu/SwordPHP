@@ -33,6 +33,11 @@ echo partial('layouts/admin-header', []);
             </div>
 
             <div class="grupo-formulario">
+                <label for="slug">Slug (URL)</label>
+                <input type="text" id="slug" name="slug" value="<?php echo htmlspecialchars(old('slug', $pagina->slug ?? '')); ?>">
+            </div>
+
+            <div class="grupo-formulario">
                 <label for="subtitulo">Subtítulo (Opcional)</label>
                 <input type="text" id="subtitulo" name="subtitulo" placeholder="Introduce el subtítulo" value="<?php echo htmlspecialchars(old('subtitulo', $pagina->subtitulo ?? '')); ?>">
             </div>
@@ -53,6 +58,7 @@ echo partial('layouts/admin-header', []);
     </div>
 
     <div class="segundoContenedor">
+
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">

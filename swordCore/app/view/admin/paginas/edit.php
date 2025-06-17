@@ -68,6 +68,25 @@ echo partial('layouts/admin-header', []);
             </select>
         </div>
 
+        <?php if (!empty($plantillasDisponibles)): ?>
+            <div class="grupo-formulario">
+                <label for="plantilla_pagina">Plantilla</label>
+                <select id="plantilla_pagina" name="_plantilla_pagina">
+                    <option value="">Plantilla por defecto</option>
+                    <?php
+                    // Obtener la plantilla guardada para esta página, o la del old input si falló la validación
+                    $plantillaGuardada = old('_plantilla_pagina', $pagina->obtenerMeta('_plantilla_pagina'));
+                    foreach ($plantillasDisponibles as $archivo => $nombre):
+                        $selected = ($archivo === $plantillaGuardada) ? 'selected' : '';
+                    ?>
+                        <option value="<?php echo htmlspecialchars($archivo); ?>" <?php echo $selected; ?>>
+                            <?php echo htmlspecialchars($nombre); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endif; ?>
+
         <div class="pie-formulario">
             <button type="button" class="btnN icono IconoRojo" onclick="eliminarRecurso('/panel/paginas/destroy/<?php echo htmlspecialchars($pagina->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta página? Esta acción no se puede deshacer.')">
                 <?php echo icon('borrar'); ?>

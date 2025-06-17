@@ -13,7 +13,8 @@ return [
     \App\controller\PaginaController::class => function ($container) {
         return new \App\controller\PaginaController(
             $container->make(\App\service\PaginaService::class),
-            $container->make(\App\service\OpcionService::class) // <--- ESTA LÍNEA SE AÑADIÓ
+            $container->make(\App\service\OpcionService::class),
+            $container->make(\App\service\TemaService::class)
         );
     },
 

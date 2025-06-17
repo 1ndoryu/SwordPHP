@@ -67,6 +67,25 @@ echo partial('layouts/admin-header', []);
             </select>
         </div>
 
+        <?php if (!empty($plantillasDisponibles)): ?>
+            <div class="grupo-formulario">
+                <label for="plantilla_pagina">Plantilla</label>
+                <select id="plantilla_pagina" name="_plantilla_pagina">
+                    <option value="">Plantilla por defecto</option>
+                    <?php
+                    // Obtener la plantilla del old input si falló la validación
+                    $plantillaSeleccionada = old('_plantilla_pagina');
+                    foreach ($plantillasDisponibles as $archivo => $nombre):
+                        $selected = ($archivo === $plantillaSeleccionada) ? 'selected' : '';
+                    ?>
+                        <option value="<?php echo htmlspecialchars($archivo); ?>" <?php echo $selected; ?>>
+                            <?php echo htmlspecialchars($nombre); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        <?php endif; ?>
+
         <div class="pie-formulario">
             <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>

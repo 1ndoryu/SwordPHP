@@ -468,7 +468,7 @@ select {
     background: transparent;
     color: #333;
     font-size: 13px;
-    padding: 8px 1.5rem 8px 0; /* Ajuste para que el texto no se monte en la flecha */
+    padding: 6px 1.5rem 8px 0; /* Ajuste para que el texto no se monte en la flecha */
     display: block;
     width: 100%;
     position: relative;

@@ -20,19 +20,23 @@ class PaginaController
     /**
      * @var PaginaService
      * @var OpcionService
+     * @var TemaService
      */
     private PaginaService $paginaService;
     private OpcionService $opcionService;
+    private \App\service\TemaService $temaService;
 
     /**
      * Constructor
      * @param PaginaService $paginaService
      * @param OpcionService $opcionService
+     * @param \App\service\TemaService $temaService
      */
-    public function __construct(PaginaService $paginaService, OpcionService $opcionService)
+    public function __construct(PaginaService $paginaService, OpcionService $opcionService, \App\service\TemaService $temaService)
     {
         $this->paginaService = $paginaService;
         $this->opcionService = $opcionService;
+        $this->temaService = $temaService;
     }
 
     /**
@@ -91,12 +95,16 @@ class PaginaController
 
     public function create(Request $request): Response
     {
-        // REFACTOR: Extraer mensajes de error de la sesión para pasarlos a la vista.
+        // Extraer mensajes de error de la sesión para pasarlos a la vista.
         $errorMessage = $request->session()->pull('error');
+
+        // Obtenemos las plantillas de página disponibles desde el servicio de temas.
+        $plantillasDisponibles = $this->temaService->obtenerPlantillasDePagina();
 
         return view('admin/paginas/create', [
             'tituloPagina' => 'Crear Nueva Página',
-            'errorMessage' => $errorMessage
+            'errorMessage' => $errorMessage,
+            'plantillasDisponibles' => $plantillasDisponibles // Pasamos las plantillas a la vista.
         ]);
     }
     /**
@@ -118,11 +126,11 @@ class PaginaController
 
         try {
             \Illuminate\Database\Capsule\Manager::transaction(function () use ($request) {
-                // 1. Crear la página principal
-                $datosPrincipales = $request->except(['meta', '_csrf']);
+                // 1. Crear la página principal, excluyendo los campos meta.
+                $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
                 $pagina = $this->paginaService->crearPagina($datosPrincipales);
 
-                // 2. Procesar y guardar los metadatos
+                // 2. Procesar y guardar los metadatos del gestor de campos.
                 $metadatosFormulario = $request->post('meta', []);
                 $nuevosMetadatosParaInsertar = [];
 
@@ -143,6 +151,17 @@ class PaginaController
                     }
                 }
 
+                // 3. Añadir el metadato de la plantilla seleccionada.
+                $plantillaSeleccionada = $request->post('_plantilla_pagina');
+                if (!empty($plantillaSeleccionada)) {
+                    $nuevosMetadatosParaInsertar[] = [
+                        'pagina_id'  => $pagina->id,
+                        'meta_key'   => '_plantilla_pagina',
+                        'meta_value' => $plantillaSeleccionada,
+                    ];
+                }
+
+                // 4. Insertar todos los metadatos en lote.
                 if (!empty($nuevosMetadatosParaInsertar)) {
                     PaginaMeta::insert($nuevosMetadatosParaInsertar);
                 }
@@ -168,14 +187,16 @@ class PaginaController
     {
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
-
-            // REFACTOR: Extraer mensaje de error de la sesión.
             $errorMessage = $request->session()->pull('error');
+
+            // Obtenemos las plantillas de página disponibles desde el servicio de temas.
+            $plantillasDisponibles = $this->temaService->obtenerPlantillasDePagina();
 
             return view('admin/paginas/edit', [
                 'pagina' => $pagina,
                 'tituloPagina' => 'Editar Página',
-                'errorMessage' => $errorMessage
+                'errorMessage' => $errorMessage,
+                'plantillasDisponibles' => $plantillasDisponibles // Pasamos las plantillas a la vista.
             ]);
         } catch (NotFoundException $e) {
             $request->session()->set('error', 'La página que intentas editar no existe.');
@@ -196,11 +217,14 @@ class PaginaController
 
                 $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
-                $datosPrincipales = $request->except(['meta', '_csrf']);
+                // Excluimos los datos meta del guardado de la tabla principal
+                $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
                 $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
 
+                // Borramos los metadatos antiguos para sincronizar
                 $pagina->metas()->delete();
 
+                // Recolectamos los metadatos del gestor de campos personalizados
                 $metadatosFormulario = $request->post('meta', []);
                 $nuevosMetadatosParaInsertar = [];
 
@@ -213,28 +237,36 @@ class PaginaController
                             if ($valor !== '') {
                                 $nuevosMetadatosParaInsertar[] = [
                                     'pagina_id'  => $pagina->id,
-                                    'meta_key'   => $clave, // CORRECCIÓN: Nombre de columna correcto.
-                                    'meta_value' => $valor, // CORRECCIÓN: Nombre de columna correcto.
+                                    'meta_key'   => $clave,
+                                    'meta_value' => $valor,
                                 ];
                             }
                         }
                     }
                 }
 
+                // Añadimos el metadato de la plantilla a la inserción en lote
+                $plantillaSeleccionada = $request->post('_plantilla_pagina');
+                if (!empty($plantillaSeleccionada)) {
+                    $nuevosMetadatosParaInsertar[] = [
+                        'pagina_id'  => $pagina->id,
+                        'meta_key'   => '_plantilla_pagina',
+                        'meta_value' => $plantillaSeleccionada,
+                    ];
+                }
+
+                // Insertamos todos los metadatos en una sola consulta
                 if (!empty($nuevosMetadatosParaInsertar)) {
                     PaginaMeta::insert($nuevosMetadatosParaInsertar);
                 }
             });
 
-            // CORRECCIÓN: Usar el método set() de la sesión a través del objeto Request.
             $request->session()->set('success', 'Página actualizada con éxito.');
             return redirect('/panel/paginas');
         } catch (NotFoundException $e) {
-            // CORRECCIÓN: Usar el método set() de la sesión.
             $request->session()->set('error', 'La página que intentas actualizar no existe.');
             return redirect('/panel/paginas');
         } catch (Throwable $e) {
-            // CORRECCIÓN: Usar set() para el mensaje de error y para guardar el "old input".
             $request->session()->set('error', 'Ocurrió un error al actualizar la página: ' . $e->getMessage());
             $request->session()->set('_old_input', $request->all());
             return redirect('/panel/paginas/edit/' . $id);

@@ -137,4 +137,51 @@ class TemaService
 
         return false;
     }
+
+    /**
+     * Obtiene la lista de plantillas de página disponibles en el tema activo.
+     *
+     * Escanea los archivos .php en el directorio raíz del tema activo y busca
+     * una cabecera de comentario especial para identificarlas como plantillas.
+     * Ejemplo de cabecera: /* Template Name: Mi Plantilla Personalizada * /
+     *
+     * @return array Un array asociativo [nombre_archivo => nombre_plantilla].
+     */
+    public function obtenerPlantillasDePagina(): array
+    {
+        $plantillas = [];
+        $temaActivoSlug = config('theme.active_theme');
+        $rutaTemaActivo = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $temaActivoSlug;
+
+        if (!is_dir($rutaTemaActivo)) {
+            return [];
+        }
+
+        try {
+            $iterador = new \DirectoryIterator($rutaTemaActivo);
+            foreach ($iterador as $archivoInfo) {
+                if ($archivoInfo->isFile() && $archivoInfo->getExtension() === 'php') {
+                    // Leemos solo los primeros 8KB, que es más que suficiente para las cabeceras.
+                    $contenido = file_get_contents($archivoInfo->getPathname(), false, null, 0, 8192);
+
+                    // Expresión regular para buscar 'Template Name:' en un comentario de bloque PHP.
+                    if (preg_match('/^[ \t\/*#@]*Template Name:(.*)$/mi', $contenido, $match)) {
+                        if (!empty($match[1])) {
+                            $nombrePlantilla = trim($match[1]);
+                            $nombreArchivo = $archivoInfo->getFilename();
+                            $plantillas[$nombreArchivo] = $nombrePlantilla;
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \support\Log::error("Error al escanear plantillas de página en el tema '{$temaActivoSlug}': " . $e->getMessage());
+            return [];
+        }
+
+        // Ordenamos las plantillas por nombre para una mejor visualización en el selector.
+        asort($plantillas);
+
+        return $plantillas;
+    }
 }

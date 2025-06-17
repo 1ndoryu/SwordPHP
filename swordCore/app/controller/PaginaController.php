@@ -9,7 +9,7 @@ use support\Request;
 use support\Response;
 use Throwable;
 use Webman\Exception\NotFoundException;
-
+use App\service\OpcionService;
 
 /**
  * Class PaginaController
@@ -19,16 +19,20 @@ class PaginaController
 {
     /**
      * @var PaginaService
+     * @var OpcionService
      */
     private PaginaService $paginaService;
+    private OpcionService $opcionService;
 
     /**
      * Constructor
      * @param PaginaService $paginaService
+     * @param OpcionService $opcionService
      */
-    public function __construct(PaginaService $paginaService)
+    public function __construct(PaginaService $paginaService, OpcionService $opcionService)
     {
         $this->paginaService = $paginaService;
+        $this->opcionService = $opcionService;
     }
 
     /**
@@ -36,7 +40,6 @@ class PaginaController
      * @param Request $request
      * @return Response
      */
-
     public function index(Request $request): Response
     {
         $porPagina = 10;
@@ -53,16 +56,22 @@ class PaginaController
 
         $offset = ($paginaActual - 1) * $porPagina;
 
-        $paginas = Pagina::with('autor')
-            ->where('tipocontenido', 'pagina')
-            ->orderBy('created_at', 'desc')
-            ->offset($offset)
-            ->limit($porPagina)
-            ->get();
+        // Obtener el slug de la página de inicio para la ordenación y la vista.
+        $slugPaginaInicio = $this->opcionService->obtenerOpcion('pagina_de_inicio_slug');
+
+        $query = Pagina::with('autor')->where('tipocontenido', 'pagina');
+
+        // Aplicar ordenación personalizada: página de inicio primero.
+        if ($slugPaginaInicio) {
+            $query->orderByRaw("CASE WHEN slug = ? THEN 0 ELSE 1 END ASC", [$slugPaginaInicio]);
+        }
+        $query->orderBy('created_at', 'desc');
+
+        $paginas = $query->offset($offset)->limit($porPagina)->get();
 
         $successMessage = $request->session()->pull('success');
         $errorMessage = $request->session()->pull('error');
-        
+
         return view('admin/paginas/index', [
             'paginas' => $paginas,
             'tituloPagina' => 'Gestión de Páginas',
@@ -70,6 +79,7 @@ class PaginaController
             'totalPaginas' => $totalPaginas,
             'successMessage' => $successMessage,
             'errorMessage' => $errorMessage,
+            'slugPaginaInicio' => $slugPaginaInicio, // Pasar el slug a la vista
         ]);
     }
 

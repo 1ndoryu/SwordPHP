@@ -24,13 +24,13 @@ $metadatos = $metadatos ?? collect([]);
             <div class="metaPar">
                 <div class="metaPar-clave">
                     <label for="meta_clave_<?= $index ?>">Nombre del campo</label>
-                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente. 
+                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente.
                     ?>
                     <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($meta->meta_key ?? '') ?>" placeholder="ej: autor_invitado">
                 </div>
                 <div class="metaPar-valor">
                     <label for="meta_valor_<?= $index ?>">Valor</label>
-                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente. 
+                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente.
                     ?>
                     <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="1" placeholder="Valor del campo"><?= htmlspecialchars($meta->meta_value ?? '') ?></textarea>
                 </div>
@@ -41,7 +41,7 @@ $metadatos = $metadatos ?? collect([]);
         <?php endforeach; ?>
     </div>
 
-    <button type="button " class="btnN" id="agregarMetaBtn">Agregar Campo</button>
+    <button type="button" class="btnN" id="agregarMetaBtn">Agregar Campo</button>
 </div>
 
 <script>
@@ -50,7 +50,10 @@ $metadatos = $metadatos ?? collect([]);
         if (!contenedor) return;
 
         const agregarBtn = document.getElementById('agregarMetaBtn');
+        const metadatosExistentesContenedor = document.getElementById('metadatosExistentes');
         let metaIndex = <?= $metadatos->count() ?>;
+
+        if (!agregarBtn || !metadatosExistentesContenedor) return;
 
         agregarBtn.addEventListener('click', function() {
             const nuevoParHtml = `
@@ -68,7 +71,7 @@ $metadatos = $metadatos ?? collect([]);
                 </div>
             </div>
         `;
-            document.getElementById('metadatosExistentes').insertAdjacentHTML('beforeend', nuevoParHtml);
+            metadatosExistentesContenedor.insertAdjacentHTML('beforeend', nuevoParHtml);
             metaIndex++;
         });
 

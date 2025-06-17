@@ -2,6 +2,8 @@
 
 namespace App\service;
 
+use support\Config;
+
 /**
  * Servicio para gestionar los temas.
  *
@@ -126,6 +128,13 @@ class TemaService
         }
 
         // 5. Escribir el nuevo contenido de vuelta en el archivo.
-        return file_put_contents($rutaConfig, $nuevoContenido) !== false;
+        if (file_put_contents($rutaConfig, $nuevoContenido) !== false) {
+            // **SOLUCIÓN:** Actualiza la configuración en memoria para el worker actual.
+            // Esto evita la necesidad de una segunda recarga para ver el cambio.
+            Config::set('theme.active_theme', $slug);
+            return true;
+        }
+
+        return false;
     }
 }

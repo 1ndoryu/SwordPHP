@@ -43,9 +43,12 @@ echo partial('layouts/admin-header', []);
                             </div>
                             <div class="infoItem infoTitulo">
                                 <span><?php echo htmlspecialchars($pagina->titulo); ?></span>
+                                <?php if (isset($slugPaginaInicio) && $pagina->slug === $slugPaginaInicio): ?>
+                                    <span class="badge-inicio"> - Inicio</span>
+                                <?php endif; ?>
                             </div>
                             <div class="infoItem" style="display: none">
-                            
+                                
                                 <span><?php echo htmlspecialchars($pagina->id); ?></span>
                             </div>
                             <div class="infoItem">
@@ -97,7 +100,7 @@ echo partial('layouts/admin-header', []);
     </div>
 </div>
 
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+<?php 
 ?>
 
 <?php

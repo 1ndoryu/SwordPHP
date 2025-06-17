@@ -5,10 +5,9 @@ return [
     'default' => [
         'handlers' => [
             [
-                'class' => Monolog\Handler\RotatingFileHandler::class,
+                'class' => Monolog\Handler\StreamHandler::class,
                 'constructor' => [
-                    runtime_path() . '/logs/webman.log', // Log general de la aplicación
-                    7, // Número máximo de archivos a rotar
+                    runtime_path() . '/logs/webman.log', // Archivo único para el canal por defecto
                     Monolog\Logger::DEBUG, // Nivel mínimo de log a registrar
                 ],
                 'formatter' => [
@@ -22,10 +21,9 @@ return [
     'database' => [
         'handlers' => [
             [
-                'class' => Monolog\Handler\RotatingFileHandler::class,
+                'class' => Monolog\Handler\StreamHandler::class,
                 'constructor' => [
-                    runtime_path() . '/logs/database.log', // Archivo específico para BD
-                    7,
+                    runtime_path() . '/logs/database.log', // Archivo único para BD
                     Monolog\Logger::DEBUG, // Registramos todo para depuración
                 ],
                 'formatter' => [
@@ -39,10 +37,9 @@ return [
     'security' => [
         'handlers' => [
             [
-                'class' => Monolog\Handler\RotatingFileHandler::class,
+                'class' => Monolog\Handler\StreamHandler::class,
                 'constructor' => [
-                    runtime_path() . '/logs/security.log', // Archivo específico para seguridad
-                    7,
+                    runtime_path() . '/logs/security.log', // Archivo único para seguridad
                     Monolog\Logger::INFO, // Registramos desde nivel informativo hacia arriba
                 ],
                 'formatter' => [

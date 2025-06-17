@@ -257,7 +257,7 @@ function miPluginEjemplo_registrarWidgetDashboard()
         20 // Prioridad
     );
 }
-miPluginEjemplo_registrarWidgetDashboard();
+# miPluginEjemplo_registrarWidgetDashboard();
 
 /**
  * 8. Función que renderiza el contenido del widget del dashboard.

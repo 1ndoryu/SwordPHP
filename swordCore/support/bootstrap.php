@@ -70,6 +70,29 @@ if (file_exists($themeFunctionsFile)) {
 }
 // ===================== FIN: CARGA DE FUNCTIONS.PHP DEL TEMA ======================
 
+// ===================== INICIO: CARGA DE PLUGINS ACTIVOS ======================
+try {
+    // Como el contenedor de DI podría no estar completamente disponible, instanciamos el servicio manualmente.
+    $opcionService = new \App\service\OpcionService();
+    $activePlugins = $opcionService->obtenerOpcion('active_plugins', []);
+
+    if (is_array($activePlugins)) {
+        foreach ($activePlugins as $pluginSlug) {
+            $pluginFile = SWORD_PLUGINS_PATH . DIRECTORY_SEPARATOR . $pluginSlug . DIRECTORY_SEPARATOR . $pluginSlug . '.php';
+            if (is_file($pluginFile)) {
+                require_once $pluginFile;
+            } else {
+                // Registrar un error si el archivo de un plugin activo no se encuentra.
+                Log::warning("El archivo principal del plugin activo '{$pluginSlug}' no se encontró en: {$pluginFile}");
+            }
+        }
+    }
+} catch (\Throwable $e) {
+    // Registrar cualquier error que ocurra durante la carga de plugins.
+    Log::error("Ocurrió un error crítico durante la carga de plugins: " . $e->getMessage());
+}
+// ====================== FIN: CARGA DE PLUGINS ACTIVOS =======================
+
 if ($timezone = config('app.default_timezone')) {
     date_default_timezone_set($timezone);
 }

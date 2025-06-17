@@ -13,6 +13,7 @@ use App\controller\AjaxController;
 use App\controller\TipoContenidoController;
 use App\service\TipoContenidoService;
 use App\controller\MediaController;
+use App\controller\PluginController;
 use App\controller\UsuarioController;
 use App\controller\TemaController;
 use support\Log;
@@ -77,6 +78,14 @@ $panelGroup = Route::group('/panel', function () {
     // Temas
     Route::get('/temas', [TemaController::class, 'index']);
     Route::post('/temas/activar/{slug}', [TemaController::class, 'activar']);
+
+    // Plugins
+    // Plugins
+    Route::group('/plugins', function () {
+        Route::get('', [PluginController::class, 'index']);
+        Route::post('/activar/{slug}', [PluginController::class, 'activar']);
+        Route::post('/desactivar/{slug}', [PluginController::class, 'desactivar']);
+    });
 
     // Ajustes Generales
     Route::get('/ajustes', [App\controller\AjustesController::class, 'index']);

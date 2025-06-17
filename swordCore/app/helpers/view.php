@@ -166,7 +166,7 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
                 continue;
             }
             $menuItems[$slug] = [
-                'url'   => '/panel/' . $slug,
+                'url'  => '/panel/' . $slug,
                 'icon'  => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
                 'text'  => $config['labels']['name'] ?? ucfirst($slug),
             ];
@@ -174,6 +174,7 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
 
         $menuItems['media'] = ['url' => '/panel/media', 'icon' => 'fa-solid fa-photo-film', 'text' => 'Medios'];
         $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'icon' => 'fa-solid fa-users', 'text' => 'Usuarios'];
+        $menuItems['plugins'] = ['url' => '/panel/plugins', 'icon' => 'fa-solid fa-puzzle-piece', 'text' => 'Plugins'];
         $menuItems['temas'] = ['url' => '/panel/temas', 'icon' => 'fa-solid fa-palette', 'text' => 'Temas'];
         $menuItems['ajustes'] = ['url' => '/panel/ajustes', 'icon' => 'fa-solid fa-gears', 'text' => 'Ajustes'];
 
@@ -187,11 +188,11 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
             }
             $activeClass = $isActive ? 'active' : '';
             $html .= <<<HTML
-                <li class="nav-item">
-                    <a class="nav-link {$activeClass}" href="{$item['url']}">
-                        <span>{$item['text']}</span>
-                    </a>
-                </li>
+            <li class="nav-item">
+                <a class="nav-link {$activeClass}" href="{$item['url']}">
+                    <span>{$item['text']}</span>
+                </a>
+            </li>
 HTML;
         }
 

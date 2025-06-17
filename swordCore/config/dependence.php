@@ -19,9 +19,10 @@ return [
     },
 
     // Le decimos al contenedor cómo construir PaginaPublicaController.
-    \App\controller\PaginaPublicaController::class => function ($container) {
-        return new \App\controller\PaginaPublicaController(
-            $container->make(\App\service\PaginaService::class)
+    \App\controller\PluginController::class => function ($container) {
+        return new \App\controller\PluginController(
+            $container->make(\App\service\PluginService::class),
+            $container->make(\App\service\OpcionService::class)
         );
-    }
+    },
 ];

@@ -9,7 +9,7 @@ getHeader();
 
 <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
-<h1><?php echo htmlspecialchars($pagina->titulo); ?></h1> 
+<h1><?php echo htmlspecialchars(aplicarFiltro('elTitulo', $pagina->titulo, $pagina)); ?></h1>
 <div>
     <?php
     // NOTA DE SEGURIDAD: Se usa 'echo' directamente para renderizar HTML.

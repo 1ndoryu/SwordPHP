@@ -11,8 +11,7 @@
 
 // Encolamos los assets necesarios para el panel.
 // Esto equivale a las secciones @estilos y @scripts del layout de Blade.
-assetService()->encolarDirectorio('/css/panel', 'css');
-assetService()->encolarDirectorio('/js/panel', 'js');
+
 
 // Obtenemos la información del usuario actual.
 $usuario = usuarioActual();

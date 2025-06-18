@@ -13,9 +13,23 @@ class MediaService
             throw new \Exception('El archivo no es válido.');
         }
 
-        // Obtenemos el tamaño y tipo MIME ANTES de mover el archivo.
         $fileSize = $archivo->getSize();
+        $extension = strtolower($archivo->getUploadExtension());
+
+        // Lógica mejorada para obtener el MIME type
         $mimeType = $archivo->getUploadMimeType();
+        if (empty($mimeType) || $mimeType === 'application/octet-stream') {
+            $extensionToMimeMap = [
+                'jpg'  => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png'  => 'image/png',
+                'gif'  => 'image/gif',
+                'webp' => 'image/webp',
+                'svg'  => 'image/svg+xml',
+                'ico'  => 'image/x-icon',
+            ];
+            $mimeType = $extensionToMimeMap[$extension] ?? 'application/octet-stream';
+        }
 
         $año = date('Y');
         $mes = date('m');
@@ -28,23 +42,17 @@ class MediaService
 
         $nombreOriginal = pathinfo($archivo->getUploadName(), PATHINFO_FILENAME);
         $titulo = $this->sanitizarTitulo($nombreOriginal);
-        $extension = strtolower($archivo->getUploadExtension());
         $nombreArchivo = $this->generarNombreUnico($titulo, $extension, $directorioDestino, $usuarioId);
 
         $rutaCompleta = $directorioDestino . DIRECTORY_SEPARATOR . $nombreArchivo;
-
-        // Ahora sí, movemos el archivo a su destino final.
         $archivo->move($rutaCompleta);
-
         $rutaRelativa = $año . '/' . $mes . '/' . $nombreArchivo;
 
         $media = new Media();
-        $media->idautor = $usuarioId; // CORREGIDO
+        $media->idautor = $usuarioId;
         $media->titulo = $titulo;
-        $media->rutaarchivo = $rutaRelativa; // CORREGIDO
-        $media->tipomime = $mimeType; // CORREGIDO
-
-        // CORREGIDO: Guardar datos extra en la columna JSONB
+        $media->rutaarchivo = $rutaRelativa;
+        $media->tipomime = $mimeType;
         $media->metadata = [
             'tamaño_bytes' => $fileSize,
             'nombre_original' => $archivo->getUploadName()

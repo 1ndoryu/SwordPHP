@@ -118,3 +118,6 @@ function icon($nombre)
     return ''; // Return empty string if not found
 }
 initIconos();
+
+assetService()->encolarDirectorio('/css/panel', 'css');
+assetService()->encolarDirectorio('/js/panel', 'js');

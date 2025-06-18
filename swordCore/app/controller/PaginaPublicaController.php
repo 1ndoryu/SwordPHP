@@ -5,6 +5,7 @@ namespace App\controller;
 use App\service\SwordQuery;
 use support\Request;
 use support\Response;
+use App\service\OpcionService;
 
 class PaginaPublicaController
 {
@@ -38,9 +39,6 @@ class PaginaPublicaController
             return response("<h1>404 | Página No Encontrada</h1><p>No se pudo determinar el contenido a mostrar desde la URL.</p>", 404);
         }
 
-        // En el futuro, los parámetros de fecha ($año, $mes, $dia) se podrían usar
-        // para desambiguar slugs o para validación adicional.
-
         // 1. Crear la consulta principal para la página/entrada solicitada.
         $swordConsultaPrincipal = new SwordQuery($argumentos);
 
@@ -49,12 +47,34 @@ class PaginaPublicaController
             return response("<h1>404 | Página No Encontrada</h1>", 404);
         }
 
-        // 3. Accedemos a la primera entrada solo para determinar la plantilla a usar.
+        // 3. Accedemos a la primera entrada para determinar la plantilla a usar.
         $entradaParaPlantilla = $swordConsultaPrincipal->entradas->first();
+        $tipoContenido = $entradaParaPlantilla->tipocontenido;
+        $nombreArchivoPlantilla = null;
 
-        // Plantilla por defecto.
+        // --- Lógica de Selección de Plantilla con Prioridad ---
+
+        // Prioridad 1: Ajuste del Tipo de Contenido (para CPTs)
+        if ($tipoContenido !== 'pagina') {
+            $opcionService = new OpcionService();
+            $ajustesCPT = $opcionService->obtenerOpcion("ajustes_cpt_{$tipoContenido}");
+            if (!empty($ajustesCPT['plantilla_single'])) {
+                $nombreArchivoPlantilla = $ajustesCPT['plantilla_single'];
+            }
+        }
+
+        // Prioridad 2: Metadato de la página individual (principalmente para 'paginas')
+        // Se aplica si no se encontró una plantilla en el paso anterior.
+        if (is_null($nombreArchivoPlantilla)) {
+            $metaPlantilla = $entradaParaPlantilla->obtenerMeta('_plantilla_pagina');
+            if (!empty($metaPlantilla)) {
+                $nombreArchivoPlantilla = $metaPlantilla;
+            }
+        }
+
+        // 4. Determinar la plantilla final a usar.
+        // Por ahora, el fallback por defecto si no se encuentra nada es 'pagina'.
         $plantillaAUsar = 'pagina';
-        $nombreArchivoPlantilla = $entradaParaPlantilla->obtenerMeta('_plantilla_pagina');
 
         if (!empty($nombreArchivoPlantilla)) {
             $rutaCompletaPlantilla = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . config('theme.active_theme') . DIRECTORY_SEPARATOR . $nombreArchivoPlantilla;
@@ -63,7 +83,7 @@ class PaginaPublicaController
             }
         }
 
-        // 4. Renderizar la vista. La plantilla ahora es responsable de ejecutar el loop.
+        // 5. Renderizar la vista. La plantilla ahora es responsable de ejecutar el loop.
         return view($plantillaAUsar, []);
     }
 }

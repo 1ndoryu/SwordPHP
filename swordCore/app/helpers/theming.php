@@ -138,25 +138,50 @@ if (!function_exists('elEnlacePermanente')) {
     }
 }
 
+if (!function_exists('obtenerEnlacePermanenteEntrada')) {
+    /**
+     * Obtiene la URL (enlace permanente) para una entrada específica.
+     *
+     * @param \App\model\Pagina $entrada El objeto de la entrada (página, post, etc.).
+     * @return string La URL completa del enlace permanente.
+     */
+    function obtenerEnlacePermanenteEntrada(\App\model\Pagina $entrada): string
+    {
+        $opcionService = new \App\service\OpcionService();
+        $estructura = $opcionService->obtenerOpcion('permalink_structure', '/%slug%/');
+
+        $reemplazos = [
+            '%año%' => $entrada->created_at->format('Y'),
+            '%mes%' => $entrada->created_at->format('m'),
+            '%dia%' => $entrada->created_at->format('d'),
+            '%slug%' => $entrada->slug,
+            '%id%'   => $entrada->id,
+        ];
+
+        $rutaRelativa = str_replace(array_keys($reemplazos), array_values($reemplazos), $estructura);
+
+        $rutaLimpia = trim($rutaRelativa, '/');
+        $baseUrl = rtrim(config('app.url', ''), '/');
+
+        return $baseUrl . '/' . $rutaLimpia;
+    }
+}
+
 if (!function_exists('obtenerEnlacePermanente')) {
     /**
-     * Obtiene la URL (enlace permanente) de la entrada actual.
+     * Obtiene la URL (enlace permanente) de la entrada actual del loop.
      *
      * @return string
      */
     function obtenerEnlacePermanente(): string
     {
         global $entrada;
-        if (!isset($entrada->slug)) {
+        if (!$entrada instanceof \App\model\Pagina) {
             return '';
         }
-
-        // TODO: En el futuro, usar un helper de URL del sitio si existe.
-        $baseUrl = rtrim(config('app.url', ''), '/');
-        return $baseUrl . '/' . $entrada->slug;
+        return obtenerEnlacePermanenteEntrada($entrada);
     }
 }
-
 
 if (!function_exists('sw_head')) {
     /**

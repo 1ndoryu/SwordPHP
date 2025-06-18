@@ -24,8 +24,8 @@ El objetivo de Sword es combinar la simplicidad y extensibilidad que los desarro
 -   **Separación de Código y Contenido:** Una estricta separación entre el núcleo del sistema (`swordCore`) y el contenido del usuario (`swordContent`), incluyendo temas, plugins y archivos multimedia.
 -   **Facilidad para Desarrolladores de Temas:** Los desarrolladores de temas pueden añadir lógica y funcionalidades usando un archivo `functions.php` y helpers globales, sin necesidad de entender la arquitectura interna del núcleo.
 -   **Sin Frameworks CSS/JS Opinados:** El núcleo del panel de administración no depende de frameworks como Bootstrap o Tailwind, ofreciendo un lienzo limpio y ligero.
--   **Instalación Sencilla:** Inspirado en WordPress, la instalación se basa en la creación de tablas iniciales mediante un script, en lugar de un sistema de migraciones complejo.
--   **Modularidad:** La arquitectura está diseñada para ser extendida a través de un futuro sistema de plugins, manteniendo el núcleo lo más ligero posible.
+-   **Instalación Sencilla:** Inspirado en WordPress, la instalación se realiza a través de un intuitivo instalador web que configura la base de datos y los ajustes iniciales del sitio.
+-   **Modularidad:** La arquitectura está diseñada para ser extendida a través de un sistema de plugins y hooks (acciones y filtros), manteniendo el núcleo lo más ligero posible.
 
 ---
 
@@ -40,9 +40,10 @@ El objetivo de Sword es combinar la simplicidad y extensibilidad que los desarro
 
 ## ✨ Características Actuales
 
+-   **Instalador Web:** Proceso de instalación guiado desde el navegador para configurar la base de datos y el sitio por primera vez.
 -   **Núcleo del Sistema:** Basado en Webman para un alto rendimiento.
 -   **Autenticación:** Sistema completo de registro, inicio y cierre de sesión.
--   **Panel de Administración:** Interfaz de administración segura con roles de usuario (admin, suscriptor).
+-   **Panel de Administración:** Interfaz de administración segura con roles de usuario (admin, suscriptor) y widgets en el dashboard.
 -   **Gestión de Contenidos (CRUD):**
     -   **Páginas:** Creación, edición y eliminación de páginas.
     -   **Tipos de Contenido Personalizados (Post Types):** Sistema para registrar y gestionar tipos de contenido genéricos (ej: proyectos, noticias).
@@ -51,9 +52,16 @@ El objetivo de Sword es combinar la simplicidad y extensibilidad que los desarro
 -   **Gestión de Usuarios (CRUD):** Creación, edición y eliminación de usuarios desde el panel.
 -   **Sistema de Temas:**
     -   Arquitectura de temas que separa la lógica del núcleo.
-    -   Carga de `functions.php` del tema activo.
+    -   Carga de `functions.php` y plantillas de página (`Template Name: ...`) del tema activo.
     -   Helpers globales como `getHeader()`, `getFooter()` para la construcción de plantillas.
--   **Gestor de Assets:** Funciones globales (`encolarEstilo`, `encolarScript`) para añadir CSS y JS desde los temas, de forma similar a WordPress.
+-   **Sistema de Plugins:**
+    -   Activación y desactivación de plugins desde el panel.
+    -   Los plugins pueden añadir menús y páginas de ajustes al panel de administración.
+-   **Hooks (Acciones y Filtros):** Sistema completo para extender funcionalidades del núcleo y de otros plugins.
+-   **Theming con "The Loop":** Funciones de plantilla globales (`hayEntradas`, `laEntrada`, `elTitulo`, `elContenido`, etc.) para facilitar la creación de temas de forma similar a WordPress.
+-   **Gestor de Assets:** Funciones globales (`encolarEstilo`, `encolarScript`) para añadir CSS y JS desde los temas y plugins.
+-   **Sistema de Shortcodes:** API para registrar y procesar shortcodes en el contenido.
+-   **Ajustes del Sitio:** Panel de control para configurar los ajustes generales (título, descripción), de lectura (página de inicio) y enlaces permanentes.
 
 ---
 
@@ -63,55 +71,51 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 
 ### ✅ Equivalencias Directas y Conceptuales
 
-| Función / Método Sword                   | Equivalente WordPress                    |
-| :--------------------------------------- | :--------------------------------------- |
-| `encolarEstilo('id', 'ruta')`            | `wp_enqueue_style('handle', 'src')`      |
-| `encolarScript('id', 'ruta')`            | `wp_enqueue_script('handle', 'src')`     |
-| `assetService()->localizarScript(...)`   | `wp_localize_script(...)`                |
-| `rutaTema('path/recurso.css')`           | `get_theme_file_uri('path/file.css')`    |
-| `ajaxAccion('nombre', $cb)`              | `add_action('wp_ajax_nombre', $cb)`      |
-| `usuarioActual()`                        | `wp_get_current_user()`                  |
-| `idUsuarioActual()`                      | `get_current_user_id()`                  |
-| `!is_null(usuarioActual())`              | `is_user_logged_in()`                    |
-| `obtenerMetaUser()`                      | `get_user_meta()`                        |
-| `guardarMetaUser()`                      | `update_user_meta()` / `add_user_meta()` |
-| `eliminarMetaUser()`                     | `delete_user_meta()`                     |
-| `$pagina->guardarMeta('clave', 'valor')` | `update_post_meta($post_id, ...)`        |
-| `$pagina->obtenerMeta('clave')`          | `get_post_meta($post_id, ..., true)`     |
-| `$pagina->eliminarMeta('clave')`         | `delete_post_meta($post_id, ...)`        |
-| `$opcionService->guardarOpcion(...)`     | `update_option('name', 'value')`         |
-| `$opcionService->obtenerOpcion(...)`     | `get_option('name')`                     |
-| `getHeader()`                            | `get_header()`                           |
-| `getFooter()`                            | `get_footer()`                           |
+| Función / Método Sword                   | Equivalente WordPress                     |
+| :--------------------------------------- | :---------------------------------------- |
+| `agregarAccion('hook', $cb)`             | `add_action('hook', $cb)`                 |
+| `hacerAccion('hook', ...$args)`          | `do_action('hook', ...$args)`             |
+| `agregarFiltro('hook', $cb)`             | `add_filter('hook', $cb)`                 |
+| `aplicarFiltro('hook', $val, ...$args)`  | `apply_filters('hook', $val, ...$args)`  |
+| `encolarEstilo('id', 'ruta')`            | `wp_enqueue_style('handle', 'src')`       |
+| `encolarScript('id', 'ruta')`            | `wp_enqueue_script('handle', 'src')`      |
+| `new SwordQuery($args)`                  | `new WP_Query($args)`                     |
+| `hayEntradas()`                          | `have_posts()`                            |
+| `laEntrada()`                            | `the_post()`                              |
+| `elTitulo()`                             | `the_title()`                             |
+| `elContenido()`                          | `the_content()`                           |
+| `elEnlacePermanente()`                   | `the_permalink()`                         |
+| `obtenerEnlacePermanenteEntrada($e)`     | `get_permalink($post)`                    |
+| `getHeader()`                            | `get_header()`                            |
+| `getFooter()`                            | `get_footer()`                            |
+| `usuarioActual()`                        | `wp_get_current_user()`                   |
+| `idUsuarioActual()`                      | `get_current_user_id()`                   |
+| `guardarOpcion('nombre', 'valor')`       | `update_option('name', 'value')`          |
+| `obtenerOpcion('nombre')`                | `get_option('name')`                      |
 
 ### ❌ Funcionalidades Faltantes (Próximamente)
 
-| Función Sword | Equivalente WordPress |
-| :------------ | :-------------------- |
-| `(No existe)` | `add_action()`        |
-| `(No existe)` | `do_action()`         |
-| `(No existe)` | `add_filter()`        |
-| `(No existe)` | `apply_filters()`     |
-| `(No existe)` | `get_permalink()`     |
-| `(No existe)` | `the_title()`         |
-| `(No existe)` | `the_content()`       |
-| `(No existe)` | `have_posts()`        |
-| `(No existe)` | `the_post()`          |
-| `(No existe)` | `new WP_Query()`      |
+| Función Sword | Equivalente WordPress           |
+| :------------ | :------------------------------ |
+| (No existe)   | `get_the_author()`              |
+| (No existe)   | `get_the_date()`                |
+| (No existe)   | `the_excerpt()`                 |
+| (No existe)   | `get_post_thumbnail_id()`       |
+| (No existe)   | `wp_get_attachment_image_src()` |
+| (No existe)   | `register_nav_menus()`          |
+| (No existe)   | `wp_nav_menu()`                 |
 
 ---
 
 ## 🛠️ Instalación y Puesta en Marcha (Local)
 
 1.  **Clonar el repositorio:**
-
     ```bash
     git clone [https://github.com/1ndoryu/SwordPHP.git](https://github.com/1ndoryu/SwordPHP.git)
     cd SwordPHP
     ```
 
 2.  **Instalar dependencias de Composer:**
-
     ```bash
     # Navega al directorio del núcleo
     cd swordCore
@@ -120,56 +124,21 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
     composer install
     ```
 
-3.  **Configurar el entorno:**
+3.  **Preparar la Base de Datos:**
+    -   Asegúrate de tener un servidor de base de datos PostgreSQL en funcionamiento.
+    -   Crea una base de datos vacía para el proyecto (por ejemplo, `swordphp`).
 
-    -   Copia el archivo `.env.example` a `.env` dentro de `swordCore`.
-    -   Ajusta las credenciales de tu base de datos (PostgreSQL) en el archivo `.env`.
-        ```
-        DB_HOST=127.0.0.1
-        DB_PORT=5432
-        DB_DATABASE=swordphp
-        DB_USERNAME=postgres
-        DB_PASSWORD=tu_clave
-        ```
-
-4.  **Crear la base de datos:** Asegúrate de crear una base de datos con el nombre que especificaste en el archivo `.env`.
-
-5.  **Ejecutar el script de instalación (Próximamente):** Se creará un script para generar las tablas iniciales del sistema.
-
-6.  **Iniciar el servidor:**
+4.  **Iniciar el servidor:**
     ```bash
     # Desde el directorio swordCore
     php start.php start
     ```
     También puedes usar `windows.bat` si estás en Windows. El servidor estará disponible en `http://127.0.0.1:8787`.
 
----
-
-## 🗺️ Hoja de Ruta (Roadmap)
-
-- [x] **Fase 1: Fundación del Sistema**
-    - Autenticación, estructura del panel de administración y CRUD de páginas.
-
-- [x] **Fase 2: Sistema de Temas y Ruteo**
-    - Separación arquitectónica (`swordCore`/`swordContent`) y carga de `functions.php`.
-
-- [x] **Fase 3: Gestión de Contenido Avanzada**
-    - Implementación de Tipos de Contenido Personalizados, Gestor de Medios, CRUD de Usuarios y Metadatos.
-
-- [x] **Fase 4: Gestión de Temas desde el Panel**
-    - Funcionalidad para visualizar y activar temas directamente desde la interfaz de administración.
-
-- [ ] **Fase 5: Estabilización y Mejoras de UI**
-    - Corrección de bugs reportados y mejoras en la experiencia de usuario del panel.
-
-- [ ] **Fase 6: Sistema de Plantillas de Página**
-    - Permitir que los temas registren diferentes plantillas y poder seleccionarlas desde el editor de páginas.
-
-- [ ] **Fase 7: Arquitectura de Plugins**
-    - Diseñar e implementar el sistema de plugins, incluyendo "hooks" (acciones y filtros) para extender el núcleo.
-
-- [ ] **Fase 8: Funciones de Theming Avanzadas**
-    - Implementar un "loop" de contenido y funciones de plantilla (`the_title`, `the_content`, etc.) para facilitar la creación de temas.
+5.  **Ejecutar el Instalador Web:**
+    -   Abre tu navegador y ve a `http://127.0.0.1:8787`.
+    -   Serás redirigido automáticamente al instalador.
+    -   Sigue los pasos para conectar la base de datos, configurar tu sitio y crear el usuario administrador.
 
 ---
 

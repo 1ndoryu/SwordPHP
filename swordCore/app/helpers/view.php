@@ -156,20 +156,39 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
             return '';
         }
 
+        // 1. Definir la estructura base del menú
         $menuItems = [
             'inicio' => ['url' => '/panel', 'text' => 'Inicio'],
-            'paginas' => ['url' => '/panel/paginas', 'text' => 'Páginas'],
+            'paginas' => [
+                'url' => '#',
+                'text' => 'Páginas',
+                'submenu' => [
+                    'todas' => ['url' => '/panel/paginas', 'text' => 'Todas las páginas'],
+                    'nueva' => ['url' => '/panel/paginas/create', 'text' => 'Añadir nueva'],
+                ]
+            ]
         ];
 
+        // 2. Añadir los Tipos de Contenido Personalizados
         $tiposDeContenido = TipoContenidoService::getInstancia()->obtenerTodos();
         foreach ($tiposDeContenido as $slug => $config) {
-            if ($slug === 'paginas') continue;
+            if ($slug === 'paginas') continue; // Ya se manejó
+
+            $pluralName = $config['labels']['name'] ?? ucfirst($slug);
+            $addNewItemText = $config['labels']['add_new_item'] ?? 'Añadir nuevo';
+
             $menuItems[$slug] = [
-                'url' => '/panel/' . $slug,
-                'text' => $config['labels']['name'] ?? ucfirst($slug),
+                'url' => '#',
+                'text' => $pluralName,
+                'submenu' => [
+                    'todos' => ['url' => '/panel/' . $slug, 'text' => 'Todos'],
+                    'nuevo' => ['url' => '/panel/' . $slug . '/crear', 'text' => $addNewItemText],
+                    'ajustes' => ['url' => '/panel/' . $slug . '/ajustes', 'text' => 'Ajustes']
+                ]
             ];
         }
 
+        // 3. Añadir el resto de elementos estáticos del menú
         $menuItems['media'] = ['url' => '/panel/media', 'text' => 'Medios'];
         $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'text' => 'Usuarios'];
         $menuItems['apariencia'] = [
@@ -180,7 +199,6 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
             ]
         ];
         $menuItems['plugins'] = ['url' => '/panel/plugins', 'text' => 'Plugins'];
-        // Reemplaza la línea de 'ajustes' por este bloque:
         $menuItems['ajustes'] = [
             'url' => '#',
             'text' => 'Ajustes',
@@ -189,15 +207,18 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
                 'enlaces' => ['url' => '/panel/ajustes/enlaces-permanentes', 'text' => 'Enlaces Permanentes'],
             ]
         ];
+
+        // 4. Aplicar el filtro para que los plugins puedan modificar el menú
         $menuItems = aplicarFiltro('menuLateralAdmin', $menuItems);
 
+        // 5. Renderizar el HTML del menú
         $html = '';
         $currentPath = $request->path();
 
         foreach ($menuItems as $key => $item) {
             $hasSubmenu = !empty($item['submenu']) && is_array($item['submenu']);
-
             $isParentActive = false;
+
             if ($hasSubmenu) {
                 foreach ($item['submenu'] as $subItem) {
                     if ($currentPath === $subItem['url'] || ($subItem['url'] !== '/panel' && str_starts_with($currentPath, $subItem['url']))) {
@@ -222,13 +243,9 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
             if ($hasSubmenu) {
                 $html .= '<ul class="nav-submenu">';
                 foreach ($item['submenu'] as $subKey => $subItem) {
-                    $isChildActive = ($currentPath === $subItem['url']) || ($subItem['url'] !== '/panel' && str_starts_with($currentPath, $subItem['url']));
+                    // Un hijo es activo SÓLO si hay una coincidencia exacta de URL.
+                    $isChildActive = ($currentPath === $subItem['url']);
                     $childActiveClass = $isChildActive ? 'active' : '';
-
-                    if ($subItem['url'] === '/panel/ajustes' && $currentPath !== '/panel/ajustes') {
-                        $childActiveClass = '';
-                    }
-
                     $html .= "<li class=\"nav-item-sub\"><a class=\"nav-link-sub {$childActiveClass}\" href=\"{$subItem['url']}\">{$subItem['text']}</a></li>";
                 }
                 $html .= '</ul>';

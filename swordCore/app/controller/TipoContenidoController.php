@@ -7,15 +7,17 @@ use App\service\TipoContenidoService;
 use support\Request;
 use support\Response;
 use Illuminate\Support\Str;
+use App\service\OpcionService;
+use App\service\TemaService;
 
 /**
- * Controlador genérico para gestionar las operaciones CRUD de los tipos de contenido.
- */
+ * Controlador genérico para gestionar las operaciones CRUD de los tipos de contenido.
+ */
 class TipoContenidoController
 {
     /**
-     * Muestra la lista de entradas para un tipo de contenido específico.
-     */
+     * Muestra la lista de entradas para un tipo de contenido específico.
+     */
     public function index(Request $request, string $slug): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -58,8 +60,8 @@ class TipoContenidoController
     }
 
     /**
-     * Muestra el formulario para crear una nueva entrada.
-     */
+     * Muestra el formulario para crear una nueva entrada.
+     */
     public function create(Request $request, string $slug): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -71,8 +73,8 @@ class TipoContenidoController
     }
 
     /**
-     * Almacena una nueva entrada en la base de datos.
-     */
+     * Almacena una nueva entrada en la base de datos.
+     */
     public function store(Request $request, string $slug): Response
     {
         $this->getConfigOr404($slug);
@@ -114,8 +116,8 @@ class TipoContenidoController
     }
 
     /**
-     * Muestra el formulario para editar una entrada existente.
-     */
+     * Muestra el formulario para editar una entrada existente.
+     */
     public function edit(Request $request, string $slug, int $id): Response
     {
         $config = $this->getConfigOr404($slug);
@@ -134,8 +136,8 @@ class TipoContenidoController
     }
 
     /**
-     * Actualiza una entrada existente en la base de datos.
-     */
+     * Actualiza una entrada existente en la base de datos.
+     */
     public function update(Request $request, string $slug, int $id): Response
     {
         $this->getConfigOr404($slug);
@@ -190,8 +192,8 @@ class TipoContenidoController
 
 
     /**
-     * Elimina una entrada, asegurándose de que coincida con el tipo de contenido.
-     */
+     * Elimina una entrada, asegurándose de que coincida con el tipo de contenido.
+     */
     public function destroy(Request $request, string $slug, int $id): Response
     {
         $this->getConfigOr404($slug);
@@ -202,8 +204,61 @@ class TipoContenidoController
     }
 
     /**
-     * Obtiene la configuración del tipo de contenido o aborta con un error 404 si no existe.
-     */
+     * Muestra la página de ajustes para un tipo de contenido.
+     */
+    public function mostrarAjustes(Request $request, string $slug): Response
+    {
+        $config = $this->getConfigOr404($slug);
+        $temaService = new TemaService();
+        $opcionService = new OpcionService();
+
+        // 1. Obtener las plantillas de página disponibles del tema.
+        $plantillasDisponibles = $temaService->obtenerPlantillasDePagina();
+
+        // 2. Obtener los ajustes previamente guardados para este tipo de contenido.
+        $ajustesGuardados = $opcionService->obtenerOpcion("ajustes_cpt_{$slug}", [
+            'plantilla_single' => '',
+            // 'roles_permitidos' => ['admin'], // Para futura implementación
+        ]);
+
+        $mensajeExito = $request->session()->pull('success');
+
+        return view('admin/tipoContenido/ajustes', [
+            'config' => $config,
+            'slug' => $slug,
+            'tituloPagina' => 'Ajustes de ' . ($config['labels']['name'] ?? ucfirst($slug)),
+            'plantillasDisponibles' => $plantillasDisponibles,
+            'ajustesGuardados' => $ajustesGuardados,
+            'mensajeExito' => $mensajeExito
+        ]);
+    }
+
+    /**
+     * Guarda los ajustes para un tipo de contenido.
+     */
+    public function guardarAjustes(Request $request, string $slug): Response
+    {
+        $this->getConfigOr404($slug);
+        $opcionService = new OpcionService();
+
+        // Obtener los valores del formulario.
+        $plantilla = $request->post('plantilla_single', '');
+
+        $ajustesAGuardar = [
+            'plantilla_single' => $plantilla,
+            // 'roles_permitidos' => $request->post('roles', []), // Para futura implementación
+        ];
+
+        // Guardar la opción en la base de datos.
+        $opcionService->guardarOpcion("ajustes_cpt_{$slug}", $ajustesAGuardar);
+
+        $request->session()->set('success', 'Ajustes guardados correctamente.');
+        return redirect('/panel/' . $slug . '/ajustes');
+    }
+
+    /**
+     * Obtiene la configuración del tipo de contenido o aborta con un error 404 si no existe.
+     */
     private function getConfigOr404(string $slug): array
     {
         $config = TipoContenidoService::getInstancia()->obtener($slug);
@@ -214,8 +269,8 @@ class TipoContenidoController
     }
 
     /**
-     * Genera un slug único para un título o texto base.
-     */
+     * Genera un slug único para un título o texto base.
+     */
     private function generarSlug(string $textoBase, ?int $idExcluir = null): string
     {
         $slug = Str::slug($textoBase);

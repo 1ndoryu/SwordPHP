@@ -73,6 +73,9 @@ $panelGroup = Route::group('/panel', function () {
                 Route::get('/editar/{id:\d+}', [TipoContenidoController::class, 'edit']);
                 Route::post('/editar/{id:\d+}', [TipoContenidoController::class, 'update']);
                 Route::post('/eliminar/{id:\d+}', [TipoContenidoController::class, 'destroy']);
+                // --- NUEVAS RUTAS DE AJUSTES PARA CPT ---
+                Route::get('/ajustes', [TipoContenidoController::class, 'mostrarAjustes']);
+                Route::post('/ajustes', [TipoContenidoController::class, 'guardarAjustes']);
             });
         }
     }
@@ -143,7 +146,7 @@ Route::fallback(function (Request $request) {
     $request->fullUrl(),
     $request->header('user-agent'),
     $cabecerasComoString
-  ); */
+    ); */
     // Log::channel('default')->warning($logMessage);
     return response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada en el servidor.</p>", 404);
 });

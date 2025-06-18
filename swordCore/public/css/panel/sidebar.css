@@ -26,7 +26,6 @@
     color: var(--blanco);
 }
 
-
 /* Contenedor del submenú */
 .nav-submenu {
     list-style: none;
@@ -35,7 +34,7 @@
     overflow: hidden;
     max-height: 0; /* Oculto por defecto */
     transition: max-height 0.3s ease-out;
-    background-color: rgba(0,0,0, 0.15);
+    background-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Mostrar el submenú cuando el elemento padre tiene la clase 'open' */
@@ -48,7 +47,7 @@
 /* Enlaces de los ítems del submenú */
 .nav-submenu .nav-link-sub {
     display: block;
-    padding: 8px 15px 8px 35px; /* Texto indentado para jerarquía */
+    padding: 5px 0px 8px 15px;
     color: var(--texto-secundario);
     text-decoration: none;
     font-size: 0.95em;
@@ -80,4 +79,12 @@
     height: 6px;
     background-color: var(--color-primario);
     border-radius: 50%;
+}
+
+li.nav-item-sub {
+    background: unset;
+}
+
+ul.nav-submenu {
+    background: unset !important;
 }

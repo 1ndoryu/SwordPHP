@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Archivo de rutas de enlaces permanentes.
  * Este archivo es generado y sobreescrito automáticamente por los Ajustes de Enlaces Permanentes.
@@ -9,5 +8,5 @@
 use Webman\Route;
 use App\controller\PaginaPublicaController;
 
-// Estructura por defecto: /%slug%/
-Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar']);
+// Estructura actual: /archivos/%id%/
+Route::get('/archivos/{id:\d+}', [PaginaPublicaController::class, 'mostrar']);

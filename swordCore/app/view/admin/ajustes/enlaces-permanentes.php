@@ -65,7 +65,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 <form method="POST" action="/panel/ajustes/enlaces-permanentes">
     <?php echo csrf_field(); ?>
 
-    <div class="ajustesSword">
+    <div class="ajustesSword enlacesPermanentes">
         <?php if (!empty($mensajeExito)): ?>
             <div class="alerta alertaExito" style="margin-bottom: 20px;">
                 <?php echo htmlspecialchars($mensajeExito); ?>
@@ -125,39 +125,35 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                         </div>
                     </div>
                 </fieldset>
+                <button type="submit" class="btnN btn-primario">Guardar Cambios</button>
+                <div class="oculto">
+                    <h4>Opcional (Funcionalidad Futura)</h4>
+                    <p>Si quieres, puedes usar una estructura personalizada para las URL de tus categorías y etiquetas. Por ejemplo, usando <code>temas</code> como tu base para categorías harás que los enlaces a las categorías se parezcan a <code>/temas/mi-categoria/</code>. Si dejas esto en blanco se usarán los valores por defecto.</p>
 
-                <hr>
+                    <div class="grupo-formulario">
+                        <label for="category_base">Base de las categorías</label>
+                        <input name="category_base" id="category_base" type="text" value="" class="regular-text code" disabled>
+                    </div>
 
-                <h4>Opcional (Funcionalidad Futura)</h4>
-                <p>Si quieres, puedes usar una estructura personalizada para las URL de tus categorías y etiquetas. Por ejemplo, usando <code>temas</code> como tu base para categorías harás que los enlaces a las categorías se parezcan a <code>/temas/mi-categoria/</code>. Si dejas esto en blanco se usarán los valores por defecto.</p>
-
-                <div class="grupo-formulario">
-                    <label for="category_base">Base de las categorías</label>
-                    <input name="category_base" id="category_base" type="text" value="" class="regular-text code" disabled>
+                    <div class="grupo-formulario">
+                        <label for="tag_base">Base de las etiquetas</label>
+                        <input name="tag_base" id="tag_base" type="text" value="" class="regular-text code" disabled>
+                    </div>
                 </div>
-
-                <div class="grupo-formulario">
-                    <label for="tag_base">Base de las etiquetas</label>
-                    <input name="tag_base" id="tag_base" type="text" value="" class="regular-text code" disabled>
-                </div>
-
             </div>
         </div>
 
-        <div class="bloque card" style="background: transparent; border: 0; box-shadow: none; padding: 0;">
-            <button type="submit" class="btnN btn-primario">Guardar Cambios</button>
-        </div>
     </div>
 </form>
 
 <style>
     .grupo-formulario-radio {
         border: 0;
-        padding: 0;
+        padding: 20px;
         margin: 0;
         display: flex;
         flex-direction: column;
-        gap: 1.2rem;
+        gap: 16px;
     }
 
     .screen-reader-text {
@@ -175,7 +171,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
     .radio-item {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 10px;
     }
 
@@ -185,9 +181,10 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
     .radio-item label {
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         cursor: pointer;
-        gap: 4px;
+        align-items: center;
+        gap: 10px;
     }
 
     .radio-item label>span {
@@ -202,18 +199,31 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         background-color: var(--fondo-claro);
         padding: 2px 5px;
         border-radius: 3px;
-        margin-top: 4px;
+    }
+
+    .custom_structure {
+        flex-grow: 1;
+    }
+
+    .enlacesPermanentes .bloque.card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .radio-item input {
+        width: auto;
     }
 
     .custom-input-wrapper {
         display: flex;
         align-items: center;
         gap: 5px;
-        margin-top: 5px;
+        height: 0px;
     }
 
-    .custom_structure {
-        flex-grow: 1;
+    input#custom_structure_field {
+        margin: 0px;
+        padding: 0px !important;
     }
 </style>
 

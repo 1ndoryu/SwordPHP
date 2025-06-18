@@ -17,6 +17,7 @@ use App\controller\PluginController;
 use App\controller\UsuarioController;
 use App\controller\TemaController;
 use App\controller\PluginPageController;
+use App\controller\AjustesController;
 use support\Log;
 
 // Ruta principal (raíz del sitio)
@@ -81,7 +82,6 @@ $panelGroup = Route::group('/panel', function () {
     Route::post('/temas/activar/{slug}', [TemaController::class, 'activar']);
 
     // Plugins
-    // Plugins
     Route::group('/plugins', function () {
         Route::get('', [PluginController::class, 'index']);
         Route::post('/activar/{slug}', [PluginController::class, 'activar']);
@@ -90,9 +90,14 @@ $panelGroup = Route::group('/panel', function () {
 
     // Ajustes
     Route::group('/ajustes', function () {
-        Route::get('', [App\controller\AjustesController::class, 'index']);
-        Route::post('/guardar', [App\controller\AjustesController::class, 'guardar']);
-        // Ruta genérica para las páginas de ajustes de los plugins.
+        Route::get('', [AjustesController::class, 'index']);
+        Route::post('/guardar', [AjustesController::class, 'guardar']);
+
+        // Rutas específicas de Ajustes (deben ir ANTES de la ruta comodín)
+        Route::get('/enlaces-permanentes', [AjustesController::class, 'enlacesPermanentes']);
+        Route::post('/enlaces-permanentes', [AjustesController::class, 'guardarEnlacesPermanentes']);
+
+        // Ruta genérica para las páginas de ajustes de los plugins (debe ir AL FINAL).
         Route::get('/{slug}', [PluginPageController::class, 'mostrar']);
     });
 
@@ -109,10 +114,6 @@ $panelGroup = Route::group('/panel', function () {
         Route::post('/update/{id:\d+}', [UsuarioController::class, 'update']);
         Route::post('/eliminar/{id:\d+}', [UsuarioController::class, 'destroy']);
     });
-
-    Route::get('/enlaces-permanentes', [App\controller\AjustesController::class, 'enlacesPermanentes']);
-    Route::post('/enlaces-permanentes', [App\controller\AjustesController::class, 'guardarEnlacesPermanentes']);
-
 });
 // Se aplica el middleware al grupo de rutas del panel.
 $panelGroup->middleware([

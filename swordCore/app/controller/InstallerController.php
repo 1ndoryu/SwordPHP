@@ -38,7 +38,7 @@ class InstallerController
                 'name' => $_ENV['DB_DATABASE'] ?? 'swordphp',
                 'user' => $_ENV['DB_USERNAME'] ?? 'postgres',
             ];
-            
+
             try {
                 // Intenta conectar para ver si podemos pasar al siguiente paso
                 Db::connection('pgsql')->select('select 1');
@@ -139,11 +139,17 @@ class InstallerController
 
             // 4. Crear el lock file para marcar la instalación como completada
             file_put_contents(runtime_path('installed.lock'), date('c'));
-            
-            // 5. Redirigir al login con mensaje de éxito
+
+            // 5. Forzar la recarga del servidor de desarrollo tocando un archivo de configuración.
+            // Esto es necesario para que Webman vuelva a leer el archivo de rutas y reconozca
+            // las rutas de la aplicación que ahora están desbloqueadas.
+            if (config('app.debug')) { // Solo en modo debug/desarrollo
+                @touch(config_path('app.php'));
+            }
+
+            // 6. Redirigir al login con mensaje de éxito
             session()->set('exito', '¡SwordPHP se ha instalado correctamente! Ya puedes iniciar sesión.');
             return redirect('/login');
-
         } catch (Throwable $e) {
             // Limpiar para un posible reintento.
             Db::connection('pgsql')->unprepared('DROP TABLE IF EXISTS media, paginas, usuarios, opciones CASCADE;');
@@ -151,7 +157,6 @@ class InstallerController
             return redirect('/install');
         }
     }
-
     /**
      * Devuelve el SQL para crear todas las tablas necesarias.
      * @return string
@@ -159,62 +164,62 @@ class InstallerController
     private function getTableCreationSql(): string
     {
         return <<<SQL
-        CREATE TABLE usuarios (
-            id BIGSERIAL PRIMARY KEY,
-            nombreusuario VARCHAR(60) NOT NULL UNIQUE,
-            correoelectronico VARCHAR(100) NOT NULL UNIQUE,
-            clave VARCHAR(255) NOT NULL,
-            nombremostrado VARCHAR(250),
-            rol VARCHAR(50) NOT NULL DEFAULT 'suscriptor',
-            metadata JSONB,
-            remember_token VARCHAR(100),
-            created_at TIMESTAMP WITHOUT TIME ZONE,
-            updated_at TIMESTAMP WITHOUT TIME ZONE
-        );
-        CREATE INDEX idx_usuarios_rol ON usuarios(rol);
-        CREATE INDEX idx_usuarios_metadata ON usuarios USING GIN (metadata);
+    CREATE TABLE IF NOT EXISTS usuarios (
+      id BIGSERIAL PRIMARY KEY,
+      nombreusuario VARCHAR(60) NOT NULL UNIQUE,
+      correoelectronico VARCHAR(100) NOT NULL UNIQUE,
+      clave VARCHAR(255) NOT NULL,
+      nombremostrado VARCHAR(250),
+      rol VARCHAR(50) NOT NULL DEFAULT 'suscriptor',
+      metadata JSONB,
+      remember_token VARCHAR(100),
+      created_at TIMESTAMP WITHOUT TIME ZONE,
+      updated_at TIMESTAMP WITHOUT TIME ZONE
+    );
+    CREATE INDEX IF NOT EXISTS idx_usuarios_rol ON usuarios(rol);
+    CREATE INDEX IF NOT EXISTS idx_usuarios_metadata ON usuarios USING GIN (metadata);
 
-        CREATE TABLE paginas (
-            id BIGSERIAL PRIMARY KEY,
-            titulo TEXT NOT NULL,
-            subtitulo TEXT,
-            contenido TEXT,
-            slug VARCHAR(255) NOT NULL UNIQUE,
-            idautor BIGINT REFERENCES usuarios(id) ON DELETE SET NULL,
-            estado VARCHAR(50) NOT NULL DEFAULT 'borrador',
-            tipocontenido VARCHAR(50) NOT NULL DEFAULT 'pagina',
-            metadata JSONB,
-            created_at TIMESTAMP WITHOUT TIME ZONE,
-            updated_at TIMESTAMP WITHOUT TIME ZONE
-        );
-        CREATE INDEX idx_paginas_tipocontenido_estado ON paginas(tipocontenido, estado);
-        CREATE INDEX idx_paginas_idautor ON paginas(idautor);
-        CREATE INDEX idx_paginas_metadata ON paginas USING GIN (metadata);
+    CREATE TABLE IF NOT EXISTS paginas (
+      id BIGSERIAL PRIMARY KEY,
+      titulo TEXT NOT NULL,
+      subtitulo TEXT,
+      contenido TEXT,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      idautor BIGINT REFERENCES usuarios(id) ON DELETE SET NULL,
+      estado VARCHAR(50) NOT NULL DEFAULT 'borrador',
+      tipocontenido VARCHAR(50) NOT NULL DEFAULT 'pagina',
+      metadata JSONB,
+      created_at TIMESTAMP WITHOUT TIME ZONE,
+      updated_at TIMESTAMP WITHOUT TIME ZONE
+    );
+    CREATE INDEX IF NOT EXISTS idx_paginas_tipocontenido_estado ON paginas(tipocontenido, estado);
+    CREATE INDEX IF NOT EXISTS idx_paginas_idautor ON paginas(idautor);
+    CREATE INDEX IF NOT EXISTS idx_paginas_metadata ON paginas USING GIN (metadata);
 
-        CREATE TABLE media (
-            id BIGSERIAL PRIMARY KEY,
-            idautor BIGINT REFERENCES usuarios(id) ON DELETE SET NULL,
-            titulo TEXT NOT NULL,
-            leyenda TEXT,
-            textoalternativo VARCHAR(255),
-            descripcion TEXT,
-            rutaarchivo VARCHAR(255) NOT NULL UNIQUE,
-            tipomime VARCHAR(100) NOT NULL,
-            metadata JSONB,
-            created_at TIMESTAMP WITHOUT TIME ZONE,
-            updated_at TIMESTAMP WITHOUT TIME ZONE
-        );
-        CREATE INDEX idx_media_idautor ON media(idautor);
-        CREATE INDEX idx_media_tipomime ON media(tipomime);
-        CREATE INDEX idx_media_metadata ON media USING GIN (metadata);
+    CREATE TABLE IF NOT EXISTS media (
+      id BIGSERIAL PRIMARY KEY,
+      idautor BIGINT REFERENCES usuarios(id) ON DELETE SET NULL,
+      titulo TEXT NOT NULL,
+      leyenda TEXT,
+      textoalternativo VARCHAR(255),
+      descripcion TEXT,
+      rutaarchivo VARCHAR(255) NOT NULL UNIQUE,
+      tipomime VARCHAR(100) NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMP WITHOUT TIME ZONE,
+      updated_at TIMESTAMP WITHOUT TIME ZONE
+    );
+    CREATE INDEX IF NOT EXISTS idx_media_idautor ON media(idautor);
+    CREATE INDEX IF NOT EXISTS idx_media_tipomime ON media(tipomime);
+    CREATE INDEX IF NOT EXISTS idx_media_metadata ON media USING GIN (metadata);
 
-        CREATE TABLE opciones (
-            id BIGSERIAL PRIMARY KEY,
-            opcion_nombre VARCHAR(191) NOT NULL UNIQUE,
-            opcion_valor TEXT,
-            created_at TIMESTAMP WITHOUT TIME ZONE,
-            updated_at TIMESTAMP WITHOUT TIME ZONE
-        );
-        SQL;
+    CREATE TABLE IF NOT EXISTS opciones (
+      id BIGSERIAL PRIMARY KEY,
+      opcion_nombre VARCHAR(191) NOT NULL UNIQUE,
+      opcion_valor TEXT,
+      created_at TIMESTAMP WITHOUT TIME ZONE,
+      updated_at TIMESTAMP WITHOUT TIME ZONE
+    );
+    SQL;
     }
 }

@@ -35,21 +35,36 @@ class PaginaService
     }
 
     /**
-     * Encuentra una página por su ID, incluyendo sus metadatos (a través de la relación 'metas').
-     *
-     * @param int $id
-     * @return Pagina
-     * @throws NotFoundException
-     */
+     * Encuentra una página por su ID.
+     *
+     * @param int $id
+     * @return Pagina
+     * @throws NotFoundException
+     */
     public function obtenerPaginaPorId(int $id): Pagina
     {
-        // CORRECCIÓN: Usar el nombre de la relación correcto 'metas' en lugar de 'metadatos'.
-        $pagina = Pagina::with('metas')->find($id);
+        // La relación 'metas' ya no existe. Los metadatos están en la columna 'metadata'.
+        $pagina = Pagina::find($id);
 
         if (!$pagina) {
             throw new NotFoundException('Página no encontrada.');
         }
         return $pagina;
+    }
+
+    /**
+     * Elimina una página por su ID.
+     *
+     * @param int $id
+     * @return bool|null
+     * @throws NotFoundException
+     */
+    public function eliminarPagina(int $id): ?bool
+    {
+        $pagina = $this->obtenerPaginaPorId($id);
+        // Los metadatos en la columna JSONB se eliminan junto con la página.
+        // La línea que borraba la relación ya no es necesaria.
+        return $pagina->delete();
     }
 
     /**
@@ -88,21 +103,6 @@ class PaginaService
         $pagina->slug = $this->asegurarSlugUnico($baseParaSlug, $pagina->id);
 
         return $pagina->save();
-    }
-
-    /**
-     * Elimina una página por su ID.
-     *
-     * @param int $id
-     * @return bool|null
-     * @throws NotFoundException
-     */
-    public function eliminarPagina(int $id): ?bool
-    {
-        $pagina = $this->obtenerPaginaPorId($id);
-        // CORRECCIÓN: Usar el nombre de la relación correcto 'metas'.
-        $pagina->metas()->delete();
-        return $pagina->delete();
     }
 
     /**

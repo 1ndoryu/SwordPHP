@@ -80,51 +80,49 @@ class TipoContenidoController
         $this->getConfigOr404($slug);
 
         try {
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $slug) {
-                // 1. Crear la entrada principal
-                $pagina = new Pagina;
-                $pagina->titulo = $request->post('titulo');
-                $pagina->contenido = $request->post('contenido', '');
-                $pagina->slug = $this->generarSlug($request->post('titulo'));
-                $pagina->tipocontenido = $slug;
-                $pagina->idautor = idUsuarioActual();
-                $pagina->estado = $request->post('estado', 'borrador');
-                $pagina->save();
-
-                // 2. Procesar y guardar los metadatos
-                $metadatosFormulario = $request->post('meta', []);
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
-                            // Usamos el método del trait para crear/actualizar el meta
-                            $pagina->guardarMeta(trim($meta['clave']), $meta['valor']);
-                        }
+            // 1. Construir el array de metadatos desde el formulario
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
-            });
+            }
 
-            // CORRECCIÓN: Usar set() en lugar de flash()
+            // 2. Preparar todos los datos para la creación
+            $datosParaCrear = [
+                'titulo'        => $request->post('titulo'),
+                'contenido'     => $request->post('contenido', ''),
+                'slug'          => $this->generarSlug($request->post('titulo')),
+                'tipocontenido' => $slug,
+                'idautor'       => idUsuarioActual(),
+                'estado'        => $request->post('estado', 'borrador'),
+                'metadata'      => $metadata, // Incluir el array de metadatos
+            ];
+
+            // 3. Crear la entrada en una sola operación
+            Pagina::create($datosParaCrear);
+
             session()->set('success', 'Entrada creada con éxito.');
             return redirect('/panel/' . $slug);
         } catch (\Throwable $e) {
-            // CORRECCIÓN: Usar set() en lugar de flash()
             session()->set('error', 'Error al crear la entrada: ' . $e->getMessage());
-            // Guardamos el input para repoblar el formulario
             session()->set('_old_input', $request->post());
             return redirect('/panel/' . $slug . '/crear');
         }
     }
-
     /**
      * Muestra el formulario para editar una entrada existente.
      */
+
     public function edit(Request $request, string $slug, int $id): Response
     {
         $config = $this->getConfigOr404($slug);
 
-        // Precargamos la relación 'metas' para que estén disponibles en la vista.
-        $entrada = Pagina::with('metas')
-            ->where('id', $id)
+        // La relación 'metas' ya no existe. Los metadatos están en la columna 'metadata'.
+        $entrada = Pagina::where('id', $id)
             ->where('tipocontenido', $slug)
             ->firstOrFail();
 
@@ -143,43 +141,33 @@ class TipoContenidoController
         $this->getConfigOr404($slug);
 
         try {
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $slug, $id) {
-                // 1. Obtener y actualizar la entrada principal
-                $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
+            $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
 
-                $pagina->titulo = $request->post('titulo');
-                $pagina->contenido = $request->post('contenido', '');
-                
-                // Usa el slug del formulario si se proporciona, si no, usa el título
-                $baseParaSlug = $request->post('slug', $request->post('titulo'));
-                $pagina->slug = $this->generarSlug($baseParaSlug, $id);
-
-                $pagina->estado = $request->post('estado', 'borrador');
-                $pagina->save();
-
-                // 2. Borrar metadatos antiguos para sincronizar
-                $pagina->metas()->delete();
-
-                // 3. Procesar y guardar los nuevos metadatos
-                $metadatosFormulario = $request->post('meta', []);
-                $nuevosMetadatosParaInsertar = [];
-
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
-                            $nuevosMetadatosParaInsertar[] = [
-                                'pagina_id'  => $pagina->id,
-                                'meta_key'   => trim($meta['clave']),
-                                'meta_value' => $meta['valor'],
-                            ];
-                        }
+            // 1. Construir el array de metadatos desde el formulario
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
+            }
 
-                if (!empty($nuevosMetadatosParaInsertar)) {
-                    \App\model\PaginaMeta::insert($nuevosMetadatosParaInsertar);
-                }
-            });
+            // 2. Asignar datos principales
+            $pagina->titulo = $request->post('titulo');
+            $pagina->contenido = $request->post('contenido', '');
+            $pagina->estado = $request->post('estado', 'borrador');
+
+            // 3. Generar y asignar slug único
+            $baseParaSlug = $request->post('slug', $request->post('titulo'));
+            $pagina->slug = $this->generarSlug($baseParaSlug, $id);
+
+            // 4. Asignar el array completo de metadatos a la propiedad del modelo
+            $pagina->metadata = $metadata;
+
+            // 5. Guardar todos los cambios en una sola operación
+            $pagina->save();
 
             session()->set('success', 'Entrada actualizada con éxito.');
             return redirect('/panel/' . $slug);

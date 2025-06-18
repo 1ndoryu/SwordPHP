@@ -100,9 +100,8 @@ class UsuarioController
             // Usamos el servicio para obtener el usuario por su ID.
             $usuario = $this->usuarioService->obtenerUsuarioPorId((int)$id);
 
-            // Cargamos explícitamente la relación 'metas' para que esté disponible en la vista.
-            // Esto es necesario para el componente de gestión de metadatos.
-            $usuario->load('metas');
+            // La relación 'metas' ya no existe, los datos están en la columna 'metadata'.
+            // La línea que cargaba la relación ya no es necesaria.
 
             $errorMessage = $request->session()->pull('error');
 

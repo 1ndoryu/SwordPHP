@@ -49,7 +49,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             <?php
             // Filtramos el metadato interno de la plantilla antes de pasarlo a la vista.
             $metadatosParaVista = array_filter(
-                $pagina->metadata ?? [],
+                $entrada->metadata ?? [], // CORREGIDO: Usar la variable correcta $entrada
                 fn($key) => $key !== '_plantilla_pagina',
                 ARRAY_FILTER_USE_KEY
             );

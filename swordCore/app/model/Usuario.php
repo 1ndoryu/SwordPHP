@@ -21,7 +21,7 @@ class Usuario extends Model
         'rol',
         'metadata' // Añadir metadata a los fillable
     ];
-    
+
     protected $hidden = [
         'clave',
         'remember_token',
@@ -33,7 +33,6 @@ class Usuario extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fecharegistro' => 'datetime', // Esto puede eliminarse si ya no existe la columna
         'metadata' => 'array',
     ];
 }

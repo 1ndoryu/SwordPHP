@@ -208,6 +208,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
     .enlacesPermanentes .bloque.card {
         display: flex;
         flex-direction: column;
+        width: 100%;
     }
 
     .radio-item input {

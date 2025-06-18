@@ -37,16 +37,18 @@ class MediaService
         $archivo->move($rutaCompleta);
 
         $rutaRelativa = $año . '/' . $mes . '/' . $nombreArchivo;
-        $urlPublica = \url_contenido('media/' . $rutaRelativa);
 
         $media = new Media();
-        $media->usuario_id = $usuarioId;
+        $media->idautor = $usuarioId; // CORREGIDO
         $media->titulo = $titulo;
-        $media->nombre_archivo = $nombreArchivo;
-        $media->ruta_archivo = $rutaRelativa;
-        $media->url_publica = $urlPublica;
-        $media->tipo_mime = $mimeType; // Usamos la variable
-        $media->tamaño = $fileSize;   // Usamos la variable
+        $media->rutaarchivo = $rutaRelativa; // CORREGIDO
+        $media->tipomime = $mimeType; // CORREGIDO
+
+        // CORREGIDO: Guardar datos extra en la columna JSONB
+        $media->metadata = [
+            'tamaño_bytes' => $fileSize,
+            'nombre_original' => $archivo->getUploadName()
+        ];
 
         $media->save();
 

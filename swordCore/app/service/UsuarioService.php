@@ -142,10 +142,12 @@ class UsuarioService
             if (Usuario::where('correoelectronico', $datos['correoelectronico'])->where('id', '!=', $id)->exists()) {
                 throw new \support\exception\BusinessException('El correo electrónico ya está en uso por otro usuario.');
             }
-            $usuario->correoelectronico = $datos['correoelectronico'];
         }
 
-        // Validación 2: Contraseña.
+        // Asignamos los datos que están en el array $fillable del modelo.
+        $usuario->fill($datos);
+
+        // Validación y asignación de la contraseña si se está cambiando.
         if (!empty($datos['clave'])) {
             if ($datos['clave'] !== ($datos['clave_confirmation'] ?? null)) {
                 throw new \support\exception\BusinessException('Las contraseñas no coinciden.');
@@ -154,15 +156,15 @@ class UsuarioService
             $usuario->clave = password_hash($datos['clave'], PASSWORD_BCRYPT);
         }
 
-        // Asignar los demás campos actualizables.
-        $usuario->nombremostrado = $datos['nombremostrado'] ?? $usuario->nombremostrado;
-        $usuario->rol = $datos['rol'] ?? $usuario->rol;
+        // Asignación de los metadatos.
+        if (isset($datos['metadata']) && is_array($datos['metadata'])) {
+            $usuario->metadata = $datos['metadata'];
+        }
 
         $usuario->save();
 
         return $usuario;
     }
-
     /**
      * Elimina un usuario y sus metadatos asociados.
      * Previene la auto-eliminación y la eliminación del último administrador.

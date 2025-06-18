@@ -44,9 +44,8 @@ assetService()->agregarJsEnLinea($scriptContenido);
                     <?php foreach ($mediaItems as $item): ?>
                         <div class="galleryItem">
                             <div class="mediaCard" data-id="<?= htmlspecialchars($item->id) ?>">
-                                <?php // CORRECCIÓN: Comprobar que tipo_mime no sea nulo antes de usar strpos. 
-                                ?>
-                                <?php if (!empty($item->tipo_mime) && strpos($item->tipo_mime, 'image/') === 0): ?>
+                                <?php // CORRECCIÓN: Se comprueba la propiedad correcta 'tipomime'. ?>
+                                <?php if (!empty($item->tipomime) && strpos($item->tipomime, 'image/') === 0): ?>
                                     <img src="<?= htmlspecialchars($item->url_publica) ?>" class="mediaImage" alt="<?= htmlspecialchars($item->titulo) ?>">
                                 <?php else: ?>
                                     <div class="mediaIcon"><span>FILE</span></div>

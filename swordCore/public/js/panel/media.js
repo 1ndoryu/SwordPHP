@@ -98,8 +98,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Función para renderizar un nuevo elemento en la galería ---
     function renderMediaItem(item) {
-        // CORRECCIÓN: Comprobar que 'tipo_mime' existe antes de usarlo.
-        const isImage = item.tipo_mime && item.tipo_mime.startsWith('image/');
+        // CORRECCIÓN: Se comprueba la propiedad correcta 'tipomime'.
+        const isImage = item.tipomime && item.tipomime.startsWith('image/');
 
         const previewHtml = isImage ? `<img src="${item.url_publica}" class="mediaImage" alt="${item.titulo}">` : `<div class="mediaIcon"><span>FILE</span></div>`;
 

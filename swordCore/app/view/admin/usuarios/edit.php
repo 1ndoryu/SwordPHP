@@ -62,7 +62,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             // Incluimos el gestor de metadatos, pasándole los metas del usuario.
             echo partial(
                 'admin/components/gestor-metadatos',
-                ['metadatos' => $usuario->metas]
+                ['metadatos' => $usuario->metadata ?? []]
             );
             ?>
 

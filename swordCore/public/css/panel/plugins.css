@@ -3,20 +3,12 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    padding: var(--padding-general);
-    background: var(--color-fondo-contenido);
-    border-radius: var(--radius);
 }
 
 .pluginSw_cuerpo-formulario form {
     display: flex;
     flex-direction: column;
     gap: 15px;
-}
-
-.wrapPlugin .custom-select-trigger {
-    background: #e8e8e8;
-    padding: 10px;
 }
 
 .wrapPlugin .grupo-formulario {
@@ -43,12 +35,14 @@ label.checkboxPluginForm {
     gap: 10px;
 }
 
-.wrapPlugin p {
-    color: #000000d4;
-}
-
 .wrapPlugin .grupo-formulario input,
 .wrapPlugin textarea {
-    background: #e8e8e8 !important;
     padding: 10px !important;
+}
+
+.wrapPlugin .grupo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
 }

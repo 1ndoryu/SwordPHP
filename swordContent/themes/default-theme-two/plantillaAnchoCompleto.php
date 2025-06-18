@@ -1,47 +1,46 @@
 <?php
+// 1. Inicia el loop de SwordPHP.
+if (hayEntradas()) :
+    while (hayEntradas()) :
+        laEntrada();
 
-/**
- * Template Name: Ancho Completo
- *
- * Esta es una plantilla de página de ejemplo de ancho completo.
- * Muestra el contenido de la página en un contenedor más amplio.
- */
+        // 2. Define el título que usará el header.php.
+        // Se obtiene después de iniciar la entrada en el loop.
+        $titulo = obtenerElTitulo();
 
-// 1. Define el título que usará el header.php.
-// La variable $pagina es pasada desde el controlador.
-$titulo = $pagina->titulo;
-
-getHeader();
+        // 3. Carga la cabecera del tema.
+        getHeader();
 ?>
 
-<?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
-
-<div style="max-width: 1200px; margin: 2rem auto; padding: 2rem; background: #fff; border: 1px solid #eee;">
-
-    <h1><?php echo htmlspecialchars($pagina->titulo); ?></h1>
-
-    <hr style="margin: 1.5rem 0;">
-
-    <div class="contenido-ancho-completo">
-        <?php
-        // NOTA DE SEGURIDAD: Se usa 'echo' directamente para renderizar HTML.
-        // Asegúrate de que el contenido se sanitiza ANTES de guardarlo en la base de datos.
-        echo $pagina->contenido;
+        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
         ?>
-    </div>
 
-    <hr style="margin: 1.5rem 0;">
+        <h1><?php elTitulo(); ?></h1>
+        <div>
+            <?php
+            // La función elContenido() se encarga de mostrar el contenido
+            // y aplicará los filtros necesarios en el futuro (ej. para shortcodes).
+            elContenido();
+            ?>
+        </div>
+        <hr>
+        <p>✅ Vista cargada desde: default-theme-two, plantilla anchoCompleto</p>
 
-    <p style="background-color: #e7f3fe; border: 1px solid #b3d7ff; padding: 10px; border-radius: 4px;">
-        ✅ Plantilla de página cargada desde: <code>plantilla-ancho-completo.php</code>
-    </p>
+        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        ?>
 
-</div>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
-?>
-
+    <?php
+    endwhile; // Fin del loop principal.
+else :
+    // Opcional: Contenido a mostrar si no se encuentran entradas.
+    $titulo = 'Contenido no encontrado';
+    getHeader();
+    ?>
+    <h1>Contenido no encontrado</h1>
+    <p>Lo sentimos, no pudimos encontrar lo que buscabas.</p>
 <?php
+endif; // Fin de la comprobación hayEntradas().
+
+// Carga el pie de página del tema.
 getFooter();
 ?>

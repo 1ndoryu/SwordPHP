@@ -77,7 +77,7 @@ if (!function_exists('renderFormPlugin')) {
                     htmlspecialchars($args['label'])
                 );
                 // Para checkbox, la descripción va fuera del label
-                return sprintf('<div class="grupo-formulario">%s%s</div>', $campoHtml, $descripcionHtml);
+                return sprintf('<div class="bloque grupo-formulario">%s%s</div>', $campoHtml, $descripcionHtml);
 
             default: // text, email, password, number, etc.
                 $campoHtml = sprintf(
@@ -92,7 +92,7 @@ if (!function_exists('renderFormPlugin')) {
                 break;
         }
 
-        return sprintf('<div class="grupo-formulario">%s%s%s</div>', $labelHtml, $campoHtml, $descripcionHtml);
+        return sprintf('<div class="bloque grupo-formulario">%s%s%s</div>', $labelHtml, $campoHtml, $descripcionHtml);
     }
 }
 

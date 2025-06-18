@@ -544,3 +544,9 @@ select {
     /* background-color: #e0e0e0; */
     font-weight: 700;
 }
+
+hr {
+    border: 0.5px solid;
+    color: #161616;
+    border-width: 0.5px;
+}

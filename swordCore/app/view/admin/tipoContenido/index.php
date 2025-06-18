@@ -17,7 +17,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         </div>
     </div>
 
-    <?php // CORRECCIÓN: Mostrar mensajes pasados desde el controlador ?>
+    <?php // Mostrar mensajes pasados desde el controlador ?>
     <?php if (!empty($successMessage)): ?>
         <div class="alerta alertaExito" role="alert">
             <?php echo htmlspecialchars($successMessage); ?>
@@ -49,9 +49,6 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                                 <span><?php echo htmlspecialchars($entrada->id); ?></span>
                             </div>
                             <div class="infoItem">
-                                <span class="badge badgeBorrador"><?php echo htmlspecialchars($entrada->slug); ?></span>
-                            </div>
-                            <div class="infoItem">
                                 <?php if ($entrada->estado == 'publicado'): ?>
                                     <span class="badge badgePublicado">Publicado</span>
                                 <?php else: ?>
@@ -64,16 +61,15 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                         </div>
 
                         <div class="contenidoAcciones">
-                            <a href="/panel/<?= $slug ?>/editar/<?php echo htmlspecialchars($entrada->id); ?>" class="iconoB btnEditar">
+                            <a href="<?php echo obtenerEnlacePermanenteEntrada($entrada); ?>" class="iconoB btnVer" target="_blank" title="Ver">
+                                <?php echo icon('ver'); ?>
+                            </a>
+                            <a href="/panel/<?= $slug ?>/editar/<?php echo htmlspecialchars($entrada->id); ?>" class="iconoB btnEditar" title="Editar">
                                 <?php echo icon('edit'); ?>
                             </a>
-
-                            <form action="/panel/<?= $slug ?>/eliminar/<?php echo htmlspecialchars($entrada->id); ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta entrada?');">
-                                <?php echo csrf_field(); ?>
-                                <button type="submit" class="iconoB IconoRojo btnEliminar">
-                                    <?php echo icon('borrar'); ?>
-                                </button>
-                            </form>
+                            <button type="button" class="iconoB IconoRojo btnEliminar" title="Eliminar" onclick="eliminarRecurso('/panel/<?= $slug ?>/eliminar/<?php echo htmlspecialchars($entrada->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta entrada?');">
+                                <?php echo icon('borrar'); ?>
+                            </button>
                         </div>
                     </div>
                 <?php

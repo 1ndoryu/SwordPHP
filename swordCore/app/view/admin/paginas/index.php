@@ -16,7 +16,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         </div>
     </div>
 
-    <?php // REFACTOR: Mostrar mensajes pasados desde el controlador ?>
+    <?php // Mostrar mensajes pasados desde el controlador ?>
     <?php if (!empty($successMessage)): ?>
         <div class="alerta alertaExito" role="alert">
             <?php echo htmlspecialchars($successMessage); ?>
@@ -69,16 +69,15 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                         </div>
 
                         <div class="contenidoAcciones">
-                            <a href="/panel/paginas/edit/<?php echo htmlspecialchars($pagina->id); ?>" class="iconoB btnEditar">
+                            <a href="<?php echo obtenerEnlacePermanenteEntrada($pagina); ?>" class="iconoB btnVer" target="_blank" title="Ver">
+                                <?php echo icon('ver'); ?>
+                            </a>
+                            <a href="/panel/paginas/edit/<?php echo htmlspecialchars($pagina->id); ?>" class="iconoB btnEditar" title="Editar">
                                 <?php echo icon('edit'); ?>
                             </a>
-
-                            <form action="/panel/paginas/destroy/<?php echo htmlspecialchars($pagina->id); ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta página?');">
-                                <?php echo csrf_field(); ?>
-                                <button type="submit" class="iconoB IconoRojo btnEliminar">
-                                    <?php echo icon('borrar'); ?>
-                                </button>
-                            </form>
+                            <button type="button" class="iconoB IconoRojo btnEliminar" title="Eliminar" onclick="eliminarRecurso('/panel/paginas/destroy/<?php echo htmlspecialchars($pagina->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta página?');">
+                                <?php echo icon('borrar'); ?>
+                            </button>
                         </div>
                     </div>
                 <?php

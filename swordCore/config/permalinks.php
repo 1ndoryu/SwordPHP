@@ -8,5 +8,5 @@
 use Webman\Route;
 use App\controller\PaginaPublicaController;
 
-// Estructura actual: /archivos/%id%/
-Route::get('/archivos/{id:\d+}', [PaginaPublicaController::class, 'mostrar']);
+// Estructura actual: /%slug%/
+Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar']);

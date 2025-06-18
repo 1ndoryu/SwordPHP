@@ -48,9 +48,15 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             </div>
 
             <?php
+            // Filtramos el metadato interno de la plantilla antes de pasarlo a la vista.
+            $metadatosParaVista = array_filter(
+                $pagina->metadata ?? [],
+                fn($key) => $key !== '_plantilla_pagina',
+                ARRAY_FILTER_USE_KEY
+            );
             echo partial(
                 'admin/components/gestor-metadatos',
-                ['metadatos' => $pagina->metas->where('meta_key', '!=', '_plantilla_pagina')]
+                ['metadatos' => $metadatosParaVista]
             );
             ?>
 

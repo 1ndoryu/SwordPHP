@@ -38,50 +38,30 @@ class UsuarioController
     public function store(Request $request): Response
     {
         try {
-            // Usamos una transacción para asegurar que el usuario y sus metas se creen juntos.
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request) {
-
-                // 1. Crear el usuario principal usando el servicio (que ya valida los datos).
-                $datosPrincipales = $request->only([
-                    'nombreusuario',
-                    'correoelectronico',
-                    'nombremostrado',
-                    'clave',
-                    'clave_confirmation',
-                    'rol'
-                ]);
-                $usuario = $this->usuarioService->crearUsuario($datosPrincipales);
-
-                // 2. Procesar y guardar los metadatos asociados.
-                $metadatosFormulario = $request->post('meta', []);
-                $nuevosMetadatosParaInsertar = [];
-
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
-                            $nuevosMetadatosParaInsertar[] = [
-                                'usuario_id' => $usuario->id,
-                                'meta_key'   => trim($meta['clave']),
-                                'meta_value' => $meta['valor'],
-                            ];
-                        }
+            // Construir el array de metadatos
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
+            }
 
-                if (!empty($nuevosMetadatosParaInsertar)) {
-                    \App\model\UsuarioMeta::insert($nuevosMetadatosParaInsertar);
-                }
-            });
+            // Unir datos principales y metadatos
+            $datosPrincipales = $request->only(['nombreusuario', 'correoelectronico', 'nombremostrado', 'clave', 'clave_confirmation', 'rol']);
+            $datosPrincipales['metadata'] = $metadata;
+
+            $this->usuarioService->crearUsuario($datosPrincipales);
 
             $request->session()->set('success', 'Usuario creado con éxito.');
             return redirect('/panel/usuarios');
         } catch (\support\exception\BusinessException $e) {
-            // Captura errores de validación del servicio.
             $request->session()->set('error', 'No se pudo crear el usuario: ' . $e->getMessage());
-            $request->session()->set('_old_input', $request->post()); // Repoblar formulario.
+            $request->session()->set('_old_input', $request->post());
             return redirect('/panel/usuarios/crear');
         } catch (\Throwable $e) {
-            // Captura cualquier otro error inesperado.
             $request->session()->set('error', 'Ocurrió un error inesperado al crear el usuario.');
             $request->session()->set('_old_input', $request->post());
             \support\Log::error('Error al guardar usuario: ' . $e->getMessage());
@@ -147,54 +127,37 @@ class UsuarioController
     public function update(Request $request, $id): Response
     {
         try {
-            // Usamos una transacción para asegurar la integridad de los datos.
-            // Si algo falla (ej. al guardar los metas), se revierte la actualización del usuario.
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $id) {
+            $usuario = $this->usuarioService->obtenerUsuarioPorId((int)$id);
 
-                // 1. Actualizar los datos principales del usuario a través del servicio.
-                $datosPrincipales = $request->only(['nombremostrado', 'correoelectronico', 'clave', 'clave_confirmation', 'rol']);
-                $usuario = $this->usuarioService->actualizarUsuario((int)$id, $datosPrincipales);
-
-                // 2. Sincronizar los metadatos.
-                $usuario->metas()->delete(); // Borramos todos los metadatos antiguos.
-
-                $metadatosFormulario = $request->post('meta', []);
-                $nuevosMetadatosParaInsertar = [];
-
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        // Nos aseguramos de que la clave tenga valor para no guardar campos vacíos.
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '' && !is_null($meta['valor'])) {
-                            $nuevosMetadatosParaInsertar[] = [
-                                'usuario_id' => $usuario->id,
-                                'meta_key'   => trim($meta['clave']),
-                                'meta_value' => $meta['valor'],
-                            ];
-                        }
+            // Construir metadatos
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
+            }
 
-                if (!empty($nuevosMetadatosParaInsertar)) {
-                    // Hacemos una única inserción en lote para mayor eficiencia.
-                    \App\model\UsuarioMeta::insert($nuevosMetadatosParaInsertar);
-                }
-            });
+            // Unir datos principales y metadatos
+            $datosPrincipales = $request->only(['nombremostrado', 'correoelectronico', 'clave', 'clave_confirmation', 'rol']);
+            $datosPrincipales['metadata'] = $metadata;
+
+            $this->usuarioService->actualizarUsuario((int)$id, $datosPrincipales);
 
             $request->session()->set('success', 'Usuario actualizado con éxito.');
             return redirect('/panel/usuarios');
         } catch (\support\exception\BusinessException $e) {
-            // Error de validación conocido (ej. email duplicado, contraseñas no coinciden).
             $request->session()->set('error', 'Error de validación: ' . $e->getMessage());
-            $request->session()->set('_old_input', $request->post()); // Guardamos el input para repoblar el form.
+            $request->session()->set('_old_input', $request->post());
             return redirect('/panel/usuarios/editar/' . $id);
         } catch (\Throwable $e) {
-            // Cualquier otro error inesperado.
             $request->session()->set('error', 'Ocurrió un error inesperado: ' . $e->getMessage());
             $request->session()->set('_old_input', $request->post());
             return redirect('/panel/usuarios/editar/' . $id);
         }
     }
-
     /**
      * Elimina un usuario de la base de datos.
      *

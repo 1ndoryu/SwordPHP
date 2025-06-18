@@ -5,82 +5,66 @@ namespace App\model\traits;
 /**
  * Trait GestionaMetadatos
  *
- * Proporciona métodos para gestionar metadatos asociados a un modelo de Eloquent.
- * El modelo que use este trait debe implementar una relación `metas()`.
+ * Proporciona métodos para gestionar metadatos almacenados en una columna JSONB.
+ * El modelo que use este trait debe tener una propiedad pública `$casts` que defina
+ * la columna 'metadata' como 'array'.
  */
 trait GestionaMetadatos
 {
     /**
-     * Guarda o actualiza un metadato para el modelo.
-     * Si el valor es un array o un objeto, se serializa automáticamente.
-     * Esta función sobrescribe cualquier valor previo para la misma clave.
+     * Guarda o actualiza un metadato específico.
      *
-     * @param string $metaKey La clave del metadato.
-     * @param mixed $metaValue El valor del metadato.
-     * @return \Illuminate\Database\Eloquent\Model El modelo de metadato creado o actualizado.
-     */
-    public function guardarMeta(string $metaKey, $metaValue)
-    {
-        $valor = is_array($metaValue) || is_object($metaValue) ? serialize($metaValue) : $metaValue;
-
-        return $this->metas()->updateOrCreate(
-            ['meta_key' => $metaKey],
-            ['meta_value' => $valor]
-        );
-    }
-
-    /**
-     * Obtiene un metadato del modelo.
-     * Deserializa el valor si es necesario.
-     *
-     * @param string $metaKey La clave del metadato a obtener.
-     * @param bool $single Si es true, devuelve un solo valor; de lo contrario, una colección de valores.
-     * @return mixed Null si no se encuentra, o el valor/colección de valores.
-     */
-    public function obtenerMeta(string $metaKey, bool $single = true)
-    {
-        // Eager load metas si no están cargadas para optimizar
-        if (!$this->relationLoaded('metas')) {
-            $this->load('metas');
-        }
-
-        $metas = $this->metas->where('meta_key', $metaKey);
-
-        if ($metas->isEmpty()) {
-            return $single ? null : collect();
-        }
-
-        $values = $metas->pluck('meta_value')->map(function ($value) {
-            return $this->esSerializado($value) ? unserialize($value) : $value;
-        });
-
-        return $single ? $values->first() : $values;
-    }
-
-    /**
-     * Elimina todos los metadatos de un modelo que coincidan con una clave.
-     *
-     * @param string $metaKey La clave del metadato a eliminar.
-     * @return bool True si se eliminó algún registro, false en caso contrario.
-     */
-    public function eliminarMeta(string $metaKey): bool
-    {
-        return (bool) $this->metas()->where('meta_key', $metaKey)->delete();
-    }
-
-    /**
-     * Comprueba si una cadena de texto está serializada.
-     *
-     * @param mixed $data
+     * @param string $clave La clave del metadato.
+     * @param mixed $valor El valor a guardar.
      * @return bool
      */
-    private function esSerializado($data): bool
+    public function guardarMeta(string $clave, $valor): bool
     {
-        if (!is_string($data) || trim($data) === '') {
-            return false;
+        $metadata = $this->metadata ?? [];
+        $metadata[$clave] = $valor;
+        $this->metadata = $metadata;
+        // El guardado se delega al controlador para hacerlo en una sola operación.
+        return true; 
+    }
+
+    /**
+     * Obtiene un metadato.
+     *
+     * @param string $clave La clave del metadato.
+     * @param mixed|null $porDefecto Valor a devolver si la clave no existe.
+     * @return mixed
+     */
+    public function obtenerMeta(string $clave, $porDefecto = null)
+    {
+        // El 'cast' de Eloquent ya ha decodificado el JSON a un array.
+        return $this->metadata[$clave] ?? $porDefecto;
+    }
+
+    /**
+     * Elimina un metadato.
+     *
+     * @param string $clave La clave a eliminar.
+     * @return bool Devuelve true si la clave existía y fue eliminada.
+     */
+    public function eliminarMeta(string $clave): bool
+    {
+        $metadata = $this->metadata ?? [];
+        if (array_key_exists($clave, $metadata)) {
+            unset($metadata[$clave]);
+            $this->metadata = $metadata;
+            return true;
         }
-        // El error se suprime con @ para evitar E_NOTICE con data inválida.
-        // Se compara estrictamente con false porque una cadena serializada de `false` es `b:0;`
-        return @unserialize($data) !== false || $data === 'b:0;';
+        return false;
+    }
+    
+    /**
+     * Reemplaza todos los metadatos con un nuevo conjunto.
+     * Ideal para sincronizar con los datos de un formulario.
+     *
+     * @param array $nuevosMetadatos El array completo de nuevos metadatos.
+     */
+    public function sincronizarMetas(array $nuevosMetadatos): void
+    {
+        $this->metadata = $nuevosMetadatos;
     }
 }

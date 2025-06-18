@@ -117,7 +117,6 @@ class PaginaController
     {
         $data = $request->post();
 
-        // Validación básica
         if (empty($data['titulo'])) {
             $request->session()->set('error', 'El campo Título es obligatorio.');
             $request->session()->set('_old_input', $request->post());
@@ -125,43 +124,27 @@ class PaginaController
         }
 
         try {
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request) {
-                // 1. Crear la página principal.
-                $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
-                $pagina = $this->paginaService->crearPagina($datosPrincipales);
-
-                // 2. Reconstruir la lista completa de metadatos a partir del formulario.
-                $metadatosParaInsertar = [];
-
-                // Añadir los campos personalizados del gestor.
-                $metadatosFormulario = $request->post('meta', []);
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                            $metadatosParaInsertar[] = [
-                                'pagina_id'  => $pagina->id,
-                                'meta_key'   => trim($meta['clave']),
-                                'meta_value' => $meta['valor'] ?? '',
-                            ];
-                        }
+            // Construimos el array de metadatos desde el formulario
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
+            }
+            $plantillaSeleccionada = $request->post('_plantilla_pagina');
+            if (!empty($plantillaSeleccionada)) {
+                $metadata['_plantilla_pagina'] = $plantillaSeleccionada;
+            }
 
-                // Añadir el metadato de la plantilla si se ha seleccionado uno.
-                $plantillaSeleccionada = $request->post('_plantilla_pagina');
-                if (!empty($plantillaSeleccionada)) {
-                    $metadatosParaInsertar[] = [
-                        'pagina_id'  => $pagina->id,
-                        'meta_key'   => '_plantilla_pagina',
-                        'meta_value' => $plantillaSeleccionada,
-                    ];
-                }
+            // Unimos los datos principales con los metadatos
+            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
+            $datosPrincipales['metadata'] = $metadata;
 
-                // 3. Insertar todos los metadatos en una única consulta.
-                if (!empty($metadatosParaInsertar)) {
-                    PaginaMeta::insert($metadatosParaInsertar);
-                }
-            });
+            // El servicio se encarga del resto
+            $this->paginaService->crearPagina($datosPrincipales);
 
             $request->session()->set('success', 'Página creada con éxito.');
             return redirect('/panel/paginas');
@@ -208,50 +191,28 @@ class PaginaController
     public function update(Request $request, $id): Response
     {
         try {
-            \Illuminate\Database\Capsule\Manager::transaction(function () use ($request, $id) {
+            $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
-                $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
-
-                // 1. Actualiza los datos principales de la página.
-                $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
-                $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
-
-                // 2. Sincroniza todos los metadatos. Primero, los eliminamos todos.
-                $pagina->metas()->delete();
-
-                // 3. Reconstruimos la lista de metadatos a partir del formulario.
-                $metadatosParaInsertar = [];
-
-                // Añadimos los campos personalizados del gestor de metadatos.
-                $metadatosFormulario = $request->post('meta', []);
-                if (is_array($metadatosFormulario)) {
-                    foreach ($metadatosFormulario as $meta) {
-                        // Solo guardamos si la clave tiene un valor.
-                        if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                            $metadatosParaInsertar[] = [
-                                'pagina_id'  => $pagina->id,
-                                'meta_key'   => trim($meta['clave']),
-                                'meta_value' => $meta['valor'] ?? '' // Permitimos guardar valores vacíos.
-                            ];
-                        }
+            // Construimos el array de metadatos desde el formulario
+            $metadata = [];
+            $metadatosFormulario = $request->post('meta', []);
+            if (is_array($metadatosFormulario)) {
+                foreach ($metadatosFormulario as $meta) {
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
+            }
+            $plantillaSeleccionada = $request->post('_plantilla_pagina');
+            if (!empty($plantillaSeleccionada)) {
+                $metadata['_plantilla_pagina'] = $plantillaSeleccionada;
+            }
 
-                // Añadimos el metadato de la plantilla, solo si se ha seleccionado una.
-                $plantillaSeleccionada = $request->post('_plantilla_pagina');
-                if (!empty($plantillaSeleccionada)) {
-                    $metadatosParaInsertar[] = [
-                        'pagina_id'  => $pagina->id,
-                        'meta_key'   => '_plantilla_pagina',
-                        'meta_value' => $plantillaSeleccionada,
-                    ];
-                }
+            // Unimos los datos principales con los metadatos
+            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
+            $datosPrincipales['metadata'] = $metadata;
 
-                // 4. Hacemos una única inserción en lote si hay metadatos que guardar.
-                if (!empty($metadatosParaInsertar)) {
-                    PaginaMeta::insert($metadatosParaInsertar);
-                }
-            });
+            $this->paginaService->actualizarPagina($pagina, $datosPrincipales);
 
             $request->session()->set('success', 'Página actualizada con éxito.');
             return redirect('/panel/paginas');

@@ -4,59 +4,24 @@ namespace App\model;
 
 use App\model\traits\GestionaMetadatos;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Class Usuario
- * * @package App\model
- *
- * @property int $id
- * @property string $nombreUsuario
- * @property string $correoElectronico
- * @property string $clave
- * @property string|null $nombreMostrado
- * @property \Carbon\Carbon $fechaRegistro
- * @property string $rol
- * @property string|null $remember_token
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
- */
 class Usuario extends Model
 {
     use GestionaMetadatos;
 
-    /**
-     * El nombre de la tabla asociada con el modelo.
-     *
-     * @var string
-     */
     protected $table = 'usuarios';
-
-    /**
-     * La clave primaria para el modelo.
-     *
-     * @var string
-     */
     protected $primaryKey = 'id';
+    public $timestamps = true;
 
-    /**
-     * Los atributos que se pueden asignar masivamente.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nombreusuario',
         'correoelectronico',
         'clave',
         'nombremostrado',
-        'rol'
+        'rol',
+        'metadata' // Añadir metadata a los fillable
     ];
-
-    /**
-     * Los atributos que deben ocultarse para las serializaciones.
-     *
-     * @var array<int, string>
-     */
+    
     protected $hidden = [
         'clave',
         'remember_token',
@@ -68,24 +33,7 @@ class Usuario extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'fecharegistro' => 'datetime',
+        'fecharegistro' => 'datetime', // Esto puede eliminarse si ya no existe la columna
+        'metadata' => 'array',
     ];
-
-    /**
-     * Indica si el modelo debe tener timestamps.
-     * Eloquent gestionará created_at y updated_at automáticamente.
-     *
-     * @var bool
-     */
-    public $timestamps = true;
-
-    /**
-     * Define la relación "uno a muchos" con los metadatos del usuario.
-     *
-     * @return HasMany
-     */
-    public function metas(): HasMany
-    {
-        return $this->hasMany(UsuarioMeta::class, 'usuario_id');
-    }
 }

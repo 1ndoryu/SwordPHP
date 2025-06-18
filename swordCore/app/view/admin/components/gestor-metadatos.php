@@ -1,43 +1,39 @@
 <?php
-
 /**
  * Componente para gestionar metadatos (campos personalizados).
+ * Adaptado para funcionar con un array asociativo de metadatos (JSONB).
  *
- * Este componente genera una interfaz de usuario para añadir, ver, editar y eliminar
- * pares de clave-valor. Está diseñado para ser incluido en formularios de creación
- * o edición de contenido. No depende de ningún framework CSS.
- *
- * @var ?\Illuminate\Support\Collection $metadatos Colección de objetos de metadatos existentes.
- * Se espera que cada objeto en la colección tenga las propiedades 'clave' y 'valor'.
- * Si no se proporciona, se inicializa como una colección vacía.
+ * @var ?array $metadatos Array asociativo de clave-valor.
  */
 
-// Si la variable $metadatos no está definida al incluir el archivo, se crea una colección vacía para evitar errores.
-$metadatos = $metadatos ?? collect([]);
+// Si la variable $metadatos no está definida, se inicializa como un array vacío.
+$metadatos = $metadatos ?? [];
+$index = 0;
 ?>
 
 <div class="bloque gestorMetadatos" id="gestorMetadatosContenedor">
     <h4>Campos Personalizados</h4>
 
     <div id="metadatosExistentes">
-        <?php foreach ($metadatos as $index => $meta): ?>
+        <?php foreach ($metadatos as $clave => $valor): ?>
             <div class="metaPar">
                 <div class="metaPar-clave">
                     <label for="meta_clave_<?= $index ?>">Nombre del campo</label>
-                    <?php // CORRECCIÓN: Usar meta_key para mostrar el valor existente.
-                    ?>
-                    <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($meta->meta_key ?? '') ?>" placeholder="ej: autor_invitado">
+                    <input id="meta_clave_<?= $index ?>" type="text" name="meta[<?= $index ?>][clave]" value="<?= htmlspecialchars($clave) ?>" placeholder="ej: autor_invitado">
                 </div>
                 <div class="metaPar-valor">
                     <label for="meta_valor_<?= $index ?>">Valor</label>
-                    <?php // CORRECCIÓN: Usar meta_value para mostrar el valor existente.
+                    <?php
+                    // Si el valor es un array o un objeto, lo mostramos como un string JSON.
+                    $valorParaTextarea = is_array($valor) || is_object($valor) ? json_encode($valor, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $valor;
                     ?>
-                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="1" placeholder="Valor del campo"><?= htmlspecialchars($meta->meta_value ?? '') ?></textarea>
+                    <textarea id="meta_valor_<?= $index ?>" name="meta[<?= $index ?>][valor]" rows="1" placeholder="Valor del campo"><?= htmlspecialchars($valorParaTextarea) ?></textarea>
                 </div>
                 <div class="metaPar-accion">
                     <button type="button" class="eliminarMetaPar" title="Eliminar campo">&times;</button>
                 </div>
             </div>
+            <?php $index++; ?>
         <?php endforeach; ?>
     </div>
 
@@ -51,7 +47,8 @@ $metadatos = $metadatos ?? collect([]);
 
         const agregarBtn = document.getElementById('agregarMetaBtn');
         const metadatosExistentesContenedor = document.getElementById('metadatosExistentes');
-        let metaIndex = <?= $metadatos->count() ?>;
+        // Inicializamos el índice del JS a partir del último índice renderizado por PHP.
+        let metaIndex = <?= $index ?>;
 
         if (!agregarBtn || !metadatosExistentesContenedor) return;
 
@@ -70,7 +67,7 @@ $metadatos = $metadatos ?? collect([]);
                     <button type="button" class="eliminarMetaPar" title="Eliminar campo">&times;</button>
                 </div>
             </div>
-        `;
+            `;
             metadatosExistentesContenedor.insertAdjacentHTML('beforeend', nuevoParHtml);
             metaIndex++;
         });

@@ -18,7 +18,26 @@ use App\controller\UsuarioController;
 use App\controller\TemaController;
 use App\controller\PluginPageController;
 use App\controller\AjustesController;
+use App\controller\InstallerController; // <- Añadir esta línea
 use support\Log;
+
+// --- Instalador ---
+// Si el sistema no está instalado, se capturan todas las rutas y se dirigen al instalador.
+if (!file_exists(runtime_path('installed.lock'))) {
+    Route::get('/install', [InstallerController::class, 'showStep']);
+    Route::post('/install', [InstallerController::class, 'processStep']);
+
+    // Redirigir cualquier otra ruta al instalador si no es la propia ruta de instalación.
+    // Esto asegura que el usuario no pueda acceder a ninguna otra parte del sitio.
+    Route::any('/{route:.*}', function () {
+        if (request()->path() !== '/install') {
+            return redirect('/install');
+        }
+    });
+
+    return; // Detiene el procesamiento de las demás rutas de la aplicación
+}
+
 
 // Ruta principal (raíz del sitio)
 Route::get('/', function (Request $request) {
@@ -141,12 +160,12 @@ require_once __DIR__ . '/permalinks.php';
 Route::fallback(function (Request $request) {
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     /*$logMessage = sprintf(
-    "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
-    $request->getRealIp(),
-    $request->fullUrl(),
-    $request->header('user-agent'),
-    $cabecerasComoString
-    ); */
+  "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
+  $request->getRealIp(),
+  $request->fullUrl(),
+  $request->header('user-agent'),
+  $cabecerasComoString
+  ); */
     // Log::channel('default')->warning($logMessage);
     return response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada en el servidor.</p>", 404);
 });

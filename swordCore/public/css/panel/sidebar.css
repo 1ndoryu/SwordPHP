@@ -1,0 +1,83 @@
+/* --- Estilos para Submenús del Sidebar --- */
+
+.panelSidebarNav .nav-item .nav-link {
+    position: relative;
+    user-select: none;
+}
+
+/* Indicador de flecha para elementos con submenú */
+.panelSidebarNav .nav-item:has(.nav-submenu) > .nav-link::after {
+    content: '›';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    transition: transform 0.2s ease-in-out;
+    font-size: 1.6em;
+    line-height: 1;
+    color: var(--texto-secundario);
+}
+
+/* Rotar flecha cuando el menú está activo/abierto */
+.panelSidebarNav .nav-item.open > .nav-link::after {
+    transform: translateY(-50%) rotate(90deg);
+}
+.panelSidebarNav .nav-item > .nav-link.active::after {
+    color: var(--blanco);
+}
+
+
+/* Contenedor del submenú */
+.nav-submenu {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    overflow: hidden;
+    max-height: 0; /* Oculto por defecto */
+    transition: max-height 0.3s ease-out;
+    background-color: rgba(0,0,0, 0.15);
+}
+
+/* Mostrar el submenú cuando el elemento padre tiene la clase 'open' */
+.nav-item.open > .nav-submenu {
+    max-height: 500px; /* Un valor suficientemente grande para mostrar todos los ítems */
+    transition: max-height 0.5s ease-in-out;
+    padding: 5px 0;
+}
+
+/* Enlaces de los ítems del submenú */
+.nav-submenu .nav-link-sub {
+    display: block;
+    padding: 8px 15px 8px 35px; /* Texto indentado para jerarquía */
+    color: var(--texto-secundario);
+    text-decoration: none;
+    font-size: 0.95em;
+    position: relative;
+    border-radius: 4px;
+    margin: 0 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-submenu .nav-link-sub:hover {
+    background-color: var(--fondo-hover);
+    color: var(--blanco);
+}
+
+/* Estilo para el enlace activo del submenú */
+.nav-submenu .nav-link-sub.active {
+    color: var(--blanco);
+    font-weight: 600;
+}
+
+/* Círculo indicador para el ítem activo del submenú */
+.nav-submenu .nav-link-sub.active::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-primario);
+    border-radius: 50%;
+}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Start file for windows
  */
@@ -31,7 +32,8 @@ if (class_exists('Dotenv\Dotenv') && file_exists(base_path() . '/.env')) {
 }
 
 // Esta llamada ahora funcionará porque las constantes ya existen.
-App::loadAllConfig(['route']);
+// Versión correcta
+support\App::loadAllConfig(['route', 'permalinks']);
 
 $errorReporting = config('app.error_reporting');
 if (isset($errorReporting)) {
@@ -110,7 +112,7 @@ if (\$timezone = \$appConfig['default_timezone'] ?? '') {
     date_default_timezone_set(\$timezone);
 }
 
-App::loadAllConfig(['route']);
+App::loadAllConfig(['route', 'permalinks']);
 
 worker_start('$processParam', $configParam);
 

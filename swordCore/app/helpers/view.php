@@ -145,6 +145,7 @@ if (!function_exists('getFooter')) {
 if (!function_exists('renderizarMenuLateralAdmin')) {
     /**
      * Genera el HTML para el menú lateral del panel de administración.
+     * Soporta submenús anidados.
      *
      * @return string El HTML del menú.
      */
@@ -156,45 +157,83 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
         }
 
         $menuItems = [
-            'inicio' => ['url' => '/panel', 'icon' => 'fa-solid fa-house', 'text' => 'Inicio'],
-            'paginas' => ['url' => '/panel/paginas', 'icon' => 'fa-solid fa-file-lines', 'text' => 'Páginas'],
+            'inicio' => ['url' => '/panel', 'text' => 'Inicio'],
+            'paginas' => ['url' => '/panel/paginas', 'text' => 'Páginas'],
         ];
 
         $tiposDeContenido = TipoContenidoService::getInstancia()->obtenerTodos();
         foreach ($tiposDeContenido as $slug => $config) {
-            if ($slug === 'paginas') {
-                continue;
-            }
+            if ($slug === 'paginas') continue;
             $menuItems[$slug] = [
                 'url' => '/panel/' . $slug,
-                'icon' => $config['menu_icon'] ?? 'fa-solid fa-file-pen',
                 'text' => $config['labels']['name'] ?? ucfirst($slug),
             ];
         }
 
-        $menuItems['media'] = ['url' => '/panel/media', 'icon' => 'fa-solid fa-photo-film', 'text' => 'Medios'];
-        $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'icon' => 'fa-solid fa-users', 'text' => 'Usuarios'];
-        $menuItems['plugins'] = ['url' => '/panel/plugins', 'icon' => 'fa-solid fa-puzzle-piece', 'text' => 'Plugins'];
-        $menuItems['temas'] = ['url' => '/panel/temas', 'icon' => 'fa-solid fa-palette', 'text' => 'Temas'];
-        $menuItems['ajustes'] = ['url' => '/panel/ajustes', 'icon' => 'fa-solid fa-gears', 'text' => 'Ajustes'];
-
-        // Aplicamos un filtro para que los plugins puedan añadir/modificar items del menú.
+        $menuItems['media'] = ['url' => '/panel/media', 'text' => 'Medios'];
+        $menuItems['usuarios'] = ['url' => '/panel/usuarios', 'text' => 'Usuarios'];
+        $menuItems['apariencia'] = [
+            'url' => '#',
+            'text' => 'Apariencia',
+            'submenu' => [
+                'temas' => ['url' => '/panel/temas', 'text' => 'Temas'],
+            ]
+        ];
+        $menuItems['plugins'] = ['url' => '/panel/plugins', 'text' => 'Plugins'];
+        // Reemplaza la línea de 'ajustes' por este bloque:
+        $menuItems['ajustes'] = [
+            'url' => '#',
+            'text' => 'Ajustes',
+            'submenu' => [
+                'generales' => ['url' => '/panel/ajustes', 'text' => 'Generales'],
+                'enlaces' => ['url' => '/panel/ajustes/enlaces-permanentes', 'text' => 'Enlaces Permanentes'],
+            ]
+        ];
         $menuItems = aplicarFiltro('menuLateralAdmin', $menuItems);
 
         $html = '';
+        $currentPath = $request->path();
+
         foreach ($menuItems as $key => $item) {
-            $isActive = (str_starts_with($request->path(), $item['url']) && $item['url'] !== '/panel') || $request->path() === $item['url'];
-            if ($item['url'] === '/panel' && $request->path() !== '/panel') {
-                $isActive = false;
+            $hasSubmenu = !empty($item['submenu']) && is_array($item['submenu']);
+
+            $isParentActive = false;
+            if ($hasSubmenu) {
+                foreach ($item['submenu'] as $subItem) {
+                    if ($currentPath === $subItem['url'] || ($subItem['url'] !== '/panel' && str_starts_with($currentPath, $subItem['url']))) {
+                        $isParentActive = true;
+                        break;
+                    }
+                }
+            } else {
+                $isParentActive = ($currentPath === $item['url']) || ($item['url'] !== '/panel' && str_starts_with($currentPath, $item['url']));
+                if ($item['url'] === '/panel' && $currentPath !== '/panel') {
+                    $isParentActive = false;
+                }
             }
-            $activeClass = $isActive ? 'active' : '';
-            $html .= <<<HTML
-      <li class="nav-item">
-        <a class="nav-link {$activeClass}" href="{$item['url']}">
-          <span>{$item['text']}</span>
-        </a>
-      </li>
-HTML;
+
+            $parentActiveClass = $isParentActive ? 'active' : '';
+            $parentOpenClass = $isParentActive ? 'open' : '';
+            $linkTarget = $hasSubmenu ? '#' : $item['url'];
+
+            $html .= "<li class=\"nav-item {$parentOpenClass}\">";
+            $html .= "<a class=\"nav-link {$parentActiveClass}\" href=\"{$linkTarget}\"><span>{$item['text']}</span></a>";
+
+            if ($hasSubmenu) {
+                $html .= '<ul class="nav-submenu">';
+                foreach ($item['submenu'] as $subKey => $subItem) {
+                    $isChildActive = ($currentPath === $subItem['url']) || ($subItem['url'] !== '/panel' && str_starts_with($currentPath, $subItem['url']));
+                    $childActiveClass = $isChildActive ? 'active' : '';
+
+                    if ($subItem['url'] === '/panel/ajustes' && $currentPath !== '/panel/ajustes') {
+                        $childActiveClass = '';
+                    }
+
+                    $html .= "<li class=\"nav-item-sub\"><a class=\"nav-link-sub {$childActiveClass}\" href=\"{$subItem['url']}\">{$subItem['text']}</a></li>";
+                }
+                $html .= '</ul>';
+            }
+            $html .= '</li>';
         }
 
         return $html;

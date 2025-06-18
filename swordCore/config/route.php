@@ -109,6 +109,10 @@ $panelGroup = Route::group('/panel', function () {
         Route::post('/update/{id:\d+}', [UsuarioController::class, 'update']);
         Route::post('/eliminar/{id:\d+}', [UsuarioController::class, 'destroy']);
     });
+
+    Route::get('/enlaces-permanentes', [App\controller\AjustesController::class, 'enlacesPermanentes']);
+    Route::post('/enlaces-permanentes', [App\controller\AjustesController::class, 'guardarEnlacesPermanentes']);
+
 });
 // Se aplica el middleware al grupo de rutas del panel.
 $panelGroup->middleware([
@@ -125,8 +129,8 @@ Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 
 // --- Ruteo Dinámico de Páginas del Frontend ---
-// CORRECCIÓN: Se elimina la barra (/) de la expresión regular para que no capture rutas de varios niveles como '/panel/ajustes'.
-Route::get('/{slug:[a-zA-Z0-9\-_]+}', [PaginaPublicaController::class, 'mostrar']);
+// Carga la ruta de enlaces permanentes desde su propio archivo de configuración.
+require_once __DIR__ . '/permalinks.php';
 
 
 // --- Ruta Fallback (Manejo de 404) ---

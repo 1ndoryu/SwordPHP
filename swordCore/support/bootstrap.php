@@ -51,8 +51,8 @@ if (!defined('PROJECT_ROOT')) {
 
 Config::clear();
 
-// Carga de todas las configuraciones EXCEPTO route.php
-support\App::loadAllConfig(['route']);
+// Carga de todas las configuraciones EXCEPTO los archivos de rutas.
+support\App::loadAllConfig(['route', 'permalinks']);
 
 // =================== INICIO: INICIALIZACIÓN DE BOOTSTRAPS DEL CORE Y PLUGINS ===================
 // Este bloque se ejecuta ahora para asegurar que los servicios base (como la BD) estén listos

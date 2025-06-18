@@ -41,13 +41,17 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             </div>
 
             <?php
-            $old_meta_array = old('meta', []);
-            $metadatos_para_componente = collect($old_meta_array)->map(function ($item) {
-                return (object) [
-                    'meta_key' => $item['clave'] ?? null,
-                    'meta_value' => $item['valor'] ?? null,
-                ];
-            });
+            // Repoblamos el gestor de metadatos con datos antiguos si la validación falló.
+            $old_meta_form_data = old('meta', []);
+            $metadatos_para_componente = [];
+            if (is_array($old_meta_form_data)) {
+                foreach ($old_meta_form_data as $meta_item) {
+                    // Se reconstruye el array asociativo [clave => valor] que espera el componente.
+                    if (!empty($meta_item['clave'])) {
+                        $metadatos_para_componente[trim($meta_item['clave'])] = $meta_item['valor'] ?? '';
+                    }
+                }
+            }
 
             echo partial(
                 'admin/components/gestor-metadatos',

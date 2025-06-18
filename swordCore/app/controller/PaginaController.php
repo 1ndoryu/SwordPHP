@@ -95,6 +95,10 @@ class PaginaController
 
     public function create(Request $request): Response
     {
+        // Limpiamos los datos de 'old input' para asegurar que el formulario de creación aparezca siempre vacío
+        // y no herede datos de envíos de formularios anteriores que hayan fallado.
+        $request->session()->forget('_old_input');
+
         // Extraer mensajes de error de la sesión para pasarlos a la vista.
         $errorMessage = $request->session()->pull('error');
 

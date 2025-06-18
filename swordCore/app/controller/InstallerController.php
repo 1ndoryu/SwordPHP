@@ -149,7 +149,11 @@ class InstallerController
 
             // 6. Redirigir al login con mensaje de éxito
             session()->set('exito', '¡SwordPHP se ha instalado correctamente! Ya puedes iniciar sesión.');
-            return redirect('/login');
+
+            // Obtenemos el host y construimos la URL manualmente para mayor robustez.
+            $host = $request->header('host');
+            $url = 'http://' . $host . '/login';
+            return new Response(302, ['Location' => $url]);
         } catch (Throwable $e) {
             // Limpiar para un posible reintento.
             Db::connection('pgsql')->unprepared('DROP TABLE IF EXISTS media, paginas, usuarios, opciones CASCADE;');

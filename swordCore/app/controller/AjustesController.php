@@ -173,7 +173,7 @@ class AjustesController
             $contenidoArchivo .= "Route::get('{$patronRuta}', [PaginaPublicaController::class, 'mostrar']);\n";
 
             // 6. Escribir el archivo. Esto activará el monitor de archivos para recargar el servidor.
-            $rutaConfig = config_path('permalinks.php');
+            $rutaConfig = config_path('permalinks.inc.php');
             if (file_put_contents($rutaConfig, $contenidoArchivo) === false) {
                 throw new \Exception("No se pudo escribir en el archivo de configuración de enlaces permanentes: {$rutaConfig}");
             }

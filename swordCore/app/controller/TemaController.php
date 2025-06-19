@@ -39,9 +39,9 @@ class TemaController
         // Obtenemos todos los temas disponibles usando el servicio.
         $temasDisponibles = $this->temaService->obtenerTemasDisponibles();
 
-        // Obtenemos el slug del tema activo desde la configuración.
-        $temaActivoSlug = config('theme.active_theme', '');
-        
+        // Obtenemos el slug del tema activo desde el servicio, que ahora consulta la BD.
+        $temaActivoSlug = $this->temaService->obtenerTemaActivoSlug();
+
         // Obtenemos posibles mensajes flash de la sesión.
         $mensajeExito = $request->session()->pull('success');
         $mensajeError = $request->session()->pull('error');
@@ -66,8 +66,8 @@ class TemaController
     {
         try {
             $this->temaService->activarTema($slug);
-            $request->session()->set('success', "Tema '{$slug}' activado. El sistema se recargará para aplicar los cambios.");
-
+            // El mensaje ya no necesita sugerir una recarga, el cambio es instantáneo para el usuario.
+            $request->session()->set('success', "Tema '{$slug}' activado correctamente.");
         } catch (Throwable $e) {
             Log::error('Error al activar el tema: ' . $e->getMessage());
             $request->session()->set('error', 'Error al activar el tema: ' . $e->getMessage());

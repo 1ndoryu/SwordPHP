@@ -12,6 +12,30 @@ use support\Config;
  */
 class TemaService
 {
+    private OpcionService $opcionService;
+
+    /**
+     * Inyecta el servicio de opciones para interactuar con la base de datos.
+     *
+     * @param OpcionService $opcionService
+     */
+    public function __construct(OpcionService $opcionService)
+    {
+        $this->opcionService = $opcionService;
+    }
+
+    /**
+     * Obtiene el slug del tema activo directamente desde la base de datos.
+     *
+     * @return string
+     */
+    public function obtenerTemaActivoSlug(): string
+    {
+        // Usa el valor del archivo de configuración como fallback si la opción no está en la BD.
+        $fallbackTheme = config('theme.active_theme', 'sword-theme-default');
+        return $this->opcionService->obtenerOpcion('active_theme', $fallbackTheme);
+    }
+
     /**
      * Obtiene la lista de todos los temas disponibles en el directorio de temas.
      *
@@ -65,12 +89,12 @@ class TemaService
         $contenido = file_get_contents($rutaArchivoCss, false, null, 0, 4096);
 
         $cabeceras = [
-            'nombre'   => 'Theme Name',
-            'uri'    => 'Theme URI',
+            'nombre' => 'Theme Name',
+            'uri'  => 'Theme URI',
             'descripcion' => 'Description',
-            'autor'   => 'Author',
-            'uriAutor'  => 'Author URI',
-            'version'  => 'Version',
+            'autor' => 'Author',
+            'uriAutor' => 'Author URI',
+            'version' => 'Version',
         ];
 
         $datosTema = [];
@@ -86,11 +110,11 @@ class TemaService
     }
 
     /**
-     * Activa un tema específico escribiendo su slug en el archivo de configuración.
+     * Activa un tema guardando su slug como una opción en la base de datos.
      *
-     * @param string $slug El identificador (directorio) del tema a activar.
-     * @return bool Devuelve true si la operación fue exitosa, false en caso contrario.
-     * @throws \Exception Si el tema no existe o si hay problemas de permisos de escritura.
+     * @param string $slug El identificador del tema a activar.
+     * @return bool Devuelve true si la operación fue exitosa.
+     * @throws \Exception Si el tema no existe.
      */
     public function activarTema(string $slug): bool
     {
@@ -100,40 +124,22 @@ class TemaService
             throw new \Exception("El tema '{$slug}' no es un tema válido o no se pudo encontrar.");
         }
 
-        // 2. Modificar el archivo de configuración de forma segura.
-        $rutaConfig = config_path('theme.php');
+        // 2. Guardar la nueva opción en la base de datos.
+        $this->opcionService->guardarOpcion('active_theme', $slug);
 
-        if (!is_writable($rutaConfig)) {
-            // Es crucial verificar los permisos para evitar errores fatales.
-            throw new \Exception("Error de permisos: el archivo '{$rutaConfig}' no tiene permisos de escritura.");
-        }
+        // 3. Actualizar la configuración en memoria para el worker actual.
+        // Esto evita la necesidad de una recarga para que el cambio surta efecto en la petición actual.
+        Config::set('theme.active_theme', $slug);
 
-        $contenidoConfig = file_get_contents($rutaConfig);
+        // 4. Actualizar también las rutas de las vistas en memoria.
+        $projectRoot = dirname(base_path());
+        $newViewPaths = [
+            SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $slug,
+            app_path() . DIRECTORY_SEPARATOR . 'view',
+        ];
+        Config::set('view.options.view_path', $newViewPaths);
 
-        // 3. Usar una expresión regular para reemplazar únicamente el valor de 'active_theme'.
-        // Esto es robusto contra diferentes espaciados y tipos de comillas (' o ").
-        $nuevoContenido = preg_replace(
-            "/('active_theme'\\s*=>\\s*)['\"].*?['\"]/",
-            "$1'{$slug}'",
-            $contenidoConfig,
-            1, // Realizar solo un reemplazo
-            $reemplazos
-        );
-
-        // 4. Verificar que el reemplazo se realizó correctamente.
-        if ($reemplazos === 0) {
-            throw new \Exception("No se pudo encontrar la clave 'active_theme' en el archivo de configuración.");
-        }
-
-        // 5. Escribir el nuevo contenido de vuelta en el archivo.
-        if (file_put_contents($rutaConfig, $nuevoContenido) !== false) {
-            // **SOLUCIÓN:** Actualiza la configuración en memoria para el worker actual.
-            // Esto evita la necesidad de una segunda recarga para ver el cambio.
-            Config::set('theme.active_theme', $slug);
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -148,7 +154,7 @@ class TemaService
     public function obtenerPlantillasDePagina(): array
     {
         $plantillas = [];
-        $temaActivoSlug = config('theme.active_theme');
+        $temaActivoSlug = $this->obtenerTemaActivoSlug();
         $rutaTemaActivo = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $temaActivoSlug;
 
         if (!is_dir($rutaTemaActivo)) {

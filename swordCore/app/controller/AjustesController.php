@@ -165,12 +165,34 @@ class AjustesController
             }
 
             // 5. Generar el contenido del nuevo archivo de configuración de rutas.
+            preg_match_all('/\{(\w+):/', $patronRuta, $matches);
+            $paramNombres = $matches[1] ?? [];
+
+            $closureParams = '$request';
+            if (!empty($paramNombres)) {
+                $closureParams .= ', ' . implode(', ', array_map(fn($p) => '$' . $p, $paramNombres));
+            }
+
+            $availableParams = ['slug', 'año', 'mes', 'dia', 'id'];
+            $callParamsList = ['$request'];
+            foreach ($availableParams as $ap) {
+                if (in_array($ap, $paramNombres)) {
+                    $callParamsList[] = '$' . $ap;
+                } else {
+                    $callParamsList[] = 'null';
+                }
+            }
+            $callParams = implode(', ', $callParamsList);
+
             $contenidoArchivo = "<?php\n";
             $contenidoArchivo .= "/**\n * Archivo de rutas de enlaces permanentes.\n * Este archivo es generado y sobreescrito automáticamente por los Ajustes de Enlaces Permanentes.\n * NO MODIFICAR MANUALMENTE.\n */\n\n";
             $contenidoArchivo .= "use Webman\\Route;\n";
-            $contenidoArchivo .= "use App\\controller\\PaginaPublicaController;\n\n";
+            $contenidoArchivo .= "use App\\controller\\PaginaPublicaController;\n";
+            $contenidoArchivo .= "use support\\Request;\n\n";
             $contenidoArchivo .= "// Estructura actual: " . htmlspecialchars($estructuraAGuardar) . "\n";
-            $contenidoArchivo .= "Route::get('{$patronRuta}', [PaginaPublicaController::class, 'mostrar']);\n";
+            $contenidoArchivo .= "Route::get('{$patronRuta}', function({$closureParams}) {\n";
+            $contenidoArchivo .= "    return container(PaginaPublicaController::class)->mostrar({$callParams});\n";
+            $contenidoArchivo .= "});\n";
 
             // 6. Escribir el archivo. Esto activará el monitor de archivos para recargar el servidor.
             $rutaConfig = support_path('permalinks_generated.php');

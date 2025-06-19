@@ -20,7 +20,7 @@ class PaginaService
      */
     public function obtenerPaginasPublicadas()
     {
-        return Pagina::where('estado', 'publicado')->get();
+        return Pagina::where('tipocontenido', 'pagina')->where('estado', 'publicado')->get();
     }
 
     /**

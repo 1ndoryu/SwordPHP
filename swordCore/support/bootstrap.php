@@ -73,6 +73,7 @@ foreach (config('plugin', []) as $firm => $projects) {
     }
 }
 
+
 Middleware::load(config('middleware', []));
 foreach (config('plugin', []) as $firm => $projects) {
     foreach ($projects as $name => $project) {
@@ -87,6 +88,10 @@ foreach (config('plugin', []) as $firm => $projects) {
     }
 }
 Middleware::load(['__static__' => config('static.middleware', [])]);
+
+// Carga de todas las configuraciones EXCEPTO los archivos de rutas.
+#support\App::loadAllConfig(['route', 'permalinks']);
+
 
 foreach (config('bootstrap', []) as $className) {
     if (!class_exists($className)) {

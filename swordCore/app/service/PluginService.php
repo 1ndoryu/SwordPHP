@@ -20,31 +20,63 @@ class PluginService
      *
      * @return array Un array de plugins, donde cada plugin es un array asociativo con sus datos.
      */
+
     public function obtenerPluginsDisponibles(): array
     {
         $plugins = [];
         $directorioPlugins = SWORD_PLUGINS_PATH;
 
-        // Asegurarse de que el directorio de plugins exista.
         if (!is_dir($directorioPlugins)) {
             if (!mkdir($directorioPlugins, 0755, true)) {
-                 Log::error("No se pudo crear el directorio de plugins en: $directorioPlugins");
-                 return [];
+                Log::error("No se pudo crear el directorio de plugins en: $directorioPlugins");
+                return [];
             }
         }
-        
+
         $directorios = array_filter(scandir($directorioPlugins), fn($dir) => !in_array($dir, ['.', '..']));
 
         foreach ($directorios as $slug) {
             $rutaPlugin = $directorioPlugins . DIRECTORY_SEPARATOR . $slug;
-            // La convención es que el archivo principal se llame igual que el directorio del plugin.
-            $archivoPrincipal = $rutaPlugin . DIRECTORY_SEPARATOR . $slug . '.php';
+            if (!is_dir($rutaPlugin)) {
+                continue;
+            }
 
-            if (is_dir($rutaPlugin) && file_exists($archivoPrincipal)) {
+            // CORRECCIÓN: Buscar de forma flexible el archivo principal del plugin.
+            $archivoPrincipal = null;
+
+            // La convención es que el archivo principal se llame como el directorio (slug)
+            // o con la primera letra en mayúscula (PascalCase).
+            $posiblesNombres = [
+                $slug . '.php',          // ej: miplugin.php
+                ucfirst($slug) . '.php'  // ej: Miplugin.php
+            ];
+
+            // Añadimos una búsqueda de cualquier .php por si no sigue la convención
+            $archivosPhp = glob($rutaPlugin . '/*.php');
+            if ($archivosPhp) {
+                foreach ($archivosPhp as $archivoPhp) {
+                    $posiblesNombres[] = basename($archivoPhp);
+                }
+            }
+            $posiblesNombres = array_unique($posiblesNombres);
+
+            foreach ($posiblesNombres as $nombre) {
+                $rutaCompleta = $rutaPlugin . DIRECTORY_SEPARATOR . $nombre;
+                if (file_exists($rutaCompleta)) {
+                    // Verificamos si tiene cabecera de plugin para asegurar que es el archivo correcto.
+                    $datosCabecera = $this->parsearCabeceraPlugin($rutaCompleta);
+                    if (!empty($datosCabecera['nombre'])) {
+                        $archivoPrincipal = $rutaCompleta;
+                        break;
+                    }
+                }
+            }
+
+            if ($archivoPrincipal) {
                 $datosPlugin = $this->parsearCabeceraPlugin($archivoPrincipal);
                 if (!empty($datosPlugin['nombre'])) {
                     $datosPlugin['slug'] = $slug;
-                    $datosPlugin['archivoPrincipal'] = $slug . '.php';
+                    $datosPlugin['archivoPrincipal'] = basename($archivoPrincipal); // Guardar el nombre de archivo correcto
                     $plugins[$slug] = $datosPlugin;
                 }
             }
@@ -104,7 +136,7 @@ class PluginService
         }
 
         $pluginsActivos = $opcionService->obtenerOpcion('active_plugins', []);
-        
+
         if (!in_array($slug, $pluginsActivos)) {
             $pluginsActivos[] = $slug;
             return $opcionService->guardarOpcion('active_plugins', $pluginsActivos);

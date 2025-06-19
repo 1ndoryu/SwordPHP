@@ -104,6 +104,8 @@ if (!function_exists('renderizarPaginacion')) {
     }
 }
 
+// swordCore/app/helpers/view.php
+
 if (!function_exists('getHeader')) {
     /**
      * Carga el archivo header del tema.
@@ -113,7 +115,8 @@ if (!function_exists('getHeader')) {
     function getHeader($name = null)
     {
         $template = $name ? "layouts/header-{$name}.php" : 'layouts/header.php';
-        $header_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+        // CORRECCIÓN: Usar el servicio de temas para obtener dinámicamente el tema activo.
+        $header_path = SWORD_THEMES_PATH . '/' . \App\service\TemaService::getActiveTheme() . '/' . $template;
 
         if (file_exists($header_path)) {
             include $header_path;
@@ -132,7 +135,8 @@ if (!function_exists('getFooter')) {
     function getFooter($name = null)
     {
         $template = $name ? "layouts/footer-{$name}.php" : 'layouts/footer.php';
-        $footer_path = SWORD_THEMES_PATH . '/' . config('theme.active_theme') . '/' . $template;
+        // CORRECCIÓN: Usar el servicio de temas para obtener dinámicamente el tema activo.
+        $footer_path = SWORD_THEMES_PATH . '/' . \App\service\TemaService::getActiveTheme() . '/' . $template;
 
         if (file_exists($footer_path)) {
             include $footer_path;

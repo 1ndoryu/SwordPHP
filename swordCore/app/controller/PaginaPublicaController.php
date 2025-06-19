@@ -22,7 +22,9 @@ class PaginaPublicaController
      * @param int|null $id El ID de la entrada.
      * @return Response
      */
-    public function mostrar(Request $request, string $slug = null, string $año = null, string $mes = null, string $dia = null, int $id = null): Response
+    // swordCore/app/controller/PaginaPublicaController.php
+
+    public function mostrar(Request $request, ?string $slug = null, ?string $año = null, ?string $mes = null, ?string $dia = null, ?int $id = null): Response
     {
         global $swordConsultaPrincipal;
 
@@ -77,7 +79,8 @@ class PaginaPublicaController
         $plantillaAUsar = 'pagina';
 
         if (!empty($nombreArchivoPlantilla)) {
-            $rutaCompletaPlantilla = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . config('theme.active_theme') . DIRECTORY_SEPARATOR . $nombreArchivoPlantilla;
+            // CORRECCIÓN: Usar el TemaService para obtener el tema activo dinámicamente.
+            $rutaCompletaPlantilla = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . \App\service\TemaService::getActiveTheme() . DIRECTORY_SEPARATOR . $nombreArchivoPlantilla;
             if (is_file($rutaCompletaPlantilla)) {
                 $plantillaAUsar = pathinfo($nombreArchivoPlantilla, PATHINFO_FILENAME);
             }

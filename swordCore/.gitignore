@@ -7,6 +7,8 @@
 /tests/tmp
 /tests/.phpunit.result.cache
 status.md
+env.swp
+*.env.swp
 
 # #################### #
 # # Composer         #

@@ -25,30 +25,55 @@ class TemaService
         $temas = [];
         $directorioTemas = SWORD_THEMES_PATH;
 
+        // --- INICIO DEPURACIÓN ---
+        \support\Log::info("--- [DEBUG] Iniciando búsqueda de temas ---");
+        \support\Log::info("[DEBUG] Ruta de temas a verificar (SWORD_THEMES_PATH): '" . $directorioTemas . "'");
+
         if (!is_dir($directorioTemas)) {
-            // Devuelve un array vacío si el directorio de temas no existe.
+            \support\Log::error("[DEBUG] ¡FALLO! is_dir() devolvió FALSE. La ruta de temas no es un directorio válido o no se puede leer.");
             return [];
         }
+        \support\Log::info("[DEBUG] ÉXITO: is_dir() para la ruta de temas devolvió TRUE.");
+        // --- FIN DEPURACIÓN ---
 
         // Escanea el directorio de temas.
         $directorios = array_filter(scandir($directorioTemas), fn($dir) => !in_array($dir, ['.', '..']));
+
+        // --- INICIO DEPURACIÓN ---
+        if (empty($directorios)) {
+            \support\Log::warning("[DEBUG] AVISO: scandir() no encontró ningún subdirectorio dentro de '" . $directorioTemas . "'.");
+        } else {
+            \support\Log::info("[DEBUG] Directorios encontrados por scandir: " . json_encode($directorios));
+        }
+        // --- FIN DEPURACIÓN ---
 
         foreach ($directorios as $slug) {
             $rutaTema = $directorioTemas . DIRECTORY_SEPARATOR . $slug;
             $rutaCss = $rutaTema . DIRECTORY_SEPARATOR . 'style.css';
 
+            // --- INICIO DEPURACIÓN ---
+            \support\Log::info("[DEBUG] Procesando slug '{$slug}':");
+            \support\Log::info("  -> Verificando ruta de tema: '" . $rutaTema . "' | ¿Es directorio? " . (is_dir($rutaTema) ? 'SÍ' : 'NO'));
+            \support\Log::info("  -> Verificando ruta de CSS: '" . $rutaCss . "' | ¿Existe archivo? " . (file_exists($rutaCss) ? 'SÍ' : 'NO'));
+            // --- FIN DEPURACIÓN ---
+
             if (is_dir($rutaTema) && file_exists($rutaCss)) {
+                \support\Log::info("  -> ÉXITO: Se cumplen las condiciones para '{$slug}'. Se parseará la cabecera.");
                 $datosTema = $this->parsearCabeceraTema($rutaCss);
                 if (!empty($datosTema['nombre'])) {
                     $datosTema['slug'] = $slug;
-                    // Añadimos una ruta a una posible captura de pantalla para la vista.
                     $datosTema['screenshot'] = file_exists($rutaTema . '/screenshot.png')
                         ? url_contenido("themes/{$slug}/screenshot.png")
                         : null;
                     $temas[$slug] = $datosTema;
                 }
+            } else {
+                \support\Log::warning("  -> AVISO: No se cumplen las condiciones para '{$slug}'. No se procesará como tema.");
             }
         }
+
+        \support\Log::info("[DEBUG] Búsqueda finalizada. Total de temas válidos encontrados: " . count($temas));
+        \support\Log::info("--- [DEBUG] Fin de búsqueda de temas ---");
 
         return $temas;
     }

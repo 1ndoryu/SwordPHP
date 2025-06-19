@@ -6,13 +6,14 @@ if (!defined('SWORD_CORE_PATH')) {
     define('SWORD_CORE_PATH', __DIR__);
 }
 if (!defined('SWORD_CONTENT_PATH')) {
-    define('SWORD_CONTENT_PATH', realpath(__DIR__ . '/../swordContent'));
+    // Se elimina la llamada a realpath() que está fallando en Windows.
+    define('SWORD_CONTENT_PATH', __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'swordContent');
 }
 if (!defined('SWORD_THEMES_PATH')) {
-    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'themes');
 }
 if (!defined('SWORD_PLUGINS_PATH')) {
-    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'plugins');
 }
 
 require_once __DIR__ . '/vendor/autoload.php';

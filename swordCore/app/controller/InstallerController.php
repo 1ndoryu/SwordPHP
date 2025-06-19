@@ -20,6 +20,18 @@ class InstallerController
      */
     public function showStep(Request $request): Response
     {
+        // Comprobar si la instalación acaba de completarse.
+        if (session()->pull('install_step') === 'completed') {
+            return view('installer.show', [
+                'tituloPagina' => 'Instalación Completada',
+                'currentStep' => 'completed',
+                'loginUrl' => 'http://' . $request->header('host') . '/login',
+                'error' => null,
+                'success' => null,
+                'dbConfig' => []
+            ]);
+        }
+
         $envPath = base_path('.env');
         $data = [
             'tituloPagina' => 'Instalación de SwordPHP',
@@ -140,20 +152,9 @@ class InstallerController
             // 4. Crear el lock file para marcar la instalación como completada
             file_put_contents(runtime_path('installed.lock'), date('c'));
 
-            // 5. Forzar la recarga del servidor de desarrollo tocando un archivo de configuración.
-            // Esto es necesario para que Webman vuelva a leer el archivo de rutas y reconozca
-            // las rutas de la aplicación que ahora están desbloqueadas.
-            if (config('app.debug')) { // Solo en modo debug/desarrollo
-                @touch(config_path('app.php'));
-            }
-
-            // 6. Redirigir al login con mensaje de éxito
-            session()->set('exito', '¡SwordPHP se ha instalado correctamente! Ya puedes iniciar sesión.');
-
-            // Obtenemos el host y construimos la URL manualmente para mayor robustez.
-            $host = $request->header('host');
-            $url = 'http://' . $host . '/login';
-            return new Response(302, ['Location' => $url]);
+            // 5. Marcar la instalación como completada para mostrar el mensaje de reinicio.
+            $request->session()->set('install_step', 'completed');
+            return redirect('/install');
         } catch (Throwable $e) {
             // Limpiar para un posible reintento.
             Db::connection('pgsql')->unprepared('DROP TABLE IF EXISTS media, paginas, usuarios, opciones CASCADE;');

@@ -153,8 +153,9 @@ Route::get('/logout', [AuthController::class, 'procesarLogout']);
 
 // --- Ruteo Dinámico de Páginas del Frontend ---
 // Carga la ruta de enlaces permanentes desde su propio archivo de configuración.
-if (file_exists(__DIR__ . '/permalinks.inc.php')) {
-    require_once __DIR__ . '/permalinks.inc.php';
+$permalinks_file = support_path('permalinks_generated.php');
+if (file_exists($permalinks_file)) {
+    require_once $permalinks_file;
 }
 
 

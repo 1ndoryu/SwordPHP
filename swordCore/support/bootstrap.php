@@ -22,12 +22,6 @@ use Webman\Util;
 use Workerman\Events\Select;
 use Workerman\Worker;
 
-// --- INICIO DE LA SOLUCIÓN: Definir constantes globales de ruta ---
-define('SWORD_CORE_PATH', __DIR__);
-define('SWORD_CONTENT_PATH', realpath(__DIR__ . '/../swordContent'));
-define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
-define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
-// --- FIN DE LA SOLUCIÓN ---
 
 $worker = $worker ?? null;
 

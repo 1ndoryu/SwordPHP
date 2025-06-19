@@ -6,6 +6,7 @@ return [
     '' => [
         App\middleware\NormalizePathMiddleware::class,
         App\middleware\Session::class, 
-        App\middleware\StaticFile::class
+        App\middleware\StaticFile::class,
+        App\middleware\IncludeLoadedPluginsMiddleware::class,
     ],
 ];

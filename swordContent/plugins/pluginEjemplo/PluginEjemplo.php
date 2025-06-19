@@ -10,9 +10,6 @@
  */
 
 // Asegurarse de que el plugin no se pueda acceder directamente.
-if (!defined('SWORD_CORE_PATH')) {
-    exit;
-}
 
 /**
  * 1. Usar una acción para añadir contenido al pie de página.

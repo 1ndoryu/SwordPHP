@@ -285,7 +285,7 @@ textarea#contenido {
     min-width: 190px;
     display: flex;
     flex-direction: column;
-    width: unset;
+    width: unset !important;
 }
 
 .contenidoPagina form {

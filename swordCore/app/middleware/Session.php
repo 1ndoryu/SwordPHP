@@ -17,15 +17,18 @@ class Session implements MiddlewareInterface
      */
     public function process(Request $request, callable $handler): Response
     {
-        // Forzar el inicio de una sesión nativa de PHP si no hay una activa.
-        // Webman gestiona la configuración (como dónde se guardan los archivos),
-        // pero para usar session_regenerate_id(), necesitamos que PHP sepa
-        // que la sesión está formalmente "iniciada".
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        // Lógica condicional: Mantenemos la llamada explícita a session_start()
+        // únicamente para el entorno de Windows, como se ha solicitado, para
+        // asegurar la compatibilidad con esa plataforma.
+        if (PHP_OS_FAMILY === 'Windows') {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
         }
 
-        // Esta línea permite a Webman manejar los datos de la sesión a través de su objeto.
+        // Esta línea es la forma estándar de Webman para manejar la sesión.
+        // Se encarga de cargar la sesión usando la configuración del framework,
+        // lo cual es seguro y necesario para todos los sistemas operativos.
         $request->session();
 
         // Pasamos la petición al siguiente eslabón de la cadena (el controlador).

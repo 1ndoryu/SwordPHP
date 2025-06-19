@@ -7,11 +7,36 @@ use support\Config;
 /**
  * Servicio para gestionar los temas.
  *
- * Se encarga de escanear, parsear y gestionar los temas disponibles
- * en la instalación de SwordPHP.
+ * Se encarga de escanear, parsear y gestionar los temas disponibles,
+ * y también actúa como la fuente de verdad para saber cuál es el tema activo.
  */
 class TemaService
 {
+    /**
+     * Cache estático para el slug del tema activo.
+     * @var string|null
+     */
+    private static ?string $activeThemeSlug = null;
+
+    /**
+     * Obtiene el slug del tema activo.
+     *
+     * Lo busca en la base de datos la primera vez y lo guarda en un caché estático
+     * para las siguientes llamadas dentro de la misma petición.
+     *
+     * @return string
+     */
+    public static function getActiveTheme(): string
+    {
+        if (self::$activeThemeSlug === null) {
+            $opcionService = new OpcionService();
+            // Usa el valor del archivo de configuración como fallback.
+            $fallbackTheme = config('theme.active_theme_fallback', 'sword-theme-default');
+            self::$activeThemeSlug = $opcionService->obtenerOpcion('active_theme', $fallbackTheme);
+        }
+        return self::$activeThemeSlug;
+    }
+
     /**
      * Obtiene la lista de todos los temas disponibles en el directorio de temas.
      *
@@ -86,11 +111,11 @@ class TemaService
     }
 
     /**
-     * Activa un tema específico escribiendo su slug en el archivo de configuración.
+     * Activa un tema específico, lo guarda en la base de datos y desencadena una recarga del servidor.
      *
      * @param string $slug El identificador (directorio) del tema a activar.
-     * @return bool Devuelve true si la operación fue exitosa, false en caso contrario.
-     * @throws \Exception Si el tema no existe o si hay problemas de permisos de escritura.
+     * @return bool Devuelve true si la operación fue exitosa.
+     * @throws \Exception Si el tema no existe o si hay problemas de guardado.
      */
     public function activarTema(string $slug): bool
     {
@@ -100,55 +125,33 @@ class TemaService
             throw new \Exception("El tema '{$slug}' no es un tema válido o no se pudo encontrar.");
         }
 
-        // 2. Modificar el archivo de configuración de forma segura.
-        $rutaConfig = config_path('theme.php');
+        // 2. Guardar el nuevo tema activo en la base de datos.
+        $opcionService = new OpcionService();
+        $guardado = $opcionService->guardarOpcion('active_theme', $slug);
 
-        if (!is_writable($rutaConfig)) {
-            // Es crucial verificar los permisos para evitar errores fatales.
-            throw new \Exception("Error de permisos: el archivo '{$rutaConfig}' no tiene permisos de escritura.");
+        if ($guardado) {
+            // "Tocar" un archivo de configuración para que el monitor de archivos de Webman
+            // detecte un cambio y recargue los workers.
+            $monitorOptions = config('process.monitor.constructor.options', []);
+            if (!empty($monitorOptions['enable_file_monitor'])) {
+                @touch(config_path('theme.php'));
+            }
+            // Limpiamos el caché estático para que la siguiente llamada a getActiveTheme() obtenga el nuevo valor.
+            self::$activeThemeSlug = null;
         }
 
-        $contenidoConfig = file_get_contents($rutaConfig);
-
-        // 3. Usar una expresión regular para reemplazar únicamente el valor de 'active_theme'.
-        // Esto es robusto contra diferentes espaciados y tipos de comillas (' o ").
-        $nuevoContenido = preg_replace(
-            "/('active_theme'\\s*=>\\s*)['\"].*?['\"]/",
-            "$1'{$slug}'",
-            $contenidoConfig,
-            1, // Realizar solo un reemplazo
-            $reemplazos
-        );
-
-        // 4. Verificar que el reemplazo se realizó correctamente.
-        if ($reemplazos === 0) {
-            throw new \Exception("No se pudo encontrar la clave 'active_theme' en el archivo de configuración.");
-        }
-
-        // 5. Escribir el nuevo contenido de vuelta en el archivo.
-        if (file_put_contents($rutaConfig, $nuevoContenido) !== false) {
-            // **SOLUCIÓN:** Actualiza la configuración en memoria para el worker actual.
-            // Esto evita la necesidad de una segunda recarga para ver el cambio.
-            Config::set('theme.active_theme', $slug);
-            return true;
-        }
-
-        return false;
+        return $guardado;
     }
 
     /**
      * Obtiene la lista de plantillas de página disponibles en el tema activo.
-     *
-     * Escanea los archivos .php en el directorio raíz del tema activo y busca
-     * una cabecera de comentario especial para identificarlas como plantillas.
-     * Ejemplo de cabecera: /* Template Name: Mi Plantilla Personalizada * /
      *
      * @return array Un array asociativo [nombre_archivo => nombre_plantilla].
      */
     public function obtenerPlantillasDePagina(): array
     {
         $plantillas = [];
-        $temaActivoSlug = config('theme.active_theme');
+        $temaActivoSlug = self::getActiveTheme();
         $rutaTemaActivo = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $temaActivoSlug;
 
         if (!is_dir($rutaTemaActivo)) {
@@ -159,10 +162,7 @@ class TemaService
             $iterador = new \DirectoryIterator($rutaTemaActivo);
             foreach ($iterador as $archivoInfo) {
                 if ($archivoInfo->isFile() && $archivoInfo->getExtension() === 'php') {
-                    // Leemos solo los primeros 8KB, que es más que suficiente para las cabeceras.
                     $contenido = file_get_contents($archivoInfo->getPathname(), false, null, 0, 8192);
-
-                    // Expresión regular para buscar 'Template Name:' en un comentario de bloque PHP.
                     if (preg_match('/^[ \t\/*#@]*Template Name:(.*)$/mi', $contenido, $match)) {
                         if (!empty($match[1])) {
                             $nombrePlantilla = trim($match[1]);
@@ -177,7 +177,6 @@ class TemaService
             return [];
         }
 
-        // Ordenamos las plantillas por nombre para una mejor visualización en el selector.
         asort($plantillas);
 
         return $plantillas;

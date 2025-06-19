@@ -58,7 +58,8 @@ if (!function_exists('rutaTema')) {
     function rutaTema(string $rutaAdicional = ''): string
     {
         $baseUrl = rtrim(config('app.url', ''), '/');
-        $themeDir = '/swordContent/themes/' . config('theme.active_theme');
+        // Se usa el TemaService para obtener dinámicamente el tema activo desde la BD.
+        $themeDir = '/swordContent/themes/' . \App\service\TemaService::getActiveTheme();
         $finalPath = $baseUrl . $themeDir;
 
         if ($rutaAdicional) {

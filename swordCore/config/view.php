@@ -25,25 +25,18 @@ if (!defined('SWORD_PLUGINS_PATH')) {
     define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'plugins');
 }
 
-// Se obtiene la configuración del tema para determinar el tema activo.
-$themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
-$activeTheme = $themeConfig['active_theme'];
-
-// Se construyen las rutas donde se buscarán las vistas, dando prioridad al tema activo.
-$viewPaths = [
-    // 1. Directorio de vistas del tema activo.
-    SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $activeTheme,
-    // 2. Directorio de vistas del núcleo (fallback).
-    app_path() . DIRECTORY_SEPARATOR . 'view',
-];
-
+/**
+ * Configuración inicial del motor de vistas.
+ *
+ * El manejador ('handler') NativePhpView ahora es responsable de determinar
+ * dinámicamente las rutas de las vistas al momento de renderizar,
+ * cargando el tema activo desde la base de datos a través del TemaService.
+ */
 return [
     'handler' => NativePhpView::class,
     'options' => [
         'cache_path' => runtime_path('views'),
-        // Se corrige la clave 'view_path' para que use el array con las rutas del tema y del core.
-        // Esto soluciona el problema de que solo se cargaban las vistas del core.
-        'view_path' => $viewPaths,
+        // La clave 'view_path' ya no es necesaria aquí. El manejador de vistas la gestiona internamente.
         'namespaces' => [
             'pagination' => base_path() . '/app/view/vendor/pagination',
         ],

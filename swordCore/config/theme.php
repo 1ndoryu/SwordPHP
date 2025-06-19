@@ -2,18 +2,18 @@
 /**
  * Configuración de Temas de SwordPHP.
  *
- * Aquí se define el tema activo y otras configuraciones
- * relacionadas con la apariencia del frontend.
+ * Aquí se define el tema de fallback que se usará si no hay ninguno
+ * configurado en la base de datos.
  */
 return [
 
     /**
-     * Tema Activo.
+     * Tema de Fallback.
      *
-     * El valor de esta clave corresponde al nombre del directorio del tema
-     * que se encuentra en `swordContent/themes/`.
-     * SwordPHP buscará las plantillas y assets en este directorio.
+     * Este tema se usará si no hay ningún tema activo definido en la base de datos,
+     * o durante la instalación inicial. El valor corresponde al nombre del
+     * directorio del tema en `swordContent/themes/`.
      */
-    'active_theme' => 'sword-theme-default',
+    'active_theme_fallback' => 'sword-theme-default',
 
 ];

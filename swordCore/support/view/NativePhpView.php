@@ -2,6 +2,7 @@
 
 namespace support\view;
 
+use App\service\TemaService;
 use Webman\View;
 use function config;
 
@@ -13,7 +14,7 @@ use function config;
 class NativePhpView implements View
 {
     /**
-     * Renderiza una plantilla PHP nativa.
+     * Renderiza una plantilla PHP nativa, determinando dinámicamente la ruta del tema.
      *
      * @param string $template La ruta de la plantilla (ej: 'admin/paginas/index').
      * @param array $vars Las variables que se pasarán a la plantilla.
@@ -22,9 +23,20 @@ class NativePhpView implements View
      */
     public static function render(string $template, array $vars, ?string $app = null): string
     {
-        // Obtiene el array de rutas de vista desde la configuración.
-        // Esto permite buscar primero en el tema y luego en el core.
-        $viewPaths = config('view.options.view_path', []);
+        // Caché estático para las rutas de las vistas para evitar recalcularlas en cada render.
+        static $viewPaths = null;
+
+        // Si las rutas no han sido calculadas en esta petición, las determinamos.
+        if ($viewPaths === null) {
+            // Usamos el nuevo método estático para obtener el tema activo.
+            $activeTheme = TemaService::getActiveTheme();
+
+            // Construimos el array de rutas, dando prioridad al tema activo.
+            $viewPaths = [
+                SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $activeTheme,
+                app_path() . DIRECTORY_SEPARATOR . 'view',
+            ];
+        }
 
         // Convierte la notación de puntos (ej: 'admin.paginas.index') a slashes.
         $templatePath = str_replace('.', DIRECTORY_SEPARATOR, $template) . '.php';
@@ -44,18 +56,11 @@ class NativePhpView implements View
         }
 
         // `extract` convierte las claves del array asociativo en variables.
-        // Ejemplo: ['titulo' => 'Mi Título'] se convierte en la variable $titulo.
         extract($vars);
 
-        // Inicia el búfer de salida. Esto captura todo lo que se "imprima"
-        // (con echo, <?=, etc.) en lugar de enviarlo directamente al navegador.
+        // Inicia el búfer de salida para capturar el HTML.
         ob_start();
-
-        // Incluye el archivo de la plantilla. Las variables extraídas ($vars)
-        // estarán disponibles dentro de este archivo.
         include $viewFile;
-
-        // Devuelve el contenido del búfer capturado y lo limpia.
         return ob_get_clean();
     }
 

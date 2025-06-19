@@ -8,6 +8,19 @@ use support\view\NativePhpView;
  * Fichero ajustado para usar plantillas PHP nativas y mantener la estructura de temas.
  */
 
+if (!defined('SWORD_CORE_PATH')) {
+    define('SWORD_CORE_PATH', __DIR__);
+}
+if (!defined('SWORD_CONTENT_PATH')) {
+    define('SWORD_CONTENT_PATH', realpath(__DIR__ . '/../swordContent'));
+}
+if (!defined('SWORD_THEMES_PATH')) {
+    define('SWORD_THEMES_PATH', SWORD_CONTENT_PATH . '/themes');
+}
+if (!defined('SWORD_PLUGINS_PATH')) {
+    define('SWORD_PLUGINS_PATH', SWORD_CONTENT_PATH . '/plugins');
+}
+
 // Se obtiene la configuración del tema para determinar el tema activo.
 $themeConfig = config('theme', ['active_theme' => 'sword-theme-default']);
 $activeTheme = $themeConfig['active_theme'];

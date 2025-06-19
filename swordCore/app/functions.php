@@ -1,5 +1,29 @@
 <?php
-// ARCHIVO MODIFICADO: swordCore/app/functions.php
+/**
+ * Archivo para funciones de ayuda (helpers) globales.
+ * Se organiza incluyendo ficheros especializados desde la carpeta /helpers.
+ */
+
+if (!function_exists('support_path')) {
+    /**
+     * Obtiene la ruta absoluta al directorio 'support'.
+     *
+     * @param string $path Ruta adicional a concatenar.
+     * @return string
+     */
+    function support_path(string $path = ''): string
+    {
+        // Usa la función base_path() de Webman para construir la ruta al directorio 'support'.
+        $support_path = base_path() . DIRECTORY_SEPARATOR . 'support';
+        
+        // Si se proporciona una ruta adicional, la concatena.
+        if ($path) {
+            return $support_path . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
+        }
+        
+        return $support_path;
+    }
+}
 
 /**
  * Archivo para funciones de ayuda (helpers) globales.
@@ -22,6 +46,8 @@ require_once __DIR__ . '/helpers/formPlugin.php';
 require_once __DIR__ . '/helpers/theming.php';
 require_once __DIR__ . '/helpers/shortcode.php';
 require_once __DIR__ . '/helpers/dashboard.php';
+
+
 
 if (!function_exists('ajaxAccion')) {
     /**

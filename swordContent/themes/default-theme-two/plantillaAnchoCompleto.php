@@ -1,4 +1,8 @@
 <?php
+/*
+Template Name: Ancho Completo
+*/
+
 // 1. Inicia el loop de SwordPHP.
 if (hayEntradas()) :
     while (hayEntradas()) :
@@ -12,7 +16,7 @@ if (hayEntradas()) :
         getHeader();
 ?>
 
-        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA --
         ?>
 
         <h1><?php elTitulo(); ?></h1>
@@ -26,7 +30,7 @@ if (hayEntradas()) :
         <hr>
         <p>✅ Vista cargada desde: default-theme-two, plantilla anchoCompleto</p>
 
-        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA --
         ?>
 
     <?php

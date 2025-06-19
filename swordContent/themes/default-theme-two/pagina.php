@@ -1,4 +1,9 @@
 <?php
+
+/*
+Template Name: Inicio
+*/
+
 // 1. Inicia el loop de SwordPHP.
 if (hayEntradas()) :
     while (hayEntradas()) :

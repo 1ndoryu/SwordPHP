@@ -42,7 +42,7 @@ return [
                 'php', 'html', 'htm', 'env'
             ],
             'options' => [
-                'enable_file_monitor' => !in_array('-d', $argv) && DIRECTORY_SEPARATOR === '/',
+                'enable_file_monitor' => !in_array('-d', $argv),
                 'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',
             ]
         ]

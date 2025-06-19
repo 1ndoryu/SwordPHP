@@ -3,6 +3,7 @@
 namespace App\service;
 
 use support\Log;
+use App\service\PluginRegistry;
 
 /**
  * Servicio para la gestión de plugins.
@@ -41,17 +42,12 @@ class PluginService
                 continue;
             }
 
-            // CORRECCIÓN: Buscar de forma flexible el archivo principal del plugin.
             $archivoPrincipal = null;
-
-            // La convención es que el archivo principal se llame como el directorio (slug)
-            // o con la primera letra en mayúscula (PascalCase).
             $posiblesNombres = [
-                $slug . '.php',          // ej: miplugin.php
-                ucfirst($slug) . '.php'  // ej: Miplugin.php
+                $slug . '.php',
+                ucfirst($slug) . '.php'
             ];
 
-            // Añadimos una búsqueda de cualquier .php por si no sigue la convención
             $archivosPhp = glob($rutaPlugin . '/*.php');
             if ($archivosPhp) {
                 foreach ($archivosPhp as $archivoPhp) {
@@ -63,7 +59,6 @@ class PluginService
             foreach ($posiblesNombres as $nombre) {
                 $rutaCompleta = $rutaPlugin . DIRECTORY_SEPARATOR . $nombre;
                 if (file_exists($rutaCompleta)) {
-                    // Verificamos si tiene cabecera de plugin para asegurar que es el archivo correcto.
                     $datosCabecera = $this->parsearCabeceraPlugin($rutaCompleta);
                     if (!empty($datosCabecera['nombre'])) {
                         $archivoPrincipal = $rutaCompleta;
@@ -76,7 +71,7 @@ class PluginService
                 $datosPlugin = $this->parsearCabeceraPlugin($archivoPrincipal);
                 if (!empty($datosPlugin['nombre'])) {
                     $datosPlugin['slug'] = $slug;
-                    $datosPlugin['archivoPrincipal'] = basename($archivoPrincipal); // Guardar el nombre de archivo correcto
+                    $datosPlugin['archivoPrincipal'] = basename($archivoPrincipal);
                     $plugins[$slug] = $datosPlugin;
                 }
             }
@@ -85,28 +80,17 @@ class PluginService
         return $plugins;
     }
 
-    /**
-     * Parsea la cabecera de un archivo PHP para extraer los metadatos del plugin.
-     *
-     * Lee los primeros 8KB del archivo y utiliza expresiones regulares para encontrar
-     * los campos de la cabecera del plugin.
-     *
-     * @param string $rutaArchivoPHP La ruta completa al archivo principal del plugin.
-     * @return array Un array con los datos extraídos de la cabecera.
-     */
     private function parsearCabeceraPlugin(string $rutaArchivoPHP): array
     {
         $contenido = file_get_contents($rutaArchivoPHP, false, null, 0, 8192);
-
         $cabeceras = [
-            'nombre'      => 'Plugin Name',
-            'uri'         => 'Plugin URI',
+            'nombre'   => 'Plugin Name',
+            'uri'    => 'Plugin URI',
             'descripcion' => 'Description',
-            'version'     => 'Version',
-            'autor'       => 'Author',
-            'uriAutor'    => 'Author URI',
+            'version'  => 'Version',
+            'autor'   => 'Author',
+            'uriAutor'  => 'Author URI',
         ];
-
         $datosPlugin = [];
         foreach ($cabeceras as $clave => $regex) {
             if (preg_match('/^[ \t\/*#@]*' . preg_quote($regex, '/') . ':(.*)$/mi', $contenido, $match) && $match[1]) {
@@ -115,17 +99,9 @@ class PluginService
                 $datosPlugin[$clave] = '';
             }
         }
-
         return $datosPlugin;
     }
 
-    /**
-     * Activa un plugin añadiéndolo a la lista de plugins activos en la base de datos.
-     *
-     * @param string $slug El slug del plugin a activar.
-     * @return bool
-     * @throws \Exception Si el plugin a activar no existe.
-     */
     public function activarPlugin(string $slug): bool
     {
         $opcionService = new OpcionService();
@@ -137,20 +113,21 @@ class PluginService
 
         $pluginsActivos = $opcionService->obtenerOpcion('active_plugins', []);
 
-        if (!in_array($slug, $pluginsActivos)) {
-            $pluginsActivos[] = $slug;
-            return $opcionService->guardarOpcion('active_plugins', $pluginsActivos);
+        if (in_array($slug, $pluginsActivos)) {
+            return true; // Ya estaba activo, la operación se considera exitosa.
         }
 
-        return true; // Ya estaba activo, la operación se considera exitosa.
+        $pluginsActivos[] = $slug;
+        $guardado = $opcionService->guardarOpcion('active_plugins', $pluginsActivos);
+
+        if ($guardado) {
+            PluginRegistry::$activePlugins = $pluginsActivos;
+            forzarReinicioServidor();
+        }
+
+        return $guardado;
     }
 
-    /**
-     * Desactiva un plugin eliminándolo de la lista de plugins activos.
-     *
-     * @param string $slug El slug del plugin a desactivar.
-     * @return bool
-     */
     public function desactivarPlugin(string $slug): bool
     {
         $opcionService = new OpcionService();
@@ -158,12 +135,19 @@ class PluginService
 
         $key = array_search($slug, $pluginsActivos);
 
-        if ($key !== false) {
-            unset($pluginsActivos[$key]);
-            $pluginsActivos = array_values($pluginsActivos); // Re-indexar array
-            return $opcionService->guardarOpcion('active_plugins', $pluginsActivos);
+        if ($key === false) {
+            return true; // No estaba activo, la operación se considera exitosa.
         }
 
-        return true; // No estaba activo, la operación se considera exitosa.
+        unset($pluginsActivos[$key]);
+        $nuevosPluginsActivos = array_values($pluginsActivos);
+        $guardado = $opcionService->guardarOpcion('active_plugins', $nuevosPluginsActivos);
+        forzarReinicioServidor();
+        if ($guardado) {
+            PluginRegistry::$activePlugins = $nuevosPluginsActivos;
+            forzarReinicioServidor();
+        }
+
+        return $guardado;
     }
 }

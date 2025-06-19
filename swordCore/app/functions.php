@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Archivo para funciones de ayuda (helpers) globales.
  * Se organiza incluyendo ficheros especializados desde la carpeta /helpers.
@@ -15,12 +16,12 @@ if (!function_exists('support_path')) {
     {
         // Usa la función base_path() de Webman para construir la ruta al directorio 'support'.
         $support_path = base_path() . DIRECTORY_SEPARATOR . 'support';
-        
+
         // Si se proporciona una ruta adicional, la concatena.
         if ($path) {
             return $support_path . DIRECTORY_SEPARATOR . ltrim($path, DIRECTORY_SEPARATOR);
         }
-        
+
         return $support_path;
     }
 }
@@ -147,3 +148,21 @@ initIconos();
 
 assetService()->encolarDirectorio('/css/panel', 'css');
 assetService()->encolarDirectorio('/js/panel', 'js');
+
+if (!function_exists('forzarReinicioServidor')) {
+    /**
+     * "Toca" un archivo de configuración para forzar a Webman a reiniciar los workers.
+     * Esto es necesario para que los cambios en la configuración (ej. plugins, temas) tomen efecto
+     * de forma inmediata sin necesidad de un reinicio manual.
+     */
+    function forzarReinicioServidor(): void
+    {
+        // Solo intentar reiniciar si el monitor de archivos está activo en la configuración.
+        $monitorOptions = config('process.monitor.constructor.options', []);
+        if (!empty($monitorOptions['enable_file_monitor'])) {
+            // Tocamos un archivo genérico de configuración (`app.php` es una buena opción),
+            // ya que la carpeta `config` completa está siendo monitoreada por Webman.
+            @touch(config_path('app.php'));
+        }
+    }
+}

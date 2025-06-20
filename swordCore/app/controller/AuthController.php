@@ -6,6 +6,8 @@ use App\service\UsuarioService;
 use Webman\Http\Request;
 use Webman\Http\Response;
 use support\Log;
+use support\exception\BusinessException;
+use Throwable;
 
 class AuthController
 {
@@ -18,21 +20,31 @@ class AuthController
 
     public function mostrarFormularioRegistro(Request $request): Response
     {
-        return view('auth.registro', ['titulo' => 'Crear una cuenta']);
+        return view('auth.registro', [
+            'titulo' => 'Crear una cuenta',
+            'exito' => session()->pull('exito'),
+            'error' => session()->pull('error')
+        ]);
     }
 
     public function procesarRegistro(Request $request): Response
     {
-        $datos = $request->post();
-        $usuario = $this->usuarioService->crearUsuario($datos);
+        try {
+            $datos = $request->post();
+            $this->usuarioService->crearUsuario($datos);
 
-        if ($usuario) {
             session()->set('exito', '¡Cuenta creada correctamente! Ya puedes iniciar sesión.');
             return redirect('/login');
+        } catch (BusinessException $e) {
+            session()->set('error', $e->getMessage());
+            session()->set('_old_input', $request->post());
+            return redirect('/registro');
+        } catch (Throwable $e) {
+            Log::error('Error en el registro de usuario: ' . $e->getMessage());
+            session()->set('error', 'Ocurrió un error inesperado durante el registro.');
+            session()->set('_old_input', $request->post());
+            return redirect('/registro');
         }
-
-        session()->set('error', 'No se pudo crear la cuenta. El email o nombre de usuario puede que ya esté en uso.');
-        return redirect('/registro');
     }
 
     public function mostrarFormularioLogin(Request $request): Response

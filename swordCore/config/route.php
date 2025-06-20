@@ -55,7 +55,16 @@ Route::get('/', function (Request $request) {
 });
 
 // Rutas para AJAX y pruebas
+
 Route::post('/ajax', [AjaxController::class, 'handle']);
+
+Route::group('/panel/ajax', function () {
+    Route::get('/obtener-galeria', [App\controller\AjaxController::class, 'obtenerGaleria']);
+})->middleware([
+    App\middleware\Session::class,
+    App\middleware\AutenticacionMiddleware::class
+]);
+
 Route::get('/test-ajax', function () {
     return view('test/ajax');
 });

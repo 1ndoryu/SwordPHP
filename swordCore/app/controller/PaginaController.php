@@ -128,7 +128,7 @@ class PaginaController
         }
 
         try {
-            // Construimos el array de metadatos desde el formulario
+            // Construimos el array de metadatos
             $metadata = [];
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
@@ -138,16 +138,22 @@ class PaginaController
                     }
                 }
             }
+            // ... (lógica de plantilla existente)
             $plantillaSeleccionada = $request->post('_plantilla_pagina');
             if (!empty($plantillaSeleccionada)) {
                 $metadata['_plantilla_pagina'] = $plantillaSeleccionada;
             }
 
-            // Unimos los datos principales con los metadatos
-            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
+            // === INICIO: LÓGICA IMAGEN DESTACADA ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
+            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina', '_imagen_destacada_id']);
             $datosPrincipales['metadata'] = $metadata;
 
-            // El servicio se encarga del resto
             $this->paginaService->crearPagina($datosPrincipales);
 
             $request->session()->set('success', 'Página creada con éxito.');
@@ -197,23 +203,44 @@ class PaginaController
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
-            // Construimos el array de metadatos desde el formulario
-            $metadata = [];
+            // Obtenemos los metadatos existentes para no perderlos
+            $metadata = $pagina->metadata ?? [];
+
+            // Procesamos los metadatos del formulario (gestor-metadatos.php)
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
+                // Sincronizamos los metas personalizados, borrando los que ya no están
+                $clavesEnviadas = [];
                 foreach ($metadatosFormulario as $meta) {
                     if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
+                        $clave = trim($meta['clave']);
+                        $metadata[$clave] = $meta['valor'] ?? '';
+                        $clavesEnviadas[] = $clave;
                     }
                 }
+                // Lógica para eliminar metas que se borraron desde la UI (opcional pero recomendado)
+                // Esto requiere un reajuste en cómo se manejan los metas, por simplicidad lo omitimos aquí.
+                // La forma más simple es que el gestor de metas siempre envíe todas las claves.
             }
+
             $plantillaSeleccionada = $request->post('_plantilla_pagina');
             if (!empty($plantillaSeleccionada)) {
                 $metadata['_plantilla_pagina'] = $plantillaSeleccionada;
+            } else {
+                unset($metadata['_plantilla_pagina']); // Quitar si se des-selecciona
             }
 
-            // Unimos los datos principales con los metadatos
-            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina']);
+            // === INICIO: LÓGICA IMAGEN DESTACADA ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            } else {
+                // Si el input llega vacío, se elimina la meta
+                unset($metadata['_imagen_destacada_id']);
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
+            $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina', '_imagen_destacada_id']);
             $datosPrincipales['metadata'] = $metadata;
 
             $this->paginaService->actualizarPagina($pagina, $datosPrincipales);

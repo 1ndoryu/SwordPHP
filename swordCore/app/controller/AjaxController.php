@@ -5,6 +5,7 @@ namespace App\controller;
 use App\service\AjaxManagerService;
 use support\Request;
 use support\Response;
+use App\model\Media; // Asegúrate de importar el modelo Media
 
 /**
  * El "Gatekeeper" de las llamadas AJAX.
@@ -38,5 +39,33 @@ class AjaxController
 
         // Le pedimos al "Cerebro" que ejecute la acción.
         return AjaxManagerService::ejecutarAccion($action, $request);
+    }
+
+    /**
+     * Obtiene los elementos de la biblioteca de medios para el modal de selección.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function obtenerGaleria(Request $request): Response
+    {
+        try {
+            // Obtenemos solo imágenes, las más recientes primero
+            $mediaItems = Media::where('tipomime', 'like', 'image/%')
+                ->orderBy('created_at', 'desc')
+                ->limit(100) // Limitar la carga inicial
+                ->get(['id', 'url_publica', 'titulo']);
+
+            return new Response(200, ['Content-Type' => 'application/json'], json_encode([
+                'exito' => true,
+                'media' => $mediaItems
+            ]));
+        } catch (\Throwable $e) {
+            error_log($e);
+            return new Response(500, ['Content-Type' => 'application/json'], json_encode([
+                'exito' => false,
+                'mensaje' => 'Error al obtener la galería: ' . $e->getMessage()
+            ]));
+        }
     }
 }

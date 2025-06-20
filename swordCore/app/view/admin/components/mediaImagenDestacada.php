@@ -16,7 +16,7 @@ $nombreInput = $nombreInput ?? '_imagen_destacada_id';
 $tieneImagen = !empty($idImagenDestacada) && !empty($urlImagenDestacada);
 ?>
 
-<div class="bloque" id="gestorImagenDestacada">
+<div class="gestordeMedios" id="gestorImagenDestacada">
     <h4>Imagen Destacada</h4>
     <div class="cuerpo-caja">
         <div class="contenedor-preview-imagen" id="previewImagenDestacada">
@@ -38,7 +38,7 @@ $tieneImagen = !empty($idImagenDestacada) && !empty($urlImagenDestacada);
     </div>
 </div>
 
-<div id="modalSeleccionMedios" class="modal-sword" style="display: none;">
+<div id="modalSeleccionMedios" class="blque modal modal-sword" style="display: none;">
     <div class="modal-contenido">
         <div class="modal-cabecera">
             <h3>Biblioteca de Medios</h3>
@@ -56,122 +56,76 @@ $tieneImagen = !empty($idImagenDestacada) && !empty($urlImagenDestacada);
 </div>
 
 <style>
-    /* Estilos para el Gestor y el Modal */
-    #gestorImagenDestacada .cuerpo-caja {
+    .modal-cabecera {
+        display: flex;
+        flex-direction: row !important;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    div#modalSeleccionMedios {
+        width: 600px;
+    }
+
+    div#galeriaModalContenedor img {
+        max-width: 180px;
+        max-height: 180px;
+        object-fit: cover;
+    }
+
+    div#galeriaModalContenedor {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        width: 100%;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    span.modal-cerrar {
+        font-size: 20px;
+        height: 20px;
+        display: flex;
+        align-content: center;
+    }
+
+    div#previewImagenDestacada img {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+    }
+
+    div#gestorImagenDestacada {
         display: flex;
         flex-direction: column;
         gap: 10px;
-    }
-
-    .contenedor-preview-imagen {
         width: 100%;
-        min-height: 50px;
-        border: var(--borde);
-        border-radius: var(--radius);
-        background-color: var(--fondo-claro);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
     }
 
-    .contenedor-preview-imagen img {
-        max-width: 100%;
-        height: auto;
-        display: block;
+    .acciones-imagen-destacada button {
+        width: -webkit-fill-available;
     }
 
     .acciones-imagen-destacada {
         display: flex;
         gap: 10px;
-    }
-
-    /* Estilos del Modal */
-    .modal-sword {
-        display: none;
-        position: fixed;
-        z-index: 1050;
-        left: 0;
-        top: 0;
         width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.5);
     }
 
-    .modal-contenido {
-        background-color: var(--fondo);
-        margin: 5% auto;
-        padding: 20px;
-        border: var(--borde);
-        width: 80%;
-        max-width: 900px;
-        border-radius: var(--radius);
+    .cuerpo-caja {
         display: flex;
         flex-direction: column;
-    }
-
-    .modal-cabecera {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: var(--borde);
-        padding-bottom: 10px;
-        margin-bottom: 15px;
-    }
-
-    .modal-cabecera h3 {
-        margin: 0;
-    }
-
-    .modal-cerrar {
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
+        gap: 10px;
     }
 
     .modal-cuerpo {
-        max-height: 60vh;
-        overflow-y: auto;
-    }
-
-    #galeriaModalContenedor {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .modal-media-item {
-        width: calc(20% - 12px);
-        /* 5 por fila */
-        cursor: pointer;
-        border: 2px solid transparent;
-        border-radius: 4px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .modal-media-item:hover {
-        border-color: #0073aa;
-    }
-
-    .modal-media-item.seleccionado {
-        border-color: #0073aa;
-        box-shadow: 0 0 0 3px #0073aa;
-    }
-
-    .modal-media-item img {
         width: 100%;
-        height: 120px;
-        object-fit: cover;
-        display: block;
     }
 
-    .modal-pie {
-        border-top: var(--borde);
-        padding-top: 15px;
-        margin-top: 15px;
+    .modal-contenido {
         display: flex;
-        justify-content: flex-end;
+        gap: 20px;
     }
 </style>

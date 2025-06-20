@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- Funciones ---
 
     function abrirModal() {
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         cargarGaleria();
     }
 
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function seleccionarImagen(id, url) {
         inputId.value = id;
         previewContenedor.innerHTML = `<img src="${url}" alt="Imagen destacada">`;
-        quitarBtn.style.display = 'inline-block';
+        quitarBtn.style.display = 'inline-flex';
         seleccionarBtn.textContent = 'Cambiar imagen';
     }
 

@@ -153,23 +153,15 @@ class TipoContenidoController
             // Obtenemos los metadatos existentes para no perderlos
             $metadata = $pagina->metadata ?? [];
 
-            // Procesamos los metadatos personalizados del formulario
+            // Procesamos los metadatos personalizados del formulario (gestor-metadatos.php)
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
-                $nuevosMetadatos = [];
                 foreach ($metadatosFormulario as $meta) {
                     if (isset($meta['clave']) && trim($meta['clave']) !== '') {
                         $clave = trim($meta['clave']);
-                        $nuevosMetadatos[$clave] = $meta['valor'] ?? '';
+                        $metadata[$clave] = $meta['valor'] ?? '';
                     }
                 }
-                // Sobrescribimos solo los metas personalizados, manteniendo los internos
-                foreach ($metadata as $key => $value) {
-                    if (str_starts_with($key, '_')) {
-                        $nuevosMetadatos[$key] = $value;
-                    }
-                }
-                $metadata = $nuevosMetadatos;
             }
 
             // === INICIO: LÓGICA IMAGEN DESTACADA ===
@@ -205,7 +197,6 @@ class TipoContenidoController
             return redirect('/panel/' . $slug . '/editar/' . $id);
         }
     }
-
 
     /**
      * Elimina una entrada, asegurándose de que coincida con el tipo de contenido.

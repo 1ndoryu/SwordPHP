@@ -58,13 +58,41 @@ class AjaxController
                 'exito' => true,
                 'media' => $mediaItems
             ]));
-
         } catch (\Throwable $e) {
             error_log('Error en AjaxController@obtenerGaleria: ' . $e->getMessage());
             return new Response(500, ['Content-Type' => 'application/json'], json_encode([
                 'exito' => false,
                 'mensaje' => 'Error del servidor al obtener la galería.'
             ]));
+        }
+    }
+
+    public function obtenerMediaInfo(Request $request, $id)
+    {
+        try {
+            $media = Media::find($id);
+
+            if (!$media) {
+                return new Response(404, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Medio no encontrado.']));
+            }
+
+            // Exponemos solo los datos que necesitamos en el frontend.
+            $mediaData = [
+                'id' => $media->id,
+                'url_publica' => $media->url_publica,
+                'titulo' => $media->titulo,
+                'leyenda' => $media->leyenda,
+                'textoalternativo' => $media->textoalternativo,
+                'descripcion' => $media->descripcion,
+                'tipomime' => $media->tipomime,
+                'metadata' => $media->metadata,
+                'created_at' => $media->created_at->toDateTimeString(), // Formateamos la fecha
+            ];
+
+            return new Response(200, ['Content-Type' => 'application/json'], json_encode(['exito' => true, 'media' => $mediaData]));
+        } catch (\Throwable $e) {
+            error_log("Error al obtener info de medio (ID: $id): " . $e->getMessage());
+            return new Response(500, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Error del servidor.']));
         }
     }
 }

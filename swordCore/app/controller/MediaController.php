@@ -64,4 +64,47 @@ class MediaController
             return new Response(500, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Error del servidor: ' . $e->getMessage()]));
         }
     }
+
+    /**
+     * Elimina un medio de la base de datos y el archivo físico.
+     */
+    public function destroy(Request $request, $id): Response
+    {
+        try {
+            $media = Media::find($id);
+            $session = $request->session(); // Obtenemos el objeto de la sesión
+
+            if (!$media) {
+                if ($request->expectsJson()) {
+                    return new Response(404, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Medio no encontrado.']));
+                }
+                // [+] CORREGIDO: Usamos el sistema de sesión de webman
+                $session->set('error', 'Medio no encontrado.');
+                return redirect('/panel/media');
+            }
+
+            // 1. Construir la ruta completa y eliminar el archivo físico.
+            $rutaCompleta = SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . $media->rutaarchivo;
+            if (file_exists($rutaCompleta) && is_file($rutaCompleta)) {
+                unlink($rutaCompleta);
+            }
+
+            // 2. Eliminar el registro de la base de datos.
+            $media->delete();
+            
+            // [+] CORREGIDO: Usamos el sistema de sesión de webman
+            $session->set('exito', 'El medio ha sido eliminado correctamente.');
+            return redirect('/panel/media');
+
+        } catch (\Throwable $e) {
+            error_log("Error al eliminar medio (ID: $id): " . $e->getMessage());
+            $session = $request->session();
+            if ($request->expectsJson()) {
+                return new Response(500, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'Error del servidor al intentar eliminar el medio.']));
+            }
+            // [+] CORREGIDO: Usamos el sistema de sesión de webman
+            $session->set('error', 'Error del servidor al intentar eliminar el medio.');
+            return redirect('/panel/media');
+        }
+    }
 }

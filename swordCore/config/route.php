@@ -60,6 +60,8 @@ Route::post('/ajax', [AjaxController::class, 'handle']);
 
 Route::group('/panel/ajax', function () {
     Route::get('/obtener-galeria', [App\controller\AjaxController::class, 'obtenerGaleria']);
+    // [+] NUEVA RUTA: Obtener información de un solo medio.
+    Route::get('/obtener-media-info/{id}', [App\controller\AjaxController::class, 'obtenerMediaInfo']);
 })->middleware([
     App\middleware\Session::class,
     App\middleware\AutenticacionMiddleware::class
@@ -135,6 +137,8 @@ $panelGroup = Route::group('/panel', function () {
     // Media
     Route::get('/media', [MediaController::class, 'index']);
     Route::post('/media/subir', [MediaController::class, 'subir']);
+    // [+] NUEVA RUTA: Eliminar un medio.
+    Route::post('/media/destroy/{id}', [MediaController::class, 'destroy']);
 
     // Rutas para Usuarios
     Route::group('/usuarios', function () {
@@ -172,12 +176,12 @@ if (file_exists($permalinks_file)) {
 Route::fallback(function (Request $request) {
     $cabecerasComoString = json_encode($request->header(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     /*$logMessage = sprintf(
-  "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
-  $request->getRealIp(),
-  $request->fullUrl(),
-  $request->header('user-agent'),
-  $cabecerasComoString
-  ); */
+ "Ruta no encontrada (404): IP %s intentó acceder a '%s' con User-Agent: %s\nCABECERAS COMPLETAS:\n%s",
+ $request->getRealIp(),
+ $request->fullUrl(),
+ $request->header('user-agent'),
+ $cabecerasComoString
+ ); */
     // Log::channel('default')->warning($logMessage);
     return response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada en el servidor.</p>", 404);
 });

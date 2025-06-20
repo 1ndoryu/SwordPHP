@@ -8,29 +8,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const mediaGallery = document.getElementById('mediaGallery');
 
     // --- Eventos para activar la subida de archivos ---
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length) {
-            uploadFiles(fileInput.files);
-        }
-    });
+    if (uploadZone) {
+        uploadZone.addEventListener('click', () => fileInput.click());
+    }
+    if (fileInput) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                uploadFiles(fileInput.files);
+            }
+        });
+    }
+
 
     // --- Lógica de Arrastrar y Soltar (Drag and Drop) ---
-    uploadZone.addEventListener('dragover', e => {
-        e.preventDefault();
-        uploadZone.classList.add('dragover');
-    });
-    uploadZone.addEventListener('dragleave', () => {
-        uploadZone.classList.remove('dragover');
-    });
-    uploadZone.addEventListener('drop', e => {
-        e.preventDefault();
-        uploadZone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files; // Asigna los archivos al input
-            uploadFiles(e.dataTransfer.files);
-        }
-    });
+    if (uploadZone) {
+        uploadZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files; // Asigna los archivos al input
+                uploadFiles(e.dataTransfer.files);
+            }
+        });
+    }
 
     // --- Función Principal de Subida con XMLHttpRequest ---
     function uploadFiles(files) {
@@ -98,8 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Función para renderizar un nuevo elemento en la galería ---
     function renderMediaItem(item) {
-        // CORRECCIÓN: Se comprueba la propiedad correcta 'tipomime'.
-        const isImage = item.tipomime && item.tipomime.startsWith('image/');
+        const isImage = item.tipo_mime && item.tipo_mime.startsWith('image/');
 
         const previewHtml = isImage ? `<img src="${item.url_publica}" class="mediaImage" alt="${item.titulo}">` : `<div class="mediaIcon"><span>FILE</span></div>`;
 
@@ -112,9 +118,97 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="mediaBody">
           <p class="mediaTitle" title="${item.titulo}">${item.titulo}</p>
         </div>
+        <div class="mediaActions">
+            <button type="button" class="btnN btnVer" data-id="${item.id}">Ver</button>
+            <button type="button" class="btnN IconoRojo" onclick="eliminarRecurso('/panel/media/destroy/${item.id}', '<?= csrf_token() ?? '' ?>', '¿Estás seguro de que quieres eliminar este archivo? Esta acción es permanente.')">Eliminar</button>
+        </div>
       </div>
     `;
-        // Insertar el nuevo elemento al principio del contenedor de la galería
-        mediaGallery.insertAdjacentElement('afterbegin', itemWrapper);
+        if (mediaGallery) {
+            // Elimina el mensaje "No se han encontrado medios..." si existe
+            const noMediaMessage = mediaGallery.querySelector('.fullWidth');
+            if (noMediaMessage) {
+                noMediaMessage.remove();
+            }
+            mediaGallery.insertAdjacentElement('afterbegin', itemWrapper);
+        }
+    }
+
+    // --- [+] NUEVO: Lógica para el Modal de "Ver" ---
+    const modalVerMedia = document.getElementById('modalVerMedia');
+    if (modalVerMedia && mediaGallery) {
+        const cerrarModalVerMedia = document.getElementById('cerrarModalVerMedia');
+        const cerrarModalVerMediaBtn = document.getElementById('cerrarModalVerMediaBtn');
+        const modalVerMediaContenido = document.getElementById('modalVerMediaContenido');
+
+        const abrirModalVer = async (mediaId) => {
+            modalVerMedia.style.display = 'flex';
+            modalVerMediaContenido.innerHTML = '<p>Cargando detalles...</p>';
+
+            try {
+                const respuesta = await fetch(`/panel/ajax/obtener-media-info/${mediaId}`);
+                if (!respuesta.ok) {
+                    throw new Error(`Error de red: ${respuesta.statusText}`);
+                }
+
+                const datos = await respuesta.json();
+                if (datos.exito && datos.media) {
+                    renderizarDetallesMedia(datos.media);
+                } else {
+                    throw new Error(datos.mensaje || 'No se pudieron cargar los datos.');
+                }
+            } catch (error) {
+                modalVerMediaContenido.innerHTML = `<p style="color: red;">${error.message}</p>`;
+                console.error(error);
+            }
+        };
+
+        const cerrarModal = () => {
+            modalVerMedia.style.display = 'none';
+            modalVerMediaContenido.innerHTML = '';
+        };
+
+        const renderizarDetallesMedia = (media) => {
+            const metadata = media.metadata || {};
+            const tamaño = metadata.tamaño_bytes ? `${(metadata.tamaño_bytes / 1024).toFixed(2)} KB` : 'No disponible';
+            const fechaSubida = media.created_at ? new Date(media.created_at).toLocaleString('es-ES') : 'No disponible';
+
+            const contenidoHTML = `
+                <div class="media-preview">
+                    ${media.tipomime && media.tipomime.startsWith('image/')
+                        ? `<img src="${media.url_publica}" alt="${media.textoalternativo || media.titulo}">`
+                        : `<div class="mediaIcon" style="height: 200px;"><span>${media.tipomime || 'FILE'}</span></div>`
+                    }
+                </div>
+                <div class="media-details">
+                    <p><strong>ID:</strong> ${media.id}</p>
+                    <p><strong>Título:</strong><br><input type="text" value="${media.titulo || ''}" readonly></p>
+                    <p><strong>Texto alternativo:</strong><br><input type="text" value="${media.textoalternativo || ''}" readonly></p>
+                    <p><strong>Leyenda:</strong><br><input type="text" value="${media.leyenda || ''}" readonly></p>
+                    <p><strong>URL del archivo:</strong><br><input type="text" value="${media.url_publica}" readonly onclick="this.select()"></p>
+                    <p><strong>Tipo de archivo:</strong> ${media.tipomime}</p>
+                    <p><strong>Tamaño:</strong> ${tamaño}</p>
+                    <p><strong>Subido el:</strong> ${fechaSubida}</p>
+                </div>
+            `;
+            modalVerMediaContenido.innerHTML = contenidoHTML;
+        };
+
+        mediaGallery.addEventListener('click', (e) => {
+            const botonVer = e.target.closest('.btnVer');
+            if (botonVer) {
+                e.preventDefault();
+                const mediaId = botonVer.dataset.id;
+                abrirModalVer(mediaId);
+            }
+        });
+
+        cerrarModalVerMedia.addEventListener('click', cerrarModal);
+        cerrarModalVerMediaBtn.addEventListener('click', cerrarModal);
+        modalVerMedia.addEventListener('click', (e) => {
+            if (e.target === modalVerMedia) {
+                cerrarModal();
+            }
+        });
     }
 });

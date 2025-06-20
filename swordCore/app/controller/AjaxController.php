@@ -2,16 +2,10 @@
 
 namespace App\controller;
 
-use App\service\AjaxManagerService;
+use App\model\Media;
 use support\Request;
 use support\Response;
-use App\model\Media; // Asegúrate de importar el modelo Media
 
-/**
- * El "Gatekeeper" de las llamadas AJAX.
- * Su única responsabilidad es recibir la solicitud, determinar qué acción se solicita
- * y pasarle el control al AjaxManagerService para su ejecución.
- */
 class AjaxController
 {
     /**
@@ -50,21 +44,26 @@ class AjaxController
     public function obtenerGaleria(Request $request): Response
     {
         try {
-            // Obtenemos solo imágenes, las más recientes primero
-            $mediaItems = Media::where('tipomime', 'like', 'image/%')
+            // El error original era porque se intentaba seleccionar 'url_publica', que es un accesor, no una columna.
+            // La forma correcta es obtener el modelo y Eloquent añadirá el accesor al serializar a JSON.
+            // Seleccionamos solo las columnas necesarias para optimizar. 'rutaarchivo' es necesaria para el accesor.
+            $mediaItems = Media::select(['id', 'titulo', 'rutaarchivo', 'tipomime'])
+                ->where('tipomime', 'like', 'image/%')
                 ->orderBy('created_at', 'desc')
-                ->limit(100) // Limitar la carga inicial
-                ->get(['id', 'url_publica', 'titulo']);
+                ->limit(100) // Limitar para no sobrecargar
+                ->get();
 
+            // Al convertir a JSON, el accesor 'url_publica' se añadirá automáticamente gracias a la propiedad $appends en el modelo Media.
             return new Response(200, ['Content-Type' => 'application/json'], json_encode([
                 'exito' => true,
                 'media' => $mediaItems
             ]));
+
         } catch (\Throwable $e) {
-            error_log($e);
+            error_log('Error en AjaxController@obtenerGaleria: ' . $e->getMessage());
             return new Response(500, ['Content-Type' => 'application/json'], json_encode([
                 'exito' => false,
-                'mensaje' => 'Error al obtener la galería: ' . $e->getMessage()
+                'mensaje' => 'Error del servidor al obtener la galería.'
             ]));
         }
     }

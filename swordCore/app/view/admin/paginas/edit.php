@@ -73,7 +73,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                 $urlDestacada = $media->url_publica;
             }
         }
-        echo partial('admin/components/gestor-imagen-destacada', [
+        echo partial('admin/components/mediaImagenDestacada', [
             'idImagenDestacada' => $idDestacada,
             'urlImagenDestacada' => $urlDestacada,
         ]);

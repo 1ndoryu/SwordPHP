@@ -84,3 +84,4 @@ if (!function_exists('url_contenido')) {
         return rtrim($basePath, '/') . '/' . $rutaLimpia;
     }
 }
+

@@ -20,44 +20,37 @@ class Media extends Model
         'leyenda',
         'textoalternativo',
         'descripcion',
-        'rutaarchivo',
+        'rutaarchivo', // Columna real de la BD
         'tipomime',
         'metadata'
     ];
 
     /**
-     * Los atributos que deben ser añadidos a las serializaciones del modelo.
-     *
-     * @var array
+     * ¡CORRECCIÓN! Este array SOLO debe contener los nombres de los ACCESORS (atributos virtuales).
+     * 'rutaarchivo' es una columna real de la base de datos, NO debe estar aquí.
+     * 'url_publica' es el atributo virtual que calculamos.
+     * * Asegúrate de que esta línea esté así:
      */
     protected $appends = ['url_publica'];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'metadata' => 'array',
     ];
-
-    /**
-     * Define la relación con el autor (Usuario) del archivo.
-     */
+    
     public function autor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'idautor');
     }
 
     /**
-     * Obtiene la URL pública completa del archivo multimedia.
+     * ¡CORRECCIÓN! El nombre del método debe corresponder al accesor: getUrlPublicaAttribute.
+     * Este método USA el valor de la columna 'rutaarchivo' para generar la URL.
      *
-     * @return string|null
+     * Asegúrate de que el nombre de esta función sea "getUrlPublicaAttribute":
      */
     public function getUrlPublicaAttribute(): ?string
     {
         if ($this->rutaarchivo) {
-            // La función url_contenido() es un helper global definido en el sistema.
             return url_contenido('media/' . $this->rutaarchivo);
         }
         return null;

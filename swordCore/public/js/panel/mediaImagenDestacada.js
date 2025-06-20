@@ -52,10 +52,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const div = document.createElement('div');
             div.className = 'modal-media-item';
             div.dataset.id = item.id;
+            // CORRECCIÓN: Usar 'url_publica' que es la URL completa generada por el accesor.
             div.dataset.url = item.url_publica;
             div.innerHTML = `<img src="${item.url_publica}" alt="${item.titulo}" loading="lazy">`;
 
             div.addEventListener('click', () => {
+                // CORRECCIÓN: Pasar la URL pública completa a la función de selección.
                 seleccionarImagen(item.id, item.url_publica);
                 cerrarModal();
             });

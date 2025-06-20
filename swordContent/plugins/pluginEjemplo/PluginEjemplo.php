@@ -4,12 +4,51 @@
  * Plugin Name: Plugin de Ejemplo
  * Plugin URI: https://swordphp.com/
  * Description: Un plugin de ejemplo para demostrar el sistema de hooks (acciones y filtros).
- * Version: 1.0
+ * Version: 1.1
  * Author: SwordPHP Team
  * Author URI: https://swordphp.com/
  */
 
 // Asegurarse de que el plugin no se pueda acceder directamente.
+
+/**
+ * =================================================================
+ * ENCOLAR ASSETS (TAREA 16.1)
+ * =================================================================
+ *
+ * A continuación se muestra cómo encolar hojas de estilo de forma
+ * separada para el panel de administración y para el sitio público.
+ */
+
+/*
+agregarAccion('admin_head', 'miPluginEjemplo_encolarAssetsAdmin');
+
+function miPluginEjemplo_encolarAssetsAdmin()
+{
+    // Se asume que crearás un archivo CSS en:
+    // /swordContent/plugins/pluginEjemplo/assets/admin-styles.css
+    $rutaCssAdmin = url_contenido('plugins/pluginEjemplo/assets/admin-styles.css');
+    encolarEstilo('plugin-ejemplo-admin', $rutaCssAdmin);
+}
+
+// 2. Encolar estilos para el Frontend del Tema.
+agregarAccion('sw_head', 'miPluginEjemplo_encolarAssetsFrontend');
+
+function miPluginEjemplo_encolarAssetsFrontend()
+{
+    // Se asume que crearás un archivo CSS en:
+    // /swordContent/plugins/pluginEjemplo/assets/frontend-styles.css
+    $rutaCssFrontend = url_contenido('plugins/pluginEjemplo/assets/frontend-styles.css');
+    encolarEstilo('plugin-ejemplo-frontend', $rutaCssFrontend);
+}
+
+*/
+/**
+ * =================================================================
+ * FUNCIONALIDAD ORIGINAL DEL PLUGIN
+ * =================================================================
+ */
+
 
 /**
  * 1. Usar una acción para añadir contenido al pie de página.

@@ -63,21 +63,34 @@ class AuthController
         $usuario = $this->usuarioService->autenticarUsuario($identificador, $clave);
 
         if ($usuario) {
-            $request->session()->set('usuarioId', $usuario->id);
-            Log::channel('default')->info('[AuthController] -> Login exitoso. Usuario ID: ' . $usuario->id . '. Redirigiendo a /panel.');
+            $session = $request->session();
+            $session->set('usuarioId', $usuario->id);
+
+            Log::channel('session_debug')->info('AuthController: Login exitoso. Guardando usuarioId en sesión.', [
+                'session_id' => $session->getId(),
+                'usuarioId_guardado' => $usuario->id,
+                'session_data_despues' => $session->all()
+            ]);
 
             // Usamos el helper estándar para la redirección.
             return redirect('/panel');
         }
 
-        Log::channel('default')->warning('[AuthController] -> Login fallido para el identificador: ' . $identificador);
+        Log::channel('session_debug')->warning('AuthController: Login fallido.', [
+            'identificador' => $identificador
+        ]);
         session()->set('error', 'Las credenciales proporcionadas son incorrectas.');
         return redirect('/login');
     }
 
     public function procesarLogout(Request $request): Response
     {
-        $request->session()->flush();
+        $session = $request->session();
+        Log::channel('session_debug')->info('AuthController: Procesando logout.', [
+            'session_id' => $session->getId(),
+            'session_data_antes' => $session->all()
+        ]);
+        $session->flush();
         session()->set('exito', 'Has cerrado sesión correctamente.');
         return redirect('/login');
     }

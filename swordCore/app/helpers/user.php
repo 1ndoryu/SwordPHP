@@ -1,6 +1,7 @@
 <?php
 
 use App\model\Usuario;
+use support\Log;
 
 /**
  * Obtiene el modelo del usuario actualmente autenticado.
@@ -15,18 +16,39 @@ function usuarioActual(): ?Usuario
     static $usuarioActual = null;
     static $haSidoVerificado = false;
 
+    Log::channel('session_debug')->debug('Helper/usuarioActual: Iniciando verificación.', [
+        'haSidoVerificado' => $haSidoVerificado,
+        'usuarioCacheado' => $usuarioActual ? 'ID: ' . $usuarioActual->id : null,
+    ]);
+
     if ($haSidoVerificado) {
+        Log::channel('session_debug')->debug('Helper/usuarioActual: Devolviendo desde caché estático.', [
+            'usuario_devuelto' => $usuarioActual ? 'ID: ' . $usuarioActual->id : 'null'
+        ]);
         return $usuarioActual;
     }
 
     $haSidoVerificado = true;
     $idUsuario = session('usuarioId');
 
+    Log::channel('session_debug')->info('Helper/usuarioActual: Intentando obtener usuario de la sesión.', [
+        'session_id' => session()->getId(),
+        'usuarioId_obtenido' => $idUsuario,
+        'session_data_completa' => session()->all()
+    ]);
+
     if (!$idUsuario) {
+        Log::channel('session_debug')->warning('Helper/usuarioActual: No se encontró usuarioId en la sesión. Devolviendo null.');
         return null;
     }
 
     $usuarioActual = Usuario::find($idUsuario);
+
+    Log::channel('session_debug')->info('Helper/usuarioActual: Búsqueda en BD finalizada.', [
+        'buscado_por_id' => $idUsuario,
+        'resultado' => $usuarioActual ? 'Usuario encontrado (ID: ' . $usuarioActual->id . ')' : 'Usuario NO encontrado en BD'
+    ]);
+
     return $usuarioActual;
 }
 

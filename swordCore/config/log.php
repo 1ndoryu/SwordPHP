@@ -17,6 +17,23 @@ return [
             ]
         ],
     ],
+    // NUEVO: Canal de log para la depuración de sesiones
+    'session_debug' => [
+        'handlers' => [
+            [
+                'class' => Monolog\Handler\StreamHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/session_debug.log', // Archivo dedicado
+                    Monolog\Logger::DEBUG, // Capturar todos los niveles de mensajes
+                ],
+                'formatter' => [
+                    'class' => Monolog\Formatter\LineFormatter::class,
+                    // Formato: [FECHA HORA] canal.NIVEL: Mensaje {contexto} [extra]
+                    'constructor' => ["[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n", 'Y-m-d H:i:s', true],
+                ],
+            ]
+        ],
+    ],
     // Canal de log para la base de datos
     'database' => [
         'handlers' => [

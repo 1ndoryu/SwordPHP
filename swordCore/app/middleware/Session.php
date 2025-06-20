@@ -5,6 +5,7 @@ namespace App\middleware;
 use Webman\MiddlewareInterface;
 use Webman\Http\Response;
 use Webman\Http\Request;
+use support\Log;
 
 class Session implements MiddlewareInterface
 {
@@ -17,11 +18,15 @@ class Session implements MiddlewareInterface
      */
     public function process(Request $request, callable $handler): Response
     {
-        // La llamada a $request->session() es la forma estándar y agnóstica al sistema operativo
-        // para asegurar que la sesión se cargue y esté disponible. El manejador de sesión
-        // configurado en config/session.php (FileSessionHandler por defecto) se encargará
-        // de los detalles de bajo nivel, como iniciar la sesión si es necesario.
-        $request->session();
+        // La llamada a $request->session() carga o inicia la sesión.
+        $session = $request->session();
+
+        // Log para depuración
+        Log::channel('session_debug')->info('Middleware\Session: Procesando petición.', [
+            'uri' => $request->uri(),
+            'session_id' => $session->getId(),
+            'session_data' => $session->all()
+        ]);
 
         // Pasamos la petición al siguiente eslabón de la cadena (el controlador).
         return $handler($request);

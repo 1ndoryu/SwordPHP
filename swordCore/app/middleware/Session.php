@@ -17,18 +17,10 @@ class Session implements MiddlewareInterface
      */
     public function process(Request $request, callable $handler): Response
     {
-        // Lógica condicional: Mantenemos la llamada explícita a session_start()
-        // únicamente para el entorno de Windows, como se ha solicitado, para
-        // asegurar la compatibilidad con esa plataforma.
-        if (PHP_OS_FAMILY === 'Windows') {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-        }
-
-        // Esta línea es la forma estándar de Webman para manejar la sesión.
-        // Se encarga de cargar la sesión usando la configuración del framework,
-        // lo cual es seguro y necesario para todos los sistemas operativos.
+        // La llamada a $request->session() es la forma estándar y agnóstica al sistema operativo
+        // para asegurar que la sesión se cargue y esté disponible. El manejador de sesión
+        // configurado en config/session.php (FileSessionHandler por defecto) se encargará
+        // de los detalles de bajo nivel, como iniciar la sesión si es necesario.
         $request->session();
 
         // Pasamos la petición al siguiente eslabón de la cadena (el controlador).

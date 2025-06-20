@@ -91,6 +91,13 @@ class TipoContenidoController
                 }
             }
 
+            // === INICIO: LÓGICA IMAGEN DESTACADA ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
             // 2. Preparar todos los datos para la creación
             $datosParaCrear = [
                 'titulo'        => $request->post('titulo'),
@@ -143,30 +150,51 @@ class TipoContenidoController
         try {
             $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
 
-            // 1. Construir el array de metadatos desde el formulario
-            $metadata = [];
+            // Obtenemos los metadatos existentes para no perderlos
+            $metadata = $pagina->metadata ?? [];
+
+            // Procesamos los metadatos personalizados del formulario
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
+                $nuevosMetadatos = [];
                 foreach ($metadatosFormulario as $meta) {
                     if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
+                        $clave = trim($meta['clave']);
+                        $nuevosMetadatos[$clave] = $meta['valor'] ?? '';
                     }
                 }
+                // Sobrescribimos solo los metas personalizados, manteniendo los internos
+                foreach ($metadata as $key => $value) {
+                    if (str_starts_with($key, '_')) {
+                        $nuevosMetadatos[$key] = $value;
+                    }
+                }
+                $metadata = $nuevosMetadatos;
             }
 
-            // 2. Asignar datos principales
+            // === INICIO: LÓGICA IMAGEN DESTACADA ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            } else {
+                // Si el input llega vacío, se elimina la meta
+                unset($metadata['_imagen_destacada_id']);
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
+            // Asignar datos principales
             $pagina->titulo = $request->post('titulo');
             $pagina->contenido = $request->post('contenido', '');
             $pagina->estado = $request->post('estado', 'borrador');
 
-            // 3. Generar y asignar slug único
+            // Generar y asignar slug único
             $baseParaSlug = $request->post('slug', $request->post('titulo'));
             $pagina->slug = $this->generarSlug($baseParaSlug, $id);
 
-            // 4. Asignar el array completo de metadatos a la propiedad del modelo
+            // Asignar el array completo de metadatos a la propiedad del modelo
             $pagina->metadata = $metadata;
 
-            // 5. Guardar todos los cambios en una sola operación
+            // Guardar todos los cambios en una sola operación
             $pagina->save();
 
             session()->set('success', 'Entrada actualizada con éxito.');

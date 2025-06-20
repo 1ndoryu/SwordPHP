@@ -59,10 +59,15 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             <hr>
 
             <?php
-            // Incluimos el gestor de metadatos, pasándole los metas del usuario.
+            // Incluimos el gestor de metadatos, filtrando las claves internas
+            $metadatosParaVista = array_filter(
+                $usuario->metadata ?? [],
+                fn($key) => !str_starts_with($key, '_'),
+                ARRAY_FILTER_USE_KEY
+            );
             echo partial(
                 'admin/components/gestor-metadatos',
-                ['metadatos' => $usuario->metadata ?? []]
+                ['metadatos' => $metadatosParaVista]
             );
             ?>
 
@@ -70,6 +75,21 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
     </div>
 
     <div class="bloque segundoContenedor">
+        <?php
+        $idDestacada = $usuario->obtenerMeta('_imagen_destacada_id');
+        $urlDestacada = '';
+        if ($idDestacada) {
+            $media = \App\model\Media::find($idDestacada);
+            if ($media) {
+                $urlDestacada = $media->url_publica;
+            }
+        }
+        echo partial('admin/components/mediaImagenDestacada', [
+            'idImagenDestacada' => $idDestacada,
+            'urlImagenDestacada' => $urlDestacada,
+        ]);
+        ?>
+
         <div class="grupo-formulario estado">
             <label for="rol">Rol del Usuario</label>
             <select id="rol" name="rol">

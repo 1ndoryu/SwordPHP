@@ -47,10 +47,10 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
 
             <?php
-            // Filtramos el metadato interno de la plantilla antes de pasarlo a la vista.
+            // Filtramos los metadatos internos antes de pasarlos a la vista.
             $metadatosParaVista = array_filter(
-                $entrada->metadata ?? [], // CORREGIDO: Usar la variable correcta $entrada
-                fn($key) => $key !== '_plantilla_pagina',
+                $entrada->metadata ?? [],
+                fn($key) => !str_starts_with($key, '_'),
                 ARRAY_FILTER_USE_KEY
             );
             echo partial(
@@ -62,7 +62,20 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
     </div>
 
     <div class="bloque segundoContenedor">
-
+        <?php
+        $idDestacada = $entrada->obtenerMeta('_imagen_destacada_id');
+        $urlDestacada = '';
+        if ($idDestacada) {
+            $media = \App\model\Media::find($idDestacada);
+            if ($media) {
+                $urlDestacada = $media->url_publica;
+            }
+        }
+        echo partial('admin/components/mediaImagenDestacada', [
+            'idImagenDestacada' => $idDestacada,
+            'urlImagenDestacada' => $urlDestacada,
+        ]);
+        ?>
 
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>

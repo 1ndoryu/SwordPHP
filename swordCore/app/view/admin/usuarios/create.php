@@ -60,12 +60,12 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             // Incluimos el gestor de metadatos.
             // Repoblamos con 'old' si la validación del formulario falla.
             $old_meta_array = old('meta', []);
-            $metadatos_para_componente = collect($old_meta_array)->map(function ($item) {
-                return (object) [
-                    'meta_key' => $item['clave'] ?? null,
-                    'meta_value' => $item['valor'] ?? null,
-                ];
-            });
+            $metadatos_para_componente = collect($old_meta_array)->mapWithKeys(function ($item) {
+                 if (isset($item['clave']) && trim($item['clave']) !== '') {
+                    return [trim($item['clave']) => $item['valor'] ?? ''];
+                }
+                return [];
+            })->all();
             echo partial(
                 'admin/components/gestor-metadatos',
                 ['metadatos' => $metadatos_para_componente]
@@ -76,6 +76,20 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
     </div>
 
     <div class="bloque segundoContenedor">
+        <?php
+        $idDestacada = old('_imagen_destacada_id');
+        $urlDestacada = '';
+        if ($idDestacada) {
+            $media = \App\model\Media::find($idDestacada);
+            if ($media) {
+                $urlDestacada = $media->url_publica;
+            }
+        }
+        echo partial('admin/components/mediaImagenDestacada', [
+            'idImagenDestacada' => $idDestacada,
+            'urlImagenDestacada' => $urlDestacada,
+        ]);
+        ?>
         <div class="grupo-formulario estado">
             <label for="rol">Rol del Usuario</label>
             <select id="rol" name="rol">

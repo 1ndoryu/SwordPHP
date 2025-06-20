@@ -49,6 +49,13 @@ class UsuarioController
                 }
             }
 
+            // === INICIO: LÓGICA IMAGEN DESTACADA (DE PERFIL) ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
             // Unir datos principales y metadatos
             $datosPrincipales = $request->only(['nombreusuario', 'correoelectronico', 'nombremostrado', 'clave', 'clave_confirmation', 'rol']);
             $datosPrincipales['metadata'] = $metadata;
@@ -128,16 +135,37 @@ class UsuarioController
         try {
             $usuario = $this->usuarioService->obtenerUsuarioPorId((int)$id);
 
-            // Construir metadatos
-            $metadata = [];
+            // Obtenemos los metadatos existentes para no perderlos
+            $metadata = $usuario->metadata ?? [];
+
+            // Procesamos los metadatos personalizados del formulario
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
+                $nuevosMetadatos = [];
                 foreach ($metadatosFormulario as $meta) {
                     if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
+                        $clave = trim($meta['clave']);
+                        $nuevosMetadatos[$clave] = $meta['valor'] ?? '';
                     }
                 }
+                // Sobrescribimos solo los metas personalizados, manteniendo los internos
+                foreach ($metadata as $key => $value) {
+                    if (str_starts_with($key, '_')) {
+                        $nuevosMetadatos[$key] = $value;
+                    }
+                }
+                $metadata = $nuevosMetadatos;
             }
+
+            // === INICIO: LÓGICA IMAGEN DESTACADA (DE PERFIL) ===
+            $idImagenDestacada = $request->post('_imagen_destacada_id');
+            if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
+                $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
+            } else {
+                // Si el input llega vacío, se elimina la meta
+                unset($metadata['_imagen_destacada_id']);
+            }
+            // === FIN: LÓGICA IMAGEN DESTACADA ===
 
             // Unir datos principales y metadatos
             $datosPrincipales = $request->only(['nombremostrado', 'correoelectronico', 'clave', 'clave_confirmation', 'rol']);

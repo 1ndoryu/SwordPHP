@@ -63,6 +63,22 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
     </div>
 
     <div class="bloque segundoContenedor">
+        <?php
+        $idDestacada = old('_imagen_destacada_id');
+        $urlDestacada = '';
+        if ($idDestacada) {
+            // Si hay un ID antiguo, intentamos buscar la URL para mostrar la preview.
+            $media = \App\model\Media::find($idDestacada);
+            if ($media) {
+                $urlDestacada = $media->url_publica;
+            }
+        }
+        echo partial('admin/components/mediaImagenDestacada', [
+            'idImagenDestacada' => $idDestacada,
+            'urlImagenDestacada' => $urlDestacada,
+        ]);
+        ?>
+
         <div class="grupo-formulario estado">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">

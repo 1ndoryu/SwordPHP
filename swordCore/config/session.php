@@ -1,19 +1,22 @@
 <?php
 
 use Webman\Session\FileSessionHandler;
-use Webman\Session\RedisSessionHandler;
+use Webman\Session\RedisSessionHandler; // Asegúrate de que RedisSessionHandler está importado
 use Webman\Session\RedisClusterSessionHandler;
 
 return [
 
-    'type' => 'file', // or redis or redis_cluster
+    'type' => 'redis', // CAMBIAR: de 'file' a 'redis'
 
-    'handler' => FileSessionHandler::class,
+    'handler' => RedisSessionHandler::class, // CAMBIAR: de FileSessionHandler::class a RedisSessionHandler::class
 
     'config' => [
+        // La configuración 'file' se ignora, la dejamos como está.
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
+        // La configuración 'redis' ahora será utilizada.
+        // Se conecta a la configuración 'default' que definimos en config/redis.php
         'redis' => [
             'host' => '127.0.0.1',
             'port' => 6379,

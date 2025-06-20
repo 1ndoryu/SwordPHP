@@ -1,22 +1,43 @@
 <?php
 
 use Webman\Session\FileSessionHandler;
-use Webman\Session\RedisSessionHandler; // Asegúrate de que RedisSessionHandler está importado
+use Webman\Session\RedisSessionHandler;
 use Webman\Session\RedisClusterSessionHandler;
 
+// --- INICIO DE LA LÓGICA DINÁMICA ---
+
+// 1. Obtenemos el driver de la variable de entorno. Si no existe, usamos 'file' por defecto.
+$sessionDriver = env('SESSION_DRIVER', 'file');
+
+// 2. Definimos las configuraciones para cada driver.
+$handlerConfig = [
+    'file' => [
+        'type'    => 'file',
+        'handler' => FileSessionHandler::class,
+    ],
+    'redis' => [
+        'type'    => 'redis',
+        'handler' => RedisSessionHandler::class,
+    ],
+];
+
+// 3. Seleccionamos la configuración activa. Si se especifica un driver inválido, se usará 'file'.
+$activeConfig = $handlerConfig[$sessionDriver] ?? $handlerConfig['file'];
+
+// --- FIN DE LA LÓGICA DINÁMICA ---
+
+
 return [
-
-    'type' => 'redis', // CAMBIAR: de 'file' a 'redis'
-
-    'handler' => RedisSessionHandler::class, // CAMBIAR: de FileSessionHandler::class a RedisSessionHandler::class
+    // Usamos los valores de la configuración activa que seleccionamos arriba.
+    'type' => $activeConfig['type'],
+    'handler' => $activeConfig['handler'],
 
     'config' => [
-        // La configuración 'file' se ignora, la dejamos como está.
+        // La configuración 'file' siempre está aquí para que no falle si es seleccionada.
         'file' => [
             'save_path' => runtime_path() . '/sessions',
         ],
-        // La configuración 'redis' ahora será utilizada.
-        // Se conecta a la configuración 'default' que definimos en config/redis.php
+        // La configuración 'redis' también está siempre disponible.
         'redis' => [
             'host' => '127.0.0.1',
             'port' => 6379,
@@ -34,7 +55,7 @@ return [
     ],
 
     'session_name' => 'PHPSID',
-    
+
     'auto_update_timestamp' => false,
 
     'lifetime' => 7*24*60*60,
@@ -44,13 +65,12 @@ return [
     'cookie_path' => '/',
 
     'domain' => '',
-    
+
     'http_only' => true,
 
     'secure' => false,
-    
+
     'same_site' => '',
 
     'gc_probability' => [1, 1000],
-
 ];

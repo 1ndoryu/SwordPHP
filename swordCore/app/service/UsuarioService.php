@@ -144,10 +144,8 @@ class UsuarioService
             }
         }
 
-        // Asignamos los datos que están en el array $fillable del modelo.
-        $usuario->fill($datos);
-
         // Validación y asignación de la contraseña si se está cambiando.
+        // Solo se actualiza si se proporciona una nueva contraseña.
         if (!empty($datos['clave'])) {
             if ($datos['clave'] !== ($datos['clave_confirmation'] ?? null)) {
                 throw new \support\exception\BusinessException('Las contraseñas no coinciden.');
@@ -155,6 +153,13 @@ class UsuarioService
             // Hashear y asignar la nueva contraseña.
             $usuario->clave = password_hash($datos['clave'], PASSWORD_BCRYPT);
         }
+
+        // Quitar la clave y su confirmación de los datos a rellenar masivamente
+        // para no sobreescribir la existente con un valor vacío.
+        unset($datos['clave'], $datos['clave_confirmation']);
+
+        // Asignamos el resto de los datos que están en el array $fillable.
+        $usuario->fill($datos);
 
         // Asignación de los metadatos.
         if (isset($datos['metadata']) && is_array($datos['metadata'])) {

@@ -163,7 +163,8 @@ function miPluginEjemplo_renderizarPagina()
             'value' => $valorBannerEstilos,
             'atributos' => ['rows' => 3],
             'placeholder' => 'ej: background: #ff0000; color: white;',
-            'descripcion' => 'Añade CSS personalizado para el contenedor del banner (sin las etiquetas <style>).'
+            'descripcion' => 'Añade CSS personalizado para el contenedor del banner (sin las etiquetas <style>).',
+            'clases_wrapper' => 'campo-personalizado' // <-- Demostración de la nueva funcionalidad
         ],
     ];
 
@@ -175,7 +176,6 @@ function miPluginEjemplo_renderizarPagina()
         'textoBoton' => 'Guardar Todos los Ajustes'
     ]);
 }
-
 /**
  * 6. Registrar los shortcodes del plugin.
  */

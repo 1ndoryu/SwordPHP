@@ -15,6 +15,7 @@ if (!function_exists('renderFormPlugin')) {
      * - opciones (array): Array asociativo ['valor' => 'texto'] para 'select'.
      * - estaMarcado (bool): Para 'checkbox', indica si está marcado.
      * - atributos (array): Array de atributos HTML adicionales.
+     * - clases_wrapper (string): Clases CSS adicionales para el div contenedor del campo.
      *
      * @return string El HTML del campo de formulario.
      */
@@ -31,11 +32,15 @@ if (!function_exists('renderFormPlugin')) {
             'opciones' => [],
             'estaMarcado' => false,
             'atributos' => [],
+            'clases_wrapper' => '', // Nueva opción para clases personalizadas
         ];
         $args = array_merge($defaults, $args);
 
         if (empty($args['name'])) return ''; // El nombre es esencial.
         if (empty($args['id'])) $args['id'] = $args['name'];
+
+        // Construir clases del contenedor
+        $clasesWrapper = 'bloque grupo-formulario ' . htmlspecialchars($args['clases_wrapper']);
 
         $atributosStr = _construirAtributosHtml($args['atributos']);
         $labelHtml = $args['label'] && $args['tipo'] !== 'checkbox' ? sprintf('<label for="%s"><label>%s</label></label>', htmlspecialchars($args['id']), htmlspecialchars($args['label'])) : '';
@@ -77,7 +82,7 @@ if (!function_exists('renderFormPlugin')) {
                     htmlspecialchars($args['label'])
                 );
                 // Para checkbox, la descripción va fuera del label
-                return sprintf('<div class="bloque grupo-formulario">%s%s</div>', $campoHtml, $descripcionHtml);
+                return sprintf('<div class="%s">%s%s</div>', trim($clasesWrapper), $campoHtml, $descripcionHtml);
 
             default: // text, email, password, number, etc.
                 $campoHtml = sprintf(
@@ -92,7 +97,7 @@ if (!function_exists('renderFormPlugin')) {
                 break;
         }
 
-        return sprintf('<div class="bloque grupo-formulario">%s%s%s</div>', $labelHtml, $campoHtml, $descripcionHtml);
+        return sprintf('<div class="%s">%s%s%s</div>', trim($clasesWrapper), $labelHtml, $campoHtml, $descripcionHtml);
     }
 }
 

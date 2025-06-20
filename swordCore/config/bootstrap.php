@@ -1,7 +1,13 @@
 <?php
 
-return [
-    support\bootstrap\Session::class, // Asegúrate de que esta línea esté activa.
+$bootstrap = [
+    support\bootstrap\Session::class,
     App\bootstrap\Eloquent::class,
-    App\bootstrap\PreloadActivePlugins::class,
 ];
+
+// Carga el precargador de plugins activos solo si el CMS está habilitado.
+if (env('CMS_ENABLED', true)) {
+    $bootstrap[] = App\bootstrap\PreloadActivePlugins::class;
+}
+
+return $bootstrap;

@@ -14,7 +14,10 @@
 
 
 // Obtenemos la información del usuario actual.
-$usuario = usuarioActual();
+if (env('CMS_ENABLED', true)) {
+    $usuario = usuarioActual();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

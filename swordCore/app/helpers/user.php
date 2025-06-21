@@ -62,7 +62,7 @@ function idUsuarioActual(): ?int
     return session('usuarioId');
 }
 
-if (!function_exists('obtenerMetaUsuario')) {
+if (!function_exists('getMetaUser')) {
     /**
      * Obtiene un metadato de usuario.
      *
@@ -71,7 +71,7 @@ if (!function_exists('obtenerMetaUsuario')) {
      * @param bool $single Si se debe devolver un solo valor.
      * @return mixed
      */
-    function obtenerMetaUsuario(int $usuario_id, string $meta_key, bool $single = true)
+    function getMetaUser(int $usuario_id, string $meta_key, bool $single = true)
     {
         $usuario = Usuario::find($usuario_id);
         if (!$usuario) {
@@ -81,7 +81,7 @@ if (!function_exists('obtenerMetaUsuario')) {
     }
 }
 
-if (!function_exists('guardarMetaUser')) {
+if (!function_exists('updateMetaUser')) {
     /**
      * Guarda (crea o actualiza) un metadato de usuario.
      *
@@ -90,7 +90,7 @@ if (!function_exists('guardarMetaUser')) {
      * @param mixed $meta_value El valor del metadato.
      * @return bool
      */
-    function guardarMetaUser(int $usuario_id, string $meta_key, $meta_value): bool
+    function updateMetaUser(int $usuario_id, string $meta_key, $meta_value): bool
     {
         $usuario = Usuario::find($usuario_id);
         if (!$usuario) {
@@ -100,7 +100,7 @@ if (!function_exists('guardarMetaUser')) {
     }
 }
 
-if (!function_exists('eliminarMetaUser')) {
+if (!function_exists('deleteMetaUser')) {
     /**
      * Elimina un metadato de usuario.
      *
@@ -108,7 +108,7 @@ if (!function_exists('eliminarMetaUser')) {
      * @param string $meta_key La clave del metadato.
      * @return bool
      */
-    function eliminarMetaUser(int $usuario_id, string $meta_key): bool
+    function deleteMetaUser(int $usuario_id, string $meta_key): bool
     {
         $usuario = Usuario::find($usuario_id);
         if (!$usuario) {

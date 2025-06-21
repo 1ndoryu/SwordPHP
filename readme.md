@@ -58,7 +58,7 @@ El objetivo de Sword es combinar la simplicidad y extensibilidad que los desarro
     -   Activación y desactivación de plugins desde el panel.
     -   Los plugins pueden añadir menús y páginas de ajustes al panel de administración.
 -   **Hooks (Acciones y Filtros):** Sistema completo para extender funcionalidades del núcleo y de otros plugins.
--   **Theming con "The Loop":** Funciones de plantilla globales (`hayEntradas`, `laEntrada`, `elTitulo`, `elContenido`, etc.) para facilitar la creación de temas de forma similar a WordPress.
+-   **Theming con "The Loop":** Funciones de plantilla globales (`havePost`, `thePost`, `theTitle`, `theContent`, etc.) para facilitar la creación de temas de forma similar a WordPress.
 -   **Gestor de Assets:** Funciones globales (`encolarEstilo`, `encolarScript`) para añadir CSS y JS desde los temas y plugins.
 -   **Sistema de Shortcodes:** API para registrar y procesar shortcodes en el contenido.
 -   **Ajustes del Sitio:** Panel de control para configurar los ajustes generales (título, descripción), de lectura (página de inicio) y enlaces permanentes.
@@ -73,19 +73,19 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 
 | Función / Método Sword                   | Equivalente WordPress                     |
 | :--------------------------------------- | :---------------------------------------- |
-| `agregarAccion('hook', $cb)`             | `add_action('hook', $cb)`                 |
-| `hacerAccion('hook', ...$args)`          | `do_action('hook', ...$args)`             |
-| `agregarFiltro('hook', $cb)`             | `add_filter('hook', $cb)`                 |
-| `aplicarFiltro('hook', $val, ...$args)`  | `apply_filters('hook', $val, ...$args)`  |
+| `addAction('hook', $cb)`             | `add_action('hook', $cb)`                 |
+| `doAction('hook', ...$args)`          | `do_action('hook', ...$args)`             |
+| `addFilter('hook', $cb)`             | `add_filter('hook', $cb)`                 |
+| `applyFilters('hook', $val, ...$args)`  | `apply_filters('hook', $val, ...$args)`  |
 | `encolarEstilo('id', 'ruta')`            | `wp_enqueue_style('handle', 'src')`       |
 | `encolarScript('id', 'ruta')`            | `wp_enqueue_script('handle', 'src')`      |
 | `new SwordQuery($args)`                  | `new WP_Query($args)`                     |
-| `hayEntradas()`                          | `have_posts()`                            |
-| `laEntrada()`                            | `the_post()`                              |
-| `elTitulo()`                             | `the_title()`                             |
-| `elContenido()`                          | `the_content()`                           |
-| `elEnlacePermanente()`                   | `the_permalink()`                         |
-| `obtenerEnlacePermanenteEntrada($e)`     | `get_permalink($post)`                    |
+| `havePost()`                          | `have_posts()`                            |
+| `thePost()`                            | `the_post()`                              |
+| `theTitle()`                             | `the_title()`                             |
+| `theContent()`                          | `the_content()`                           |
+| `getPermalink()`                   | `the_permalink()`                         |
+| `getPermalinkPost($e)`     | `get_permalink($post)`                    |
 | `getHeader()`                            | `get_header()`                            |
 | `getFooter()`                            | `get_footer()`                            |
 | `usuarioActual()`                        | `wp_get_current_user()`                   |

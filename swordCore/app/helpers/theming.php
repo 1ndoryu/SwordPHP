@@ -9,33 +9,33 @@
 $GLOBALS['swordConsultaPrincipal'] = null;
 $GLOBALS['entrada'] = null;
 
-if (!function_exists('hayEntradas')) {
+if (!function_exists('havePost')) {
     /**
      * Determina si la consulta principal actual tiene entradas para el loop.
      *
      * @return bool
      */
-    function hayEntradas(): bool
+    function havePost(): bool
     {
         global $swordConsultaPrincipal;
         if (!$swordConsultaPrincipal instanceof \App\service\SwordQuery) {
             return false;
         }
-        return $swordConsultaPrincipal->hayEntradas();
+        return $swordConsultaPrincipal->havePost();
     }
 }
 
-if (!function_exists('laEntrada')) {
+if (!function_exists('thePost')) {
     /**
      * Itera el índice de entradas y configura la variable global $entrada.
      *
      * @return void
      */
-    function laEntrada(): void
+    function thePost(): void
     {
         global $swordConsultaPrincipal, $entrada;
         if ($swordConsultaPrincipal instanceof \App\service\SwordQuery) {
-            $swordConsultaPrincipal->laEntrada();
+            $swordConsultaPrincipal->thePost();
             // Sincroniza la variable global $entrada con la entrada actual de la consulta.
             $entrada = $swordConsultaPrincipal->entrada;
         }
@@ -43,109 +43,109 @@ if (!function_exists('laEntrada')) {
 }
 
 // A partir de aquí, las funciones asumen que la variable global $entrada está disponible
-// gracias a la llamada previa de laEntrada().
+// gracias a la llamada previa de thePost().
 
-if (!function_exists('elId')) {
+if (!function_exists('postId')) {
     /**
      * Muestra el ID de la entrada actual.
      *
      * @return void
      */
-    function elId(): void
+    function postId(): void
     {
-        echo obtenerElId();
+        echo getPostId();
     }
 }
 
-if (!function_exists('obtenerElId')) {
+if (!function_exists('getPostId')) {
     /**
      * Obtiene el ID de la entrada actual.
      *
      * @return int
      */
-    function obtenerElId(): int
+    function getPostId(): int
     {
         global $entrada;
         return $entrada->id ?? 0;
     }
 }
 
-if (!function_exists('elTitulo')) {
+if (!function_exists('theTitle')) {
     /**
      * Muestra el título de la entrada actual, aplicando filtros.
      *
      * @return void
      */
-    function elTitulo(): void
+    function theTitle(): void
     {
         global $entrada;
         $titulo = $entrada->titulo ?? '';
         // Se aplica un filtro para permitir la modificación del título.
-        echo aplicarFiltro('elTitulo', $titulo, $entrada);
+        echo applyFilters('theTitle', $titulo, $entrada);
     }
 }
 
-if (!function_exists('obtenerElTitulo')) {
+if (!function_exists('getTitle')) {
     /**
      * Obtiene el título de la entrada actual sin aplicar filtros.
      *
      * @return string
      */
-    function obtenerElTitulo(): string
+    function getTitle(): string
     {
         global $entrada;
         return $entrada->titulo ?? '';
     }
 }
 
-if (!function_exists('elContenido')) {
+if (!function_exists('theContent')) {
     /**
      * Muestra el contenido de la entrada actual, aplicando filtros.
      *
      * @return void
      */
-    function elContenido(): void
+    function theContent(): void
     {
         global $entrada;
         $contenido = $entrada->contenido ?? '';
         // Se aplica un filtro para permitir el parseo de shortcodes, etc.
-        echo aplicarFiltro('elContenido', $contenido, $entrada);
+        echo applyFilters('theContent', $contenido, $entrada);
     }
 }
 
-if (!function_exists('obtenerElContenido')) {
+if (!function_exists('getContent')) {
     /**
      * Obtiene el contenido de la entrada actual sin aplicar filtros.
      *
      * @return string
      */
-    function obtenerElContenido(): string
+    function getContent(): string
     {
         global $entrada;
         return $entrada->contenido ?? '';
     }
 }
 
-if (!function_exists('elEnlacePermanente')) {
+if (!function_exists('getPermalink')) {
     /**
      * Muestra la URL (enlace permanente) de la entrada actual.
      *
      * @return void
      */
-    function elEnlacePermanente(): void
+    function getPermalink(): void
     {
-        echo obtenerEnlacePermanente();
+        echo getPermalink();
     }
 }
 
-if (!function_exists('obtenerEnlacePermanenteEntrada')) {
+if (!function_exists('getPermalinkPost')) {
     /**
      * Obtiene la URL (enlace permanente) para una entrada específica.
      *
      * @param \App\model\Pagina $entrada El objeto de la entrada (página, post, etc.).
      * @return string La URL completa del enlace permanente.
      */
-    function obtenerEnlacePermanenteEntrada(\App\model\Pagina $entrada): string
+    function getPermalinkPost(\App\model\Pagina $entrada): string
     {
         $opcionService = new \App\service\OpcionService();
         $estructura = $opcionService->obtenerOpcion('permalink_structure', '/%slug%/');
@@ -167,19 +167,19 @@ if (!function_exists('obtenerEnlacePermanenteEntrada')) {
     }
 }
 
-if (!function_exists('obtenerEnlacePermanente')) {
+if (!function_exists('getPermalink')) {
     /**
      * Obtiene la URL (enlace permanente) de la entrada actual del loop.
      *
      * @return string
      */
-    function obtenerEnlacePermanente(): string
+    function getPermalink(): string
     {
         global $entrada;
         if (!$entrada instanceof \App\model\Pagina) {
             return '';
         }
-        return obtenerEnlacePermanenteEntrada($entrada);
+        return getPermalinkPost($entrada);
     }
 }
 
@@ -194,7 +194,7 @@ if (!function_exists('sw_head')) {
         echo assetService()->imprimirAssetsHead();
 
         // Hook para que plugins o el tema puedan inyectar contenido en el <head>.
-        hacerAccion('sw_head');
+        doAction('sw_head');
     }
 }
 
@@ -209,7 +209,7 @@ if (!function_exists('sw_footer')) {
         echo assetService()->imprimirAssetsFooter();
 
         // Hook para que plugins o el tema puedan inyectar contenido en el <footer>.
-        hacerAccion('sw_footer');
+        doAction('sw_footer');
     }
 }
 
@@ -224,7 +224,7 @@ if (!function_exists('sw_admin_head')) {
         echo assetService()->imprimirAssetsHead();
         
         // Hook para que plugins puedan inyectar contenido en el <head> del panel.
-        hacerAccion('admin_head');
+        doAction('admin_head');
     }
 }
 
@@ -236,7 +236,7 @@ if (!function_exists('sw_admin_footer')) {
     function sw_admin_footer()
     {
         // Hook para que plugins puedan añadir contenido antes de cerrar el body del panel.
-        hacerAccion('admin_footer');
+        doAction('admin_footer');
 
         // Imprime las etiquetas <script> de los JS encolados.
         echo assetService()->imprimirAssetsFooter();

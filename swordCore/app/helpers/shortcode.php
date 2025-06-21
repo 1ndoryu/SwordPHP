@@ -18,7 +18,7 @@ if (!function_exists('agregarShortcode')) {
 if (!function_exists('procesarShortcodes')) {
     /**
      * Procesa los shortcodes dentro de una cadena de contenido.
-     * Esta función se engancha al filtro 'elContenido'.
+     * Esta función se engancha al filtro 'theContent'.
      *
      * @param string $contenido El contenido a procesar.
      * @return string El contenido con los shortcodes renderizados.
@@ -29,7 +29,7 @@ if (!function_exists('procesarShortcodes')) {
     }
 }
 
-// Engancha la función de procesamiento al filtro 'elContenido'.
+// Engancha la función de procesamiento al filtro 'theContent'.
 // La prioridad 11 se usa para asegurar que se ejecute después de los filtros por defecto,
 // como el de WordPress para 'wpautop', si se implementara en el futuro.
-agregarFiltro('elContenido', 'procesarShortcodes', 11);
+addFilter('theContent', 'procesarShortcodes', 11);

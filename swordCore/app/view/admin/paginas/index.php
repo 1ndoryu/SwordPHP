@@ -69,7 +69,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                         </div>
 
                         <div class="contenidoAcciones">
-                            <a href="<?php echo obtenerEnlacePermanenteEntrada($pagina); ?>" class="iconoB btnVer" target="_blank" title="Ver">
+                            <a href="<?php echo getPermalinkPost($pagina); ?>" class="iconoB btnVer" target="_blank" title="Ver">
                                 <?php echo icon('ver'); ?>
                             </a>
                             <a href="/panel/paginas/edit/<?php echo htmlspecialchars($pagina->id); ?>" class="iconoB btnEditar" title="Editar">

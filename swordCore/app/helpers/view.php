@@ -213,7 +213,7 @@ if (!function_exists('renderizarMenuLateralAdmin')) {
         ];
 
         // 4. Aplicar el filtro para que los plugins puedan modificar el menú
-        $menuItems = aplicarFiltro('menuLateralAdmin', $menuItems);
+        $menuItems = applyFilters('menuLateralAdmin', $menuItems);
 
         // 5. Renderizar el HTML del menú
         $html = '';

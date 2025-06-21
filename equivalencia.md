@@ -17,18 +17,18 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 ### Tabla 2: Manejo de AJAX
 
-| Función SwordPHP            | Equivalente WordPress               |
-| :-------------------------- | :---------------------------------- |
-| `ajaxAccion('nombre', $cb)` | `add_action('wp_ajax_nombre', $cb)` |
+| Función SwordPHP         | Equivalente WordPress               |
+| :----------------------- | :---------------------------------- |
+| `addAjax('nombre', $cb)` | `add_action('wp_ajax_nombre', $cb)` |
 
 ### Tabla 3: Hooks (Acciones y Filtros)
 
-| Función SwordPHP                          | Equivalente WordPress                   |
-| :---------------------------------------- | :-------------------------------------- |
-| `agregarAccion('hook', $cb, $p, $a)`      | `add_action('hook', $cb, $p, $a)`       |
-| `hacerAccion('hook', ...$args)`           | `do_action('hook', ...$args)`           |
-| `agregarFiltro('hook', $cb, $p, $a)`      | `add_filter('hook', $cb, $p, $a)`       |
-| `aplicarFiltro('hook', $valor, ...$args)` | `apply_filters('hook', $val, ...$args)` |
+| Función SwordPHP                         | Equivalente WordPress                   |
+| :--------------------------------------- | :-------------------------------------- |
+| `addAction('hook', $cb, $p, $a)`         | `add_action('hook', $cb, $p, $a)`       |
+| `doAction('hook', ...$args)`             | `do_action('hook', ...$args)`           |
+| `addFilter('hook', $cb, $p, $a)`         | `add_filter('hook', $cb, $p, $a)`       |
+| `applyFilters('hook', $valor, ...$args)` | `apply_filters('hook', $val, ...$args)` |
 
 ### Tabla 4: Datos de Usuario
 
@@ -42,9 +42,9 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 | Función / Lógica SwordPHP | Equivalente WordPress                    |
 | :------------------------ | :--------------------------------------- |
-| `obtenerMetaUsuario()`    | `get_user_meta()`                        |
-| `guardarMetaUser()`       | `update_user_meta()` / `add_user_meta()` |
-| `eliminarMetaUser()`      | `delete_user_meta()`                     |
+| `getMetaUser()`           | `get_user_meta()`                        |
+| `updateMetaUser()`        | `update_user_meta()` / `add_user_meta()` |
+| `deleteMetaUser()`        | `delete_user_meta()`                     |
 
 ### Tabla 6: Metadatos de Contenido (Post Meta) #Esto hay que ajustarlo para que sean funciones globales y no metodos.
 
@@ -63,18 +63,18 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 ### Tabla 8: El Loop y Plantillas (Theming)
 
-| Función SwordPHP                           | Equivalente WordPress          |
-| :----------------------------------------- | :----------------------------- |
-| `new SwordQuery($args)`                    | `new WP_Query($args)`          |
-| `hayEntradas()`                            | `have_posts()`                 |
-| `laEntrada()`                              | `the_post()`                   |
-| `elTitulo()`                               | `the_title()`                  |
-| `elContenido()`                            | `the_content()`                |
-| `elEnlacePermanente()`                     | `the_permalink()`              |
-| `obtenerEnlacePermanente()`                | `get_permalink()` (en el loop) |
-| `obtenerEnlacePermanenteEntrada($entrada)` | `get_permalink($post)`         |
-| `getHeader()`                              | `get_header()`                 |
-| `getFooter()`                              | `get_footer()`                 |
+| Función SwordPHP             | Equivalente WordPress          |
+| :--------------------------- | :----------------------------- |
+| `new SwordQuery($args)`      | `new WP_Query($args)`          |
+| `havePost()`                 | `have_posts()`                 |
+| `thePost()`                  | `the_post()`                   |
+| `theTitle()`                 | `the_title()`                  |
+| `theContent()`               | `the_content()`                |
+| `getPermalink()`             | `the_permalink()`              |
+| `getPermalink()`             | `get_permalink()` (en el loop) |
+| `getPermalinkPost($entrada)` | `get_permalink($post)`         |
+| `getHeader()`                | `get_header()`                 |
+| `getFooter()`                | `get_footer()`                 |
 
 ---
 

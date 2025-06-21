@@ -10,7 +10,7 @@
 
 <?php
 sw_footer(); // Imprime los scripts y estilos encolados
-hacerAccion('pieDePagina');
+doAction('pieDePagina');
 ?>
 
 </body>

@@ -107,7 +107,7 @@ class SwordQuery
      *
      * @return bool
      */
-    public function hayEntradas(): bool
+    public function havePost(): bool
     {
         return $this->entradaActual + 1 < $this->totalEntradas;
     }
@@ -117,9 +117,9 @@ class SwordQuery
      *
      * @return void
      */
-    public function laEntrada(): void
+    public function thePost(): void
     {
-        if ($this->hayEntradas()) {
+        if ($this->havePost()) {
             $this->entradaActual++;
             $this->entrada = $this->entradas[$this->entradaActual];
         }

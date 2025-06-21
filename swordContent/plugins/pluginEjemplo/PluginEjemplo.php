@@ -21,7 +21,7 @@
  */
 
 /*
-agregarAccion('admin_head', 'miPluginEjemplo_encolarAssetsAdmin');
+addAction('admin_head', 'miPluginEjemplo_encolarAssetsAdmin');
 
 function miPluginEjemplo_encolarAssetsAdmin()
 {
@@ -32,7 +32,7 @@ function miPluginEjemplo_encolarAssetsAdmin()
 }
 
 // 2. Encolar estilos para el Frontend del Tema.
-agregarAccion('sw_head', 'miPluginEjemplo_encolarAssetsFrontend');
+addAction('sw_head', 'miPluginEjemplo_encolarAssetsFrontend');
 
 function miPluginEjemplo_encolarAssetsFrontend()
 {
@@ -54,7 +54,7 @@ function miPluginEjemplo_encolarAssetsFrontend()
  * 1. Usar una acción para añadir contenido al pie de página.
  * Ahora usa el valor guardado en las opciones.
  */
-agregarAccion('pieDePagina', 'miPluginEjemplo_agregarContenidoFooter');
+addAction('pieDePagina', 'miPluginEjemplo_agregarContenidoFooter');
 
 function miPluginEjemplo_agregarContenidoFooter()
 {
@@ -99,7 +99,7 @@ function miPluginEjemplo_agregarContenidoFooter()
 /**
  * 2. Usar un filtro para modificar el título de la página.
  */
-agregarFiltro('elTitulo', 'miPluginEjemplo_modificarTitulo', 10, 2);
+addFilter('theTitle', 'miPluginEjemplo_modificarTitulo', 10, 2);
 
 function miPluginEjemplo_modificarTitulo($tituloActual, $pagina)
 {
@@ -110,7 +110,7 @@ function miPluginEjemplo_modificarTitulo($tituloActual, $pagina)
 /**
  * 3. Añadir el enlace al menú del panel de administración.
  */
-agregarFiltro('menuLateralAdmin', 'miPluginEjemplo_agregarMenuAdmin');
+addFilter('menuLateralAdmin', 'miPluginEjemplo_agregarMenuAdmin');
 
 function miPluginEjemplo_agregarMenuAdmin($menuItems)
 {

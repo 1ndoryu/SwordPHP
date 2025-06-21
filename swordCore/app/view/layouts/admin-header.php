@@ -9,11 +9,7 @@
  * Se espera que la página que lo incluya defina una variable $tituloPagina.
  */
 
-// Encolamos los assets necesarios para el panel.
-// Esto equivale a las secciones @estilos y @scripts del layout de Blade.
 
-
-// Obtenemos la información del usuario actual.
 if (env('CMS_ENABLED', true)) {
     $usuario = usuarioActual();
 }
@@ -47,8 +43,8 @@ if (env('CMS_ENABLED', true)) {
             </nav>
         </aside>
 
-        <main class="panelContenidoPrincipal">
-            <header class="panelContenidoCabecera">
+        <main class="contenidoPanelP">
+            <header class="contenidoPanelC">
                 <h1><?php echo htmlspecialchars($tituloPagina ?? 'Dashboard'); ?></h1>
 
                 <?php if ($usuario): ?>

@@ -188,19 +188,19 @@ a.btnCrear {
     transition: background-color 0.3s;
 }
 
-.panelContenidoPrincipal {
+.contenidoPanelP {
     flex-grow: 1;
     padding: var(--padding-seccion);
 }
 
-.panelContenidoCabecera {
+.contenidoPanelC {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--margin-inferior-seccion);
 }
 
-.panelContenidoCabecera h1 {
+.contenidoPanelC h1 {
     margin: 0;
 }
 

@@ -52,12 +52,12 @@ class HookService
         }
     }
 
-    public function agregarAccion(string $nombreAccion, callable $callback, int $prioridad = 10, int $argumentosAceptados = 1): void
+    public function addAction(string $nombreAccion, callable $callback, int $prioridad = 10, int $argumentosAceptados = 1): void
     {
         $this->agregar($this->acciones, $nombreAccion, $callback, $prioridad, $argumentosAceptados);
     }
 
-    public function agregarFiltro(string $nombreFiltro, callable $callback, int $prioridad = 10, int $argumentosAceptados = 1): void
+    public function addFilter(string $nombreFiltro, callable $callback, int $prioridad = 10, int $argumentosAceptados = 1): void
     {
         $this->agregar($this->filtros, $nombreFiltro, $callback, $prioridad, $argumentosAceptados);
     }
@@ -68,7 +68,7 @@ class HookService
      * @param string $nombreAccion El nombre de la acción.
      * @param mixed ...$args Argumentos para pasar a los callbacks.
      */
-    public function hacerAccion(string $nombreAccion, ...$args): void
+    public function doAction(string $nombreAccion, ...$args): void
     {
         if (!isset($this->acciones[$nombreAccion])) {
             return;
@@ -90,7 +90,7 @@ class HookService
      * @param mixed ...$args Argumentos adicionales para pasar a los callbacks.
      * @return mixed El valor modificado después de aplicar todos los filtros.
      */
-    public function aplicarFiltro(string $nombreFiltro, $valor, ...$args): mixed
+    public function applyFilters(string $nombreFiltro, $valor, ...$args): mixed
     {
         if (!isset($this->filtros[$nombreFiltro])) {
             return $valor;

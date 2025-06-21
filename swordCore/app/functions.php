@@ -71,14 +71,14 @@ if (env('CMS_ENABLED', true)) {
 
 
 
-    if (!function_exists('ajaxAccion')) {
+    if (!function_exists('addAjax')) {
         /**
          * Registra una acción AJAX para que esté disponible en el sistema.
          *
          * @param string $nombreAccion El nombre único para la acción AJAX.
          * @param callable $callback La función que se ejecutará cuando se llame a esta acción.
          */
-        function ajaxAccion(string $nombreAccion, callable $callback)
+        function addAjax(string $nombreAccion, callable $callback)
         {
             AjaxManagerService::registrarAccion($nombreAccion, $callback);
         }
@@ -86,7 +86,7 @@ if (env('CMS_ENABLED', true)) {
 
 
     #Funciona el test
-    ajaxAccion('test_sin_tema', function (support\Request $request) {
+    addAjax('test_sin_tema', function (support\Request $request) {
         $extra_data = $request->post('info', 'ninguna');
         return json([
             'success' => true,

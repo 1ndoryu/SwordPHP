@@ -3,42 +3,50 @@
 namespace App\controller;
 
 use App\model\Pagina;
-use App\model\PaginaMeta;
+use App\service\ManagedContentService;
+use App\service\OpcionService;
 use App\service\PaginaService;
+use App\service\TemaService;
 use support\Request;
 use support\Response;
 use Throwable;
 use Webman\Exception\NotFoundException;
-use App\service\OpcionService;
 
 /**
- * Class PaginaController
- * @package App\controller
- */
+ * Class PaginaController
+ * @package App\controller
+ */
 class PaginaController
 {
     /**
      * @var PaginaService
      * @var OpcionService
      * @var TemaService
+     * @var ManagedContentService
      */
     private PaginaService $paginaService;
     private OpcionService $opcionService;
-    private \App\service\TemaService $temaService;
+    private TemaService $temaService;
+    private ManagedContentService $managedContentService;
 
     /**
      * Constructor
      * @param PaginaService $paginaService
      * @param OpcionService $opcionService
-     * @param \App\service\TemaService $temaService
+     * @param TemaService $temaService
+     * @param ManagedContentService $managedContentService
      */
-    public function __construct(PaginaService $paginaService, OpcionService $opcionService, \App\service\TemaService $temaService)
-    {
+    public function __construct(
+        PaginaService $paginaService,
+        OpcionService $opcionService,
+        TemaService $temaService,
+        ManagedContentService $managedContentService // <-- PARÁMETRO AÑADIDO
+    ) {
         $this->paginaService = $paginaService;
         $this->opcionService = $opcionService;
         $this->temaService = $temaService;
+        $this->managedContentService = $managedContentService; // <-- ASIGNACIÓN AHORA ES VÁLIDA
     }
-
     /**
      * Muestra la lista de páginas.
      * @param Request $request
@@ -255,6 +263,46 @@ class PaginaController
             $request->session()->set('_old_input', $request->all());
             return redirect('/panel/paginas/edit/' . $id);
         }
+    }
+
+    public function restaurar(Request $request, int $id): Response
+    {
+        try {
+            $pagina = $this->paginaService->obtenerPaginaPorId($id);
+            $slugDefinicion = $pagina->obtenerMeta('_managed_source_slug');
+
+            if (!$slugDefinicion) {
+                throw new \Exception('Esta página no es gestionada por el sistema y no puede ser restaurada.');
+            }
+
+            $definicion = $this->managedContentService->obtenerDefinicion($slugDefinicion);
+
+            if (!$definicion) {
+                throw new \Exception("No se encontró la definición de código fuente '{$slugDefinicion}' para esta página.");
+            }
+
+            // Preparamos los datos desde la definición
+            $datosParaRestaurar = [
+                'titulo'    => $definicion['titulo'] ?? 'Sin Título',
+                'contenido' => $definicion['contenido'] ?? '',
+                'metadata'  => $pagina->metadata ?? [], // Mantenemos los metadatos existentes...
+            ];
+
+            // ...pero sobreescribimos la plantilla si está definida.
+            if (isset($definicion['plantilla'])) {
+                $datosParaRestaurar['metadata']['_plantilla_pagina'] = $definicion['plantilla'];
+            } else {
+                unset($datosParaRestaurar['metadata']['_plantilla_pagina']);
+            }
+
+            $this->paginaService->actualizarPagina($pagina, $datosParaRestaurar);
+
+            $request->session()->set('success', 'La página ha sido restaurada a su estado por defecto.');
+        } catch (\Exception $e) {
+            $request->session()->set('error', 'Error al restaurar: ' . $e->getMessage());
+        }
+
+        return redirect('/panel/paginas/edit/' . $id);
     }
 
     /**

@@ -123,7 +123,7 @@ class PaginaService
      * @param int|null $idExcluir El ID del registro a excluir de la comprobación de unicidad (usado en actualizaciones).
      * @return string El slug único y sanitizado.
      */
-    private function asegurarSlugUnico(string $textoBase, ?int $idExcluir = null): string
+    public function asegurarSlugUnico(string $textoBase, ?int $idExcluir = null): string
     {
         $slug = Str::slug($textoBase);
         $slugBase = $slug;
@@ -146,6 +146,7 @@ class PaginaService
 
         return $slug;
     }
+
 
     /**
      * Encuentra una página publicada por su slug.

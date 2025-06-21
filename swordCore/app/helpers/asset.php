@@ -85,3 +85,52 @@ if (!function_exists('url_contenido')) {
     }
 }
 
+if (!function_exists('encolarRecursos')) {
+    /**
+     * Encola un archivo CSS/JS o todos los archivos de un directorio desde el tema activo.
+     *
+     * @param string $ruta Ruta relativa al archivo o directorio dentro del tema activo.
+     * @return void
+     */
+    function encolarRecursos(string $ruta): void
+    {
+        $temaService = new \App\service\TemaService();
+        $rutaTemaAbsoluto = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $temaService->getActiveTheme();
+        $rutaRecursoAbsoluto = $rutaTemaAbsoluto . DIRECTORY_SEPARATOR . ltrim($ruta, '/');
+
+        $urlTema = rutaTema();
+
+        if (is_dir($rutaRecursoAbsoluto)) {
+            try {
+                $iterador = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($rutaRecursoAbsoluto, \RecursiveDirectoryIterator::SKIP_DOTS));
+
+                foreach ($iterador as $archivo) {
+                    if ($archivo->isFile()) {
+                        $extension = strtolower($archivo->getExtension());
+                        $rutaRelativaArchivo = ltrim(str_replace($rutaTemaAbsoluto, '', $archivo->getPathname()), '/\\');
+                        $urlRecurso = $urlTema . '/' . str_replace(DIRECTORY_SEPARATOR, '/', $rutaRelativaArchivo);
+                        $identificador = 'recurso-' . pathinfo($archivo->getFilename(), PATHINFO_FILENAME);
+
+                        if ($extension === 'css') {
+                            encolarEstilo($identificador, $urlRecurso);
+                        } elseif ($extension === 'js') {
+                            encolarScript($identificador, $urlRecurso);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                \support\Log::error("Error al encolar directorio de recursos '{$ruta}': " . $e->getMessage());
+            }
+        } elseif (is_file($rutaRecursoAbsoluto)) {
+            $extension = strtolower(pathinfo($rutaRecursoAbsoluto, PATHINFO_EXTENSION));
+            $urlRecurso = $urlTema . '/' . ltrim($ruta, '/');
+            $identificador = 'recurso-' . pathinfo($rutaRecursoAbsoluto, PATHINFO_FILENAME);
+
+            if ($extension === 'css') {
+                encolarEstilo($identificador, $urlRecurso);
+            } elseif ($extension === 'js') {
+                encolarScript($identificador, $urlRecurso);
+            }
+        }
+    }
+}

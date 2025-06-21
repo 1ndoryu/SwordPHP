@@ -9,6 +9,17 @@ use Webman\Http\Response;
 class AdminController
 {
     /**
+     * Constructor del controlador de administración.
+     * Se dispara en cada carga de una página del panel.
+     */
+    public function __construct()
+    {
+        // Dispara el hook para inicialización de lógica del panel.
+        // Aquí se conectará nuestro motor de sincronización.
+        doAction('swInitAdmin');
+    }
+
+    /**
      * Muestra la página principal del panel de administración (dashboard).
      *
      * @param Request $request

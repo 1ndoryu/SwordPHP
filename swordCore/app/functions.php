@@ -21,7 +21,7 @@ if (env('CMS_ENABLED', true)) {
     require_once __DIR__ . '/helpers/shortcode.php';
     require_once __DIR__ . '/helpers/dashboard.php';
     require_once __DIR__ . '/helpers/defaultContent.php';
+    require_once __DIR__ . '/helpers/managedContent.php';
     require_once __DIR__ . '/helpers/iconos.php';
     require_once __DIR__ . '/helpers/server.php';
-
 }

@@ -107,6 +107,16 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         <?php endif; ?>
 
         <div class="pie-formulario">
+
+            <?php if ($pagina->obtenerMeta('_managed_source_slug')): ?>
+                <form action="/panel/paginas/restaurar/<?php echo htmlspecialchars($pagina->id); ?>" method="POST" style="margin-right: auto;">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit" class="btnN" onclick="return confirm('¿Estás seguro de que quieres restaurar esta página a su contenido por defecto? Perderás cualquier cambio que hayas realizado.')">
+                        Restaurar por Defecto
+                    </button>
+                </form>
+            <?php endif; ?>
+
             <button type="button" class="btnN icono IconoRojo" onclick="eliminarRecurso('/panel/paginas/destroy/<?php echo htmlspecialchars($pagina->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta página? Esta acción no se puede deshacer.')">
                 <?php echo icon('borrar'); ?>
             </button>

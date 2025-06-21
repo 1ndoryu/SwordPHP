@@ -2,12 +2,12 @@
 
 use App\service\TipoContenidoService;
 
-function registrarTipoContenido(string $slug, array $argumentos)
+function definePostType(string $slug, array $argumentos)
 {
     TipoContenidoService::getInstancia()->registrar($slug, $argumentos);
 }
 
-registrarTipoContenido(
+definePostType(
     'entradas', 
     [
         'labels' => [

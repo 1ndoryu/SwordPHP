@@ -176,12 +176,14 @@ class InstallerController
       clave VARCHAR(255) NOT NULL,
       nombremostrado VARCHAR(250),
       rol VARCHAR(50) NOT NULL DEFAULT 'suscriptor',
+      api_token VARCHAR(80) NULL UNIQUE,
       metadata JSONB,
       remember_token VARCHAR(100),
       created_at TIMESTAMP WITHOUT TIME ZONE,
       updated_at TIMESTAMP WITHOUT TIME ZONE
     );
     CREATE INDEX IF NOT EXISTS idx_usuarios_rol ON usuarios(rol);
+    CREATE INDEX IF NOT EXISTS idx_usuarios_api_token ON usuarios(api_token);
     CREATE INDEX IF NOT EXISTS idx_usuarios_metadata ON usuarios USING GIN (metadata);
 
     CREATE TABLE IF NOT EXISTS paginas (

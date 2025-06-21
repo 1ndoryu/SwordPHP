@@ -171,7 +171,27 @@ class UsuarioService
         return $usuario;
     }
     /**
-     * Elimina un usuario y sus metadatos asociados.
+     * Genera o regenera un token de API para un usuario y lo devuelve.
+     *
+     * @param int $id El ID del usuario.
+     * @return string El nuevo token de API.
+     * @throws \Webman\Exception\NotFoundException si el usuario no existe.
+     */
+
+
+    public function generarTokenApi(int $id): string
+    {
+        $usuario = $this->obtenerUsuarioPorId($id);
+
+        // Llama al método del modelo para generar y asignar el token
+        $usuario->generarApiToken();
+        $usuario->save();
+
+        return $usuario->api_token;
+    }
+
+    /**
+     * Elimina un usuario.
      * Previene la auto-eliminación y la eliminación del último administrador.
      *
      * @param int $id El ID del usuario a eliminar.
@@ -196,11 +216,9 @@ class UsuarioService
             }
         }
 
-        // Usamos una transacción para asegurar que el usuario y sus metas se borren juntos.
-        \Illuminate\Database\Capsule\Manager::transaction(function () use ($usuario) {
-            $usuario->metas()->delete();
-            $usuario->delete();
-        });
+        // La relación 'metas' ya no existe. Los metadatos son una columna JSON
+        // y se eliminan automáticamente con el usuario.
+        $usuario->delete();
 
         return true;
     }

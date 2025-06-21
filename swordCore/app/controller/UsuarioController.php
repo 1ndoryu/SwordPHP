@@ -203,4 +203,27 @@ class UsuarioController
 
         return redirect('/panel/usuarios');
     }
+
+    /**
+     * Genera un nuevo token de API para un usuario y lo devuelve como JSON.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function generarTokenApi(Request $request, int $id): Response
+    {
+        try {
+            // Se asume que este endpoint está protegido por el middleware de autenticación del panel,
+            // por lo que solo los administradores pueden llegar aquí.
+            $nuevoToken = $this->usuarioService->generarTokenApi($id);
+
+            return json(['success' => true, 'token' => $nuevoToken]);
+        } catch (\Webman\Exception\NotFoundException $e) {
+            return json(['success' => false, 'message' => 'Usuario no encontrado.'], 404);
+        } catch (\Throwable $e) {
+            \support\Log::error('Error al generar token API: ' . $e->getMessage());
+            return json(['success' => false, 'message' => 'Error interno al generar el token.'], 500);
+        }
+    }
 }

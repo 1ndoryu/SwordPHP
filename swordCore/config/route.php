@@ -4,6 +4,7 @@ use Webman\Route;
 use support\Request;
 use App\controller\InstallerController;
 use App\controller\IndexController;
+use App\controller\Api\V1\ContentApiController;
 
 // --- Verificación del Instalador (se ejecuta siempre) ---
 if (!file_exists(runtime_path('installed.lock'))) {
@@ -60,7 +61,7 @@ if (env('CMS_ENABLED', true)) {
     $panelGroup = Route::group('/panel', function () {
         Route::get('', [AdminController::class, 'inicio']);
         Route::get('/', [AdminController::class, 'inicio']);
-        
+
         Route::group('/paginas', function () {
             Route::get('', [PaginaController::class, 'index']);
             Route::get('/create', [PaginaController::class, 'create']);
@@ -112,6 +113,7 @@ if (env('CMS_ENABLED', true)) {
             Route::get('/editar/{id:\d+}', [UsuarioController::class, 'edit']);
             Route::post('/update/{id:\d+}', [UsuarioController::class, 'update']);
             Route::post('/eliminar/{id:\d+}', [UsuarioController::class, 'destroy']);
+            Route::post('/generar-token-api/{id:\d+}', [UsuarioController::class, 'generarTokenApi']);
         });
     });
     $panelGroup->middleware([AutenticacionMiddleware::class]);
@@ -128,12 +130,41 @@ if (env('CMS_ENABLED', true)) {
     if (file_exists($permalinks_file)) {
         require_once $permalinks_file;
     }
+
+    Route::group('/api/v1', function () {
+        // Aquí se añadirán los endpoints en las siguientes rondas
+    });
 } else {
     // ===================================
     // MODO FRAMEWORK BASE (CMS Desactivado)
     // ===================================
     // Define la ruta raíz para que apunte directamente al IndexController.
-    Route::get('/', [IndexController::class, 'index']);
+    Route::group('/api/v1', function () {
+        // --- Endpoints de Contenido ---
+        Route::get('/content', [\App\controller\Api\V1\ContentApiController::class, 'index']);
+        Route::get('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'show']);
+
+        // --- Endpoints Protegidos ---
+        Route::group(function () {
+            // Contenido (Crear, Actualizar, Eliminar)
+            Route::post('/content', [\App\controller\Api\V1\ContentApiController::class, 'store']);
+            Route::put('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'update']);
+            Route::patch('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'update']);
+            Route::delete('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'destroy']);
+
+            // --- Endpoints de Usuarios (CRUD Completo) ---
+            Route::get('/users', [\App\controller\Api\V1\UserApiController::class, 'index']);
+            Route::post('/users', [\App\controller\Api\V1\UserApiController::class, 'store']);
+            Route::get('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'show']);
+            Route::put('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
+            Route::patch('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
+            Route::delete('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'destroy']);
+
+            // --- Endpoints de Opciones ---
+            Route::get('/options/{key:.+}', [\App\controller\Api\V1\OptionApiController::class, 'show']);
+            Route::post('/options', [\App\controller\Api\V1\OptionApiController::class, 'store']);
+        })->middleware([\App\middleware\ApiAuthMiddleware::class]);
+    });
 }
 
 // --- Ruta Fallback y cierre (siempre activa) ---

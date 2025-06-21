@@ -58,6 +58,17 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
             <hr>
 
+            <h4>Acceso por API</h4>
+            <p style="opacity: 0.7; font-size: 0.9em;">Gestiona el token de acceso para la API Headless.</p>
+            <div class="grupo-formulario">
+                <label for="api_token_display">Token de API</label>
+                <input type="text" id="api_token_display" value="<?php echo htmlspecialchars($usuario->api_token ?? 'No generado'); ?>" readonly>
+                <small>Este token se usa para autenticar peticiones a la API. Trátalo como una contraseña.</small>
+            </div>
+            <button type="button" class="btnN" id="btn-generar-token">Generar / Regenerar Token</button>
+
+            <hr>
+
             <?php
             // Incluimos el gestor de metadatos, filtrando las claves internas
             $metadatosParaVista = array_filter(
@@ -107,7 +118,57 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         </div>
     </div>
 </form>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnGenerar = document.getElementById('btn-generar-token');
+        if (btnGenerar) {
+            btnGenerar.addEventListener('click', function() {
+                if (!confirm('¿Estás seguro? El token anterior será invalidado y tendrás que actualizarlo en todas las aplicaciones que lo usen.')) {
+                    return;
+                }
 
+                this.disabled = true;
+                this.textContent = 'Generando...';
+
+                const url = `/panel/usuarios/generar-token-api/<?php echo $usuario->id; ?>`;
+                const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+                fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken
+                        },
+                        body: JSON.stringify({
+                            _token: csrfToken
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('La respuesta del servidor no fue exitosa: ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('api_token_display').value = data.token;
+                            alert('Nuevo token generado con éxito.');
+                        } else {
+                            alert('Error: ' + (data.message || 'No se pudo generar el token.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error en la petición fetch:', error);
+                        alert('Ocurrió un error de red al contactar al servidor.');
+                    })
+                    .finally(() => {
+                        this.disabled = false;
+                        this.textContent = 'Generar / Regenerar Token';
+                    });
+            });
+        }
+    });
+</script>
 <?php
 // 3. Incluye el pie de página del panel de administración.
 echo partial('layouts/admin-footer', []);

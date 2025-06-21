@@ -57,7 +57,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
             </div>
 
             <hr>
-
+            
             <h4>Acceso por API</h4>
             <p style="opacity: 0.7; font-size: 0.9em;">Gestiona el token de acceso para la API Headless.</p>
             <div class="grupo-formulario">
@@ -111,64 +111,77 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
         </div>
 
         <div class="pie-formulario">
-            <button type="button" class="btnN icono IconoRojo" onclick="eliminarRecurso('/panel/usuarios/eliminar/<?php echo htmlspecialchars($usuario->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar este usuario? Si este usuario tiene contenido asociado, podría quedar huérfano.')">
+            <button type="button" class="btnN icono IconoRojo" onclick="eliminarRecurso('/panel/usuarios/eliminar/<?php echo htmlspecialchars($usuario->id); ?>', document.querySelector('input[name=\'_token\']').value, '¿Estás seguro de que deseas eliminar este usuario? Si este usuario tiene contenido asociado, podría quedar huérfano.')">
                 <?php echo icon('borrar'); ?>
             </button>
             <button type="submit" class="btnN icono verde"><?php echo icon('checkCircle') ?></button>
         </div>
     </div>
 </form>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnGenerar = document.getElementById('btn-generar-token');
-        if (btnGenerar) {
-            btnGenerar.addEventListener('click', function() {
-                if (!confirm('¿Estás seguro? El token anterior será invalidado y tendrás que actualizarlo en todas las aplicaciones que lo usen.')) {
-                    return;
-                }
+document.addEventListener('DOMContentLoaded', function() {
+    const btnGenerar = document.getElementById('btn-generar-token');
+    // CORRECCIÓN: El selector ahora busca 'input[name="_token"]'
+    const csrfInput = document.querySelector('input[name="_token"]');
 
-                this.disabled = true;
-                this.textContent = 'Generando...';
+    // Nos aseguramos de que ambos elementos existan antes de añadir el listener
+    if (btnGenerar && csrfInput) {
+        btnGenerar.addEventListener('click', function() {
+            if (!confirm('¿Estás seguro? El token anterior será invalidado y tendrás que actualizarlo en todas las aplicaciones que lo usen.')) {
+                return;
+            }
 
-                const url = `/panel/usuarios/generar-token-api/<?php echo $usuario->id; ?>`;
-                const csrfToken = document.querySelector('input[name="_csrf"]').value;
+            this.disabled = true;
+            this.textContent = 'Generando...';
 
-                fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': csrfToken
-                        },
-                        body: JSON.stringify({
-                            _token: csrfToken
-                        })
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('La respuesta del servidor no fue exitosa: ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            document.getElementById('api_token_display').value = data.token;
-                            alert('Nuevo token generado con éxito.');
-                        } else {
-                            alert('Error: ' + (data.message || 'No se pudo generar el token.'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error en la petición fetch:', error);
-                        alert('Ocurrió un error de red al contactar al servidor.');
-                    })
-                    .finally(() => {
-                        this.disabled = false;
-                        this.textContent = 'Generar / Regenerar Token';
+            const url = `/panel/usuarios/generar-token-api/<?php echo $usuario->id; ?>`;
+            const csrfToken = csrfInput.value;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken // Este es el header correcto para la validación CSRF en AJAX
+                },
+                body: JSON.stringify({}) // Enviamos un cuerpo JSON vacío, el token va en la cabecera
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Si la respuesta no es 2xx, intentamos leer el JSON del error para un mensaje más claro
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'Error del servidor: ' + response.statusText);
                     });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('api_token_display').value = data.token;
+                    alert('Nuevo token generado con éxito.');
+                } else {
+                    // Este caso es para errores lógicos que devuelven un código 200
+                    alert('Error: ' + (data.message || 'No se pudo generar el token.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error en la petición fetch:', error);
+                alert('Ocurrió un error: ' + error.message);
+            })
+            .finally(() => {
+                // Esto se ejecuta siempre, haya éxito o error
+                this.disabled = false;
+                this.textContent = 'Generar / Regenerar Token';
             });
+        });
+    } else {
+        if (!csrfInput) {
+            console.error('SwordPHP Developer Error: No se encontró el campo CSRF "input[name=\'_token\']".');
         }
-    });
+    }
+});
 </script>
+
 <?php
 // 3. Incluye el pie de página del panel de administración.
 echo partial('layouts/admin-footer', []);

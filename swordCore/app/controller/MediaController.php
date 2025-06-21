@@ -41,7 +41,7 @@ class MediaController
                 $archivos = [$archivos];
             }
 
-            $usuarioId = idUsuarioActual();
+            $usuarioId = idCurrentUser();
             if (!$usuarioId) {
                 return new Response(401, ['Content-Type' => 'application/json'], json_encode(['exito' => false, 'mensaje' => 'No autorizado. Se requiere iniciar sesión.']));
             }

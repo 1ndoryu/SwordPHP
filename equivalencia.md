@@ -34,9 +34,9 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 | Función / Lógica SwordPHP   | Equivalente WordPress   |
 | :-------------------------- | :---------------------- |
-| `usuarioActual()`           | `wp_get_current_user()` |
-| `idUsuarioActual()`         | `get_current_user_id()` |
-| `!is_null(usuarioActual())` | `is_user_logged_in()`   |
+| `currentUser()`           | `wp_get_current_user()` |
+| `idCurrentUser()`         | `get_current_user_id()` |
+| `!is_null(currentUser())` | `is_user_logged_in()`   |
 
 ### Tabla 5: Metadatos de Usuario (User Meta)
 
@@ -58,8 +58,8 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 | Método SwordPHP (`$opcionService->...`) | Equivalente WordPress            |
 | :-------------------------------------- | :------------------------------- |
-| `->guardarOpcion('nombre', 'valor')`    | `update_option('name', 'value')` |
-| `->obtenerOpcion('nombre')`             | `get_option('name')`             |
+| `->updateOption('nombre', 'valor')`    | `update_option('name', 'value')` |
+| `->getOption('nombre')`             | `get_option('name')`             |
 
 ### Tabla 8: El Loop y Plantillas (Theming)
 

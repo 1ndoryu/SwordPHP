@@ -145,9 +145,9 @@ class InstallerController
 
             // 3. Guardar las opciones del sitio
             $opcionService = new OpcionService();
-            $opcionService->guardarOpcion('titulo_sitio', $data['site_title']);
-            $opcionService->guardarOpcion('descripcion_sitio', 'Otro sitio increíble con SwordPHP');
-            $opcionService->guardarOpcion('active_plugins', []); // Iniciar sin plugins activos
+            $opcionService->updateOption('titulo_sitio', $data['site_title']);
+            $opcionService->updateOption('descripcion_sitio', 'Otro sitio increíble con SwordPHP');
+            $opcionService->updateOption('active_plugins', []); // Iniciar sin plugins activos
 
             // 4. Crear el lock file para marcar la instalación como completada
             file_put_contents(runtime_path('installed.lock'), date('c'));

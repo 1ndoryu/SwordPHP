@@ -32,7 +32,7 @@ class TemaService
             $opcionService = new OpcionService();
             // Usa el valor del archivo de configuración como fallback.
             $fallbackTheme = config('theme.active_theme_fallback', 'sword-theme-default');
-            self::$activeThemeSlug = $opcionService->obtenerOpcion('active_theme', $fallbackTheme);
+            self::$activeThemeSlug = $opcionService->getOption('active_theme', $fallbackTheme);
         }
         return self::$activeThemeSlug;
     }
@@ -127,7 +127,7 @@ class TemaService
 
         // 2. Guardar el nuevo tema activo en la base de datos.
         $opcionService = new OpcionService();
-        $guardado = $opcionService->guardarOpcion('active_theme', $slug);
+        $guardado = $opcionService->updateOption('active_theme', $slug);
 
         if ($guardado) {
             // "Tocar" un archivo de configuración para que el monitor de archivos de Webman

@@ -22,7 +22,7 @@ class AutenticacionMiddleware implements MiddlewareInterface
             'uri' => $request->uri(),
             'session_id' => $request->session()->getId(),
         ]);
-        $usuario = usuarioActual();
+        $usuario = currentUser();
 
         // Caso 1: El usuario está logueado y es administrador.
         if ($usuario && $usuario->rol === 'admin') {
@@ -46,7 +46,7 @@ class AutenticacionMiddleware implements MiddlewareInterface
         }
         // Caso 3: No hay ningún usuario logueado.
         Log::channel('session_debug')->warning('Middleware\Autenticacion: ACCESO DENEGADO Y REDIRIGIDO A LOGIN.', [
-            'motivo' => 'No hay usuario autenticado (usuarioActual devolvió null).',
+            'motivo' => 'No hay usuario autenticado (currentUser devolvió null).',
         ]);
         $request->session()->set('error', 'Debes iniciar sesión para acceder a esta página.');
         return redirect('/login');

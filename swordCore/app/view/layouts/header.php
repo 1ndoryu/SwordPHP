@@ -4,7 +4,7 @@ assetService()->encolarDirectorio('/css/panel', 'css');
 assetService()->encolarDirectorio('/js/panel', 'js');
 
 // Obtenemos la información del usuario actual.
-$usuario = usuarioActual();
+$usuario = currentUser();
 ?>
 <!DOCTYPE html>
 <html lang="es">

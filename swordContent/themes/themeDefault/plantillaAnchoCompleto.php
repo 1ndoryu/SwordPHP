@@ -1,7 +1,6 @@
 <?php
-
 /*
-Template Name: Inicio
+Template Name: Ancho Completo
 */
 
 // 1. Inicia el loop de SwordPHP.
@@ -17,7 +16,7 @@ if (havePost()) :
         getHeader();
 ?>
 
-        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        <?php // -- COMIENZO DEL CONTENIDO ESPECÍFICO DE LA PÁGINA --
         ?>
 
         <h1><?php theTitle(); ?></h1>
@@ -29,9 +28,9 @@ if (havePost()) :
             ?>
         </div>
         <hr>
-        <p>✅ Vista cargada desde: default-theme-two</p>
+        <p>✅ Vista cargada desde: themeDefault, plantilla anchoCompleto</p>
 
-        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- 
+        <?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA --
         ?>
 
     <?php

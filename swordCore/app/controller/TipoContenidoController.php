@@ -104,7 +104,7 @@ class TipoContenidoController
                 'contenido'     => $request->post('contenido', ''),
                 'slug'          => $this->generarSlug($request->post('titulo')),
                 'tipocontenido' => $slug,
-                'idautor'       => idUsuarioActual(),
+                'idautor'       => idCurrentUser(),
                 'estado'        => $request->post('estado', 'borrador'),
                 'metadata'      => $metadata, // Incluir el array de metadatos
             ];
@@ -223,7 +223,7 @@ class TipoContenidoController
         $plantillasDisponibles = $temaService->obtenerPlantillasDePagina();
 
         // 2. Obtener los ajustes previamente guardados para este tipo de contenido.
-        $ajustesGuardados = $opcionService->obtenerOpcion("ajustes_cpt_{$slug}", [
+        $ajustesGuardados = $opcionService->getOption("ajustes_cpt_{$slug}", [
             'plantilla_single' => '',
             // 'roles_permitidos' => ['admin'], // Para futura implementación
         ]);
@@ -257,7 +257,7 @@ class TipoContenidoController
         ];
 
         // Guardar la opción en la base de datos.
-        $opcionService->guardarOpcion("ajustes_cpt_{$slug}", $ajustesAGuardar);
+        $opcionService->updateOption("ajustes_cpt_{$slug}", $ajustesAGuardar);
 
         $request->session()->set('success', 'Ajustes guardados correctamente.');
         return redirect('/panel/' . $slug . '/ajustes');

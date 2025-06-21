@@ -19,7 +19,7 @@ class AdminController
         // 1. Registrar widgets (eventualmente, esto lo harán los plugins y el núcleo a través de hooks).
 
         // Widget de Bienvenida de ejemplo.
-        agregarWidgetDashboard(
+        addWidgetPanel(
             'bienvenida_sword',
             'Bienvenido a SwordPHP',
             function () {
@@ -30,7 +30,7 @@ class AdminController
         );
 
         // Widget de marcador de posición para futuras actualizaciones.
-        agregarWidgetDashboard(
+        addWidgetPanel(
             'actualizaciones_sword',
             'Actualizaciones',
             function () {

@@ -71,27 +71,27 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 
 ### ✅ Equivalencias Directas y Conceptuales
 
-| Función / Método Sword                   | Equivalente WordPress                     |
-| :--------------------------------------- | :---------------------------------------- |
-| `addAction('hook', $cb)`             | `add_action('hook', $cb)`                 |
-| `doAction('hook', ...$args)`          | `do_action('hook', ...$args)`             |
-| `addFilter('hook', $cb)`             | `add_filter('hook', $cb)`                 |
-| `applyFilters('hook', $val, ...$args)`  | `apply_filters('hook', $val, ...$args)`  |
-| `encolarEstilo('id', 'ruta')`            | `wp_enqueue_style('handle', 'src')`       |
-| `encolarScript('id', 'ruta')`            | `wp_enqueue_script('handle', 'src')`      |
-| `new SwordQuery($args)`                  | `new WP_Query($args)`                     |
-| `havePost()`                          | `have_posts()`                            |
-| `thePost()`                            | `the_post()`                              |
-| `theTitle()`                             | `the_title()`                             |
-| `theContent()`                          | `the_content()`                           |
-| `getPermalink()`                   | `the_permalink()`                         |
-| `getPermalinkPost($e)`     | `get_permalink($post)`                    |
-| `getHeader()`                            | `get_header()`                            |
-| `getFooter()`                            | `get_footer()`                            |
-| `usuarioActual()`                        | `wp_get_current_user()`                   |
-| `idUsuarioActual()`                      | `get_current_user_id()`                   |
-| `guardarOpcion('nombre', 'valor')`       | `update_option('name', 'value')`          |
-| `obtenerOpcion('nombre')`                | `get_option('name')`                      |
+| Función / Método Sword                 | Equivalente WordPress                   |
+| :------------------------------------- | :-------------------------------------- |
+| `addAction('hook', $cb)`               | `add_action('hook', $cb)`               |
+| `doAction('hook', ...$args)`           | `do_action('hook', ...$args)`           |
+| `addFilter('hook', $cb)`               | `add_filter('hook', $cb)`               |
+| `applyFilters('hook', $val, ...$args)` | `apply_filters('hook', $val, ...$args)` |
+| `encolarEstilo('id', 'ruta')`          | `wp_enqueue_style('handle', 'src')`     |
+| `encolarScript('id', 'ruta')`          | `wp_enqueue_script('handle', 'src')`    |
+| `new SwordQuery($args)`                | `new WP_Query($args)`                   |
+| `havePost()`                           | `have_posts()`                          |
+| `thePost()`                            | `the_post()`                            |
+| `theTitle()`                           | `the_title()`                           |
+| `theContent()`                         | `the_content()`                         |
+| `getPermalink()`                       | `the_permalink()`                       |
+| `getPermalinkPost($e)`                 | `get_permalink($post)`                  |
+| `getHeader()`                          | `get_header()`                          |
+| `getFooter()`                          | `get_footer()`                          |
+| `currentUser()`                        | `wp_get_current_user()`                 |
+| `idCurrentUser()`                      | `get_current_user_id()`                 |
+| `updateOption('nombre', 'valor')`      | `update_option('name', 'value')`        |
+| `getOption('nombre')`                  | `get_option('name')`                    |
 
 ### ❌ Funcionalidades Faltantes (Próximamente)
 
@@ -110,12 +110,14 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 ## 🛠️ Instalación y Puesta en Marcha (Local)
 
 1.  **Clonar el repositorio:**
+
     ```bash
     git clone [https://github.com/1ndoryu/SwordPHP.git](https://github.com/1ndoryu/SwordPHP.git)
     cd SwordPHP
     ```
 
 2.  **Instalar dependencias de Composer:**
+
     ```bash
     # Navega al directorio del núcleo
     cd swordCore
@@ -125,14 +127,17 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
     ```
 
 3.  **Preparar la Base de Datos:**
+
     -   Asegúrate de tener un servidor de base de datos PostgreSQL en funcionamiento.
     -   Crea una base de datos vacía para el proyecto (por ejemplo, `swordphp`).
 
 4.  **Iniciar el servidor:**
+
     ```bash
     # Desde el directorio swordCore
     php start.php start
     ```
+
     También puedes usar `windows.bat` si estás en Windows. El servidor estará disponible en `http://127.0.0.1:8787`.
 
 5.  **Ejecutar el Instalador Web:**

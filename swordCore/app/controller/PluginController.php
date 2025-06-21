@@ -41,7 +41,7 @@ class PluginController
 
         // Obtenemos los slugs de los plugins activos desde la base de datos.
         // Usamos un array vacío como valor por defecto.
-        $pluginsActivos = $this->opcionService->obtenerOpcion('active_plugins', []);
+        $pluginsActivos = $this->opcionService->getOption('active_plugins', []);
 
         // Obtenemos posibles mensajes flash de la sesión.
         $mensajeExito = $request->session()->pull('success');

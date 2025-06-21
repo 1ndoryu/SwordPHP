@@ -3,7 +3,7 @@
 use App\service\PluginPageService;
 use App\service\OpcionService;
 
-if (!function_exists('agregarPaginaAdmin')) {
+if (!function_exists('addPageAdmin')) {
     /**
      * Registra una página de administración para un plugin.
      * Es un wrapper para el PluginPageService.
@@ -13,13 +13,13 @@ if (!function_exists('agregarPaginaAdmin')) {
      * 'page_title' => (string) El título que se mostrará en la cabecera (H1).
      * 'callback'   => (callable) La función que renderiza el contenido de la página.
      */
-    function agregarPaginaAdmin(string $slug, array $opciones)
+    function addPageAdmin(string $slug, array $opciones)
     {
         PluginPageService::getInstancia()->registrar($slug, $opciones);
     }
 }
 
-if (!function_exists('obtenerOpcionPlugin')) {
+if (!function_exists('getOptionPlugin')) {
     /**
      * Obtiene una opción guardada por un plugin.
      * Añade un prefijo automático para evitar colisiones.
@@ -29,15 +29,15 @@ if (!function_exists('obtenerOpcionPlugin')) {
      * @param mixed $valorPorDefecto Valor a devolver si la opción no existe.
      * @return mixed
      */
-    function obtenerOpcionPlugin(string $slugPlugin, string $nombreOpcion, $valorPorDefecto = null)
+    function getOptionPlugin(string $slugPlugin, string $nombreOpcion, $valorPorDefecto = null)
     {
         $opcionService = new OpcionService();
         $clavePrefijada = "plugin_{$slugPlugin}_{$nombreOpcion}";
-        return $opcionService->obtenerOpcion($clavePrefijada, $valorPorDefecto);
+        return $opcionService->getOption($clavePrefijada, $valorPorDefecto);
     }
 }
 
-if (!function_exists('guardarOpcionPlugin')) {
+if (!function_exists('updateOptionPlugin')) {
     /**
      * Guarda una opción para un plugin.
      * Añade un prefijo automático para evitar colisiones.
@@ -47,10 +47,10 @@ if (!function_exists('guardarOpcionPlugin')) {
      * @param mixed $valor El valor a guardar.
      * @return bool
      */
-    function guardarOpcionPlugin(string $slugPlugin, string $nombreOpcion, $valor): bool
+    function updateOptionPlugin(string $slugPlugin, string $nombreOpcion, $valor): bool
     {
         $opcionService = new OpcionService();
         $clavePrefijada = "plugin_{$slugPlugin}_{$nombreOpcion}";
-        return $opcionService->guardarOpcion($clavePrefijada, $valor);
+        return $opcionService->updateOption($clavePrefijada, $valor);
     }
 }

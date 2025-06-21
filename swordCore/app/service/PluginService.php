@@ -111,14 +111,14 @@ class PluginService
             throw new \Exception("El plugin '{$slug}' no es un plugin válido.");
         }
 
-        $pluginsActivos = $opcionService->obtenerOpcion('active_plugins', []);
+        $pluginsActivos = $opcionService->getOption('active_plugins', []);
 
         if (in_array($slug, $pluginsActivos)) {
             return true; // Ya estaba activo, la operación se considera exitosa.
         }
 
         $pluginsActivos[] = $slug;
-        $guardado = $opcionService->guardarOpcion('active_plugins', $pluginsActivos);
+        $guardado = $opcionService->updateOption('active_plugins', $pluginsActivos);
 
         if ($guardado) {
             PluginRegistry::$activePlugins = $pluginsActivos;
@@ -131,7 +131,7 @@ class PluginService
     public function desactivarPlugin(string $slug): bool
     {
         $opcionService = new OpcionService();
-        $pluginsActivos = $opcionService->obtenerOpcion('active_plugins', []);
+        $pluginsActivos = $opcionService->getOption('active_plugins', []);
 
         $key = array_search($slug, $pluginsActivos);
 
@@ -141,7 +141,7 @@ class PluginService
 
         unset($pluginsActivos[$key]);
         $nuevosPluginsActivos = array_values($pluginsActivos);
-        $guardado = $opcionService->guardarOpcion('active_plugins', $nuevosPluginsActivos);
+        $guardado = $opcionService->updateOption('active_plugins', $nuevosPluginsActivos);
         forzarReinicioServidor();
         if ($guardado) {
             PluginRegistry::$activePlugins = $nuevosPluginsActivos;

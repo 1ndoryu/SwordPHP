@@ -2,14 +2,14 @@
 
 use App\service\ShortcodeService;
 
-if (!function_exists('agregarShortcode')) {
+if (!function_exists('addShortcode')) {
     /**
      * Registra una función de callback para un shortcode.
      *
      * @param string $tag El nombre del shortcode a registrar.
      * @param callable $callback La función que se ejecutará para renderizar el shortcode.
      */
-    function agregarShortcode(string $tag, callable $callback)
+    function addShortcode(string $tag, callable $callback)
     {
         ShortcodeService::getInstancia()->registrar($tag, $callback);
     }

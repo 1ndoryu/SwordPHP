@@ -11,7 +11,7 @@
 
 
 if (env('CMS_ENABLED', true)) {
-    $usuario = usuarioActual();
+    $usuario = currentUser();
 }
 
 ?>

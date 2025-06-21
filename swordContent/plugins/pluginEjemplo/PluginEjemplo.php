@@ -61,14 +61,14 @@ function miPluginEjemplo_agregarContenidoFooter()
     $slugPlugin = 'plugin-ejemplo';
 
     // 1. Comprobar si el banner está activado en los ajustes.
-    if (!obtenerOpcionPlugin($slugPlugin, 'banner_activo', true)) {
+    if (!getOptionPlugin($slugPlugin, 'banner_activo', true)) {
         return; // No hacer nada si el banner está desactivado.
     }
 
     // 2. Obtener las opciones del banner.
-    $textoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
-    $posicion = obtenerOpcionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
-    $estilosCSS = obtenerOpcionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
+    $textoBanner = getOptionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
+    $posicion = getOptionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
+    $estilosCSS = getOptionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
 
     // 3. Construir los estilos en línea basados en la posición.
     $posicionEstilos = '';
@@ -126,7 +126,7 @@ function miPluginEjemplo_agregarMenuAdmin($menuItems)
  */
 function miPluginEjemplo_registrarPagina()
 {
-    agregarPaginaAdmin(
+    addPageAdmin(
         'plugin-ejemplo', // El slug debe coincidir con el de la URL
         [
             'page_title' => 'Ajustes del Plugin Ejemplo',
@@ -155,16 +155,16 @@ function miPluginEjemplo_renderizarPagina()
         foreach ($nombresOpciones as $nombreOpcion) {
             // Los checkboxes no enviados no estarán en el POST, así que les damos un valor por defecto de '0'.
             $valor = request()->post($nombreOpcion, ($nombreOpcion === 'banner_activo' ? '0' : ''));
-            guardarOpcionPlugin($slugPlugin, $nombreOpcion, $valor);
+            updateOptionPlugin($slugPlugin, $nombreOpcion, $valor);
         }
         $mensajeExito = 'Ajustes guardados correctamente.';
     }
 
     // Obtenemos los valores actuales de todas las opciones para mostrarlos en los campos.
-    $valorTextoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
-    $valorBannerActivo = (bool) obtenerOpcionPlugin($slugPlugin, 'banner_activo', true);
-    $valorBannerPosicion = obtenerOpcionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
-    $valorBannerEstilos = obtenerOpcionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
+    $valorTextoBanner = getOptionPlugin($slugPlugin, 'texto_banner', '🔌 ¡Hola desde el Plugin de Ejemplo!');
+    $valorBannerActivo = (bool) getOptionPlugin($slugPlugin, 'banner_activo', true);
+    $valorBannerPosicion = getOptionPlugin($slugPlugin, 'banner_posicion', 'bottom-right');
+    $valorBannerEstilos = getOptionPlugin($slugPlugin, 'banner_estilos_css', 'background: #007bff; color: white;');
 
     // Definimos los campos para el formulario en un array.
     $campos = [
@@ -221,13 +221,13 @@ function miPluginEjemplo_renderizarPagina()
 function miPluginEjemplo_registrarShortcodes()
 {
     // Shortcode simple: [saludo]
-    agregarShortcode('saludo', 'miPluginEjemplo_callbackSaludo');
+    addShortcode('saludo', 'miPluginEjemplo_callbackSaludo');
 
     // Shortcode con atributos: [saludo_personalizado nombre="Gemini"]
-    agregarShortcode('saludo_personalizado', 'miPluginEjemplo_callbackSaludoPersonalizado');
+    addShortcode('saludo_personalizado', 'miPluginEjemplo_callbackSaludoPersonalizado');
 
     // Shortcode que envuelve contenido: [caja borde="blue"]Este es el contenido[/caja]
-    agregarShortcode('caja', 'miPluginEjemplo_callbackCaja');
+    addShortcode('caja', 'miPluginEjemplo_callbackCaja');
 }
 // Ejecutar la función de registro de shortcodes.
 miPluginEjemplo_registrarShortcodes();
@@ -285,7 +285,7 @@ function miPluginEjemplo_callbackCaja($atributos, $contenido = null)
  */
 function miPluginEjemplo_registrarWidgetDashboard()
 {
-    agregarWidgetDashboard(
+    addWidgetPanel(
         'plugin_ejemplo_resumen',
         'Resumen del Plugin Ejemplo',
         'miPluginEjemplo_renderizarWidgetDashboard',
@@ -304,8 +304,8 @@ function miPluginEjemplo_renderizarWidgetDashboard()
     $slugPlugin = 'plugin-ejemplo';
 
     // Obtenemos los valores guardados
-    $bannerActivo = (bool) obtenerOpcionPlugin($slugPlugin, 'banner_activo', true);
-    $textoBanner = obtenerOpcionPlugin($slugPlugin, 'texto_banner', '¡Hola desde el Plugin de Ejemplo!');
+    $bannerActivo = (bool) getOptionPlugin($slugPlugin, 'banner_activo', true);
+    $textoBanner = getOptionPlugin($slugPlugin, 'texto_banner', '¡Hola desde el Plugin de Ejemplo!');
     $urlAjustes = '/panel/ajustes/plugin-ejemplo';
 
     echo '<p><strong>Estado del banner:</strong> ';

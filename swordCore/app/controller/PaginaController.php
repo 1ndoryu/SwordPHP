@@ -61,7 +61,7 @@ class PaginaController
         $offset = ($paginaActual - 1) * $porPagina;
 
         // Obtener el slug de la página de inicio para la ordenación y la vista.
-        $slugPaginaInicio = $this->opcionService->obtenerOpcion('pagina_de_inicio_slug');
+        $slugPaginaInicio = $this->opcionService->getOption('pagina_de_inicio_slug');
 
         $query = Pagina::with('autor')->where('tipocontenido', 'pagina');
 

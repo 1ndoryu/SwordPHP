@@ -29,19 +29,19 @@ class AjustesController
     {
         // --- Datos para Ajustes de Lectura ---
         $paginasPublicadas = $this->paginaService->obtenerPaginasPublicadas();
-        $paginaInicioActualSlug = $this->opcionService->obtenerOpcion('pagina_de_inicio_slug');
+        $paginaInicioActualSlug = $this->opcionService->getOption('pagina_de_inicio_slug');
 
         // --- Datos para Ajustes Generales ---
         $opcionesGenerales = [
-            'titulo_sitio'          => $this->opcionService->obtenerOpcion('titulo_sitio', 'SwordPHP'),
-            'descripcion_sitio'     => $this->opcionService->obtenerOpcion('descripcion_sitio', 'Otro sitio increíble con SwordPHP'),
-            'disuadir_motores_busqueda' => (bool) $this->opcionService->obtenerOpcion('disuadir_motores_busqueda', 0),
-            'formato_fecha'         => $this->opcionService->obtenerOpcion('formato_fecha', 'd/m/Y'),
-            'formato_hora'          => $this->opcionService->obtenerOpcion('formato_hora', 'H:i:s'),
-            'zona_horaria'          => $this->opcionService->obtenerOpcion('zona_horaria', 'UTC'),
-            'favicon_url'           => $this->opcionService->obtenerOpcion('favicon_url', ''),
-            'correo_administrador'  => $this->opcionService->obtenerOpcion('correo_administrador', idUsuarioActual() ? usuarioActual()->correoelectronico : ''),
-            'permitir_registros'    => (bool) $this->opcionService->obtenerOpcion('permitir_registros', 0)
+            'titulo_sitio'          => $this->opcionService->getOption('titulo_sitio', 'SwordPHP'),
+            'descripcion_sitio'     => $this->opcionService->getOption('descripcion_sitio', 'Otro sitio increíble con SwordPHP'),
+            'disuadir_motores_busqueda' => (bool) $this->opcionService->getOption('disuadir_motores_busqueda', 0),
+            'formato_fecha'         => $this->opcionService->getOption('formato_fecha', 'd/m/Y'),
+            'formato_hora'          => $this->opcionService->getOption('formato_hora', 'H:i:s'),
+            'zona_horaria'          => $this->opcionService->getOption('zona_horaria', 'UTC'),
+            'favicon_url'           => $this->opcionService->getOption('favicon_url', ''),
+            'correo_administrador'  => $this->opcionService->getOption('correo_administrador', idCurrentUser() ? currentUser()->correoelectronico : ''),
+            'permitir_registros'    => (bool) $this->opcionService->getOption('permitir_registros', 0)
         ];
         $zonasHorarias = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
 
@@ -68,7 +68,7 @@ class AjustesController
     {
         // --- Guardar Ajustes de Lectura ---
         $slugPaginaInicio = $request->post('pagina_inicio');
-        $this->opcionService->guardarOpcion('pagina_de_inicio_slug', $slugPaginaInicio);
+        $this->opcionService->updateOption('pagina_de_inicio_slug', $slugPaginaInicio);
 
         // --- Guardar Ajustes Generales ---
         $opcionesDeTexto = [
@@ -82,15 +82,15 @@ class AjustesController
         ];
 
         foreach ($opcionesDeTexto as $clave) {
-            $this->opcionService->guardarOpcion($clave, $request->post($clave, ''));
+            $this->opcionService->updateOption($clave, $request->post($clave, ''));
         }
 
         // Manejo especial para los checkboxes
         $valorDisuadir = $request->post('disuadir_motores_busqueda') ? '1' : '0';
-        $this->opcionService->guardarOpcion('disuadir_motores_busqueda', $valorDisuadir);
+        $this->opcionService->updateOption('disuadir_motores_busqueda', $valorDisuadir);
 
         $valorRegistros = $request->post('permitir_registros') ? '1' : '0';
-        $this->opcionService->guardarOpcion('permitir_registros', $valorRegistros);
+        $this->opcionService->updateOption('permitir_registros', $valorRegistros);
 
         // --- Mensaje y Redirección ---
         $request->session()->set('mensaje_exito', 'Ajustes guardados correctamente.');
@@ -108,7 +108,7 @@ class AjustesController
         $mensajeExito = $request->session()->pull('mensaje_exito');
 
         // Obtener la estructura actual, con '/%slug%/' como valor por defecto.
-        $estructuraActual = $this->opcionService->obtenerOpcion('permalink_structure', '/%slug%/');
+        $estructuraActual = $this->opcionService->getOption('permalink_structure', '/%slug%/');
 
         // Determinar si la estructura guardada es una de las predefinidas o una personalizada.
         $valorInputPersonalizado = $estructuraActual;
@@ -156,7 +156,7 @@ class AjustesController
 
         try {
             // 3. Guardar la opción en la base de datos para consulta futura.
-            $this->opcionService->guardarOpcion('permalink_structure', $estructuraAGuardar);
+            $this->opcionService->updateOption('permalink_structure', $estructuraAGuardar);
 
             // 4. Convertir la estructura legible a un patrón de ruta de Webman.
             $patronRuta = $this->convertirEstructuraARuta($estructuraAGuardar);

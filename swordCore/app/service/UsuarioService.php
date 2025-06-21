@@ -182,7 +182,7 @@ class UsuarioService
     public function eliminarUsuario(int $id): bool
     {
         // Validación 1: Prevenir que un usuario se elimine a sí mismo.
-        if ($id === idUsuarioActual()) {
+        if ($id === idCurrentUser()) {
             throw new \support\exception\BusinessException('No puedes eliminar tu propia cuenta de usuario.');
         }
 

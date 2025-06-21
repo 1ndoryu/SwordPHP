@@ -11,45 +11,45 @@ use support\Log;
  *
  * @return Usuario|null El modelo del usuario o null si no está autenticado.
  */
-function usuarioActual(): ?Usuario
+function currentUser(): ?Usuario
 {
-    static $usuarioActual = null;
+    static $currentUser = null;
     static $haSidoVerificado = false;
 
-    Log::channel('session_debug')->debug('Helper/usuarioActual: Iniciando verificación.', [
+    Log::channel('session_debug')->debug('Helper/currentUser: Iniciando verificación.', [
         'haSidoVerificado' => $haSidoVerificado,
-        'usuarioCacheado' => $usuarioActual ? 'ID: ' . $usuarioActual->id : null,
+        'usuarioCacheado' => $currentUser ? 'ID: ' . $currentUser->id : null,
     ]);
 
     if ($haSidoVerificado) {
-        Log::channel('session_debug')->debug('Helper/usuarioActual: Devolviendo desde caché estático.', [
-            'usuario_devuelto' => $usuarioActual ? 'ID: ' . $usuarioActual->id : 'null'
+        Log::channel('session_debug')->debug('Helper/currentUser: Devolviendo desde caché estático.', [
+            'usuario_devuelto' => $currentUser ? 'ID: ' . $currentUser->id : 'null'
         ]);
-        return $usuarioActual;
+        return $currentUser;
     }
 
     $haSidoVerificado = true;
     $idUsuario = session('usuarioId');
 
-    Log::channel('session_debug')->info('Helper/usuarioActual: Intentando obtener usuario de la sesión.', [
+    Log::channel('session_debug')->info('Helper/currentUser: Intentando obtener usuario de la sesión.', [
         'session_id' => session()->getId(),
         'usuarioId_obtenido' => $idUsuario,
         'session_data_completa' => session()->all()
     ]);
 
     if (!$idUsuario) {
-        Log::channel('session_debug')->warning('Helper/usuarioActual: No se encontró usuarioId en la sesión. Devolviendo null.');
+        Log::channel('session_debug')->warning('Helper/currentUser: No se encontró usuarioId en la sesión. Devolviendo null.');
         return null;
     }
 
-    $usuarioActual = Usuario::find($idUsuario);
+    $currentUser = Usuario::find($idUsuario);
 
-    Log::channel('session_debug')->info('Helper/usuarioActual: Búsqueda en BD finalizada.', [
+    Log::channel('session_debug')->info('Helper/currentUser: Búsqueda en BD finalizada.', [
         'buscado_por_id' => $idUsuario,
-        'resultado' => $usuarioActual ? 'Usuario encontrado (ID: ' . $usuarioActual->id . ')' : 'Usuario NO encontrado en BD'
+        'resultado' => $currentUser ? 'Usuario encontrado (ID: ' . $currentUser->id . ')' : 'Usuario NO encontrado en BD'
     ]);
 
-    return $usuarioActual;
+    return $currentUser;
 }
 
 /**
@@ -57,7 +57,7 @@ function usuarioActual(): ?Usuario
  *
  * @return int|null El ID del usuario o null si no está autenticado.
  */
-function idUsuarioActual(): ?int
+function idCurrentUser(): ?int
 {
     return session('usuarioId');
 }

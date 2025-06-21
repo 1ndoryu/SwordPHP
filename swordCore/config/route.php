@@ -40,7 +40,7 @@ if (env('CMS_ENABLED', true)) {
     // Ruta principal del CMS
     Route::get('/', function (Request $request) {
         $opcionService = container(OpcionService::class);
-        $slugPaginaInicio = $opcionService->obtenerOpcion('pagina_de_inicio_slug');
+        $slugPaginaInicio = $opcionService->getOption('pagina_de_inicio_slug');
         if ($slugPaginaInicio) {
             return container(PaginaPublicaController::class)->mostrar($request, $slugPaginaInicio);
         }

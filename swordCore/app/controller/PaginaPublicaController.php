@@ -59,7 +59,7 @@ class PaginaPublicaController
         // Prioridad 1: Ajuste del Tipo de Contenido (para CPTs)
         if ($tipoContenido !== 'pagina') {
             $opcionService = new OpcionService();
-            $ajustesCPT = $opcionService->obtenerOpcion("ajustes_cpt_{$tipoContenido}");
+            $ajustesCPT = $opcionService->getOption("ajustes_cpt_{$tipoContenido}");
             if (!empty($ajustesCPT['plantilla_single'])) {
                 $nombreArchivoPlantilla = $ajustesCPT['plantilla_single'];
             }

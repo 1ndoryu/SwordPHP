@@ -18,7 +18,7 @@ class PreloadActivePlugins implements Bootstrap
         try {
             // La única acción: consultar la BD y guardar la lista de slugs.
             $opcionService = container(OpcionService::class);
-            PluginRegistry::$activePlugins = $opcionService->obtenerOpcion('active_plugins', []);
+            PluginRegistry::$activePlugins = $opcionService->getOption('active_plugins', []);
         } catch (\Throwable $e) {
             // Si esto falla, es una información crítica.
             Log::error("FALLO CRITICO EN BOOTSTRAP: No se pudo pre-cargar la lista de plugins desde la BD. Error: " . $e->getMessage());

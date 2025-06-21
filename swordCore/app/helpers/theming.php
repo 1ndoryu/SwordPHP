@@ -148,7 +148,7 @@ if (!function_exists('getPermalinkPost')) {
     function getPermalinkPost(\App\model\Pagina $entrada): string
     {
         $opcionService = new \App\service\OpcionService();
-        $estructura = $opcionService->obtenerOpcion('permalink_structure', '/%slug%/');
+        $estructura = $opcionService->getOption('permalink_structure', '/%slug%/');
 
         $reemplazos = [
             '%año%' => $entrada->created_at->format('Y'),

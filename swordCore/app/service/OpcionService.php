@@ -24,7 +24,7 @@ class OpcionService
      * @param mixed $valorPorDefecto El valor a devolver si la opción no se encuentra.
      * @return mixed
      */
-    public function obtenerOpcion(string $nombre, $valorPorDefecto = null)
+    public function getOption(string $nombre, $valorPorDefecto = null)
     {
         if (array_key_exists($nombre, self::$cacheOpciones)) {
             return self::$cacheOpciones[$nombre];
@@ -51,7 +51,7 @@ class OpcionService
      * @param mixed $valor El valor a guardar.
      * @return bool
      */
-    public function guardarOpcion(string $nombre, $valor): bool
+    public function updateOption(string $nombre, $valor): bool
     {
         $valorAGuardar = is_array($valor) || is_object($valor) ? serialize($valor) : $valor;
 

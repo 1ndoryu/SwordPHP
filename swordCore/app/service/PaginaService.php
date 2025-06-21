@@ -79,7 +79,7 @@ class PaginaService
         $this->validarDatos($datos);
 
         $datos['slug'] = $this->generarSlug($datos['titulo']);
-        $datos['idautor'] = idUsuarioActual();
+        $datos['idautor'] = idCurrentUser();
         $datos['tipocontenido'] = 'pagina';
 
         return Pagina::create($datos);

@@ -132,14 +132,6 @@ if (env('CMS_ENABLED', true)) {
     }
 
     Route::group('/api/v1', function () {
-        // Aquí se añadirán los endpoints en las siguientes rondas
-    });
-} else {
-    // ===================================
-    // MODO FRAMEWORK BASE (CMS Desactivado)
-    // ===================================
-    // Define la ruta raíz para que apunte directamente al IndexController.
-    Route::group('/api/v1', function () {
         // --- Endpoints de Contenido ---
         Route::get('/content', [\App\controller\Api\V1\ContentApiController::class, 'index']);
         Route::get('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'show']);
@@ -165,6 +157,9 @@ if (env('CMS_ENABLED', true)) {
             Route::post('/options', [\App\controller\Api\V1\OptionApiController::class, 'store']);
         })->middleware([\App\middleware\ApiAuthMiddleware::class]);
     });
+} else {
+
+    Route::get('/', [IndexController::class, 'index']);
 }
 
 // --- Ruta Fallback y cierre (siempre activa) ---

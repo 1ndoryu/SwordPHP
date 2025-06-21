@@ -208,7 +208,7 @@ function miPluginEjemplo_renderizarPagina()
     ];
 
     // Renderizamos el formulario completo usando el helper.
-    return renderizarFormularioAjustesPlugin([
+    return renderFormPluginPanel([
         'campos' => $campos,
         'mensajeExito' => $mensajeExito,
         'descripcionFormulario' => 'Desde aquí puedes configurar las opciones del plugin de ejemplo.',

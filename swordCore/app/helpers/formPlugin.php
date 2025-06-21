@@ -101,7 +101,7 @@ if (!function_exists('renderFormPlugin')) {
     }
 }
 
-if (!function_exists('renderizarFormularioAjustesPlugin')) {
+if (!function_exists('renderFormPluginPanel')) {
     /**
      * Renderiza un formulario de ajustes completo para un plugin.
      *
@@ -115,7 +115,7 @@ if (!function_exists('renderizarFormularioAjustesPlugin')) {
      *
      * @return string El HTML del formulario completo.
      */
-    function renderizarFormularioAjustesPlugin(array $args): string
+    function renderFormPluginPanel(array $args): string
     {
         $defaults = [
             'action' => '',

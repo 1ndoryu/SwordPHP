@@ -36,7 +36,7 @@ class ManagedContentService
             $this->definiciones[$slugDefinicion] = $argumentos;
         }
     }
-    
+
     /**
      * Obtiene una definición de contenido específica por su slug.
      *
@@ -74,8 +74,50 @@ class ManagedContentService
                 $pagina->delete();
             }
         }
-    }
 
+        // 4. LÓGICA DE PÁGINA DE INICIO: Establecer si es necesario.
+        $this->sincronizarPaginaDeInicio();
+    }
+    /**
+     * Establece la página de inicio definida en el código si no hay una configurada
+     * o si la página de inicio actual fue eliminada.
+     */
+    private function sincronizarPaginaDeInicio(): void
+    {
+        $opcionService = container(OpcionService::class);
+        $paginaInicioActualSlug = $opcionService->getOption('pagina_de_inicio_slug');
+
+        $procederASetearHomepage = false;
+        if (empty($paginaInicioActualSlug)) {
+            // No hay página de inicio configurada, podemos establecer una.
+            $procederASetearHomepage = true;
+        } else {
+            // Hay una configurada, comprobamos si todavía existe.
+            if (!Pagina::where('slug', $paginaInicioActualSlug)->exists()) {
+                // La página de inicio actual ya no existe, podemos establecer una nueva.
+                $procederASetearHomepage = true;
+            }
+        }
+
+        if ($procederASetearHomepage) {
+            $slugPaginaInicioDefinida = null;
+            foreach ($this->definiciones as $slugDef => $args) {
+                // Buscamos la primera definición marcada como 'es_inicio'.
+                if (!empty($args['es_inicio']) && $args['es_inicio'] === true && ($args['tipo_contenido'] ?? 'pagina') === 'pagina') {
+                    // La página ya debe existir en la BD, la buscamos por su slug de definición.
+                    $pagina = Pagina::where('metadata->_managed_source_slug', $slugDef)->first();
+                    if ($pagina) {
+                        $slugPaginaInicioDefinida = $pagina->slug;
+                        break; // Nos quedamos con la primera que encontremos.
+                    }
+                }
+            }
+
+            if ($slugPaginaInicioDefinida) {
+                $opcionService->updateOption('pagina_de_inicio_slug', $slugPaginaInicioDefinida);
+            }
+        }
+    }
     /**
      * Crea una nueva entrada en la base de datos a partir de una definición.
      *
@@ -86,22 +128,22 @@ class ManagedContentService
     {
         $paginaService = container(PaginaService::class); // Usamos el container para obtener el servicio
         $slugPagina = $args['slug'] ?? $slugDefinicion;
-        
+
         // Prevenir colisiones de slug
         $slugFinal = $paginaService->asegurarSlugUnico($slugPagina);
 
         $datosParaCrear = [
-            'titulo'        => $args['titulo'] ?? 'Sin Título',
-            'contenido'     => $args['contenido'] ?? '',
+            'titulo'    => $args['titulo'] ?? 'Sin Título',
+            'contenido'  => $args['contenido'] ?? '',
             'tipocontenido' => $args['tipo_contenido'] ?? 'pagina',
-            'estado'        => $args['estado'] ?? 'publicado',
-            'slug'          => $slugFinal,
-            'metadata'      => $args['metadata'] ?? []
+            'estado'    => $args['estado'] ?? 'publicado',
+            'slug'     => $slugFinal,
+            'metadata'   => $args['metadata'] ?? []
         ];
 
         // Añadimos el metadato clave que lo identifica como gestionado.
         $datosParaCrear['metadata']['_managed_source_slug'] = $slugDefinicion;
-        
+
         // Si se especifica una plantilla, se añade a los metadatos.
         if (isset($args['plantilla'])) {
             $datosParaCrear['metadata']['_plantilla_pagina'] = $args['plantilla'];

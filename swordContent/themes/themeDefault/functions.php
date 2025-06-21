@@ -12,7 +12,6 @@ swDefinirPagina('definicion-pagina-privacidad', [
     'contenido' => '<h2>1. Introducción</h2><p>Este contenido fue generado desde el código del tema y puede ser restaurado en cualquier momento.</p>'
 ]);
 
-
 /**
  * 2. Encolar los recursos (CSS y JS) del tema.
  *

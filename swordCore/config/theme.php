@@ -14,6 +14,6 @@ return [
      * o durante la instalación inicial. El valor corresponde al nombre del
      * directorio del tema en `swordContent/themes/`.
      */
-    'active_theme_fallback' => 'sword-theme-default',
+    'active_theme_fallback' => 'themeDefault',
 
 ];

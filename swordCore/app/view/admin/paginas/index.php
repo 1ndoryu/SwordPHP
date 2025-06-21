@@ -52,7 +52,7 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                                 <span><?php echo htmlspecialchars($pagina->id); ?></span>
                             </div>
                             <div class="infoItem">
-                                <span><?php echo htmlspecialchars($pagina->autor->nombre ?? 'Wan'); ?></span>
+                                <span><?php echo htmlspecialchars($pagina->autor->nombremostrado ?? ($pagina->autor->nombreusuario ?? 'N/A')); ?>
                             </div>
                             <div class="infoItem">
                                 

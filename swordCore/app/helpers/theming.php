@@ -126,18 +126,6 @@ if (!function_exists('getContent')) {
     }
 }
 
-if (!function_exists('getPermalink')) {
-    /**
-     * Muestra la URL (enlace permanente) de la entrada actual.
-     *
-     * @return void
-     */
-    function getPermalink(): void
-    {
-        echo getPermalink();
-    }
-}
-
 if (!function_exists('getPermalinkPost')) {
     /**
      * Obtiene la URL (enlace permanente) para una entrada específica.
@@ -170,6 +158,7 @@ if (!function_exists('getPermalinkPost')) {
 if (!function_exists('getPermalink')) {
     /**
      * Obtiene la URL (enlace permanente) de la entrada actual del loop.
+     * Análogo a get_permalink() de WordPress.
      *
      * @return string
      */
@@ -182,6 +171,20 @@ if (!function_exists('getPermalink')) {
         return getPermalinkPost($entrada);
     }
 }
+
+if (!function_exists('thePermalink')) {
+    /**
+     * Muestra la URL (enlace permanente) de la entrada actual del loop.
+     * Análogo a the_permalink() de WordPress.
+     *
+     * @return void
+     */
+    function thePermalink(): void
+    {
+        echo getPermalink();
+    }
+}
+
 
 if (!function_exists('sw_head')) {
     /**

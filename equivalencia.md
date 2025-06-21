@@ -32,8 +32,8 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 ### Tabla 4: Datos de Usuario
 
-| Función / Lógica SwordPHP   | Equivalente WordPress   |
-| :-------------------------- | :---------------------- |
+| Función / Lógica SwordPHP | Equivalente WordPress   |
+| :------------------------ | :---------------------- |
 | `currentUser()`           | `wp_get_current_user()` |
 | `idCurrentUser()`         | `get_current_user_id()` |
 | `!is_null(currentUser())` | `is_user_logged_in()`   |
@@ -58,8 +58,8 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 
 | Método SwordPHP (`$opcionService->...`) | Equivalente WordPress            |
 | :-------------------------------------- | :------------------------------- |
-| `->updateOption('nombre', 'valor')`    | `update_option('name', 'value')` |
-| `->getOption('nombre')`             | `get_option('name')`             |
+| `->updateOption('nombre', 'valor')`     | `update_option('name', 'value')` |
+| `->getOption('nombre')`                 | `get_option('name')`             |
 
 ### Tabla 8: El Loop y Plantillas (Theming)
 
@@ -70,7 +70,7 @@ Este documento sirve como una hoja de referencia rápida para desarrolladores fa
 | `thePost()`                  | `the_post()`                   |
 | `theTitle()`                 | `the_title()`                  |
 | `theContent()`               | `the_content()`                |
-| `getPermalink()`             | `the_permalink()`              |
+| `thePermalink()`             | `the_permalink()`              |
 | `getPermalink()`             | `get_permalink()` (en el loop) |
 | `getPermalinkPost($entrada)` | `get_permalink($post)`         |
 | `getHeader()`                | `get_header()`                 |

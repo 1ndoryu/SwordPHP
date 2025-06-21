@@ -84,7 +84,7 @@ Para facilitar la transición a los desarrolladores de WordPress, Sword ofrece u
 | `thePost()`                            | `the_post()`                            |
 | `theTitle()`                           | `the_title()`                           |
 | `theContent()`                         | `the_content()`                         |
-| `getPermalink()`                       | `the_permalink()`                       |
+| `thePermalink()`                       | `the_permalink()`                       |
 | `getPermalinkPost($e)`                 | `get_permalink($post)`                  |
 | `getHeader()`                          | `get_header()`                          |
 | `getFooter()`                          | `get_footer()`                          |

@@ -3,16 +3,13 @@
 namespace App\service;
 
 use App\model\Pagina;
-use App\service\PaginaService;
 
 /**
  * Servicio para gestionar contenido definido por código (páginas, etc.).
- * Implementa el patrón Singleton para mantener un registro único de definiciones.
+ * Su ciclo de vida es gestionado por el contenedor de inyección de dependencias.
  */
 class ManagedContentService
 {
-    private static ?self $instancia = null;
-
     /**
      * Almacena las definiciones de contenido.
      * La clave es un slug único que identifica la definición.
@@ -20,20 +17,11 @@ class ManagedContentService
      */
     private array $definiciones = [];
 
-    private function __construct() {}
-    private function __clone() {}
-    public function __wakeup()
-    {
-        throw new \Exception("No se puede deserializar un singleton.");
-    }
-
-    public static function getInstancia(): self
-    {
-        if (self::$instancia === null) {
-            self::$instancia = new self();
-        }
-        return self::$instancia;
-    }
+    /**
+     * El constructor ahora es público para permitir la instanciación
+     * por parte del contenedor de dependencias.
+     */
+    public function __construct() {}
 
     /**
      * Registra una página o cualquier tipo de contenido.
@@ -48,7 +36,7 @@ class ManagedContentService
             $this->definiciones[$slugDefinicion] = $argumentos;
         }
     }
-
+    
     /**
      * Obtiene una definición de contenido específica por su slug.
      *
@@ -88,7 +76,6 @@ class ManagedContentService
         }
     }
 
-
     /**
      * Crea una nueva entrada en la base de datos a partir de una definición.
      *
@@ -97,11 +84,11 @@ class ManagedContentService
      */
     private function crearEntradaDesdeDefinicion(string $slugDefinicion, array $args): void
     {
-        $paginaService = new PaginaService();
+        $paginaService = container(PaginaService::class); // Usamos el container para obtener el servicio
         $slugPagina = $args['slug'] ?? $slugDefinicion;
-
+        
         // Prevenir colisiones de slug
-        $slugFinal = $paginaService->asegurarSlugUnico($slugPagina); // <-- CORREGIDO
+        $slugFinal = $paginaService->asegurarSlugUnico($slugPagina);
 
         $datosParaCrear = [
             'titulo'        => $args['titulo'] ?? 'Sin Título',
@@ -114,7 +101,7 @@ class ManagedContentService
 
         // Añadimos el metadato clave que lo identifica como gestionado.
         $datosParaCrear['metadata']['_managed_source_slug'] = $slugDefinicion;
-
+        
         // Si se especifica una plantilla, se añade a los metadatos.
         if (isset($args['plantilla'])) {
             $datosParaCrear['metadata']['_plantilla_pagina'] = $args['plantilla'];

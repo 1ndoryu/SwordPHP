@@ -12,6 +12,9 @@ if (!function_exists('assetService')) {
      */
     function assetService(): \App\service\AssetService
     {
+        // REVERTIDO: Volvemos al método de singleton manual.
+        // Esto es crucial porque este helper puede ser llamado desde archivos de configuración
+        // antes de que el contenedor de dependencias principal esté inicializado.
         static $instancia = null;
 
         if ($instancia === null) {
@@ -94,6 +97,8 @@ if (!function_exists('encolarRecursos')) {
      */
     function encolarRecursos(string $ruta): void
     {
+        // REVERTIDO: Restauramos la instanciación de TemaService. Aunque el método que usa es estático,
+        // revertimos el archivo a su estado original completo para garantizar la estabilidad.
         $temaService = new \App\service\TemaService();
         $rutaTemaAbsoluto = SWORD_THEMES_PATH . DIRECTORY_SEPARATOR . $temaService->getActiveTheme();
         $rutaRecursoAbsoluto = $rutaTemaAbsoluto . DIRECTORY_SEPARATOR . ltrim($ruta, '/');

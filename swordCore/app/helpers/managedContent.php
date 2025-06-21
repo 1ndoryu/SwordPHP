@@ -18,7 +18,8 @@ if (!function_exists('swDefinirPagina')) {
     function swDefinirPagina(string $slugDefinicion, array $argumentos = [])
     {
         $argumentos['tipo_contenido'] = 'pagina';
-        ManagedContentService::getInstancia()->registrarContenido($slugDefinicion, $argumentos);
+        // CORREGIDO: Usamos el helper container() para obtener la instancia del servicio
+        container(ManagedContentService::class)->registrarContenido($slugDefinicion, $argumentos);
     }
 }
 
@@ -33,10 +34,14 @@ if (!function_exists('swDefinirContenido')) {
     function swDefinirContenido(string $tipo, string $slugDefinicion, array $argumentos)
     {
         $argumentos['tipo_contenido'] = $tipo;
-        ManagedContentService::getInstancia()->registrarContenido($slugDefinicion, $argumentos);
+        // CORREGIDO: Usamos el helper container() para obtener la instancia del servicio
+        container(ManagedContentService::class)->registrarContenido($slugDefinicion, $argumentos);
     }
 }
 
 // Conectamos el motor de sincronización al hook del panel de administración.
 // Esto asegura que la sincronización se ejecute cada vez que se carga el panel.
-addAction('swInitAdmin', [ManagedContentService::getInstancia(), 'sincronizar']);
+// Usamos una función anónima para obtener el servicio desde el contenedor en el momento de la ejecución.
+addAction('swInitAdmin', function() {
+    container(ManagedContentService::class)->sincronizar();
+});

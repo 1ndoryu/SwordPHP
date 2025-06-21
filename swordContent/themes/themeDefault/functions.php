@@ -16,8 +16,6 @@ swDefinirPagina('definicion-pagina-privacidad', [
 /**
  * 2. Encolar los recursos (CSS y JS) del tema.
  *
- * Esta única función cargará el archivo 'main.css' y todos los archivos .js
- * que se encuentren dentro de la carpeta 'frontend/js/' del tema.
  */
-encolarRecursos('frontend/css/main.css');
-encolarRecursos('frontend/js');
+encolarRecursos('asset/css/main.css');
+encolarRecursos('asset/js');

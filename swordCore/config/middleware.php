@@ -8,10 +8,10 @@ $globalMiddleware = [
     app\middleware\XdebugProfiler::class,
 ];
 
-// Añade el middleware para cargar plugins solo si el CMS está habilitado.
+// Añade el middleware para cargar plugins y el tema solo si el CMS está habilitado.
 if (env('CMS_ENABLED', true)) {
     $globalMiddleware[] = App\middleware\IncludeLoadedPluginsMiddleware::class;
-    $globalMiddleware[] = app\middleware\XdebugProfiler::class;
+    $globalMiddleware[] = App\middleware\IncludeActiveThemeMiddleware::class;
 }
 
 return [

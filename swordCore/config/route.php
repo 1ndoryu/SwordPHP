@@ -54,10 +54,13 @@ if (env('CMS_ENABLED', true)) {
         Route::get('/obtener-media-info/{id}', [AjaxController::class, 'obtenerMediaInfo']);
     })->middleware([\App\middleware\Session::class, AutenticacionMiddleware::class]);
 
+    Route::get('/reiniciar-servidor', [AdminController::class, 'reiniciarServidor']); // Nueva ruta
+
     // Grupo de Rutas del Panel de Administración
     $panelGroup = Route::group('/panel', function () {
         Route::get('', [AdminController::class, 'inicio']);
         Route::get('/', [AdminController::class, 'inicio']);
+        
         Route::group('/paginas', function () {
             Route::get('', [PaginaController::class, 'index']);
             Route::get('/create', [PaginaController::class, 'create']);

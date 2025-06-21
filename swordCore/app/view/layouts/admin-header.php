@@ -50,6 +50,7 @@ if (env('CMS_ENABLED', true)) {
                 <?php if ($usuario): ?>
                     <div class="infoUsuario">
                         <span>Hola, <?php echo htmlspecialchars($usuario->nombremostrado ?: $usuario->nombreusuario); ?></span>
+                        <a href="#" onclick="if(confirm('¿Estás seguro de que quieres reiniciar el servidor?')) { window.location.href = '/reiniciar-servidor'; }" class="logoutBtn">Reiniciar Servidor</a>
                         <a href="/logout" class="logoutBtn">Cerrar Sesión</a>
                     </div>
                 <?php endif; ?>

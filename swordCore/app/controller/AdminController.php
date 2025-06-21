@@ -63,4 +63,21 @@ class AdminController
             'widgetsColumna2' => $widgetsPorColumna[1],
         ]);
     }
+
+
+    /**
+     * Maneja la solicitud de reinicio del servidor.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function reiniciarServidor(Request $request): Response
+    {
+        forzarReinicioServidor();
+        // Establece un mensaje flash para mostrar en la siguiente solicitud.
+        session()->set('success', 'Se ha enviado la señal de reinicio al servidor.');
+        // Redirige al panel después de intentar reiniciar.
+        // El reinicio real puede tardar unos segundos.
+        return redirect('/panel');
+    }
 }

@@ -9,12 +9,45 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 <div class="bloque vistaListado">
 
     <div class="cabeceraVista">
+        <div class="tituloVista">
+            <h1><?php echo $tituloPagina; ?></h1>
+        </div>
         <div class="accionesVista">
             <a href="/panel/paginas/create" class="btnCrear">
                 Añadir
             </a>
         </div>
     </div>
+
+    <?php // Formulario de Filtros ?>
+    <div class="filtrosListado">
+        <form action="/panel/paginas" method="GET" id="filtrosFormPaginas">
+            <div class="campoFiltro">
+                <label for="search_term">Buscar:</label>
+                <input type="text" name="search_term" id="search_term" value="<?php echo htmlspecialchars($filtrosActuales['search_term'] ?? ''); ?>" placeholder="Título, contenido...">
+            </div>
+            <div class="campoFiltro">
+                <label for="date_filter">Fecha:</label>
+                <input type="date" name="date_filter" id="date_filter" value="<?php echo htmlspecialchars($filtrosActuales['date_filter'] ?? ''); ?>">
+            </div>
+            <div class="campoFiltro">
+                <label for="author_filter">Autor:</label>
+                <select name="author_filter" id="author_filter">
+                    <option value="">Todos los autores</option>
+                    <?php foreach ($autores as $autor): ?>
+                        <option value="<?php echo $autor->id; ?>" <?php echo (($filtrosActuales['author_filter'] ?? '') == $autor->id) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($autor->nombremostrado ?: $autor->nombreusuario); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="accionesFiltro">
+                <button type="submit" class="btnFiltrar">Filtrar</button>
+                <a href="/panel/paginas" class="btnLimpiar">Limpiar</a>
+            </div>
+        </form>
+    </div>
+
 
     <?php // Mostrar mensajes pasados desde el controlador ?>
     <?php if (!empty($successMessage)): ?>
@@ -30,12 +63,9 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
     <div class="contenidoVista">
 
-        <div class="listaContenido">
-            <?php
-            // Se comprueba si la colección de páginas no está vacía.
-            if (!$paginas->isEmpty()):
-                foreach ($paginas as $pagina):
-            ?>
+        <div class="listaContenido" id="listaPaginasContainer">
+            <?php if (!$paginas->isEmpty()): ?>
+                <?php foreach ($paginas as $pagina): ?>
                     <div class="contenidoCard">
                         <div class="contenidoInfo">
                             <div class="infoItem iconoB iconoG">
@@ -48,14 +78,12 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                                 <?php endif; ?>
                             </div>
                             <div class="infoItem" style="display: none">
-                                
                                 <span><?php echo htmlspecialchars($pagina->id); ?></span>
                             </div>
                             <div class="infoItem">
-                                <span><?php echo htmlspecialchars($pagina->autor->nombre ?? 'Wan'); ?></span>
+                                <span><?php echo htmlspecialchars($pagina->autor->nombremostrado ?? ($pagina->autor->nombreusuario ?? 'N/A')); ?></span>
                             </div>
                             <div class="infoItem">
-                                
                                 <?php if ($pagina->estado == 'publicado'): ?>
                                     <span class="badge badgePublicado">Publicado</span>
                                 <?php else: ?>
@@ -63,7 +91,6 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                                 <?php endif; ?>
                             </div>
                             <div class="infoItem">
-                                
                                 <span><?php echo htmlspecialchars($pagina->created_at->format('d/m/Y H:i')); ?></span>
                             </div>
                         </div>
@@ -80,27 +107,25 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                             </button>
                         </div>
                     </div>
-                <?php
-                endforeach;
-            else: // Si no hay páginas que mostrar
-                ?>
+                <?php endforeach; ?>
+            <?php else: ?>
                 <div class="alerta alertaInfo" style="text-align: center;">
-                    No se encontraron páginas.
+                    No se encontraron páginas con los filtros aplicados.
                 </div>
             <?php endif; ?>
         </div>
 
         <div class="paginacion">
             <?php
-            // Las variables $paginaActual y $totalPaginas son pasadas desde el controlador.
-            echo renderizarPaginacion($paginaActual, $totalPaginas);
+            // Renderizar paginación. Asegúrate que renderizarPaginacion pueda manejar los parámetros GET de los filtros.
+            // Si renderizarPaginacion no maneja automáticamente los parámetros de query, tendrás que pasarlos.
+            // Por ejemplo, podrías necesitar modificar renderizarPaginacion o construir los enlaces aquí.
+            // Asumimos que renderizarPaginacion es lo suficientemente inteligente o que los parámetros de filtro se añaden a los enlaces de paginación.
+            echo renderizarPaginacion($paginaActual, $totalPaginas, request()->url(), $filtrosActuales);
             ?>
         </div>
     </div>
 </div>
-
-<?php 
-?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

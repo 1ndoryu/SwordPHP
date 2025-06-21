@@ -1,19 +1,48 @@
 <?php
-// 1. Define el título de la página.
-$tituloPagina = 'Gestión de Usuarios';
-
-// 2. Incluye la cabecera del panel.
-echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel']);
+// Usar $tituloPagina que se pasa desde el controlador.
+echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Gestión de Usuarios']);
 ?>
 
 <div class="bloque vistaListado">
 
     <div class="cabeceraVista">
+        <div class="tituloVista">
+            <h1><?php echo htmlspecialchars($tituloPagina ?? 'Gestión de Usuarios'); ?></h1>
+        </div>
         <div class="accionesVista">
             <a href="/panel/usuarios/crear" class="btnCrear">
-                Añadir
+                Añadir Usuario
             </a>
         </div>
+    </div>
+
+    <?php // Formulario de Filtros ?>
+    <div class="filtrosListado">
+        <form action="/panel/usuarios" method="GET" id="filtrosFormUsuarios">
+            <div class="campoFiltro">
+                <label for="search_term">Buscar:</label>
+                <input type="text" name="search_term" id="search_term" value="<?php echo htmlspecialchars($filtrosActuales['search_term'] ?? ''); ?>" placeholder="Nombre, email...">
+            </div>
+            <div class="campoFiltro">
+                <label for="date_filter">Fecha Registro:</label>
+                <input type="date" name="date_filter" id="date_filter" value="<?php echo htmlspecialchars($filtrosActuales['date_filter'] ?? ''); ?>">
+            </div>
+            <div class="campoFiltro">
+                <label for="role_filter">Rol:</label>
+                <select name="role_filter" id="role_filter">
+                    <option value="">Todos los roles</option>
+                    <?php foreach ($rolesDisponibles as $rolKey): ?>
+                        <option value="<?php echo htmlspecialchars($rolKey); ?>" <?php echo (($filtrosActuales['role_filter'] ?? '') == $rolKey) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars(ucfirst($rolKey)); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="accionesFiltro">
+                <button type="submit" class="btnFiltrar">Filtrar</button>
+                <a href="/panel/usuarios" class="btnLimpiar">Limpiar</a>
+            </div>
+        </form>
     </div>
 
     <?php // Bloque para mostrar mensajes de éxito o error ?>
@@ -30,12 +59,9 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
     <div class="contenidoVista">
 
-        <div class="listaContenido">
-            <?php
-            // Se comprueba si la colección de usuarios no está vacía.
-            if ($usuarios->count() > 0):
-                foreach ($usuarios as $usuario):
-            ?>
+        <div class="listaContenido" id="listaUsuariosContainer">
+            <?php if ($usuarios->count() > 0): ?>
+                <?php foreach ($usuarios as $usuario): ?>
                     <div class="contenidoCard">
                         <div class="contenidoInfo">
                             <div class="infoItem iconoB iconoG">
@@ -60,42 +86,36 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                         </div>
 
                         <div class="contenidoAcciones">
-                            <a href="/panel/usuarios/editar/<?php echo htmlspecialchars($usuario->id); ?>" class="iconoB btnEditar">
+                            <a href="/panel/usuarios/editar/<?php echo htmlspecialchars($usuario->id); ?>" class="iconoB btnEditar" title="Editar">
                                 <?php echo icon('edit'); ?>
                             </a>
 
-                            <form action="/panel/usuarios/eliminar/<?php echo htmlspecialchars($usuario->id); ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">
+                            <form action="/panel/usuarios/eliminar/<?php echo htmlspecialchars($usuario->id); ?>" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este usuario?');" style="display: inline-block;">
                                 <?php echo csrf_field(); ?>
-                                <button type="submit" class="iconoB IconoRojo btnEliminar">
+                                <button type="submit" class="iconoB IconoRojo btnEliminar" title="Eliminar">
                                     <?php echo icon('borrar'); ?>
                                 </button>
                             </form>
                         </div>
                     </div>
-                <?php
-                endforeach;
-            else: // Si no hay usuarios que mostrar
-                ?>
+                <?php endforeach; ?>
+            <?php else: ?>
                 <div class="alerta alertaInfo" style="text-align: center;">
-                    No se encontraron usuarios.
+                    No se encontraron usuarios con los filtros aplicados.
                 </div>
             <?php endif; ?>
         </div>
 
         <div class="paginacion">
             <?php
-            // Adaptamos la paginación al nuevo helper.
-            // Asumimos que el objeto $usuarios es un paginador de Laravel/Symfony.
             if ($usuarios->hasPages()) {
-                // Pasamos la página actual y el total de páginas al helper.
-                echo renderizarPaginacion($usuarios->currentPage(), $usuarios->lastPage());
+                 // Pasar también los query params actuales para que la paginación los mantenga
+                echo renderizarPaginacion($usuarios->currentPage(), $usuarios->lastPage(), $usuarios->path(), $filtrosActuales);
             }
             ?>
         </div>
     </div>
 </div>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

@@ -10,11 +10,45 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 <div class="bloque vistaListado">
 
     <div class="cabeceraVista">
+        <div class="tituloVista">
+            <h1><?php echo $tituloPagina; ?></h1>
+        </div>
         <div class="accionesVista">
-            <a href="/panel/<?= $slug ?>/crear" class="btnCrear">
-                Añadir
+            <a href="/panel/<?= htmlspecialchars($slug) ?>/crear" class="btnCrear">
+                Añadir <?= htmlspecialchars($labels['singular_name'] ?? 'Nuevo') ?>
             </a>
         </div>
+    </div>
+
+    <?php // Formulario de Filtros ?>
+    <div class="filtrosListado">
+        <form action="/panel/<?= htmlspecialchars($slug) ?>" method="GET" id="filtrosFormContenido">
+            <div class="campoFiltro">
+                <label for="search_term">Buscar:</label>
+                <input type="text" name="search_term" id="search_term" value="<?php echo htmlspecialchars($filtrosActuales['search_term'] ?? ''); ?>" placeholder="Título, contenido...">
+            </div>
+            <div class="campoFiltro">
+                <label for="date_filter">Fecha:</label>
+                <input type="date" name="date_filter" id="date_filter" value="<?php echo htmlspecialchars($filtrosActuales['date_filter'] ?? ''); ?>">
+            </div>
+            <div class="campoFiltro">
+                <label for="author_filter">Autor:</label>
+                <select name="author_filter" id="author_filter">
+                    <option value="">Todos los autores</option>
+                    <?php if (isset($autores)): ?>
+                        <?php foreach ($autores as $autor): ?>
+                            <option value="<?php echo $autor->id; ?>" <?php echo (($filtrosActuales['author_filter'] ?? '') == $autor->id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($autor->nombremostrado ?: $autor->nombreusuario); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+            <div class="accionesFiltro">
+                <button type="submit" class="btnFiltrar">Filtrar</button>
+                <a href="/panel/<?= htmlspecialchars($slug) ?>" class="btnLimpiar">Limpiar</a>
+            </div>
+        </form>
     </div>
 
     <?php // Mostrar mensajes pasados desde el controlador ?>
@@ -31,22 +65,23 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
 
     <div class="contenidoVista">
 
-        <div class="listaContenido">
-            <?php
-            // Se comprueba si la colección de entradas no está vacía.
-            if (!$entradas->isEmpty()):
-                foreach ($entradas as $entrada):
-            ?>
+        <div class="listaContenido" id="listaContenidoContainer">
+            <?php if (!$entradas->isEmpty()): ?>
+                <?php foreach ($entradas as $entrada): ?>
                     <div class="contenidoCard">
                         <div class="contenidoInfo">
                             <div class="infoItem iconoB iconoG">
-                                <?php echo icon('file'); ?>
+                                <?php // Podríamos usar $config['menu_icon'] si está definido y es un helper de icono ?>
+                                <?php echo icon(isset($config['menu_icon_svg']) ? $config['menu_icon_svg'] : 'file'); ?>
                             </div>
                             <div class="infoItem infoTitulo">
                                 <span><?php echo htmlspecialchars($entrada->titulo); ?></span>
                             </div>
                             <div class="infoItem" style="display: none">
                                 <span><?php echo htmlspecialchars($entrada->id); ?></span>
+                            </div>
+                             <div class="infoItem">
+                                <span><?php echo htmlspecialchars($entrada->autor->nombremostrado ?? ($entrada->autor->nombreusuario ?? 'N/A')); ?></span>
                             </div>
                             <div class="infoItem">
                                 <?php if ($entrada->estado == 'publicado'): ?>
@@ -64,36 +99,29 @@ echo partial('layouts/admin-header', ['tituloPagina' => $tituloPagina ?? 'Panel'
                             <a href="<?php echo getPermalinkPost($entrada); ?>" class="iconoB btnVer" target="_blank" title="Ver">
                                 <?php echo icon('ver'); ?>
                             </a>
-                            <a href="/panel/<?= $slug ?>/editar/<?php echo htmlspecialchars($entrada->id); ?>" class="iconoB btnEditar" title="Editar">
+                            <a href="/panel/<?= htmlspecialchars($slug) ?>/editar/<?php echo htmlspecialchars($entrada->id); ?>" class="iconoB btnEditar" title="Editar">
                                 <?php echo icon('edit'); ?>
                             </a>
-                            <button type="button" class="iconoB IconoRojo btnEliminar" title="Eliminar" onclick="eliminarRecurso('/panel/<?= $slug ?>/eliminar/<?php echo htmlspecialchars($entrada->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta entrada?');">
+                            <button type="button" class="iconoB IconoRojo btnEliminar" title="Eliminar" onclick="eliminarRecurso('/panel/<?= htmlspecialchars($slug) ?>/eliminar/<?php echo htmlspecialchars($entrada->id); ?>', '<?php echo csrf_token(); ?>', '¿Estás seguro de que deseas eliminar esta entrada?');">
                                 <?php echo icon('borrar'); ?>
                             </button>
                         </div>
                     </div>
-                <?php
-                endforeach;
-            else: // Si no hay entradas que mostrar
-                ?>
+                <?php endforeach; ?>
+            <?php else: ?>
                 <div class="alerta alertaInfo" style="text-align: center;">
-                    No se encontraron <?= htmlspecialchars(strtolower($labels['name'] ?? 'contenidos')) ?>.
+                    No se encontraron <?= htmlspecialchars(strtolower($labels['name'] ?? 'contenidos')) ?> con los filtros aplicados.
                 </div>
             <?php endif; ?>
         </div>
 
-        <?php
-        // Ahora el controlador siempre pasa estas variables, por lo que la paginación funcionará.
-        if (isset($paginaActual) && isset($totalPaginas)):
-        ?>
+        <?php if (isset($paginaActual) && isset($totalPaginas) && $totalPaginas > 0): ?>
             <div class="paginacion">
-                <?php echo renderizarPaginacion($paginaActual, $totalPaginas, "/panel/$slug"); ?>
+                <?php echo renderizarPaginacion($paginaActual, $totalPaginas, "/panel/" . htmlspecialchars($slug), $filtrosActuales); ?>
             </div>
         <?php endif; ?>
     </div>
 </div>
-
-<?php // -- FIN DEL CONTENIDO ESPECÍFICO DE LA PÁGINA -- ?>
 
 <?php
 // 3. Incluye el pie de página para cerrar la estructura.

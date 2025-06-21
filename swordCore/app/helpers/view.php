@@ -63,9 +63,10 @@ if (!function_exists('renderizarPaginacion')) {
      * @param int $paginaActual La página que se está mostrando actualmente.
      * @param int $totalPaginas El número total de páginas disponibles.
      * @param string $baseUrl La URL base para los enlaces de paginación (sin el query string).
+     * @param array $queryParams Parámetros de query existentes que se deben mantener (ej. filtros).
      * @return string El HTML de la paginación.
      */
-    function renderizarPaginacion(int $paginaActual, int $totalPaginas, string $baseUrl = ''): string
+    function renderizarPaginacion(int $paginaActual, int $totalPaginas, string $baseUrl = '', array $queryParams = []): string
     {
         if ($totalPaginas <= 1) {
             return '';
@@ -74,28 +75,50 @@ if (!function_exists('renderizarPaginacion')) {
         if (empty($baseUrl)) {
             $baseUrl = request()->path();
         }
-
         $baseUrl = rtrim($baseUrl, '/');
 
-        $html = '<nav aria-label="Navegación de páginas"><ul class="pagination">';
+        // Limpiar 'page' de los queryParams para evitar duplicados
+        unset($queryParams['page']);
 
-        $esPrimeraPagina = ($paginaActual <= 1);
-        $html .= '<li class="page-item' . ($esPrimeraPagina ? ' disabled' : '') . '">';
-        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual - 1)) . '" aria-label="Anterior">&lsaquo;</a>';
-        $html .= '</li>';
-
-        for ($i = 1; $i <= $totalPaginas; $i++) {
-            $esPaginaActual = ($i == $paginaActual);
-            if ($esPaginaActual) {
-                $html .= '<li class="page-item active" aria-current="page"><span class="page-link">' . $i . '</span></li>';
-            } else {
-                $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . $i) . '">' . $i . '</a></li>';
+        // Construir el query string base a partir de los filtros existentes
+        $queryStringBase = '';
+        if (!empty($queryParams)) {
+            // Filtrar parámetros vacíos para no ensuciar la URL
+            $queryParams = array_filter($queryParams, function($value) {
+                return $value !== null && $value !== '';
+            });
+            if (!empty($queryParams)) {
+                $queryStringBase = '&' . http_build_query($queryParams);
             }
         }
 
+        $html = '<nav aria-label="Navegación de páginas"><ul class="pagination">';
+
+        // Botón Anterior
+        $esPrimeraPagina = ($paginaActual <= 1);
+        $html .= '<li class="page-item' . ($esPrimeraPagina ? ' disabled' : '') . '">';
+        $prevPageQuery = '?page=' . ($paginaActual - 1) . $queryStringBase;
+        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . $prevPageQuery) . '" aria-label="Anterior">&lsaquo;</a>';
+        $html .= '</li>';
+
+        // Números de Página
+        // Lógica para mostrar un rango de páginas (ej. primero, ..., actual-2, actual-1, actual, actual+1, actual+2, ..., último)
+        // Por simplicidad, aquí se muestran todas las páginas. Para muchos items, esto debería optimizarse.
+        for ($i = 1; $i <= $totalPaginas; $i++) {
+            $esPaginaActual = ($i == $paginaActual);
+            $pageQuery = '?page=' . $i . $queryStringBase;
+            if ($esPaginaActual) {
+                $html .= '<li class="page-item active" aria-current="page"><span class="page-link">' . $i . '</span></li>';
+            } else {
+                $html .= '<li class="page-item"><a class="page-link" href="' . htmlspecialchars($baseUrl . $pageQuery) . '">' . $i . '</a></li>';
+            }
+        }
+
+        // Botón Siguiente
         $esUltimaPagina = ($paginaActual >= $totalPaginas);
         $html .= '<li class="page-item' . ($esUltimaPagina ? ' disabled' : '') . '">';
-        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . '?page=' . ($paginaActual + 1)) . '" aria-label="Siguiente">&rsaquo;</a>';
+        $nextPageQuery = '?page=' . ($paginaActual + 1) . $queryStringBase;
+        $html .= '<a class="page-link" href="' . htmlspecialchars($baseUrl . $nextPageQuery) . '" aria-label="Siguiente">&rsaquo;</a>';
         $html .= '</li>';
 
         $html .= '</ul></nav>';

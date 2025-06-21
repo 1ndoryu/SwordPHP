@@ -22,10 +22,37 @@ class TipoContenidoController
     {
         $config = $this->getConfigOr404($slug);
 
-        // Implementar paginación
+        // Paginación
         $porPagina = 10;
         $paginaActual = (int)$request->input('page', 1);
-        $totalItems = Pagina::where('tipocontenido', $slug)->count();
+
+        // Filtros
+        $searchTerm = $request->input('search_term');
+        $dateFilter = $request->input('date_filter');
+        // Para TipoContenido, el filtro de autor es relevante si el tipo de contenido lo usa.
+        // Asumiremos que todos los 'Pagina' tienen 'idautor'.
+        $authorFilter = $request->input('author_filter');
+
+
+        $query = Pagina::where('tipocontenido', $slug);
+
+        // Aplicar filtros
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('titulo', 'like', "%{$searchTerm}%")
+                  ->orWhere('contenido', 'like', "%{$searchTerm}%"); // Opcional, buscar también en contenido
+            });
+        }
+
+        if ($dateFilter) {
+            $query->whereDate('created_at', $dateFilter);
+        }
+
+        if ($authorFilter && is_numeric($authorFilter)) {
+            $query->where('idautor', (int)$authorFilter);
+        }
+
+        $totalItems = $query->count();
         $totalPaginas = (int)ceil($totalItems / $porPagina);
 
         if ($paginaActual > $totalPaginas && $totalItems > 0) {
@@ -37,17 +64,18 @@ class TipoContenidoController
 
         $offset = ($paginaActual - 1) * $porPagina;
 
-        $entradas = Pagina::where('tipocontenido', $slug)
-            ->orderBy('id', 'desc')
+        $entradas = $query->with('autor') // Cargar relación de autor
+            ->orderBy('created_at', 'desc') // Ordenar por fecha de creación descendente
             ->offset($offset)
             ->limit($porPagina)
             ->get();
 
-        // Extraer mensajes "flasheados" de la sesión
         $successMessage = $request->session()->pull('success');
         $errorMessage = $request->session()->pull('error');
 
-        // Las vistas se unificarán en el siguiente paso.
+        // Obtener todos los autores para el dropdown de filtro
+        $autores = \App\model\Usuario::select('id', 'nombremostrado', 'nombreusuario')->get();
+
         return view('admin/tipoContenido/index', [
             'entradas' => $entradas,
             'config' => $config,
@@ -56,6 +84,12 @@ class TipoContenidoController
             'totalPaginas' => $totalPaginas,
             'successMessage' => $successMessage,
             'errorMessage' => $errorMessage,
+            'autores' => $autores,
+            'filtrosActuales' => [
+                'search_term' => $searchTerm,
+                'date_filter' => $dateFilter,
+                'author_filter' => $authorFilter,
+            ]
         ]);
     }
 

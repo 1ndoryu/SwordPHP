@@ -7,10 +7,12 @@
 </div>
 </main>
 </div> <?php
-        // Imprime las etiquetas <script> de los JS encolados.
-        sw_admin_footer();
-        ?>
+        // Encolar el script de filtros usando la función del sistema
+        encolarScript('filtros-listado', '/js/panel/filtrosListado.js');
 
+        // Imprime las etiquetas <script> de los JS encolados.
+        sw_admin_footer(); // Esta función debería imprimir lo encolado por encolarScript
+        ?>
 </body>
 
 </html>

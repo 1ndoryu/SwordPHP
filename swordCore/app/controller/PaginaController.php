@@ -56,7 +56,32 @@ class PaginaController
     {
         $porPagina = 10;
         $paginaActual = (int)$request->input('page', 1);
-        $totalItems = Pagina::where('tipocontenido', 'pagina')->count();
+
+        // Filtros
+        $searchTerm = $request->input('search_term');
+        $dateFilter = $request->input('date_filter');
+        $authorFilter = $request->input('author_filter');
+
+        $query = Pagina::with('autor')->where('tipocontenido', 'pagina');
+
+        // Aplicar filtros
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('titulo', 'like', "%{$searchTerm}%")
+                  ->orWhere('contenido', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($dateFilter) {
+            // Asumiendo que dateFilter tiene el formato YYYY-MM-DD
+            $query->whereDate('created_at', $dateFilter);
+        }
+
+        if ($authorFilter && is_numeric($authorFilter)) {
+            $query->where('idautor', (int)$authorFilter);
+        }
+
+        $totalItems = $query->count();
         $totalPaginas = (int)ceil($totalItems / $porPagina);
 
         if ($paginaActual > $totalPaginas && $totalItems > 0) {
@@ -68,12 +93,10 @@ class PaginaController
 
         $offset = ($paginaActual - 1) * $porPagina;
 
-        // Obtener el slug de la página de inicio para la ordenación y la vista.
+        // Obtener el slug de la página de inicio para la ordenación.
         $slugPaginaInicio = $this->opcionService->getOption('pagina_de_inicio_slug');
 
-        $query = Pagina::with('autor')->where('tipocontenido', 'pagina');
-
-        // Aplicar ordenación personalizada: página de inicio primero.
+        // Aplicar ordenación personalizada: página de inicio primero, luego por fecha.
         if ($slugPaginaInicio) {
             $query->orderByRaw("CASE WHEN slug = ? THEN 0 ELSE 1 END ASC", [$slugPaginaInicio]);
         }
@@ -84,6 +107,11 @@ class PaginaController
         $successMessage = $request->session()->pull('success');
         $errorMessage = $request->session()->pull('error');
 
+        // Obtener todos los autores para el dropdown de filtro
+        // Idealmente, esto debería ser más eficiente, por ejemplo, obteniendo solo autores que hayan escrito páginas.
+        $autores = \App\model\Usuario::select('id', 'nombremostrado', 'nombreusuario')->get();
+
+
         return view('admin/paginas/index', [
             'paginas' => $paginas,
             'tituloPagina' => 'Gestión de Páginas',
@@ -91,7 +119,13 @@ class PaginaController
             'totalPaginas' => $totalPaginas,
             'successMessage' => $successMessage,
             'errorMessage' => $errorMessage,
-            'slugPaginaInicio' => $slugPaginaInicio, // Pasar el slug a la vista
+            'slugPaginaInicio' => $slugPaginaInicio,
+            'autores' => $autores, // Pasar autores a la vista
+            'filtrosActuales' => [ // Pasar filtros actuales a la vista
+                'search_term' => $searchTerm,
+                'date_filter' => $dateFilter,
+                'author_filter' => $authorFilter,
+            ]
         ]);
     }
 

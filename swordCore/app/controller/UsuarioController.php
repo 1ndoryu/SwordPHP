@@ -86,11 +86,67 @@ class UsuarioController
 
     public function index(Request $request): Response
     {
+        // Filtros
+        $searchTerm = $request->input('search_term');
+        $roleFilter = $request->input('role_filter');
+        $dateFilter = $request->input('date_filter'); // Filtro por fecha de creación
 
-        $usuarios = $this->usuarioService->obtenerUsuariosPaginados();
+        // Paginación (se mantiene la lógica del servicio, pero la query se construye aquí)
+        $page = (int)$request->input('page', 1);
+        $perPage = 10; // O el valor que uses en tu servicio
+
+        $query = \App\model\Usuario::query();
+
+        // Aplicar filtros
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('nombreusuario', 'like', "%{$searchTerm}%")
+                  ->orWhere('nombremostrado', 'like', "%{$searchTerm}%")
+                  ->orWhere('correoelectronico', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        if ($roleFilter) {
+            $query->where('rol', $roleFilter);
+        }
+
+        if ($dateFilter) {
+            $query->whereDate('created_at', $dateFilter);
+        }
+
+        // Obtener el total de items para la paginación ANTES de aplicar limit/offset
+        $totalItems = $query->count();
+
+        $usuarios = $query->orderBy('created_at', 'desc')
+                          ->offset(($page - 1) * $perPage)
+                          ->limit($perPage)
+                          ->get();
+
+        // Crear un paginador manualmente para compatibilidad con la vista existente
+        // Nota: Esto es una simplificación. Idealmente, tu servicio devolvería un LengthAwarePaginator
+        // o la vista se adaptaría para manejar una colección y datos de paginación separados.
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $usuarios,
+            $totalItems,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+
+        // Roles disponibles para el filtro (podrías obtenerlos de una constante o configuración)
+        $rolesDisponibles = ['admin', 'editor', 'autor', 'colaborador', 'suscriptor'];
+
+
         return view('admin/usuarios/index', [
-            'titulo' => 'Gestión de Usuarios',
-            'usuarios' => $usuarios
+            'tituloPagina' => 'Gestión de Usuarios', // Cambiado de 'titulo' para consistencia
+            'usuarios' => $paginator, // Usar el paginador
+            'rolesDisponibles' => $rolesDisponibles,
+            'filtrosActuales' => [
+                'search_term' => $searchTerm,
+                'role_filter' => $roleFilter,
+                'date_filter' => $dateFilter,
+            ]
         ]);
     }
 

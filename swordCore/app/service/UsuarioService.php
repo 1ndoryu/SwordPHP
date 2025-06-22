@@ -222,4 +222,29 @@ class UsuarioService
 
         return true;
     }
+
+    /**
+     * Autentica a un usuario y, si tiene éxito, genera y guarda un nuevo token de API.
+     *
+     * @param string $identificador El correo electrónico o nombre de usuario.
+     * @param string $clavePlana La contraseña en texto plano.
+     * @return array Un array con el 'token' y el objeto 'usuario'.
+     * @throws \support\exception\BusinessException Si las credenciales son incorrectas.
+     */
+    public function autenticarYGenerarToken(string $identificador, string $clavePlana): array
+    {
+        $usuario = $this->autenticarUsuario($identificador, $clavePlana);
+
+        if (!$usuario) {
+            throw new \support\exception\BusinessException('Las credenciales proporcionadas son incorrectas.');
+        }
+
+        // Genera, asigna y guarda el nuevo token en el usuario.
+        $usuario->generarApiToken()->save();
+
+        return [
+            'token' => $usuario->api_token,
+            'usuario' => $usuario
+        ];
+    }
 }

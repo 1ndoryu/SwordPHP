@@ -151,6 +151,7 @@ if (env('CMS_ENABLED', true)) {
             Route::put('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
             Route::patch('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
             Route::delete('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'destroy']);
+            Route::post('/auth/token', [App\controller\Api\ApiAuthController::class, 'token']);
 
             // --- Endpoints de Opciones ---
             Route::get('/options/{key:.+}', [\App\controller\Api\V1\OptionApiController::class, 'show']);

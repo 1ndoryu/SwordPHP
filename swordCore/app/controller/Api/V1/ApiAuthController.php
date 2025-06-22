@@ -1,7 +1,8 @@
 <?php
 
-namespace App\controller\Api;
+namespace App\controller\Api\V1;
 
+use App\controller\Api\ApiBaseController;
 use App\service\UsuarioService;
 use support\Request;
 use support\Response;

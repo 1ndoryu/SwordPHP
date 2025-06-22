@@ -134,21 +134,22 @@ if (env('CMS_ENABLED', true)) {
     // === INICIO RUTAS API ===
 
     // --- RUTA PÚBLICA DE AUTENTICACIÓN ---
-    Route::post('/auth/token', [\App\controller\Api\ApiAuthController::class, 'token']);
+    // CORRECCIÓN: Se añade el namespace correcto 'V1' al controlador.
+    Route::post('/auth/token', [\App\controller\Api\V1\ApiAuthController::class, 'token']);
 
     // --- RUTAS PROTEGIDAS DE API v1 ---
     Route::group('/api/v1', function () {
         // --- Endpoints de Contenido (Públicos) ---
-        Route::get('/content', [ContentApiController::class, 'index']); // CORREGIDO
-        Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']); // CORREGIDO
+        Route::get('/content', [ContentApiController::class, 'index']);
+        Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
 
         // --- Endpoints Protegidos ---
         Route::group(function () {
             // Contenido (Crear, Actualizar, Eliminar)
-            Route::post('/content', [ContentApiController::class, 'store']); // CORREGIDO
-            Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']); // CORREGIDO
-            Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']); // CORREGIDO
-            Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']); // CORREGIDO
+            Route::post('/content', [ContentApiController::class, 'store']);
+            Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']);
+            Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']);
+            Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
 
             // --- Endpoints de Usuarios (CRUD Completo) ---
             Route::get('/users', [\App\controller\Api\V1\UserApiController::class, 'index']);

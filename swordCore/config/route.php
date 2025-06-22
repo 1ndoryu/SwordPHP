@@ -37,7 +37,7 @@ if (env('CMS_ENABLED', true)) {
     class_alias(\App\controller\TemaController::class, 'TemaController');
     class_alias(\App\controller\PluginPageController::class, 'PluginPageController');
     class_alias(\App\controller\AjustesController::class, 'AjustesController');
-    class_alias(\App\controller\Api\ApiAuthController::class, 'ApiAuthController');
+    // Se elimina el class_alias para ApiAuthController, no es necesario y causaba el error
 
     // Ruta principal del CMS
     Route::get('/', function (Request $request) {
@@ -56,7 +56,7 @@ if (env('CMS_ENABLED', true)) {
         Route::get('/obtener-media-info/{id}', [AjaxController::class, 'obtenerMediaInfo']);
     })->middleware([\App\middleware\Session::class, AutenticacionMiddleware::class]);
 
-    Route::get('/reiniciar-servidor', [AdminController::class, 'reiniciarServidor']); // Nueva ruta
+    Route::get('/reiniciar-servidor', [AdminController::class, 'reiniciarServidor']);
 
     // Grupo de Rutas del Panel de Administración
     $panelGroup = Route::group('/panel', function () {
@@ -119,7 +119,7 @@ if (env('CMS_ENABLED', true)) {
     });
     $panelGroup->middleware([AutenticacionMiddleware::class]);
 
-    // Rutas de Autenticación
+    // Rutas de Autenticación del Panel
     Route::get('/registro', [AuthController::class, 'mostrarFormularioRegistro']);
     Route::post('/registro', [AuthController::class, 'procesarRegistro']);
     Route::get('/login', [AuthController::class, 'mostrarFormularioLogin']);
@@ -132,8 +132,14 @@ if (env('CMS_ENABLED', true)) {
         require_once $permalinks_file;
     }
 
+    // === INICIO RUTAS API ===
+
+    // --- RUTA PÚBLICA DE AUTENTICACIÓN ---
+    Route::post('/auth/token', [\App\controller\Api\ApiAuthController::class, 'token']);
+
+    // --- RUTAS PROTEGIDAS DE API v1 ---
     Route::group('/api/v1', function () {
-        // --- Endpoints de Contenido ---
+        // --- Endpoints de Contenido (Públicos) ---
         Route::get('/content', [\App\controller\Api\V1\ContentApiController::class, 'index']);
         Route::get('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'show']);
 
@@ -152,15 +158,15 @@ if (env('CMS_ENABLED', true)) {
             Route::put('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
             Route::patch('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
             Route::delete('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'destroy']);
-            Route::post('/auth/token', [App\controller\Api\ApiAuthController::class, 'token']);
 
             // --- Endpoints de Opciones ---
             Route::get('/options/{key:.+}', [\App\controller\Api\V1\OptionApiController::class, 'show']);
             Route::post('/options', [\App\controller\Api\V1\OptionApiController::class, 'store']);
+
         })->middleware([\App\middleware\ApiAuthMiddleware::class]);
     });
-} else {
 
+} else {
     Route::get('/', [IndexController::class, 'index']);
 }
 

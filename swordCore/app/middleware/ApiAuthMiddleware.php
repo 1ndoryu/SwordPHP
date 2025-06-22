@@ -1,50 +1,64 @@
 <?php
 
-namespace App\middleware;
+namespace App\controller\Api;
 
-use Webman\MiddlewareInterface;
-use Webman\Http\Response;
-use Webman\Http\Request;
-use App\model\Usuario;
+use App\service\UsuarioService;
+use support\Request;
+use support\Response;
+use support\exception\BusinessException;
 
-class ApiAuthMiddleware implements MiddlewareInterface
+class ApiAuthController extends ApiBaseController
 {
+    private UsuarioService $usuarioService;
+
+    public function __construct(UsuarioService $usuarioService)
+    {
+        $this->usuarioService = $usuarioService;
+    }
+
     /**
-     * Procesa una petición entrante a la API.
+     * Autentica a un usuario y devuelve un token de API y los datos del usuario.
+     * Endpoint: POST /auth/token
      *
      * @param Request $request
-     * @param callable $handler
      * @return Response
      */
-    public function process(Request $request, callable $handler): Response
+    public function token(Request $request): Response
     {
-        $authHeader = $request->header('Authorization');
+        // 1. Obtener las credenciales del cuerpo de la petición.
+        $nombreUsuario = $request->post('nombreusuario');
+        $clave = $request->post('clave');
 
-        if (!$authHeader || !preg_match('/^Bearer\s+(.*)$/i', $authHeader, $matches)) {
-            return new Response(401, ['Content-Type' => 'application/json'], json_encode([
-                'error' => ['code' => 401, 'message' => 'Token de autorización no proporcionado o con formato incorrecto.']
-            ]));
+        // 2. Validar que las credenciales no estén vacías.
+        if (empty($nombreUsuario) || empty($clave)) {
+            return $this->respuestaError('El nombre de usuario y la clave son obligatorios.', 422);
         }
 
-        $token = $matches[1];
-        if (empty($token)) {
-            return new Response(401, ['Content-Type' => 'application/json'], json_encode([
-                'error' => ['code' => 401, 'message' => 'Token de autorización vacío.']
-            ]));
+        try {
+            // 3. Autenticar al usuario y generar un nuevo token.
+            $resultado = $this->usuarioService->autenticarYGenerarToken($nombreUsuario, $clave);
+            
+            // 4. Construir la respuesta según las especificaciones.
+            $respuesta = [
+                'token' => $resultado['token'],
+                'usuario' => [
+                    'id' => $resultado['usuario']->id,
+                    'nombreusuario' => $resultado['usuario']->nombreusuario,
+                    'nombremostrado' => $resultado['usuario']->nombremostrado,
+                    'correoelectronico' => $resultado['usuario']->correoelectronico,
+                    'rol' => $resultado['usuario']->rol,
+                ]
+            ];
+
+            return $this->respuestaExito($respuesta);
+
+        } catch (BusinessException $e) {
+            // Captura errores de negocio (ej. credenciales incorrectas).
+            return $this->respuestaError($e->getMessage(), 401); // 401 Unauthorized
+        } catch (\Throwable $e) {
+            // Captura cualquier otro error inesperado.
+            \support\Log::error('Error en el endpoint de autenticación: ' . $e->getMessage());
+            return $this->respuestaError('Ocurrió un error interno en el servidor.', 500);
         }
-
-        $usuario = Usuario::where('api_token', $token)->first();
-
-        if (!$usuario) {
-            return new Response(401, ['Content-Type' => 'application/json'], json_encode([
-                'error' => ['code' => 401, 'message' => 'No Autorizado: El token es inválido.']
-            ]));
-        }
-
-        // Adjuntamos el usuario autenticado a la petición para que los controladores puedan usarlo.
-        $request->usuario = $usuario;
-
-        // El token es válido, la petición continúa.
-        return $handler($request);
     }
 }

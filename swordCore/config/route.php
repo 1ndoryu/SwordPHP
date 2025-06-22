@@ -135,53 +135,56 @@ if (env('CMS_ENABLED', true)) {
     if (file_exists($permalinks_file)) {
         require_once $permalinks_file;
     }
-
-    // === INICIO RUTAS API ===
-
-    // --- RUTA PÚBLICA DE AUTENTICACIÓN ---
-    Route::post('/auth/token', [ApiAuthController::class, 'token']);
-
-    // --- GRUPO DE RUTAS PROTEGIDAS Y PÚBLICAS DE API v1 ---
-    Route::group('/api/v1', function () {
-
-        // -- Endpoints PÚBLICOS (no requieren token) --
-        Route::get('/content', [ContentApiController::class, 'index']);
-        Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
-        Route::get('/samples/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
-
-        // -- Endpoints PROTEGIDOS (requieren "Bearer Token") --
-        Route::group(function () {
-            // Recurso: /users
-            Route::get('/users/me', [UserApiController::class, 'me']); // Obtener usuario actual
-            Route::get('/users', [UserApiController::class, 'index']);
-            Route::post('/users', [UserApiController::class, 'store']);
-            Route::get('/users/{id:\d+}', [UserApiController::class, 'show']);
-            Route::put('/users/{id:\d+}', [UserApiController::class, 'update']);
-            Route::patch('/users/{id:\d+}', [UserApiController::class, 'update']);
-            Route::delete('/users/{id:\d+}', [UserApiController::class, 'destroy']);
-
-            // Recurso: /content (acciones de escritura)
-            Route::post('/content', [ContentApiController::class, 'store']);
-            Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']);
-            Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']);
-            Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
-
-            // Recurso: /media
-            Route::post('/media', [MediaApiController::class, 'upload']);
-
-            // Recurso: /options (solo admin)
-            Route::get('/options/{key:.+}', [OptionApiController::class, 'show']);
-            Route::post('/options', [OptionApiController::class, 'store']);
-
-            // Endpoints de Interacción
-            Route::post('/samples/{id:\d+}/like', [ContentApiController::class, 'like']);
-            Route::delete('/samples/{id:\d+}/like', [ContentApiController::class, 'unlike']);
-            Route::post('/samples/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
-        })->middleware([ApiAuthMiddleware::class]);
-    });
 } else {
+    // MODO HEADLESS
     Route::get('/', [IndexController::class, 'index']);
 }
+
+// ==========================================================
+// RUTAS DE LA API (Headless - Siempre activas)
+// ==========================================================
+Route::group('/api/v1', function () {
+
+    // --- Endpoints PÚBLICOS (no requieren token) ---
+    Route::post('/auth/token', [ApiAuthController::class, 'token']);
+    Route::get('/content', [ContentApiController::class, 'index']);
+    Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
+    Route::get('/samples/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
+
+    // --- Endpoints PROTEGIDOS (requieren "Bearer Token") ---
+    Route::group(function () {
+        // Recurso: /users
+        Route::get('/users/me', [UserApiController::class, 'me']);
+        Route::get('/users', [UserApiController::class, 'index']);
+        Route::post('/users', [UserApiController::class, 'store']);
+        Route::get('/users/{id:\d+}', [UserApiController::class, 'show']);
+        Route::put('/users/{id:\d+}', [UserApiController::class, 'update']);
+        Route::patch('/users/{id:\d+}', [UserApiController::class, 'update']);
+        Route::delete('/users/{id:\d+}', [UserApiController::class, 'destroy']);
+
+        // Recurso: /content (acciones de escritura)
+        Route::post('/content', [ContentApiController::class, 'store']);
+        Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']);
+        Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']);
+        Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
+
+        // Recurso: /media
+        Route::post('/media', [MediaApiController::class, 'upload']);
+        
+        // Recurso: /samples (acciones especiales)
+        Route::post('/samples/upload', [ContentApiController::class, 'uploadSample']);
+
+        // Recurso: /options (solo admin)
+        Route::get('/options/{key:.+}', [OptionApiController::class, 'show']);
+        Route::post('/options', [OptionApiController::class, 'store']);
+
+        // Endpoints de Interacción
+        Route::post('/samples/{id:\d+}/like', [ContentApiController::class, 'like']);
+        Route::delete('/samples/{id:\d+}/like', [ContentApiController::class, 'unlike']);
+        Route::post('/samples/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
+    })->middleware([ApiAuthMiddleware::class]);
+});
+
 
 // --- Ruta Fallback y cierre (siempre activa) ---
 Route::fallback(fn(Request $request) => response("<h1>404 | No Encontrado</h1><p>La ruta solicitada '{$request->path()}' no fue encontrada.</p>", 404));

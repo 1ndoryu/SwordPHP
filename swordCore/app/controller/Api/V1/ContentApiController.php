@@ -4,20 +4,25 @@ namespace App\controller\Api\V1;
 
 use App\controller\Api\ApiBaseController;
 use App\service\PaginaService;
+use App\service\MediaService; // AÑADIDO
 use App\service\SwordQuery;
 use support\Request;
 use support\Response;
 use Webman\Exception\NotFoundException;
 use Illuminate\Database\Capsule\Manager as DB;
-use App\model\Pagina; // <-- AÑADIDO: Importar el modelo Pagina
+use App\model\Pagina;
+use support\exception\BusinessException; // AÑADIDO
+use Throwable; // AÑADIDO
 
 class ContentApiController extends ApiBaseController
 {
     private PaginaService $paginaService;
+    private MediaService $mediaService; // AÑADIDO
 
-    public function __construct(PaginaService $paginaService)
+    public function __construct(PaginaService $paginaService, MediaService $mediaService) // MODIFICADO
     {
         $this->paginaService = $paginaService;
+        $this->mediaService = $mediaService; // AÑADIDO
     }
 
     public function index(Request $request): Response
@@ -47,8 +52,6 @@ class ContentApiController extends ApiBaseController
 
         $query = new SwordQuery($args);
 
-        // Transformar la colección para asegurar consistencia en las claves (id_autor)
-        // CORREGIDO: Añadido el type hint "Pagina" para el parámetro $item.
         $items = collect($query->entradas)->map(function (Pagina $item) {
             $attributes = $item->toArray();
             if (array_key_exists('idautor', $attributes)) {
@@ -81,7 +84,6 @@ class ContentApiController extends ApiBaseController
                 return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
             }
 
-            // Transformar la salida para asegurar consistencia en las claves (id_autor)
             $attributes = $pagina->toArray();
             if (array_key_exists('idautor', $attributes)) {
                 $attributes['id_autor'] = $attributes['idautor'];
@@ -117,6 +119,95 @@ class ContentApiController extends ApiBaseController
         } catch (\Throwable $e) {
             \support\Log::error('Error en API al crear contenido: ' . $e->getMessage());
             return $this->respuestaError('Ocurrió un error interno al crear el recurso.', 500);
+        }
+    }
+
+    /**
+     * Crea un 'sample' subiendo el archivo y los metadatos en una sola petición.
+     * POST /api/v1/samples/upload
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function uploadSample(Request $request): Response
+    {
+        $usuario = $request->usuario;
+
+        // 1. Validar Permisos
+        if (!in_array($usuario->rol, ['admin', 'artista'])) {
+            return $this->respuestaError('No tienes permiso para subir samples.', 403);
+        }
+
+        // 2. Validar Campos Obligatorios del Formulario
+        $archivo = $request->file('archivoSample');
+        $titulo = $request->post('titulo');
+        $tipoContenido = $request->post('tipocontenido');
+        $estado = $request->post('estado');
+
+        $errors = [];
+        if (null === $archivo) $errors[] = ['field' => 'archivoSample', 'issue' => 'El archivo es obligatorio.'];
+        if (empty($titulo)) $errors[] = ['field' => 'titulo', 'issue' => 'El título es obligatorio.'];
+        if ($tipoContenido !== 'sample') $errors[] = ['field' => 'tipocontenido', 'issue' => 'El tipo de contenido debe ser "sample".'];
+        if (empty($estado)) $errors[] = ['field' => 'estado', 'issue' => 'El estado es obligatorio.'];
+
+        if (!empty($errors)) {
+            return $this->respuestaError('Faltan campos obligatorios o son incorrectos.', 422, $errors);
+        }
+        
+        if (!$archivo->isValid()) {
+            return $this->respuestaError('El archivo subido no es válido.', 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 3. Manejar la subida del archivo
+            $media = $this->mediaService->gestionarSubidaApi($archivo, $usuario->id);
+
+            // 4. Preparar datos para crear el contenido
+            $metadata = [
+                'url_archivo' => $media->url_publica,
+                'media_id' => $media->id,
+            ];
+
+            // Recoger todos los demás campos del post como metadatos opcionales
+            $knownFields = ['titulo', 'subtitulo', 'tipocontenido', 'estado'];
+            foreach ($request->post() as $key => $value) {
+                if (!in_array($key, $knownFields) && !empty($value)) {
+                    $metadata[$key] = $value;
+                }
+            }
+            
+            $contentData = [
+                'titulo' => $titulo,
+                'subtitulo' => $request->post('subtitulo'),
+                'tipocontenido' => $tipoContenido,
+                'estado' => $estado,
+                'idautor' => $usuario->id,
+                'metadata' => $metadata
+            ];
+
+            // 5. Crear la entrada de contenido
+            $nuevaPagina = $this->paginaService->crearPagina($contentData);
+
+            DB::commit();
+            
+            // Transformar la salida para asegurar consistencia en las claves (id_autor)
+            $attributes = $nuevaPagina->toArray();
+            if (array_key_exists('idautor', $attributes)) {
+                $attributes['id_autor'] = $attributes['idautor'];
+                unset($attributes['idautor']);
+            }
+
+            return $this->respuestaExito($attributes, 201);
+
+        } catch (BusinessException $e) {
+            DB::rollBack();
+            return $this->respuestaError($e->getMessage(), 422);
+        } catch (Throwable $e) {
+            DB::rollBack();
+            \support\Log::error('Error en endpoint uploadSample: ' . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+            return $this->respuestaError('Ocurrió un error interno al procesar la petición.', 500);
         }
     }
 
@@ -234,7 +325,6 @@ class ContentApiController extends ApiBaseController
             ]
         ]);
 
-        // CORREGIDO: Añadido el type hint "Pagina" para el parámetro $item.
         $items = collect($query->entradas)->map(function (Pagina $item) {
             $attributes = $item->toArray();
             if (array_key_exists('idautor', $attributes)) {

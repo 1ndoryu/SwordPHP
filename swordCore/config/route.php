@@ -37,8 +37,7 @@ if (env('CMS_ENABLED', true)) {
     class_alias(\App\controller\TemaController::class, 'TemaController');
     class_alias(\App\controller\PluginPageController::class, 'PluginPageController');
     class_alias(\App\controller\AjustesController::class, 'AjustesController');
-    // Se elimina el class_alias para ApiAuthController, no es necesario y causaba el error
-
+    
     // Ruta principal del CMS
     Route::get('/', function (Request $request) {
         $opcionService = container(OpcionService::class);
@@ -140,16 +139,16 @@ if (env('CMS_ENABLED', true)) {
     // --- RUTAS PROTEGIDAS DE API v1 ---
     Route::group('/api/v1', function () {
         // --- Endpoints de Contenido (Públicos) ---
-        Route::get('/content', [\App\controller\Api\V1\ContentApiController::class, 'index']);
-        Route::get('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'show']);
+        Route::get('/content', [ContentApiController::class, 'index']); // CORREGIDO
+        Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']); // CORREGIDO
 
         // --- Endpoints Protegidos ---
         Route::group(function () {
             // Contenido (Crear, Actualizar, Eliminar)
-            Route::post('/content', [\App\controller\Api\V1\ContentApiController::class, 'store']);
-            Route::put('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'update']);
-            Route::patch('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'update']);
-            Route::delete('/content/{id:\d+}', [\App\controller\Api\V1\ContentApiController::class, 'destroy']);
+            Route::post('/content', [ContentApiController::class, 'store']); // CORREGIDO
+            Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']); // CORREGIDO
+            Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']); // CORREGIDO
+            Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']); // CORREGIDO
 
             // --- Endpoints de Usuarios (CRUD Completo) ---
             Route::get('/users', [\App\controller\Api\V1\UserApiController::class, 'index']);

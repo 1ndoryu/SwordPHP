@@ -7,9 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Clase para construir y ejecutar consultas de contenido, similar a WP_Query.
- */
 class SwordQuery
 {
     public ?Collection $entradas = null;
@@ -40,7 +37,7 @@ class SwordQuery
         ];
 
         $parsed = array_merge($defaults, $args);
-        
+
         if (is_string($parsed['include'])) {
             $parsed['include'] = array_map('trim', explode(',', $parsed['include']));
         }
@@ -53,21 +50,26 @@ class SwordQuery
         $query = Pagina::query();
         $this->construirConsulta($query, $argumentos);
 
-        // Utilizamos el paginador de Eloquent para obtener tanto los items como el total.
-        $paginador = $query->paginate(
-            $argumentos['posts_per_page'],
-            ['*'],
-            'page',
-            $argumentos['paged']
-        );
-        
-        $this->entradas = $paginador->getCollection();
-        $this->totalEntradas = $paginador->total();
+        if ($argumentos['posts_per_page'] === -1) {
+            // No paginar, obtener todos los resultados
+            $this->entradas = $query->get();
+            $this->totalEntradas = $this->entradas->count();
+        } else {
+            // Utilizar el paginador de Eloquent para obtener tanto los items como el total.
+            $paginador = $query->paginate(
+                $argumentos['posts_per_page'],
+                ['*'],
+                'page',
+                $argumentos['paged']
+            );
+
+            $this->entradas = $paginador->getCollection();
+            $this->totalEntradas = $paginador->total();
+        }
     }
 
     protected function construirConsulta(Builder $query, array $argumentos): void
     {
-        // Eager Loading (Include)
         if (!empty($argumentos['include'])) {
             $allowedRelations = ['autor'];
             $validRelations = array_intersect($argumentos['include'], $allowedRelations);
@@ -79,49 +81,38 @@ class SwordQuery
         $query->where('estado', $argumentos['post_status']);
         $query->where('tipocontenido', $argumentos['post_type']);
 
-        // Filtrado por autor
         if (!empty($argumentos['id_autor'])) {
             $query->where('idautor', (int)$argumentos['id_autor']);
         }
-        
-        // Búsqueda de texto (simple)
+
         if (!empty($argumentos['q'])) {
             $searchTerm = '%' . $argumentos['q'] . '%';
             $query->where(function (Builder $q) use ($searchTerm) {
                 $q->where('titulo', 'ILIKE', $searchTerm)
-                  ->orWhere('contenido', 'ILIKE', $searchTerm);
+                    ->orWhere('contenido', 'ILIKE', $searchTerm);
             });
         }
 
-        // Filtrado por metadata (meta_query)
         if (!empty($argumentos['meta_query']) && is_array($argumentos['meta_query'])) {
             foreach ($argumentos['meta_query'] as $meta) {
-                 if (isset($meta['key'], $meta['value'])) {
-                    // Para PostgreSQL, se usa whereJsonContains para buscar dentro del JSON
-                    $query->whereJsonContains("metadata->{$meta['key']}", $meta['value']);
-                 }
+                if (isset($meta['key'], $meta['value'])) {
+                    // CORREGIDO: Usar el operador ->> para una comparación de texto en JSONB (PostgreSQL).
+                    // Esto busca el valor de la 'key' en el nivel superior del JSON.
+                    $query->where("metadata->>{$meta['key']}", (string) $meta['value']);
+                }
             }
         }
 
-        // Ordenamiento
         $sortBy = in_array($argumentos['sort_by'], ['created_at', 'updated_at', 'titulo']) ? $argumentos['sort_by'] : 'created_at';
         $order = strtolower($argumentos['order']) === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortBy, $order);
     }
-    
-    /**
-     * Determina si hay más entradas para mostrar en el loop.
-     * @return bool
-     */
+
     public function havePost(): bool
     {
         return $this->entradaActual + 1 < $this->totalEntradas;
     }
 
-    /**
-     * Prepara la siguiente entrada para ser usada en el loop.
-     * @return void
-     */
     public function thePost(): void
     {
         if ($this->havePost()) {

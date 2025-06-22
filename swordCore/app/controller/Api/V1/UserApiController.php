@@ -8,6 +8,7 @@ use support\Request;
 use support\Response;
 use Webman\Exception\NotFoundException;
 use support\exception\BusinessException;
+use Illuminate\Support\Str;
 
 class UserApiController extends ApiBaseController
 {
@@ -19,14 +20,24 @@ class UserApiController extends ApiBaseController
     }
 
     /**
-     * Obtiene la información del usuario autenticado actualmente.
-     * GET /api/v1/users/me
+     * Convierte las claves de un array de snake_case a camelCase.
      */
+    private function mapSnakeToCamel(array $data): array
+    {
+        $mappedData = [];
+        foreach ($data as $key => $value) {
+            $mappedData[Str::camel($key)] = $value;
+        }
+        return $mappedData;
+    }
+
     public function me(Request $request): Response
     {
+        // El modelo se serializará a JSON, los campos ocultos no se mostrarán.
+        // El ApiBaseController lo envolverá en 'data'.
         return $this->respuestaExito($request->usuario);
     }
-    
+
     public function index(Request $request): Response
     {
         if ($request->usuario->rol !== 'admin') {
@@ -36,7 +47,7 @@ class UserApiController extends ApiBaseController
         $paginator = $this->usuarioService->obtenerUsuariosPaginados(
             (int) $request->get('per_page', 15)
         );
-        
+
         $paginatedData = [
             'items' => $paginator->items(),
             'pagination' => [
@@ -53,7 +64,7 @@ class UserApiController extends ApiBaseController
     public function show(Request $request, int $id): Response
     {
         if ($request->usuario->rol !== 'admin' && $request->usuario->id != $id) {
-             return $this->respuestaError('No tienes permiso para ver este usuario.', 403);
+            return $this->respuestaError('No tienes permiso para ver este usuario.', 403);
         }
         try {
             $usuario = $this->usuarioService->obtenerUsuarioPorId($id);
@@ -69,11 +80,11 @@ class UserApiController extends ApiBaseController
             return $this->respuestaError('No tienes permiso para crear usuarios.', 403);
         }
         try {
-            $data = $request->post();
+            // Mapear claves de snake_case (API) a camelCase (Servicio/Modelo)
+            $data = $this->mapSnakeToCamel($request->post());
             $nuevoUsuario = $this->usuarioService->crearUsuario($data);
             return $this->respuestaExito($nuevoUsuario, 201);
         } catch (BusinessException $e) {
-            // CORRECCIÓN: Se elimina la llamada al método inexistente getErrors().
             return $this->respuestaError($e->getMessage(), 422);
         } catch (\Throwable $e) {
             \support\Log::error('Error en API al crear usuario: ' . $e->getMessage());
@@ -89,7 +100,9 @@ class UserApiController extends ApiBaseController
         }
 
         try {
-            $data = $request->post();
+            // Mapear claves de snake_case (API) a camelCase (Servicio/Modelo)
+            $data = $this->mapSnakeToCamel($request->post());
+
             // Un no-admin no puede cambiar el rol de otro usuario ni el suyo propio.
             if ($usuarioAutenticado->rol !== 'admin') {
                 unset($data['rol']);
@@ -99,7 +112,6 @@ class UserApiController extends ApiBaseController
         } catch (NotFoundException $e) {
             return $this->respuestaError('Usuario no encontrado.', 404);
         } catch (BusinessException $e) {
-            // CORRECCIÓN: Se elimina la llamada al método inexistente getErrors().
             return $this->respuestaError($e->getMessage(), 422);
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al actualizar usuario {$id}: " . $e->getMessage());
@@ -114,7 +126,7 @@ class UserApiController extends ApiBaseController
         }
         try {
             $this->usuarioService->eliminarUsuario($id);
-            return new Response(204); // No Content
+            return new Response(204);
         } catch (NotFoundException $e) {
             return $this->respuestaError('Usuario no encontrado.', 404);
         } catch (BusinessException $e) {

@@ -9,6 +9,7 @@ use support\Request;
 use support\Response;
 use Webman\Exception\NotFoundException;
 use Illuminate\Database\Capsule\Manager as DB;
+use App\model\Pagina; // <-- AÑADIDO: Importar el modelo Pagina
 
 class ContentApiController extends ApiBaseController
 {
@@ -29,15 +30,13 @@ class ContentApiController extends ApiBaseController
             'posts_per_page' => $perPage,
             'paged' => $currentPage,
             'post_status' => $request->get('status', 'publicado'),
-            // Nuevos parámetros para capacidades avanzadas
             'include' => $request->get('include', ''),
             'q' => $request->get('q', ''),
             'sort_by' => $request->get('sort_by', 'created_at'),
             'order' => $request->get('order', 'desc'),
             'id_autor' => $request->get('id_autor'),
         ];
-        
-        // Procesar filtros de metadatos (ej: ?metadata[tonalidad]=Cm)
+
         $metadataFilters = $request->get('metadata');
         if (is_array($metadataFilters)) {
             $args['meta_query'] = [];
@@ -47,9 +46,20 @@ class ContentApiController extends ApiBaseController
         }
 
         $query = new SwordQuery($args);
-        
+
+        // Transformar la colección para asegurar consistencia en las claves (id_autor)
+        // CORREGIDO: Añadido el type hint "Pagina" para el parámetro $item.
+        $items = collect($query->entradas)->map(function (Pagina $item) {
+            $attributes = $item->toArray();
+            if (array_key_exists('idautor', $attributes)) {
+                $attributes['id_autor'] = $attributes['idautor'];
+                unset($attributes['idautor']);
+            }
+            return $attributes;
+        });
+
         $paginatedData = [
-            'items' => $query->entradas,
+            'items' => $items,
             'pagination' => [
                 'total_items' => $query->totalEntradas,
                 'total_pages' => ($query->totalEntradas > 0) ? (int) ceil($query->totalEntradas / $perPage) : 0,
@@ -60,18 +70,24 @@ class ContentApiController extends ApiBaseController
 
         return $this->respuestaExito($paginatedData);
     }
-    
+
     public function show(Request $request, int $id): Response
     {
         try {
-            // Aplicar Eager Loading también en la vista individual
             $include = $request->get('include', '');
             $pagina = $this->paginaService->obtenerPaginaPorId($id, is_string($include) ? explode(',', $include) : []);
-            
+
             if ($pagina->estado !== 'publicado') {
-                 return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
+                return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
             }
-            return $this->respuestaExito($pagina);
+
+            // Transformar la salida para asegurar consistencia en las claves (id_autor)
+            $attributes = $pagina->toArray();
+            if (array_key_exists('idautor', $attributes)) {
+                $attributes['id_autor'] = $attributes['idautor'];
+                unset($attributes['idautor']);
+            }
+            return $this->respuestaExito($attributes);
         } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
         }
@@ -112,13 +128,11 @@ class ContentApiController extends ApiBaseController
 
             $isOwner = $pagina->idautor == $usuario->id;
             $isAdmin = $usuario->rol === 'admin';
-            
-            // Lógica de Permisos de la Matriz
+
             $canUpdate = false;
             if ($isAdmin) $canUpdate = true;
             if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canUpdate = true;
-            if ($pagina->tipocontenido === 'comment' && $isOwner) $canUpdate = true; // Cualquier rol puede editar su propio comentario
-            // Añadir más reglas si es necesario...
+            if ($pagina->tipocontenido === 'comment' && $isOwner) $canUpdate = true;
 
             if (!$canUpdate) {
                 return $this->respuestaError('No tienes permiso para actualizar este recurso.', 403);
@@ -147,7 +161,6 @@ class ContentApiController extends ApiBaseController
             $isOwner = $pagina->idautor == $usuario->id;
             $isAdmin = $usuario->rol === 'admin';
 
-            // Lógica de Permisos de la Matriz
             $canDelete = false;
             if ($isAdmin) $canDelete = true;
             if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canDelete = true;
@@ -156,7 +169,7 @@ class ContentApiController extends ApiBaseController
             if (!$canDelete) {
                 return $this->respuestaError('No tienes permiso para eliminar este recurso.', 403);
             }
-            
+
             $this->paginaService->eliminarPagina($id);
             return new Response(204);
         } catch (NotFoundException) {
@@ -167,26 +180,21 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Crea un comentario para un sample.
-     * POST /api/v1/samples/{id}/comments
-     */
     public function storeComment(Request $request, int $sampleId): Response
     {
         try {
-            // Verificar que el sample existe y está publicado
             $sample = $this->paginaService->obtenerPaginaPorId($sampleId);
             if ($sample->tipocontenido !== 'sample' || $sample->estado !== 'publicado') {
                 return $this->respuestaError('El sample no existe o no está disponible.', 404);
             }
-    
+
             $data = $request->post();
             $contenido = $data['contenido'] ?? '';
-    
+
             if (empty($contenido)) {
                 return $this->respuestaError('El contenido del comentario no puede estar vacío.', 422);
             }
-    
+
             $commentData = [
                 'titulo' => 'Comentario en ' . $sample->titulo,
                 'contenido' => $contenido,
@@ -195,10 +203,9 @@ class ContentApiController extends ApiBaseController
                 'idautor' => $request->usuario->id,
                 'metadata' => ['parent_id' => $sampleId]
             ];
-    
+
             $nuevoComentario = $this->paginaService->crearPagina($commentData);
             return $this->respuestaExito($nuevoComentario, 201);
-    
         } catch (NotFoundException) {
             return $this->respuestaError('El sample sobre el que intentas comentar no fue encontrado.', 404);
         } catch (\Throwable $e) {
@@ -207,16 +214,17 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Obtiene los comentarios de un sample.
-     * GET /api/v1/samples/{id}/comments
-     */
     public function getComments(Request $request, int $sampleId): Response
     {
-        // Se asume que los comentarios son un tipo de contenido con parent_id en metadata.
+        $perPage = (int) $request->get('per_page', 15);
+        $currentPage = (int) $request->get('page', 1);
+
         $query = new SwordQuery([
             'post_type' => 'comment',
             'post_status' => 'publicado',
+            'posts_per_page' => $perPage,
+            'paged' => $currentPage,
+            'include' => 'autor',
             'meta_query' => [
                 [
                     'key' => 'parent_id',
@@ -225,23 +233,40 @@ class ContentApiController extends ApiBaseController
                 ]
             ]
         ]);
-        
-        return $this->respuestaExito(['items' => $query->entradas]);
+
+        // CORREGIDO: Añadido el type hint "Pagina" para el parámetro $item.
+        $items = collect($query->entradas)->map(function (Pagina $item) {
+            $attributes = $item->toArray();
+            if (array_key_exists('idautor', $attributes)) {
+                $attributes['id_autor'] = $attributes['idautor'];
+                unset($attributes['idautor']);
+            }
+            return $attributes;
+        });
+
+        $paginatedData = [
+            'items' => $items,
+            'pagination' => [
+                'total_items' => $query->totalEntradas,
+                'total_pages' => ($query->totalEntradas > 0) ? (int) ceil($query->totalEntradas / $perPage) : 0,
+                'current_page' => $currentPage,
+                'per_page' => $perPage,
+            ]
+        ];
+
+        return $this->respuestaExito($paginatedData);
     }
 
-    /**
-     * Da "Me Gusta" a un sample.
-     * POST /api/v1/samples/{id}/like
-     */
     public function like(Request $request, int $sampleId): Response
     {
         $userId = $request->usuario->id;
 
-        // Asumimos que la tabla 'likes' existe: id, user_id, content_id, created_at
-        // Usamos una transacción para evitar condiciones de carrera.
         DB::transaction(function () use ($userId, $sampleId) {
             $exists = DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->exists();
             if (!$exists) {
+                if (!DB::table('paginas')->where('id', $sampleId)->exists()) {
+                    return;
+                }
                 DB::table('likes')->insert([
                     'user_id' => $userId,
                     'content_id' => $sampleId,
@@ -250,18 +275,14 @@ class ContentApiController extends ApiBaseController
                 ]);
             }
         });
-        
-        return new Response(204); // Éxito, sin contenido
+
+        return new Response(204);
     }
 
-    /**
-     * Quita el "Me Gusta" de un sample.
-     * DELETE /api/v1/samples/{id}/like
-     */
     public function unlike(Request $request, int $sampleId): Response
     {
         $userId = $request->usuario->id;
         DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->delete();
-        return new Response(204); // Éxito, sin contenido
+        return new Response(204);
     }
 }

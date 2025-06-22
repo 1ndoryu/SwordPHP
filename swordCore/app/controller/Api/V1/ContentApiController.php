@@ -8,6 +8,7 @@ use App\service\SwordQuery;
 use support\Request;
 use support\Response;
 use Webman\Exception\NotFoundException;
+use Illuminate\Database\Capsule\Manager as DB;
 
 class ContentApiController extends ApiBaseController
 {
@@ -18,10 +19,6 @@ class ContentApiController extends ApiBaseController
         $this->paginaService = $paginaService;
     }
 
-    /**
-     * Lista el contenido según los parámetros de la consulta (type, per_page, page).
-     * GET /api/v1/content
-     */
     public function index(Request $request): Response
     {
         $perPage = (int) $request->get('per_page', 10);
@@ -35,16 +32,12 @@ class ContentApiController extends ApiBaseController
         ];
 
         $query = new SwordQuery($args);
-
-        // Se asume que $query->totalEntradas está disponible. Se calcula el total de páginas manualmente.
-        $totalItems = $query->totalEntradas;
-        $totalPages = ($totalItems > 0) ? (int) ceil($totalItems / $perPage) : 0;
-
+        
         $paginatedData = [
             'items' => $query->entradas,
             'pagination' => [
-                'total_items' => $totalItems,
-                'total_pages' => $totalPages,
+                'total_items' => $query->totalEntradas,
+                'total_pages' => ($query->totalEntradas > 0) ? (int) ceil($query->totalEntradas / $perPage) : 0,
                 'current_page' => $currentPage,
                 'per_page' => $perPage,
             ]
@@ -53,47 +46,38 @@ class ContentApiController extends ApiBaseController
         return $this->respuestaExito($paginatedData);
     }
     
-    // ... Resto de los métodos (show, store, update, destroy) sin cambios
-    
-    /**
-     * Obtiene una única pieza de contenido por su ID.
-     * GET /api/v1/content/{id}
-     */
     public function show(Request $request, int $id): Response
     {
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId($id);
-
-            // En la API pública, solo se debe mostrar contenido con estado 'publicado'.
             if ($pagina->estado !== 'publicado') {
                 return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
             }
-
             return $this->respuestaExito($pagina);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
         }
     }
 
-    /**
-     * Crea una nueva pieza de contenido.
-     * POST /api/v1/content
-     */
     public function store(Request $request): Response
     {
         $data = $request->post();
+        $usuario = $request->usuario;
 
         if (empty($data['titulo']) || empty($data['tipocontenido'])) {
-            return $this->respuestaError('Los campos "titulo" y "tipocontenido" son obligatorios.', 422); // 422 Unprocessable Entity
+            return $this->respuestaError('Los campos "titulo" y "tipocontenido" son obligatorios.', 422);
         }
-        
-        // El middleware ApiAuthMiddleware ya ha autenticado al usuario y lo ha adjuntado a la request.
-        $data['idautor'] = $request->usuario->id;
-        $data['estado'] = $data['estado'] ?? 'borrador'; // 'borrador' como estado por defecto.
+
+        if ($data['tipocontenido'] === 'sample' && !in_array($usuario->rol, ['admin', 'artista'])) {
+            return $this->respuestaError('No tienes permiso para crear samples.', 403);
+        }
+
+        $data['idautor'] = $usuario->id;
+        $data['estado'] = $data['estado'] ?? 'borrador';
 
         try {
             $nuevaPagina = $this->paginaService->crearPagina($data);
-            return $this->respuestaExito($nuevaPagina, 201); // 201 Created
+            return $this->respuestaExito($nuevaPagina, 201);
         } catch (\support\exception\BusinessException $e) {
             return $this->respuestaError($e->getMessage(), 422);
         } catch (\Throwable $e) {
@@ -102,28 +86,31 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Actualiza una pieza de contenido existente.
-     * PUT/PATCH /api/v1/content/{id}
-     */
     public function update(Request $request, int $id): Response
     {
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId($id);
-            $data = $request->post();
+            $usuario = $request->usuario;
 
-            // Aquí se podría añadir una capa de permisos, por ejemplo:
-            // if ($pagina->idautor !== $request->usuario->id && $request->usuario->rol !== 'admin') {
-            //     return $this->respuestaError('No tienes permiso para editar este recurso.', 403);
-            // }
-
-            $this->paginaService->actualizarPagina($pagina, $data);
+            $isOwner = $pagina->idautor == $usuario->id;
+            $isAdmin = $usuario->rol === 'admin';
             
-            // Refrescamos el modelo para devolver el objeto completo y actualizado.
+            // Lógica de Permisos de la Matriz
+            $canUpdate = false;
+            if ($isAdmin) $canUpdate = true;
+            if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canUpdate = true;
+            if ($pagina->tipocontenido === 'comment' && $isOwner) $canUpdate = true; // Cualquier rol puede editar su propio comentario
+            // Añadir más reglas si es necesario...
+
+            if (!$canUpdate) {
+                return $this->respuestaError('No tienes permiso para actualizar este recurso.', 403);
+            }
+
+            $this->paginaService->actualizarPagina($pagina, $request->post());
             $paginaActualizada = $this->paginaService->obtenerPaginaPorId($id);
 
             return $this->respuestaExito($paginaActualizada);
-        } catch (NotFoundException $e) {
+        } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
         } catch (\support\exception\BusinessException $e) {
             return $this->respuestaError($e->getMessage(), 422);
@@ -133,25 +120,130 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Elimina una pieza de contenido.
-     * DELETE /api/v1/content/{id}
-     */
     public function destroy(Request $request, int $id): Response
     {
         try {
-            // Se obtiene la página para asegurar que existe antes de intentar borrarla.
-            // Esto también permite añadir una capa de permisos si es necesario.
-            $this->paginaService->obtenerPaginaPorId($id);
+            $pagina = $this->paginaService->obtenerPaginaPorId($id);
+            $usuario = $request->usuario;
 
+            $isOwner = $pagina->idautor == $usuario->id;
+            $isAdmin = $usuario->rol === 'admin';
+
+            // Lógica de Permisos de la Matriz
+            $canDelete = false;
+            if ($isAdmin) $canDelete = true;
+            if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canDelete = true;
+            if ($pagina->tipocontenido === 'comment' && $isOwner) $canDelete = true;
+
+            if (!$canDelete) {
+                return $this->respuestaError('No tienes permiso para eliminar este recurso.', 403);
+            }
+            
             $this->paginaService->eliminarPagina($id);
-
-            return new Response(204); // 204 No Content: Éxito, sin cuerpo en la respuesta.
-        } catch (NotFoundException $e) {
+            return new Response(204);
+        } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al eliminar contenido {$id}: " . $e->getMessage());
             return $this->respuestaError('Ocurrió un error interno al eliminar el recurso.', 500);
         }
+    }
+
+    /**
+     * Crea un comentario para un sample.
+     * POST /api/v1/samples/{id}/comments
+     */
+    public function storeComment(Request $request, int $sampleId): Response
+    {
+        try {
+            // Verificar que el sample existe y está publicado
+            $sample = $this->paginaService->obtenerPaginaPorId($sampleId);
+            if ($sample->tipocontenido !== 'sample' || $sample->estado !== 'publicado') {
+                return $this->respuestaError('El sample no existe o no está disponible.', 404);
+            }
+    
+            $data = $request->post();
+            $contenido = $data['contenido'] ?? '';
+    
+            if (empty($contenido)) {
+                return $this->respuestaError('El contenido del comentario no puede estar vacío.', 422);
+            }
+    
+            $commentData = [
+                'titulo' => 'Comentario en ' . $sample->titulo,
+                'contenido' => $contenido,
+                'tipocontenido' => 'comment',
+                'estado' => 'publicado',
+                'idautor' => $request->usuario->id,
+                'metadata' => ['parent_id' => $sampleId]
+            ];
+    
+            $nuevoComentario = $this->paginaService->crearPagina($commentData);
+            return $this->respuestaExito($nuevoComentario, 201);
+    
+        } catch (NotFoundException) {
+            return $this->respuestaError('El sample sobre el que intentas comentar no fue encontrado.', 404);
+        } catch (\Throwable $e) {
+            \support\Log::error("Error creando comentario para sample {$sampleId}: " . $e->getMessage());
+            return $this->respuestaError('Error interno al guardar el comentario.', 500);
+        }
+    }
+
+    /**
+     * Obtiene los comentarios de un sample.
+     * GET /api/v1/samples/{id}/comments
+     */
+    public function getComments(Request $request, int $sampleId): Response
+    {
+        // Se asume que los comentarios son un tipo de contenido con parent_id en metadata.
+        $query = new SwordQuery([
+            'post_type' => 'comment',
+            'post_status' => 'publicado',
+            'meta_query' => [
+                [
+                    'key' => 'parent_id',
+                    'value' => $sampleId,
+                    'compare' => '='
+                ]
+            ]
+        ]);
+        
+        return $this->respuestaExito(['items' => $query->entradas]);
+    }
+
+    /**
+     * Da "Me Gusta" a un sample.
+     * POST /api/v1/samples/{id}/like
+     */
+    public function like(Request $request, int $sampleId): Response
+    {
+        $userId = $request->usuario->id;
+
+        // Asumimos que la tabla 'likes' existe: id, user_id, content_id, created_at
+        // Usamos una transacción para evitar condiciones de carrera.
+        DB::transaction(function () use ($userId, $sampleId) {
+            $exists = DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->exists();
+            if (!$exists) {
+                DB::table('likes')->insert([
+                    'user_id' => $userId,
+                    'content_id' => $sampleId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        });
+        
+        return new Response(204); // Éxito, sin contenido
+    }
+
+    /**
+     * Quita el "Me Gusta" de un sample.
+     * DELETE /api/v1/samples/{id}/like
+     */
+    public function unlike(Request $request, int $sampleId): Response
+    {
+        $userId = $request->usuario->id;
+        DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->delete();
+        return new Response(204); // Éxito, sin contenido
     }
 }

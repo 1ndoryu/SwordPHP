@@ -15,29 +15,27 @@ class OptionApiController extends ApiBaseController
     {
         $this->opcionService = $opcionService;
     }
-
-    /**
-     * Obtiene el valor de una opción específica.
-     * GET /api/v1/options/{key}
-     */
+    
     public function show(Request $request, string $key): Response
     {
-        // Se comprueba si la opción existe para devolver un 404 si no es así.
+        if ($request->usuario->rol !== 'admin') {
+            return $this->respuestaError('Acceso denegado. Se requiere rol de administrador.', 403);
+        }
+
         if (!\App\model\Opcion::where('opcion_nombre', $key)->exists()) {
             return $this->respuestaError('Opción no encontrada.', 404);
         }
 
         $value = $this->opcionService->getOption($key);
-
         return $this->respuestaExito(['key' => $key, 'value' => $value]);
     }
 
-    /**
-     * Crea o actualiza una opción.
-     * POST /api/v1/options
-     */
     public function store(Request $request): Response
     {
+        if ($request->usuario->rol !== 'admin') {
+            return $this->respuestaError('Acceso denegado. Se requiere rol de administrador.', 403);
+        }
+
         $data = $request->post();
         $key = $data['key'] ?? null;
         $value = array_key_exists('value', $data) ? $data['value'] : null;

@@ -19,16 +19,24 @@ class UserApiController extends ApiBaseController
     }
 
     /**
-     * Devuelve una lista paginada de usuarios.
-     * GET /api/v1/users
+     * Obtiene la información del usuario autenticado actualmente.
+     * GET /api/v1/users/me
      */
+    public function me(Request $request): Response
+    {
+        return $this->respuestaExito($request->usuario);
+    }
+    
     public function index(Request $request): Response
     {
+        if ($request->usuario->rol !== 'admin') {
+            return $this->respuestaError('No tienes permiso para listar usuarios.', 403);
+        }
+
         $paginator = $this->usuarioService->obtenerUsuariosPaginados(
             (int) $request->get('per_page', 15)
         );
-
-        // Transformamos la salida del paginador de Laravel a nuestro formato estándar de API.
+        
         $paginatedData = [
             'items' => $paginator->items(),
             'pagination' => [
@@ -42,12 +50,11 @@ class UserApiController extends ApiBaseController
         return $this->respuestaExito($paginatedData);
     }
 
-    /**
-     * Obtiene la información de un único usuario.
-     * GET /api/v1/users/{id}
-     */
     public function show(Request $request, int $id): Response
     {
+        if ($request->usuario->rol !== 'admin' && $request->usuario->id != $id) {
+             return $this->respuestaError('No tienes permiso para ver este usuario.', 403);
+        }
         try {
             $usuario = $this->usuarioService->obtenerUsuarioPorId($id);
             return $this->respuestaExito($usuario);
@@ -56,17 +63,17 @@ class UserApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Crea un nuevo usuario.
-     * POST /api/v1/users
-     */
     public function store(Request $request): Response
     {
+        if ($request->usuario->rol !== 'admin') {
+            return $this->respuestaError('No tienes permiso para crear usuarios.', 403);
+        }
         try {
             $data = $request->post();
             $nuevoUsuario = $this->usuarioService->crearUsuario($data);
             return $this->respuestaExito($nuevoUsuario, 201);
         } catch (BusinessException $e) {
+            // CORRECCIÓN: Se elimina la llamada al método inexistente getErrors().
             return $this->respuestaError($e->getMessage(), 422);
         } catch (\Throwable $e) {
             \support\Log::error('Error en API al crear usuario: ' . $e->getMessage());
@@ -74,19 +81,25 @@ class UserApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Actualiza un usuario existente.
-     * PUT /api/v1/users/{id}
-     */
     public function update(Request $request, int $id): Response
     {
+        $usuarioAutenticado = $request->usuario;
+        if ($usuarioAutenticado->id != $id && $usuarioAutenticado->rol !== 'admin') {
+            return $this->respuestaError('No tienes permiso para actualizar este usuario.', 403);
+        }
+
         try {
             $data = $request->post();
+            // Un no-admin no puede cambiar el rol de otro usuario ni el suyo propio.
+            if ($usuarioAutenticado->rol !== 'admin') {
+                unset($data['rol']);
+            }
             $usuarioActualizado = $this->usuarioService->actualizarUsuario($id, $data);
             return $this->respuestaExito($usuarioActualizado);
         } catch (NotFoundException $e) {
             return $this->respuestaError('Usuario no encontrado.', 404);
         } catch (BusinessException $e) {
+            // CORRECCIÓN: Se elimina la llamada al método inexistente getErrors().
             return $this->respuestaError($e->getMessage(), 422);
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al actualizar usuario {$id}: " . $e->getMessage());
@@ -94,20 +107,18 @@ class UserApiController extends ApiBaseController
         }
     }
 
-    /**
-     * Elimina un usuario.
-     * DELETE /api/v1/users/{id}
-     */
     public function destroy(Request $request, int $id): Response
     {
+        if ($request->usuario->rol !== 'admin') {
+            return $this->respuestaError('No tienes permiso para eliminar usuarios.', 403);
+        }
         try {
             $this->usuarioService->eliminarUsuario($id);
             return new Response(204); // No Content
         } catch (NotFoundException $e) {
             return $this->respuestaError('Usuario no encontrado.', 404);
         } catch (BusinessException $e) {
-            // Captura errores de negocio como "no puedes borrarte a ti mismo".
-            return $this->respuestaError($e->getMessage(), 403); // 403 Forbidden
+            return $this->respuestaError($e->getMessage(), 403);
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al eliminar usuario {$id}: " . $e->getMessage());
             return $this->respuestaError('Ocurrió un error interno.', 500);

@@ -4,7 +4,12 @@ use Webman\Route;
 use support\Request;
 use App\controller\InstallerController;
 use App\controller\IndexController;
+use App\controller\Api\V1\ApiAuthController;
 use App\controller\Api\V1\ContentApiController;
+use App\controller\Api\V1\MediaApiController;
+use App\controller\Api\V1\OptionApiController;
+use App\controller\Api\V1\UserApiController;
+use App\middleware\ApiAuthMiddleware;
 
 // --- Verificación del Instalador (se ejecuta siempre) ---
 if (!file_exists(runtime_path('installed.lock'))) {
@@ -37,7 +42,7 @@ if (env('CMS_ENABLED', true)) {
     class_alias(\App\controller\TemaController::class, 'TemaController');
     class_alias(\App\controller\PluginPageController::class, 'PluginPageController');
     class_alias(\App\controller\AjustesController::class, 'AjustesController');
-    
+
     // Ruta principal del CMS
     Route::get('/', function (Request $request) {
         $opcionService = container(OpcionService::class);
@@ -134,38 +139,46 @@ if (env('CMS_ENABLED', true)) {
     // === INICIO RUTAS API ===
 
     // --- RUTA PÚBLICA DE AUTENTICACIÓN ---
-    // CORRECCIÓN: Se añade el namespace correcto 'V1' al controlador.
-    Route::post('/auth/token', [\App\controller\Api\V1\ApiAuthController::class, 'token']);
+    Route::post('/auth/token', [ApiAuthController::class, 'token']);
 
-    // --- RUTAS PROTEGIDAS DE API v1 ---
+    // --- GRUPO DE RUTAS PROTEGIDAS Y PÚBLICAS DE API v1 ---
     Route::group('/api/v1', function () {
-        // --- Endpoints de Contenido (Públicos) ---
+
+        // -- Endpoints PÚBLICOS (no requieren token) --
         Route::get('/content', [ContentApiController::class, 'index']);
         Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
+        Route::get('/samples/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
 
-        // --- Endpoints Protegidos ---
+        // -- Endpoints PROTEGIDOS (requieren "Bearer Token") --
         Route::group(function () {
-            // Contenido (Crear, Actualizar, Eliminar)
+            // Recurso: /users
+            Route::get('/users/me', [UserApiController::class, 'me']); // Obtener usuario actual
+            Route::get('/users', [UserApiController::class, 'index']);
+            Route::post('/users', [UserApiController::class, 'store']);
+            Route::get('/users/{id:\d+}', [UserApiController::class, 'show']);
+            Route::put('/users/{id:\d+}', [UserApiController::class, 'update']);
+            Route::patch('/users/{id:\d+}', [UserApiController::class, 'update']);
+            Route::delete('/users/{id:\d+}', [UserApiController::class, 'destroy']);
+
+            // Recurso: /content (acciones de escritura)
             Route::post('/content', [ContentApiController::class, 'store']);
             Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']);
             Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']);
             Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
 
-            // --- Endpoints de Usuarios (CRUD Completo) ---
-            Route::get('/users', [\App\controller\Api\V1\UserApiController::class, 'index']);
-            Route::post('/users', [\App\controller\Api\V1\UserApiController::class, 'store']);
-            Route::get('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'show']);
-            Route::put('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
-            Route::patch('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'update']);
-            Route::delete('/users/{id:\d+}', [\App\controller\Api\V1\UserApiController::class, 'destroy']);
+            // Recurso: /media
+            Route::post('/media', [MediaApiController::class, 'upload']);
 
-            // --- Endpoints de Opciones ---
-            Route::get('/options/{key:.+}', [\App\controller\Api\V1\OptionApiController::class, 'show']);
-            Route::post('/options', [\App\controller\Api\V1\OptionApiController::class, 'store']);
+            // Recurso: /options (solo admin)
+            Route::get('/options/{key:.+}', [OptionApiController::class, 'show']);
+            Route::post('/options', [OptionApiController::class, 'store']);
 
-        })->middleware([\App\middleware\ApiAuthMiddleware::class]);
+            // Endpoints de Interacción
+            Route::post('/samples/{id:\d+}/like', [ContentApiController::class, 'like']);
+            Route::delete('/samples/{id:\d+}/like', [ContentApiController::class, 'unlike']);
+            Route::post('/samples/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
+        })->middleware([ApiAuthMiddleware::class]);
     });
-
 } else {
     Route::get('/', [IndexController::class, 'index']);
 }

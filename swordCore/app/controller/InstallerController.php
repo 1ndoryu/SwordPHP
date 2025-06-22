@@ -227,6 +227,19 @@ class InstallerController
       created_at TIMESTAMP WITHOUT TIME ZONE,
       updated_at TIMESTAMP WITHOUT TIME ZONE
     );
+    
+    -- NUEVA TABLA: LIKES
+    CREATE TABLE IF NOT EXISTS likes (
+        id BIGSERIAL PRIMARY KEY,
+        user_id BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+        content_id BIGINT NOT NULL REFERENCES paginas(id) ON DELETE CASCADE,
+        created_at TIMESTAMP WITHOUT TIME ZONE,
+        updated_at TIMESTAMP WITHOUT TIME ZONE,
+        UNIQUE (user_id, content_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes(user_id);
+    CREATE INDEX IF NOT EXISTS idx_likes_content_id ON likes(content_id);
+
     SQL;
     }
 }

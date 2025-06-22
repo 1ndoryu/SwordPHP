@@ -26,13 +26,16 @@ class ApiAuthController extends ApiBaseController
      */
     public function token(Request $request): Response
     {
-        // 1. Obtener las credenciales del cuerpo de la petición.
-        $nombreUsuario = $request->post('nombreusuario');
+        // 1. Obtener las credenciales del cuerpo de la petición (CORREGIDO a snake_case).
+        $nombreUsuario = $request->post('nombre_usuario');
         $clave = $request->post('clave');
 
         // 2. Validar que las credenciales no estén vacías.
         if (empty($nombreUsuario) || empty($clave)) {
-            return $this->respuestaError('El nombre de usuario y la clave son obligatorios.', 422); // 422 Unprocessable Entity
+            return $this->respuestaError('El nombre de usuario y la clave son obligatorios.', 422, [
+                ['field' => 'nombre_usuario', 'issue' => 'Este campo es obligatorio.'],
+                ['field' => 'clave', 'issue' => 'Este campo es obligatorio.']
+            ]);
         }
 
         try {
@@ -44,9 +47,9 @@ class ApiAuthController extends ApiBaseController
                 'token' => $resultado['token'],
                 'usuario' => [
                     'id' => $resultado['usuario']->id,
-                    'nombreusuario' => $resultado['usuario']->nombreusuario,
-                    'nombremostrado' => $resultado['usuario']->nombremostrado,
-                    'correoelectronico' => $resultado['usuario']->correoelectronico,
+                    'nombre_usuario' => $resultado['usuario']->nombreusuario, // Mantenemos snake_case en respuesta
+                    'nombre_mostrado' => $resultado['usuario']->nombremostrado,
+                    'correo_electronico' => $resultado['usuario']->correoelectronico,
                     'rol' => $resultado['usuario']->rol,
                 ]
             ];

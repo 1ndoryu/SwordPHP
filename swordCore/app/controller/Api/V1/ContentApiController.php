@@ -28,8 +28,23 @@ class ContentApiController extends ApiBaseController
             'post_type' => $request->get('type', 'pagina'),
             'posts_per_page' => $perPage,
             'paged' => $currentPage,
-            'post_status' => $request->get('status', 'publicado')
+            'post_status' => $request->get('status', 'publicado'),
+            // Nuevos parámetros para capacidades avanzadas
+            'include' => $request->get('include', ''),
+            'q' => $request->get('q', ''),
+            'sort_by' => $request->get('sort_by', 'created_at'),
+            'order' => $request->get('order', 'desc'),
+            'id_autor' => $request->get('id_autor'),
         ];
+        
+        // Procesar filtros de metadatos (ej: ?metadata[tonalidad]=Cm)
+        $metadataFilters = $request->get('metadata');
+        if (is_array($metadataFilters)) {
+            $args['meta_query'] = [];
+            foreach ($metadataFilters as $key => $value) {
+                $args['meta_query'][] = ['key' => $key, 'value' => $value, 'compare' => '='];
+            }
+        }
 
         $query = new SwordQuery($args);
         
@@ -49,9 +64,12 @@ class ContentApiController extends ApiBaseController
     public function show(Request $request, int $id): Response
     {
         try {
-            $pagina = $this->paginaService->obtenerPaginaPorId($id);
+            // Aplicar Eager Loading también en la vista individual
+            $include = $request->get('include', '');
+            $pagina = $this->paginaService->obtenerPaginaPorId($id, is_string($include) ? explode(',', $include) : []);
+            
             if ($pagina->estado !== 'publicado') {
-                return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
+                 return $this->respuestaError('Recurso no encontrado o no disponible.', 404);
             }
             return $this->respuestaExito($pagina);
         } catch (NotFoundException) {

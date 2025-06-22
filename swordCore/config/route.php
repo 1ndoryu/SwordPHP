@@ -37,6 +37,7 @@ if (env('CMS_ENABLED', true)) {
     class_alias(\App\controller\TemaController::class, 'TemaController');
     class_alias(\App\controller\PluginPageController::class, 'PluginPageController');
     class_alias(\App\controller\AjustesController::class, 'AjustesController');
+    class_alias(\App\controller\Api\ApiAuthController::class, 'ApiAuthController');
 
     // Ruta principal del CMS
     Route::get('/', function (Request $request) {

@@ -29,7 +29,7 @@ definePostType(
 );
 
 definePostType(
-    'samples', 
+    'sample', 
     [
         'labels' => [
             'name'               => 'Samples',

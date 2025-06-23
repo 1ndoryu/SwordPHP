@@ -1,17 +1,17 @@
 # Usar una imagen base de PHP (ajusta la versión si usas otra)
-FROM php:8.2-cli
+FROM php:8.4-cli
 
 # --- INICIO DE LA CORRECCIÓN ---
-# 1. Instalar dependencias del sistema: git y unzip, que son necesarios para Composer.
-#    'apt-get update' actualiza la lista de paquetes disponibles.
-#    '-y' responde "sí" automáticamente a cualquier pregunta.
-#    'rm -rf /var/lib/apt/lists/*' limpia la caché para mantener la imagen pequeña.
+# 1. Instalar dependencias del sistema:
+#    - git y unzip (para composer)
+#    - libzip-dev (dependencia para compilar la extensión 'zip' de PHP) <-- ¡ESTA ES LA LÍNEA NUEVA!
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
+    libzip-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Instalar extensiones de PHP (añadimos 'zip' que también ayuda a Composer).
+# 2. Instalar extensiones de PHP (ahora 'zip' encontrará libzip-dev y compilará bien)
 RUN docker-php-ext-install pcntl sockets pdo pdo_mysql zip
 # --- FIN DE LA CORRECCIÓN ---
 

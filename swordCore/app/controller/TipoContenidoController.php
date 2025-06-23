@@ -100,13 +100,13 @@ class TipoContenidoController
 
             // 2. Preparar todos los datos para la creación
             $datosParaCrear = [
-                'titulo'        => $request->post('titulo'),
-                'contenido'     => $request->post('contenido', ''),
-                'slug'          => $this->generarSlug($request->post('titulo')),
+                'titulo'    => $request->post('titulo'),
+                'contenido'  => $request->post('contenido', ''),
+                'slug'     => $this->generarSlug($request->post('titulo')),
                 'tipocontenido' => $slug,
-                'idautor'       => idCurrentUser(),
-                'estado'        => $request->post('estado', 'borrador'),
-                'metadata'      => $metadata, // Incluir el array de metadatos
+                'idautor'   => idCurrentUser(),
+                'estado'    => $request->post('estado', 'borrador'),
+                'metadata'   => $metadata, // Incluir el array de metadatos
             ];
 
             // 3. Crear la entrada en una sola operación
@@ -150,43 +150,39 @@ class TipoContenidoController
         try {
             $pagina = Pagina::where('id', $id)->where('tipocontenido', $slug)->firstOrFail();
 
-            // Obtenemos los metadatos existentes para no perderlos
-            $metadata = $pagina->metadata ?? [];
+            // Inicia un nuevo array para los metadatos.
+            $metadata = [];
 
-            // Procesamos los metadatos personalizados del formulario (gestor-metadatos.php)
+            // Procesa los metadatos personalizados del formulario.
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
                 foreach ($metadatosFormulario as $meta) {
-                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                        $clave = trim($meta['clave']);
-                        $metadata[$clave] = $meta['valor'] ?? '';
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '' && !str_starts_with(trim($meta['clave']), '_')) {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
             }
 
-            // === INICIO: LÓGICA IMAGEN DESTACADA ===
+            // Procesa la imagen destacada.
             $idImagenDestacada = $request->post('_imagen_destacada_id');
             if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
                 $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
-            } else {
-                // Si el input llega vacío, se elimina la meta
-                unset($metadata['_imagen_destacada_id']);
             }
-            // === FIN: LÓGICA IMAGEN DESTACADA ===
+
+            // Preserva metadatos internos no gestionados por el formulario.
+            if ($slugGestionado = $pagina->obtenerMeta('_managed_source_slug')) {
+                $metadata['_managed_source_slug'] = $slugGestionado;
+            }
 
             // Asignar datos principales
             $pagina->titulo = $request->post('titulo');
             $pagina->contenido = $request->post('contenido', '');
             $pagina->estado = $request->post('estado', 'borrador');
-
-            // Generar y asignar slug único
             $baseParaSlug = $request->post('slug', $request->post('titulo'));
             $pagina->slug = $this->generarSlug($baseParaSlug, $id);
 
-            // Asignar el array completo de metadatos a la propiedad del modelo
+            // Asigna el nuevo conjunto de metadatos.
             $pagina->metadata = $metadata;
-
-            // Guardar todos los cambios en una sola operación
             $pagina->save();
 
             session()->set('success', 'Entrada actualizada con éxito.');

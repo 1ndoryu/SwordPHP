@@ -13,9 +13,9 @@ use Throwable;
 use Webman\Exception\NotFoundException;
 
 /**
- * Class PaginaController
- * @package App\controller
- */
+ * Class PaginaController
+ * @package App\controller
+ */
 class PaginaController
 {
     /**
@@ -211,43 +211,36 @@ class PaginaController
         try {
             $pagina = $this->paginaService->obtenerPaginaPorId((int)$id);
 
-            // Obtenemos los metadatos existentes para no perderlos
-            $metadata = $pagina->metadata ?? [];
+            // Inicia un nuevo array para los metadatos, esto asegura que los metas eliminados en la UI desaparezcan.
+            $metadata = [];
 
-            // Procesamos los metadatos del formulario (gestor-metadatos.php)
+            // Procesa los metadatos personalizados enviados desde el gestor de metadatos.
             $metadatosFormulario = $request->post('meta', []);
             if (is_array($metadatosFormulario)) {
-                // Sincronizamos los metas personalizados, borrando los que ya no están
-                $clavesEnviadas = [];
                 foreach ($metadatosFormulario as $meta) {
-                    if (isset($meta['clave']) && trim($meta['clave']) !== '') {
-                        $clave = trim($meta['clave']);
-                        $metadata[$clave] = $meta['valor'] ?? '';
-                        $clavesEnviadas[] = $clave;
+                    if (isset($meta['clave']) && trim($meta['clave']) !== '' && !str_starts_with(trim($meta['clave']), '_')) {
+                        $metadata[trim($meta['clave'])] = $meta['valor'] ?? '';
                     }
                 }
-                // Lógica para eliminar metas que se borraron desde la UI (opcional pero recomendado)
-                // Esto requiere un reajuste en cómo se manejan los metas, por simplicidad lo omitimos aquí.
-                // La forma más simple es que el gestor de metas siempre envíe todas las claves.
             }
 
+            // Procesa y añade los metadatos de componentes específicos (plantilla, imagen, etc.).
             $plantillaSeleccionada = $request->post('_plantilla_pagina');
             if (!empty($plantillaSeleccionada)) {
                 $metadata['_plantilla_pagina'] = $plantillaSeleccionada;
-            } else {
-                unset($metadata['_plantilla_pagina']); // Quitar si se des-selecciona
             }
 
-            // === INICIO: LÓGICA IMAGEN DESTACADA ===
             $idImagenDestacada = $request->post('_imagen_destacada_id');
             if (!empty($idImagenDestacada) && is_numeric($idImagenDestacada)) {
                 $metadata['_imagen_destacada_id'] = (int)$idImagenDestacada;
-            } else {
-                // Si el input llega vacío, se elimina la meta
-                unset($metadata['_imagen_destacada_id']);
             }
-            // === FIN: LÓGICA IMAGEN DESTACADA ===
 
+            // Preserva metadatos internos que no son gestionados por el formulario.
+            if ($slugGestionado = $pagina->obtenerMeta('_managed_source_slug')) {
+                $metadata['_managed_source_slug'] = $slugGestionado;
+            }
+
+            // Prepara los datos principales y los metadatos reconstruidos para la actualización.
             $datosPrincipales = $request->except(['meta', '_csrf', '_plantilla_pagina', '_imagen_destacada_id']);
             $datosPrincipales['metadata'] = $metadata;
 
@@ -283,9 +276,9 @@ class PaginaController
 
             // Preparamos los datos desde la definición
             $datosParaRestaurar = [
-                'titulo'    => $definicion['titulo'] ?? 'Sin Título',
+                'titulo'  => $definicion['titulo'] ?? 'Sin Título',
                 'contenido' => $definicion['contenido'] ?? '',
-                'metadata'  => $pagina->metadata ?? [], // Mantenemos los metadatos existentes...
+                'metadata' => $pagina->metadata ?? [], // Mantenemos los metadatos existentes...
             ];
 
             // ...pero sobreescribimos la plantilla si está definida.

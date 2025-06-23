@@ -31,4 +31,4 @@ RUN composer install --working-dir=./swordCore --no-dev --optimize-autoloader --
 EXPOSE 8787
 
 # El comando para iniciar la aplicación, especificando la ruta a start.php
-CMD ["php", "swordCore/start.php start"]
+CMD ["php", "swordCore/start.php", "start"]

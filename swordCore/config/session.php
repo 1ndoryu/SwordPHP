@@ -37,10 +37,10 @@ return [
         // Ahora esta sección lee las variables de entorno de Coolify
         'redis' => [
             'host'     => env('REDIS_HOST', '127.0.0.1'),
-            'port'     => env('REDIS_PORT', 6379),
-            'auth'     => env('REDIS_PASSWORD', null), // 'auth' es para la contraseña
+            'port'     => (int) env('REDIS_PORT', 6379), // <--- ¡AÑADIR (int) AQUÍ!
+            'auth'     => env('REDIS_PASSWORD', null),
             'timeout'  => 2,
-            'database' => 0, // Usamos la base de datos 0 por defecto
+            'database' => 0,
             'prefix'   => 'redis_session_',
         ],
         // --- FIN DE LA CORRECCIÓN ---

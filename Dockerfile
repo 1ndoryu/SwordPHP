@@ -1,19 +1,20 @@
-# Usar una imagen base de PHP (ajusta la versión si usas otra)
-FROM php:8.4-cli
+# Usar una imagen base de PHP
+FROM php:8.2-cli
 
-# --- INICIO DE LA CORRECCIÓN ---
 # 1. Instalar dependencias del sistema:
 #    - git y unzip (para composer)
-#    - libzip-dev (dependencia para compilar la extensión 'zip' de PHP) <-- ¡ESTA ES LA LÍNEA NUEVA!
+#    - libzip-dev (para la extensión 'zip')
+#    - libpq-dev (para la extensión de PostgreSQL) <-- ¡AÑADIDO!
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libzip-dev \
+    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Instalar extensiones de PHP (ahora 'zip' encontrará libzip-dev y compilará bien)
-RUN docker-php-ext-install pcntl sockets pdo pdo_mysql zip
-# --- FIN DE LA CORRECCIÓN ---
+# 2. Instalar extensiones de PHP
+#    Añadimos pdo_pgsql para PostgreSQL <-- ¡AÑADIDO!
+RUN docker-php-ext-install pcntl sockets pdo pdo_mysql pdo_pgsql zip
 
 # Instalar Composer para gestionar dependencias
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -21,7 +22,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Establecer el directorio de trabajo principal del contenedor
 WORKDIR /usr/src/app
 
-# Copiar TODO el proyecto (swordCore y swordContent) al contenedor
+# Copiar TODO el proyecto al contenedor
 COPY . .
 
 # Ejecutar composer install DENTRO de la carpeta swordCore
@@ -30,5 +31,5 @@ RUN composer install --working-dir=./swordCore --no-dev --optimize-autoloader --
 # Exponer el puerto que usa Workerman
 EXPOSE 8787
 
-# El comando para iniciar la aplicación, especificando la ruta a start.php
+# El comando para iniciar la aplicación, pasando "start" como un argumento separado.
 CMD ["php", "swordCore/start.php", "start"]

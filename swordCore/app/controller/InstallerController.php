@@ -14,54 +14,56 @@ class InstallerController
 {
     /**
      * Muestra el paso actual del formulario de instalación.
+     * Esta versión está adaptada para entornos de contenedores como Coolify.
      *
      * @param Request $request
      * @return Response
      */
     public function showStep(Request $request): Response
     {
-        // Comprobar si la instalación acaba de completarse.
-        if (session()->pull('install_step') === 'completed') {
-            return view('installer.show', [
-                'tituloPagina' => 'Instalación Completada',
-                'currentStep' => 'completed',
-                'loginUrl' => 'http://' . $request->header('host') . '/login',
-                'error' => null,
-                'success' => null,
-                'dbConfig' => []
-            ]);
+        // 1. Priorizar las variables de entorno del sistema (provistas por Coolify)
+        // Se asume que si DB_HOST está definido, las demás también lo están.
+        if (!empty(env('DB_HOST'))) {
+            try {
+                // 2. Intentar conectar a la base de datos
+                Db::connection('pgsql')->select('select 1');
+
+                // 3. Si la conexión es exitosa, comprobar si ya está instalado (si la tabla 'usuarios' existe)
+                try {
+                    Db::connection('pgsql')->select('select id from usuarios limit 1');
+                    // Si la tabla existe, la instalación está completa. Redirigir a la página principal.
+                    return redirect('/');
+                } catch (Throwable $tableNotFound) {
+                    // La conexión a la BD funciona, pero las tablas no existen.
+                    // Saltar directamente al paso de configuración del sitio/admin.
+                    return view('installer.show', [
+                        'tituloPagina' => 'Configuración del Sitio',
+                        'currentStep' => 'setup', // <-- ¡Saltamos al paso 'setup'!
+                        'error' => session()->pull('error'),
+                        'success' => session()->pull('success'),
+                        'dbConfig' => []
+                    ]);
+                }
+            } catch (Throwable $connectionError) {
+                // Las variables de entorno existen pero la conexión falla. Es un error real.
+                return view('installer.show', [
+                    'tituloPagina' => 'Error de Conexión',
+                    'currentStep' => 'database',
+                    'error' => 'Las credenciales de la base de datos proporcionadas por el entorno son incorrectas. Por favor, revísalas en Coolify. Error: ' . $connectionError->getMessage(),
+                    'success' => null,
+                    'dbConfig' => []
+                ]);
+            }
         }
 
-        $envPath = base_path('.env');
-        $data = [
+        // 4. Si no hay variables de entorno, mostrar el formulario de instalación de la base de datos como último recurso.
+        return view('installer.show', [
             'tituloPagina' => 'Instalación de SwordPHP',
             'currentStep' => 'database',
             'dbConfig' => [],
             'error' => session()->pull('error'),
             'success' => session()->pull('success')
-        ];
-
-        if (file_exists($envPath)) {
-            $dotenv = Dotenv::createImmutable(base_path());
-            $dotenv->load();
-            $data['dbConfig'] = [
-                'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
-                'port' => $_ENV['DB_PORT'] ?? '5432',
-                'name' => $_ENV['DB_DATABASE'] ?? 'swordphp',
-                'user' => $_ENV['DB_USERNAME'] ?? 'postgres',
-            ];
-
-            try {
-                // Intenta conectar para ver si podemos pasar al siguiente paso
-                Db::connection('pgsql')->select('select 1');
-                $data['currentStep'] = 'setup';
-            } catch (Throwable $e) {
-                $data['currentStep'] = 'database';
-                $data['error'] = 'No se pudo conectar a la base de datos con las credenciales del archivo `.env`. Por favor, verifícalas y guarda de nuevo.';
-            }
-        }
-
-        return view('installer.show', $data);
+        ]);
     }
 
     /**

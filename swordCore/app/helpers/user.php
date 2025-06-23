@@ -6,50 +6,48 @@ use support\Log;
 /**
  * Obtiene el modelo del usuario actualmente autenticado.
  *
- * Utiliza un caché estático para evitar múltiples consultas a la base de datos
- * durante el ciclo de vida de una misma petición.
+ * Utiliza un caché en el objeto Request para evitar múltiples consultas a la base de datos
+ * durante el ciclo de vida de una misma petición. Esta aproximación es segura para
+ * entornos de ejecución persistentes como Workerman.
  *
  * @return Usuario|null El modelo del usuario o null si no está autenticado.
  */
 function currentUser(): ?Usuario
 {
-    static $currentUser = null;
-    static $haSidoVerificado = false;
+    $request = request();
 
-    Log::channel('session_debug')->debug('Helper/currentUser: Iniciando verificación.', [
-        'haSidoVerificado' => $haSidoVerificado,
-        'usuarioCacheado' => $currentUser ? 'ID: ' . $currentUser->id : null,
-    ]);
-
-    if ($haSidoVerificado) {
-        Log::channel('session_debug')->debug('Helper/currentUser: Devolviendo desde caché estático.', [
-            'usuario_devuelto' => $currentUser ? 'ID: ' . $currentUser->id : 'null'
+    // La propiedad 'swordUser' se usará como caché en el objeto de la petición.
+    // Usamos property_exists para ser explícitos y evitar warnings.
+    if (property_exists($request, 'swordUser')) {
+        Log::channel('session_debug')->debug('Helper/currentUser: Devolviendo desde caché de la petición.', [
+            'usuario_devuelto' => $request->swordUser ? 'ID: ' . $request->swordUser->id : 'null'
         ]);
-        return $currentUser;
+        return $request->swordUser;
     }
 
-    $haSidoVerificado = true;
     $idUsuario = session('usuarioId');
 
-    Log::channel('session_debug')->info('Helper/currentUser: Intentando obtener usuario de la sesión.', [
+    Log::channel('session_debug')->info('Helper/currentUser: Buscando usuario en sesión (cache miss).', [
         'session_id' => session()->getId(),
         'usuarioId_obtenido' => $idUsuario,
         'session_data_completa' => session()->all()
     ]);
 
     if (!$idUsuario) {
-        Log::channel('session_debug')->warning('Helper/currentUser: No se encontró usuarioId en la sesión. Devolviendo null.');
-        return null;
+        Log::channel('session_debug')->warning('Helper/currentUser: No se encontró usuarioId. Cacheando y devolviendo null.');
+        // Cachear y devolver null
+        return $request->swordUser = null;
     }
 
-    $currentUser = Usuario::find($idUsuario);
+    $usuario = Usuario::find($idUsuario);
 
     Log::channel('session_debug')->info('Helper/currentUser: Búsqueda en BD finalizada.', [
         'buscado_por_id' => $idUsuario,
-        'resultado' => $currentUser ? 'Usuario encontrado (ID: ' . $currentUser->id . ')' : 'Usuario NO encontrado en BD'
+        'resultado' => $usuario ? 'Usuario encontrado (ID: ' . $usuario->id . ')' : 'Usuario NO encontrado en BD'
     ]);
 
-    return $currentUser;
+    // Cachear el resultado (modelo de usuario o null) en el objeto de la petición y devolverlo.
+    return $request->swordUser = $usuario;
 }
 
 /**

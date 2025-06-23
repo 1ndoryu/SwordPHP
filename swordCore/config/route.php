@@ -11,14 +11,6 @@ use App\controller\Api\V1\OptionApiController;
 use App\controller\Api\V1\UserApiController;
 use App\middleware\ApiAuthMiddleware;
 
-// --- Verificación del Instalador (se ejecuta siempre) ---
-if (!file_exists(runtime_path('installed.lock'))) {
-    Route::get('/install', [InstallerController::class, 'showStep']);
-    Route::post('/install', [InstallerController::class, 'processStep']);
-    Route::any('/{route:.*}', fn(Request $request) => $request->path() !== '/install' ? redirect('/install') : null);
-    return;
-}
-
 // --- Bifurcación de rutas basada en la configuración del CMS ---
 
 if (env('CMS_ENABLED', true)) {

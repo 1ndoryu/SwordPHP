@@ -107,18 +107,19 @@ A continuación se describen los roles que vienen por defecto con SwordPHP:
 
 La siguiente tabla muestra las capacidades asignadas a cada rol por defecto. Una `✓` indica que el rol posee esa capacidad.
 
-| Capacidad            | `admin` | `editor` | `autor` | `colaborador` | `suscriptor` |
-| -------------------- | :-----: | :------: | :-----: | :-----------: | :----------: |
-| `manage_options`     |    ✓    |          |         |               |              |
-| `manage_content`     |    ✓    |          |         |               |              |
-| `manage_users`       |    ✓    |          |         |               |              |
-| `create_content`     |    ✓    |     ✓    |    ✓    |       ✓       |              |
-| `edit_own_content`   |    ✓    |     ✓    |    ✓    |       ✓       |              |
-| `delete_own_content` |    ✓    |     ✓    |    ✓    |               |              |
-| `like_content`       |    ✓    |     ✓    |    ✓    |       ✓       |      ✓       |
-| `comment_content`    |    ✓    |     ✓    |    ✓    |       ✓       |      ✓       |
 
-*Nota: El rol `admin` hereda implícitamente todas las capacidades.*
+| Capacidad            | admin | editor | autor | colaborador | suscriptor |
+| -------------------- | :---: | :----: | :---: | :---------: | :--------: |
+| `manage_options`     |   x   |        |       |             |            |
+| `manage_content`     |   x   |        |       |             |            |
+| `manage_users`       |   x   |        |       |             |            |
+| `create_content`     |   x   |   x    |   x   |      x      |            |
+| `edit_own_content`   |   x   |   x    |   x   |      x      |            |
+| `delete_own_content` |   x   |   x    |   x   |             |            |
+| `like_content`       |   x   |   x    |   x   |      x      |     x      |
+| `comment_content`    |   x   |   x    |   x   |      x      |     x      |
+
+_Nota: El rol `admin` hereda implícitamente todas las capacidades._
 
 ### Permisos por Tipo de Contenido
 

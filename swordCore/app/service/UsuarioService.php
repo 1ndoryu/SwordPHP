@@ -239,12 +239,11 @@ class UsuarioService
             throw new \support\exception\BusinessException('Las credenciales proporcionadas son incorrectas.');
         }
 
-        // Genera, asigna y guarda el nuevo token en el usuario.
         $usuario->generarApiToken()->save();
 
         return [
             'token' => $usuario->api_token,
-            'usuario' => $usuario
+            'usuario' => $usuario->toArray(),
         ];
     }
 }

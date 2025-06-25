@@ -146,7 +146,7 @@ Route::group('/api/v1', function () {
     // --- Endpoints PROTEGIDOS (requieren "Bearer Token") ---
     Route::group(function () {
         // Recurso: /users
-        Route::get('/users/me', [UserApiController::class, 'me']);
+        Route::get('/users/me', [ApiAuthController::class, 'me']);
         Route::get('/users', [UserApiController::class, 'index']);
         Route::post('/users', [UserApiController::class, 'store']);
         Route::get('/users/{id:\d+}', [UserApiController::class, 'show']);

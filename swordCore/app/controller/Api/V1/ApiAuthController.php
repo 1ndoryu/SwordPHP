@@ -26,42 +26,26 @@ class ApiAuthController extends ApiBaseController
      */
     public function token(Request $request): Response
     {
-        // 1. Obtener las credenciales del cuerpo de la petición (CORREGIDO a snake_case).
         $nombreUsuario = $request->post('nombre_usuario');
         $clave = $request->post('clave');
 
-        // 2. Validar que las credenciales no estén vacías.
         if (empty($nombreUsuario) || empty($clave)) {
-            return $this->respuestaError('El nombre de usuario y la clave son obligatorios.', 422, [
-                ['field' => 'nombre_usuario', 'issue' => 'Este campo es obligatorio.'],
-                ['field' => 'clave', 'issue' => 'Este campo es obligatorio.']
-            ]);
+            return $this->respuestaError('El nombre de usuario y la clave son requeridos.', 422);
         }
 
         try {
-            // 3. Autenticar al usuario y generar un nuevo token.
             $resultado = $this->usuarioService->autenticarYGenerarToken($nombreUsuario, $clave);
-
-            // 4. Construir la respuesta según las especificaciones.
-            $respuesta = [
-                'token' => $resultado['token'],
-                'usuario' => [
-                    'id' => $resultado['usuario']->id,
-                    'nombre_usuario' => $resultado['usuario']->nombreusuario, // Mantenemos snake_case en respuesta
-                    'nombre_mostrado' => $resultado['usuario']->nombremostrado,
-                    'correo_electronico' => $resultado['usuario']->correoelectronico,
-                    'rol' => $resultado['usuario']->rol,
-                ]
-            ];
-
-            return $this->respuestaExito($respuesta);
+            return $this->respuestaExito($resultado);
         } catch (BusinessException $e) {
-            // Captura errores de negocio (ej. credenciales incorrectas).
-            return $this->respuestaError($e->getMessage(), 401); // 401 Unauthorized
+            return $this->respuestaError($e->getMessage(), 401);
         } catch (\Throwable $e) {
-            // Captura cualquier otro error inesperado.
-            \support\Log::error('Error en el endpoint de autenticación: ' . $e->getMessage());
-            return $this->respuestaError('Ocurrió un error interno en el servidor.', 500);
+            \support\Log::error('Error en token endpoint: ' . $e->getMessage());
+            return $this->respuestaError('Error interno del servidor.', 500);
         }
+    }
+
+    public function me(Request $request): Response
+    {
+        return $this->respuestaExito($request->usuario->toArray());
     }
 }

@@ -74,8 +74,7 @@ Para las tareas de documentación, el flujo es similar:
 
 ## 3. Hoja de Ruta: Tareas Prioritarias (TAREA ACTUAL)
 
--   [ ] La api v1 se mejoro pero se hizo condicional a un caso especial para kamples y casiel (dos aplicacines externas que usan este cms), esto esta mal porque el nucleo no puede ser usado para cosas tan especifica, tengo que generalizar la descarga de contenido, que soporte si es una url externa o interna, (en este caso) downloadOriginalSample es demasiado estricto porque es un caso especifico, uploadSample tambien no tiene sentido, parecen funcionar, pero necesito que sean funciones integradas y genericas, pero no se como generalizarlo, supongo que hay que hacer que se especifique todo en la peticion 
-
+-   [ ] `admin` | `artista`  |   `fan`  | la api esta condicionada a actuar segun el tipo de usuario, las funcionalidades para admin esta bien, pero fue un error especificar condiciones para artista, y fans, esos tipos de usuarios son especificos de una aplicacion externa, y no deberian especificarse en este cms, por favor, encuentra la manera de que sean las aplicaciones externas que especifiquen, y manterla generalidad y agnosticismo de la api de este cms, le documentacion-api.md y date cuenta del problema
 
 ---
 

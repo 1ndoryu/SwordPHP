@@ -105,27 +105,13 @@ class ContentApiController extends ApiBaseController
             return $this->respuestaError('Los campos "titulo" y "tipocontenido" son obligatorios.', 422);
         }
 
-        if ($data['tipocontenido'] === 'sample' && !in_array($usuario->rol, ['admin', 'artista'])) {
-            return $this->respuestaError('No tienes permiso para crear samples.', 403);
-        }
+        $this->verificarPermiso($usuario, 'create_content', $data['tipocontenido']);
 
         $data['idautor'] = $usuario->id;
         $data['estado'] = $data['estado'] ?? 'borrador';
 
         try {
             $nuevaPagina = $this->paginaService->crearPagina($data);
-
-            // --- INICIO DE LA INTEGRACIÓN CON CASIEL ---
-            try {
-                // Asumiendo que has importado la clase con 'use App\Services\CasielEventPublisher;'
-                $publisher = new \App\Services\CasielEventPublisher();
-                $publisher->publicarNuevoSample($nuevaPagina->id);
-            } catch (Throwable $e) {
-                // Si la notificación falla, no detenemos el flujo. Ya se registra dentro del publisher.
-                // Opcionalmente, puedes añadir otro log aquí si lo deseas.
-            }
-            // --- FIN DE LA INTEGRACIÓN ---
-
             return $this->respuestaExito($nuevaPagina, 201);
         } catch (\support\exception\BusinessException $e) {
             return $this->respuestaError($e->getMessage(), 422);
@@ -143,17 +129,8 @@ class ContentApiController extends ApiBaseController
             $pagina = $this->paginaService->obtenerPaginaPorId($id);
             $usuario = $request->usuario;
 
-            $isOwner = $pagina->idautor == $usuario->id;
-            $isAdmin = $usuario->rol === 'admin';
-
-            $canUpdate = false;
-            if ($isAdmin) $canUpdate = true;
-            if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canUpdate = true;
-            if ($pagina->tipocontenido === 'comment' && $isOwner) $canUpdate = true;
-
-            if (!$canUpdate) {
-                return $this->respuestaError('No tienes permiso para actualizar este recurso.', 403);
-            }
+            $capacidad = ($pagina->idautor == $usuario->id) ? 'edit_own_content' : 'edit_others_content';
+            $this->verificarPermiso($usuario, $capacidad, $pagina->tipocontenido);
 
             $this->paginaService->actualizarPagina($pagina, $request->post());
             $paginaActualizada = $this->paginaService->obtenerPaginaPorId($id);
@@ -161,8 +138,8 @@ class ContentApiController extends ApiBaseController
             return $this->respuestaExito($paginaActualizada);
         } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
-        } catch (\support\exception\BusinessException $e) {
-            return $this->respuestaError($e->getMessage(), 422);
+        } catch (BusinessException $e) {
+            return $this->respuestaError($e->getMessage(), $e->getCode());
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al actualizar contenido {$id}: " . $e->getMessage());
             return $this->respuestaError('Ocurrió un error interno al actualizar el recurso.', 500);
@@ -176,22 +153,15 @@ class ContentApiController extends ApiBaseController
             $pagina = $this->paginaService->obtenerPaginaPorId($id);
             $usuario = $request->usuario;
 
-            $isOwner = $pagina->idautor == $usuario->id;
-            $isAdmin = $usuario->rol === 'admin';
-
-            $canDelete = false;
-            if ($isAdmin) $canDelete = true;
-            if ($pagina->tipocontenido === 'sample' && $isOwner && $usuario->rol === 'artista') $canDelete = true;
-            if ($pagina->tipocontenido === 'comment' && $isOwner) $canDelete = true;
-
-            if (!$canDelete) {
-                return $this->respuestaError('No tienes permiso para eliminar este recurso.', 403);
-            }
+            $capacidad = ($pagina->idautor == $usuario->id) ? 'delete_own_content' : 'delete_others_content';
+            $this->verificarPermiso($usuario, $capacidad, $pagina->tipocontenido);
 
             $this->paginaService->eliminarPagina($id);
             return new Response(204);
         } catch (NotFoundException) {
             return $this->respuestaError('Recurso no encontrado.', 404);
+        } catch (BusinessException $e) {
+            return $this->respuestaError($e->getMessage(), $e->getCode());
         } catch (\Throwable $e) {
             \support\Log::error("Error en API al eliminar contenido {$id}: " . $e->getMessage());
             return $this->respuestaError('Ocurrió un error interno al eliminar el recurso.', 500);
@@ -294,6 +264,29 @@ class ContentApiController extends ApiBaseController
         });
 
         return new Response(204);
+    }
+
+    private function verificarPermiso($usuario, $capacidad, $tipoContenido = null)
+    {
+        $permisos = config('permisos.api');
+        $rol = $usuario->rol ?? 'anonimo';
+
+        $capacidadesRol = $permisos[$rol] ?? [];
+
+        if (in_array('manage_options', $capacidadesRol)) {
+            return;
+        }
+
+        if (!in_array($capacidad, $capacidadesRol)) {
+            throw new BusinessException('No tienes permiso para realizar esta acción.', 403);
+        }
+
+        if ($tipoContenido) {
+            $tiposPermitidos = $permisos['tipos_contenido'][$rol] ?? [];
+            if (!in_array($tipoContenido, $tiposPermitidos)) {
+                throw new BusinessException("No tienes permiso para gestionar el tipo de contenido '{$tipoContenido}'.", 403);
+            }
+        }
     }
 
     public function unlike(Request $request, int $sampleId): Response

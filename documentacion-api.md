@@ -148,10 +148,39 @@ Esta flexibilidad te permite, por ejemplo, crear un rol `gestor_eventos` que sol
 
 #### `POST /media/upload`
 
-Sube un archivo (imagen, audio, etc.) al proveedor de almacenamiento configurado. Este es el primer paso y es necesario para obtener un `media_id` que luego se asociará a una pieza de contenido.
+Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa. El comportamiento se controla con el parámetro `storage_provider`.
 
 -   **Permisos:** Cualquier usuario autenticado.
--   **Petición:** `multipart/form-data` con un campo llamado `file`.
+-   **Cuerpo de la Petición (multipart/form-data):**
+
+    -   **Para subidas locales (por defecto):**
+        -   `storage_provider` (string, opcional): `local` o `casiel`. Si se omite, se usa `local`.
+        -   `file` (file, **obligatorio**): El archivo a subir.
+
+    -   **Para importación desde URL:**
+        -   `storage_provider` (string, **obligatorio**): Debe ser `external`.
+        -   `url` (string, **obligatorio**): La URL pública del archivo a importar.
+
+-   **Ejemplo de Petición (subida local):**
+    ```bash
+    curl -X POST \
+      https://tu-dominio.com/api/v1/media/upload \
+      -H "Authorization: Bearer <TU_TOKEN>" \
+      -F "file=@/ruta/a/tu/archivo.jpg"
+    ```
+
+-   **Ejemplo de Petición (importación desde URL):**
+    ```bash
+    curl -X POST \
+      https://tu-dominio.com/api/v1/media/upload \
+      -H "Authorization: Bearer <TU_TOKEN>" \
+      -H "Content-Type: application/json" \
+      -d '{
+            "storage_provider": "external",
+            "url": "https://ejemplo.com/imagen.png"
+          }'
+    ```
+
 -   **Respuesta Exitosa (201 Created):**
     ```json
     {

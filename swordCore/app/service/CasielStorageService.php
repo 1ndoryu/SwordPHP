@@ -19,7 +19,7 @@ class CasielStorageService implements StorageServiceInterface
         $this->apiKey = env('CASIEL_INTERNAL_API_KEY');
     }
 
-    public function upload(Request $request, array $file, int $userId): array
+    public function upload(Request $request, array $data, int $userId): array
     {
         $response = $this->client->post($this->baseUrl . '/v1/media/upload', [
             'headers' => [
@@ -28,8 +28,8 @@ class CasielStorageService implements StorageServiceInterface
             'multipart' => [
                 [
                     'name' => 'file',
-                    'contents' => fopen($file['file']->getRealPath(), 'r'),
-                    'filename' => $file['file']->getUploadName(),
+                    'contents' => fopen($data['file']->getRealPath(), 'r'),
+                    'filename' => $data['file']->getUploadName(),
                 ],
             ],
         ]);

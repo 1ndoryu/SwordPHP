@@ -8,10 +8,10 @@ use Webman\Http\UploadFile;
 
 class LocalStorageService implements StorageServiceInterface
 {
-    public function upload(Request $request, array $file, int $userId): array
+    public function upload(Request $request, array $data, int $userId): array
     {
         /** @var UploadFile $uploadFile */
-        $uploadFile = $file['file'];
+        $uploadFile = $data['file'];
         $publicPath = public_path();
         $filePath = DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . date('Ym');
         $fullPath = $publicPath . $filePath;
@@ -23,10 +23,12 @@ class LocalStorageService implements StorageServiceInterface
         $fileName = uniqid() . '.' . $uploadFile->getUploadExtension();
         $uploadFile->move($fullPath . DIRECTORY_SEPARATOR . $fileName);
 
+        $urlPath = str_replace(DIRECTORY_SEPARATOR, '/', $filePath . DIRECTORY_SEPARATOR . $fileName);
+
         return [
             'provider' => 'local',
             'path' => $filePath . DIRECTORY_SEPARATOR . $fileName,
-            'url' => request()->getRealHost() . $filePath . DIRECTORY_SEPARATOR . $fileName,
+            'url' => request()->host() . $urlPath,
         ];
     }
 

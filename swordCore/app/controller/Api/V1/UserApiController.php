@@ -9,6 +9,7 @@ use support\Response;
 use Webman\Exception\NotFoundException;
 use support\exception\BusinessException;
 use Illuminate\Support\Str;
+use App\model\Media; // <-- Añadir importación del modelo Media
 
 class UserApiController extends ApiBaseController
 {
@@ -136,17 +137,26 @@ class UserApiController extends ApiBaseController
     {
         try {
             $usuario = $this->usuarioService->obtenerUsuarioPorId($id);
-            $metadata = $usuario->metadata;
 
-            if (isset($metadata['profile_picture_path'])) {
-                $path = $metadata['profile_picture_path'];
-                $absolutePath = base_path('swordContent/media/' . $path);
+            // 1. Obtener el ID de la imagen desde los metadatos del usuario.
+            $profilePictureId = $usuario->obtenerMeta('_imagen_destacada_id');
 
-                if (file_exists($absolutePath)) {
-                    return response()->file($absolutePath);
+            if ($profilePictureId) {
+                // 2. Buscar el registro de Media correspondiente.
+                $media = Media::find($profilePictureId);
+
+                if ($media && $media->rutaarchivo) {
+                    // 3. Construir la ruta absoluta al archivo.
+                    $absolutePath = SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . $media->rutaarchivo;
+
+                    if (file_exists($absolutePath)) {
+                        // 4. Servir el archivo.
+                        return response()->file($absolutePath);
+                    }
                 }
             }
 
+            // Si no se encuentra el ID, el media, o el archivo, devolver 404.
             return $this->respuestaError('Imagen de perfil no encontrada.', 404);
         } catch (NotFoundException $e) {
             return $this->respuestaError('Usuario no encontrado.', 404);

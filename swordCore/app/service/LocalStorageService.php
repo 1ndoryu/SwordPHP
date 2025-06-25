@@ -12,23 +12,31 @@ class LocalStorageService implements StorageServiceInterface
     {
         /** @var UploadFile $uploadFile */
         $uploadFile = $data['file'];
-        $publicPath = public_path();
-        $filePath = DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . date('Ym');
-        $fullPath = $publicPath . $filePath;
+        
+        // Directorio relativo por fecha (ej: 202506)
+        $filePathDir = date('Ym');
+        // Ruta completa al directorio de destino dentro de swordContent
+        $fullPath = SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . $filePathDir;
 
         if (!is_dir($fullPath)) {
-            mkdir($fullPath, 0777, true);
+            mkdir($fullPath, 0755, true);
         }
 
+        // Nombre de archivo único
         $fileName = uniqid() . '.' . $uploadFile->getUploadExtension();
         $uploadFile->move($fullPath . DIRECTORY_SEPARATOR . $fileName);
 
-        $urlPath = str_replace(DIRECTORY_SEPARATOR, '/', $filePath . DIRECTORY_SEPARATOR . $fileName);
+        // Ruta relativa que se guardará en la BD (ej: 202506/xxxxx.jpg)
+        $relativePath = $filePathDir . DIRECTORY_SEPARATOR . $fileName;
 
         return [
-            'provider' => 'local',
-            'path' => $filePath . DIRECTORY_SEPARATOR . $fileName,
-            'url' => request()->host() . $urlPath,
+            'provider'        => 'local',
+            'path'            => $relativePath,
+            'url'             => url_contenido('media/' . str_replace(DIRECTORY_SEPARATOR, '/', $relativePath)),
+            'titulo'          => $data['titulo'],
+            'mime_type'       => $uploadFile->getUploadMimeType(),
+            'size'            => $uploadFile->getSize(),
+            'nombre_original' => $uploadFile->getUploadName(),
         ];
     }
 

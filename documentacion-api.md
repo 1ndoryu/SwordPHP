@@ -85,18 +85,61 @@ Para garantizar la estabilidad y el uso justo, la API está protegida por un lí
 
 ## 4. Roles y Permisos
 
-La API utiliza un sistema de roles y capacidades flexible. Cada rol de usuario tiene un conjunto de capacidades que determinan las acciones que puede realizar. Los roles y sus capacidades se definen en el archivo `config/permisos.php` y pueden ser personalizados por la aplicación que consume la API.
+La API utiliza un sistema de **Roles y Capacidades** para gestionar el acceso a los recursos. Este diseño granular te permite un control total sobre lo que cada tipo de usuario puede hacer.
 
-### Capacidades Predeterminadas
+-   **Rol:** Es una etiqueta que se asigna a un usuario (ej. `editor`, `autor`). Define un conjunto de permisos.
+-   **Capacidad:** Es un permiso específico para realizar una acción concreta (ej. `create_content`, `manage_users`).
 
-- `manage_options`: Permite gestionar las opciones del sitio.
-- `manage_content`: Permite gestionar todo el contenido (crear, editar, eliminar).
-- `manage_users`: Permite gestionar todos los usuarios.
-- `create_content`: Permite crear nuevo contenido.
-- `edit_own_content`: Permite editar el contenido propio.
-- `delete_own_content`: Permite eliminar el contenido propio.
-- `like_content`: Permite dar "like" a contenido.
-- `comment_content`: Permite comentar en contenido.
+Este sistema se configura íntegramente en el archivo `swordCore/config/permisos.php`. Puedes modificar este archivo para crear roles personalizados o ajustar los permisos de los roles existentes para que se adapten perfectamente a las necesidades de tu aplicación.
+
+### Roles Predeterminados
+
+A continuación se describen los roles que vienen por defecto con SwordPHP:
+
+-   **`admin` (Administrador):** Tiene acceso a todas las funcionalidades sin restricciones. Puede gestionar contenido, usuarios, y configuraciones del sitio. Es el rol más alto.
+-   **`editor` (Editor):** Puede crear, editar y eliminar cualquier contenido, incluyendo el de otros usuarios. No puede gestionar usuarios ni configuraciones del sitio.
+-   **`autor` (Autor):** Puede crear, editar y eliminar su propio contenido. No puede modificar el contenido de otros usuarios.
+-   **`colaborador` (Colaborador):** Puede crear y editar su propio contenido, pero no puede publicarlo ni eliminarlo. Un `editor` o `admin` debe revisar y aprobar sus cambios.
+-   **`suscriptor` (Suscriptor):** Es un usuario registrado que puede interactuar con el contenido (ej. dar "like", comentar), pero no puede crear contenido.
+-   **`anonimo` (Anónimo):** Representa a un visitante no autenticado. Por defecto, no tiene capacidades de escritura.
+
+### Matriz de Capacidades por Rol
+
+La siguiente tabla muestra las capacidades asignadas a cada rol por defecto. Una `✓` indica que el rol posee esa capacidad.
+
+| Capacidad            | `admin` | `editor` | `autor` | `colaborador` | `suscriptor` |
+| -------------------- | :-----: | :------: | :-----: | :-----------: | :----------: |
+| `manage_options`     |    ✓    |          |         |               |              |
+| `manage_content`     |    ✓    |          |         |               |              |
+| `manage_users`       |    ✓    |          |         |               |              |
+| `create_content`     |    ✓    |     ✓    |    ✓    |       ✓       |              |
+| `edit_own_content`   |    ✓    |     ✓    |    ✓    |       ✓       |              |
+| `delete_own_content` |    ✓    |     ✓    |    ✓    |               |              |
+| `like_content`       |    ✓    |     ✓    |    ✓    |       ✓       |      ✓       |
+| `comment_content`    |    ✓    |     ✓    |    ✓    |       ✓       |      ✓       |
+
+*Nota: El rol `admin` hereda implícitamente todas las capacidades.*
+
+### Permisos por Tipo de Contenido
+
+Además de las capacidades generales, puedes definir qué roles pueden crear tipos de contenido específicos. Esta configuración se encuentra en la sección `tipos_contenido` del mismo archivo `config/permisos.php`.
+
+Por ejemplo, la configuración por defecto permite a los `autores` crear `samples`, pero no `paginas`.
+
+```php
+// swordCore/config/permisos.php
+
+'tipos_contenido' => [
+    'admin' => ['pagina', 'sample', 'comentario'],
+    'editor' => ['pagina', 'sample', 'comentario'],
+    'autor' => ['sample'], // <-- Solo pueden crear 'sample'
+    'colaborador' => ['sample'],
+    'suscriptor' => [],
+    'anonimo' => [],
+],
+```
+
+Esta flexibilidad te permite, por ejemplo, crear un rol `gestor_eventos` que solo tenga permiso para crear y gestionar un tipo de contenido `evento`.
 
 ## 5. Recursos de la API (Endpoints)
 
@@ -276,7 +319,67 @@ Actualiza el perfil de un usuario. Un usuario solo puede actualizar su propio pe
     ```
 -   **Nota**: El campo `rol` solo puede ser modificado por un `admin`. Si un usuario no-admin lo incluye, será ignorado.
 
+#### `GET /users/{id}/profile-picture`
+
+Recupera la imagen de perfil de un usuario.
+
+-   **Permisos**: Público.
+-   **Respuesta Exitosa (200 OK)**: Devuelve la imagen directamente con el `Content-Type` apropiado (ej. `image/jpeg`).
+-   **Respuestas de Error**:
+    -   `404 Not Found`: Si el usuario no existe o no tiene una imagen de perfil asignada.
+
 _Para los demás endpoints (`GET /users`, `POST /users`, `DELETE /users/{id}`), consulta la matriz de permisos. Requieren rol de `admin` o ser el propietario del perfil._
+
+### Recurso: `/permisos`
+
+Este recurso permite gestionar dinámicamente el sistema de roles y capacidades de la API.
+
+#### `GET /permisos`
+
+Recupera el objeto completo de la configuración de permisos activa en el sistema. Si nunca se ha modificado a través de la API, devolverá la configuración por defecto del archivo `config/permisos.php`.
+
+-   **Permisos:** Requiere la capacidad `manage_options` (solo para `admin` por defecto).
+-   **Respuesta Exitosa (200 OK):**
+    ```json
+    {
+        "data": {
+            "api": {
+                "admin": ["manage_options", "manage_content", "manage_users"],
+                "editor": ["create_content", "edit_own_content", "delete_own_content"],
+                "suscriptor": ["like_content", "comment_content"]
+            },
+            "tipos_contenido": {
+                "admin": ["pagina", "sample"],
+                "editor": ["pagina", "sample"],
+                "autor": ["sample"]
+            }
+        }
+    }
+    ```
+
+#### `PUT /permisos`
+
+Actualiza y persiste la configuración de roles y capacidades. El cuerpo de la petición debe ser un objeto JSON completo que reemplace toda la configuración anterior.
+
+-   **Permisos:** Requiere la capacidad `manage_options` (solo para `admin` por defecto).
+-   **Cuerpo de la Petición:**
+    ```json
+    {
+        "api": {
+            "admin": ["manage_options", "manage_content", "manage_users"],
+            "editor": ["create_content", "edit_own_content"],
+            "gestor_eventos": ["create_content", "edit_own_content", "delete_own_content"]
+        },
+        "tipos_contenido": {
+            "admin": ["pagina", "sample", "evento"],
+            "editor": ["pagina", "sample"],
+            "gestor_eventos": ["evento"]
+        }
+    }
+    ```
+-   **Respuesta Exitosa (200 OK):** Devuelve la nueva configuración de permisos guardada.
+-   **Respuestas de Error:**
+    -   `400 Bad Request`: Si el cuerpo de la petición está vacío o el JSON es inválido.
 
 ### Recurso: `/options`
 

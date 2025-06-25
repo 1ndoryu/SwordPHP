@@ -17,4 +17,10 @@ if (env('CMS_ENABLED', true)) {
 return [
     // Middleware global. Se aplica a TODAS las rutas.
     '' => $globalMiddleware,
+
+    // Grupo de middlewares para la API
+    'api' => [
+        App\middleware\ApiAuthMiddleware::class,
+        app\middleware\ApiAuthorizationMiddleware::class,
+    ],
 ];

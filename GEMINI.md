@@ -43,7 +43,7 @@ Un pilar fundamental es la **experiencia del desarrollador**. Los creadores de t
 
 ## 3. Hoja de Ruta: Tareas Prioritarias (TAREA ACTUAL)
 
-- [ ] agregar en documentancion-api.md como usar 
+
 
 ---
 

@@ -12,7 +12,7 @@ class ExternalStorageService implements StorageServiceInterface
 
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client(['timeout' => 10]); // Añadir un timeout
     }
 
     public function upload(Request $request, array $data, int $userId): array
@@ -21,35 +21,59 @@ class ExternalStorageService implements StorageServiceInterface
             throw new \InvalidArgumentException('La URL proporcionada no es válida.');
         }
 
+        // --- INICIO DE LA CORRECCIÓN ---
+        // 1. Descargar el archivo y obtener sus propiedades.
         $response = $this->client->get($data['url']);
         $fileContents = $response->getBody()->getContents();
-        $fileName = basename(parse_url($data['url'], PHP_URL_PATH));
-
-        $publicPath = public_path();
-        $filePath = DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . date('Ym');
-        $fullPath = $publicPath . $filePath;
-
-        if (!is_dir($fullPath)) {
-            mkdir($fullPath, 0777, true);
+        $originalName = basename(parse_url($data['url'], PHP_URL_PATH));
+        
+        // Determinar el tipo MIME desde el contenido o la cabecera.
+        $mimeType = 'application/octet-stream'; // Valor por defecto
+        if ($response->hasHeader('Content-Type')) {
+            $mimeType = explode(';', $response->getHeaderLine('Content-Type'))[0];
+        } else if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_buffer($finfo, $fileContents);
+            finfo_close($finfo);
         }
 
-        $newFileName = uniqid() . '-' . $fileName;
-        file_put_contents($fullPath . DIRECTORY_SEPARATOR . $newFileName, $fileContents);
-        
-        $urlPath = str_replace(DIRECTORY_SEPARATOR, '/', $filePath . DIRECTORY_SEPARATOR . $newFileName);
+        $size = strlen($fileContents);
+        // --- FIN DE LA CORRECCIÓN ---
 
+        // 2. Guardar el archivo localmente.
+        $filePathDir = date('Ym');
+        $fullPathDir = SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . $filePathDir;
+
+        if (!is_dir($fullPathDir)) {
+            mkdir($fullPathDir, 0755, true);
+        }
+
+        $extension = pathinfo($originalName, PATHINFO_EXTENSION);
+        $newFileName = uniqid() . ($extension ? ".$extension" : '');
+        file_put_contents($fullPathDir . DIRECTORY_SEPARATOR . $newFileName, $fileContents);
+        
+        $relativePath = $filePathDir . DIRECTORY_SEPARATOR . $newFileName;
+        $urlPath = url_contenido('media/' . str_replace(DIRECTORY_SEPARATOR, '/', $relativePath));
+
+        // 3. Devolver la estructura de datos completa.
         return [
-            'provider' => 'external',
-            'path' => $filePath . DIRECTORY_SEPARATOR . $newFileName,
-            'url' => request()->host() . $urlPath,
+            'provider'        => 'external', // Aunque es externo, lo estamos "localizando".
+            'path'            => $relativePath,
+            'url'             => $urlPath,
+            'titulo'          => $data['titulo'],
+            'mime_type'       => $mimeType,
+            'size'            => $size,
+            'nombre_original' => $originalName,
         ];
     }
 
     public function download(string $filePath): StreamInterface
     {
-        // For external files, the path is a URL, so we just redirect.
-        // This method might not be directly used if we store external files locally.
-        // If we do, the implementation would be similar to LocalStorageService.
-        throw new \Exception('Not implemented for external storage. Files are downloaded and stored locally during upload.');
+        // La implementación actual guarda los archivos externos localmente, por lo que la descarga es igual a la local.
+        $fullPath = SWORD_CONTENT_PATH . DIRECTORY_SEPARATOR . 'media' . DIRECTORY_SEPARATOR . $filePath;
+        if (!file_exists($fullPath)) {
+            throw new \Exception('Archivo no encontrado.');
+        }
+        return fopen($fullPath, 'r');
     }
 }

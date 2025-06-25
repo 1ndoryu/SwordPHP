@@ -143,7 +143,7 @@ Route::group('/api/v1', function () {
     Route::get('/content', [ContentApiController::class, 'index']);
     Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
     Route::get('/content/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
-
+    Route::get('/users/{id:\d+}/profile-picture', [UserApiController::class, 'profilePicture']);  
     // --- Endpoints PROTEGIDOS (requieren "Bearer Token") ---
     Route::group(function () {
         // Recurso: /users
@@ -154,7 +154,6 @@ Route::group('/api/v1', function () {
         Route::put('/users/{id:\d+}', [UserApiController::class, 'update']);
         Route::patch('/users/{id:\d+}', [UserApiController::class, 'update']);
         Route::delete('/users/{id:\d+}', [UserApiController::class, 'destroy']);
-        Route::get('/users/{id:\d+}/profile-picture', [UserApiController::class, 'profilePicture']);
 
         // Recurso: /content (acciones de escritura)
         Route::post('/content', [ContentApiController::class, 'store']);

@@ -156,17 +156,20 @@ Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa
     -   **Para subidas locales (por defecto):**
         -   `storage_provider` (string, opcional): `local` o `casiel`. Si se omite, se usa `local`.
         -   `file` (file, **obligatorio**): El archivo a subir.
+        -   `titulo` (string, opcional): Un título para el archivo. Si no se proporciona, se usará el nombre del archivo.
 
     -   **Para importación desde URL:**
         -   `storage_provider` (string, **obligatorio**): Debe ser `external`.
         -   `url` (string, **obligatorio**): La URL pública del archivo a importar.
+        -   `titulo` (string, opcional): Un título para el archivo. Si no se proporciona, se extraerá de la URL.
 
 -   **Ejemplo de Petición (subida local):**
     ```bash
     curl -X POST \
       https://tu-dominio.com/api/v1/media/upload \
       -H "Authorization: Bearer <TU_TOKEN>" \
-      -F "file=@/ruta/a/tu/archivo.jpg"
+      -F "file=@/ruta/a/tu/archivo.jpg" \
+      -F "titulo=Mi Foto de Verano"
     ```
 
 -   **Ejemplo de Petición (importación desde URL):**
@@ -177,7 +180,8 @@ Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa
       -H "Content-Type: application/json" \
       -d '{
             "storage_provider": "external",
-            "url": "https://ejemplo.com/imagen.png"
+            "url": "https://ejemplo.com/imagen.png",
+            "titulo": "Logo de la Empresa"
           }'
     ```
 
@@ -384,7 +388,7 @@ Recupera el objeto completo de la configuración de permisos activa en el sistem
                 "autor": ["sample"]
             }
         }
-    }
+    } 
     ```
 
 #### `PUT /permisos`

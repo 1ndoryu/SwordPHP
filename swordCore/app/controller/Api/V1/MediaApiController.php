@@ -26,6 +26,7 @@ class MediaApiController extends ApiBaseController
         $provider = $request->post('storage_provider', 'local');
         $file = $request->file('file');
         $url = $request->post('url');
+        $titulo = $request->post('titulo');
 
         $this->setStorageProvider($provider);
 
@@ -36,12 +37,21 @@ class MediaApiController extends ApiBaseController
                 return $this->respuestaError('Se requiere una URL válida para el proveedor externo.', 422);
             }
             $data = ['url' => $url];
+            if (empty($titulo)) {
+                $path_parts = pathinfo($url);
+                $titulo = $path_parts['filename'];
+            }
         } else {
             if (!$file || !$file->isValid()) {
                 return $this->respuestaError('No se ha subido ningún archivo o el archivo no es válido.', 422);
             }
             $data = ['file' => $file];
+            if (empty($titulo)) {
+                $titulo = $file->getUploadName();
+            }
         }
+        
+        $data['titulo'] = $titulo;
 
         try {
             $uploadData = $this->storageService->upload($request, $data, $request->usuario->id);

@@ -174,8 +174,11 @@ Route::group('/api/v1', function () {
         Route::post('/samples/{id:\d+}/like', [ContentApiController::class, 'like']);
         Route::delete('/samples/{id:\d+}/like', [ContentApiController::class, 'unlike']);
         Route::post('/samples/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
+
+        Route::get('/samples/{id:\d+}/download', [ContentApiController::class, 'downloadOriginalSample']);
     })->middleware([ApiAuthMiddleware::class]);
 });
+
 
 
 // --- Ruta Fallback y cierre (siempre activa) ---

@@ -268,6 +268,7 @@ class ContentApiController extends ApiBaseController
         }
     }
 
+
     public function destroy(Request $request, int $id): Response
     {
         try {
@@ -399,5 +400,93 @@ class ContentApiController extends ApiBaseController
         $userId = $request->usuario->id;
         DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->delete();
         return new Response(204);
+    }
+
+    /**
+     * Gestiona la descarga segura de un archivo de audio original.
+     * Actúa como un proxy seguro hacia el servicio Casiel.
+     *
+     * @param Request $request La petición HTTP.
+     * @param int $id El ID del sample a descargar.
+     * @return Response
+     */
+    public function downloadOriginalSample(Request $request, int $id): Response
+    {
+        $usuario = $request->usuario; // Asumo que ya tienes el usuario autenticado en la request
+
+        // 1. Obtener el sample
+        try {
+            $sample = $this->paginaService->obtenerPaginaPorId($id);
+            if ($sample->tipocontenido !== 'sample') {
+                return $this->respuestaError('Recurso no es un sample.', 404);
+            }
+        } catch (NotFoundException $e) {
+            return $this->respuestaError('Sample no encontrado.', 404);
+        }
+
+        $isOwner = $sample->idautor == $usuario->id;
+
+        // 2. Verificar si el usuario ya ha descargado este sample (usando user meta)
+        $descargasPrevias = $usuario->obtenerMeta('downloaded_sample_ids', []);
+        $yaDescargado = is_array($descargasPrevias) && in_array($id, $descargasPrevias);
+
+        $creditosNecesarios = config('settings.creditos_por_descarga', 1);
+        $creditosUsuario = (int) $usuario->obtenerMeta('creditos_audio', 0);
+
+        // 3. Lógica de créditos y permisos
+        if (!$isOwner && !$yaDescargado) {
+            if ($creditosUsuario < $creditosNecesarios) {
+                return $this->respuestaError('Créditos insuficientes para descargar.', 403);
+            }
+        }
+
+        // 4. Obtener el nombre del archivo original de la metadata del sample
+        $nombreArchivoOriginal = $sample->metadata['nombre_archivo_original'] ?? null;
+        if (!$nombreArchivoOriginal) {
+            return $this->respuestaError('El archivo original de este sample no está disponible.', 404);
+        }
+
+        // 5. Proxy de descarga desde Casiel
+        try {
+            $casielBaseUrl = $_ENV['CASIEL_BASE_URL'] ?? 'http://localhost:8788';
+            $casielInternalKey = $_ENV['CASIEL_INTERNAL_API_KEY'];
+
+            $client = new \GuzzleHttp\Client();
+            $casielResponse = $client->get(
+                rtrim($casielBaseUrl, '/') . '/samples/original/' . rawurlencode($nombreArchivoOriginal),
+                [
+                    'headers' => ['X-Internal-Auth-Key' => $casielInternalKey],
+                    'stream' => true
+                ]
+            );
+
+            // 6. Si la descarga es exitosa y se debe cobrar, actualiza los créditos y el historial
+            if (!$isOwner && !$yaDescargado) {
+                $nuevosCreditos = $creditosUsuario - $creditosNecesarios;
+                $usuario->actualizarMeta('creditos_audio', $nuevosCreditos);
+
+                $descargasPrevias[] = $id;
+                $usuario->actualizarMeta('downloaded_sample_ids', $descargasPrevias);
+            }
+
+            // 7. Transmitir el archivo al cliente
+            $body = $casielResponse->getBody();
+            $headers = [
+                'Content-Type' => $casielResponse->getHeaderLine('Content-Type'),
+                'Content-Disposition' => $casielResponse->getHeaderLine('Content-Disposition'),
+                'Content-Length' => $casielResponse->getHeaderLine('Content-Length'),
+            ];
+
+            return new Response(200, $headers, $body);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() === 404) {
+                return $this->respuestaError('El archivo original no se encontró en el servicio de almacenamiento.', 404);
+            }
+            \support\Log::error("Error de Proxy a Casiel (Cliente): " . $e->getMessage());
+            return $this->respuestaError('Error al contactar el servicio de almacenamiento.', 502); // Bad Gateway
+        } catch (Throwable $e) {
+            \support\Log::error("Error de Proxy a Casiel (General): " . $e->getMessage());
+            return $this->respuestaError('Ocurrió un error interno al intentar descargar el archivo.', 500);
+        }
     }
 }

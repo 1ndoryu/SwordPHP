@@ -8,6 +8,7 @@ use App\controller\Api\V1\ApiAuthController;
 use App\controller\Api\V1\ContentApiController;
 use App\controller\Api\V1\MediaApiController;
 use App\controller\Api\V1\OptionApiController;
+use App\controller\Api\V1\PermisosApiController;
 use App\controller\Api\V1\UserApiController;
 use App\middleware\ApiAuthMiddleware;
 
@@ -141,24 +142,30 @@ Route::group('/api/v1', function () {
     Route::post('/auth/token', [ApiAuthController::class, 'token']);
     Route::get('/content', [ContentApiController::class, 'index']);
     Route::get('/content/{id:\d+}', [ContentApiController::class, 'show']);
-    Route::get('/samples/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
+    Route::get('/content/{id:\d+}/comments', [ContentApiController::class, 'getComments']);
 
     // --- Endpoints PROTEGIDOS (requieren "Bearer Token") ---
     Route::group(function () {
         // Recurso: /users
-        Route::get('/users/me', [ApiAuthController::class, 'me']);
+        Route::get('/users/me', [UserApiController::class, 'me']);
         Route::get('/users', [UserApiController::class, 'index']);
         Route::post('/users', [UserApiController::class, 'store']);
         Route::get('/users/{id:\d+}', [UserApiController::class, 'show']);
         Route::put('/users/{id:\d+}', [UserApiController::class, 'update']);
         Route::patch('/users/{id:\d+}', [UserApiController::class, 'update']);
         Route::delete('/users/{id:\d+}', [UserApiController::class, 'destroy']);
+        Route::get('/users/{id:\d+}/profile-picture', [UserApiController::class, 'profilePicture']);
 
         // Recurso: /content (acciones de escritura)
         Route::post('/content', [ContentApiController::class, 'store']);
         Route::put('/content/{id:\d+}', [ContentApiController::class, 'update']);
         Route::patch('/content/{id:\d+}', [ContentApiController::class, 'update']);
         Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
+        
+        // Endpoints de Interacción con Contenido
+        Route::post('/content/{id:\d+}/like', [ContentApiController::class, 'like']);
+        Route::delete('/content/{id:\d+}/like', [ContentApiController::class, 'unlike']);
+        Route::post('/content/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
 
         // Recurso: /media
         Route::post('/media/upload', [MediaApiController::class, 'upload']);
@@ -168,12 +175,10 @@ Route::group('/api/v1', function () {
         Route::get('/options/{key:.+}', [OptionApiController::class, 'show']);
         Route::post('/options', [OptionApiController::class, 'store']);
 
-        // Endpoints de Interacción
-        Route::post('/samples/{id:\d+}/like', [ContentApiController::class, 'like']);
-        Route::delete('/samples/{id:\d+}/like', [ContentApiController::class, 'unlike']);
-        Route::post('/samples/{id:\d+}/comments', [ContentApiController::class, 'storeComment']);
+        // Recurso: /permisos (solo admin)
+        Route::get('/permisos', [PermisosApiController::class, 'index']);
+        Route::put('/permisos', [PermisosApiController::class, 'update']);
 
-        Route::get('/samples/{id:\d+}/download', [ContentApiController::class, 'downloadOriginalSample']);
     })->middleware([ApiAuthMiddleware::class]);
 });
 

@@ -168,12 +168,12 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    public function storeComment(Request $request, int $sampleId): Response
+    public function storeComment(Request $request, int $contentId): Response
     {
         try {
-            $sample = $this->paginaService->obtenerPaginaPorId($sampleId);
-            if ($sample->tipocontenido !== 'sample' || $sample->estado !== 'publicado') {
-                return $this->respuestaError('El sample no existe o no está disponible.', 404);
+            $content = $this->paginaService->obtenerPaginaPorId($contentId);
+            if ($content->estado !== 'publicado') {
+                return $this->respuestaError('El contenido no existe o no está disponible.', 404);
             }
 
             $data = $request->post();
@@ -184,25 +184,25 @@ class ContentApiController extends ApiBaseController
             }
 
             $commentData = [
-                'titulo' => 'Comentario en ' . $sample->titulo,
+                'titulo' => 'Comentario en ' . $content->titulo,
                 'contenido' => $contenido,
                 'tipocontenido' => 'comment',
                 'estado' => 'publicado',
                 'idautor' => $request->usuario->id,
-                'metadata' => ['parent_id' => $sampleId]
+                'metadata' => ['parent_id' => $contentId]
             ];
 
             $nuevoComentario = $this->paginaService->crearPagina($commentData);
             return $this->respuestaExito($nuevoComentario, 201);
         } catch (NotFoundException) {
-            return $this->respuestaError('El sample sobre el que intentas comentar no fue encontrado.', 404);
+            return $this->respuestaError('El contenido sobre el que intentas comentar no fue encontrado.', 404);
         } catch (\Throwable $e) {
-            \support\Log::error("Error creando comentario para sample {$sampleId}: " . $e->getMessage());
+            \support\Log::error("Error creando comentario para contenido {$contentId}: " . $e->getMessage());
             return $this->respuestaError('Error interno al guardar el comentario.', 500);
         }
     }
 
-    public function getComments(Request $request, int $sampleId): Response
+    public function getComments(Request $request, int $contentId): Response
     {
         $perPage = (int) $request->get('per_page', 15);
         $currentPage = (int) $request->get('page', 1);
@@ -216,7 +216,7 @@ class ContentApiController extends ApiBaseController
             'meta_query' => [
                 [
                     'key' => 'parent_id',
-                    'value' => $sampleId,
+                    'value' => $contentId,
                     'compare' => '='
                 ]
             ]
@@ -244,19 +244,19 @@ class ContentApiController extends ApiBaseController
         return $this->respuestaExito($paginatedData);
     }
 
-    public function like(Request $request, int $sampleId): Response
+    public function like(Request $request, int $contentId): Response
     {
         $userId = $request->usuario->id;
 
-        DB::transaction(function () use ($userId, $sampleId) {
-            $exists = DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->exists();
+        DB::transaction(function () use ($userId, $contentId) {
+            $exists = DB::table('likes')->where('user_id', $userId)->where('content_id', $contentId)->exists();
             if (!$exists) {
-                if (!DB::table('paginas')->where('id', $sampleId)->exists()) {
+                if (!DB::table('paginas')->where('id', $contentId)->exists()) {
                     return;
                 }
                 DB::table('likes')->insert([
                     'user_id' => $userId,
-                    'content_id' => $sampleId,
+                    'content_id' => $contentId,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
@@ -289,10 +289,10 @@ class ContentApiController extends ApiBaseController
         }
     }
 
-    public function unlike(Request $request, int $sampleId): Response
+    public function unlike(Request $request, int $contentId): Response
     {
         $userId = $request->usuario->id;
-        DB::table('likes')->where('user_id', $userId)->where('content_id', $sampleId)->delete();
+        DB::table('likes')->where('user_id', $userId)->where('content_id', $contentId)->delete();
         return new Response(204);
     }
 

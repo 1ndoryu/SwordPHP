@@ -43,9 +43,4 @@ class ApiAuthController extends ApiBaseController
             return $this->respuestaError('Error interno del servidor.', 500);
         }
     }
-
-    public function me(Request $request): Response
-    {
-        return $this->respuestaExito($request->usuario->toArray());
-    }
 }

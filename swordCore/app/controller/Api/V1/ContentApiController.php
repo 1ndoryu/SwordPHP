@@ -95,6 +95,7 @@ class ContentApiController extends ApiBaseController
         }
     }
 
+
     public function store(Request $request): Response
     {
         $data = $request->post();
@@ -113,6 +114,19 @@ class ContentApiController extends ApiBaseController
 
         try {
             $nuevaPagina = $this->paginaService->crearPagina($data);
+
+            // --- INICIO DE LA INTEGRACIÓN CON CASIEL ---
+            if ($nuevaPagina->tipocontenido === 'sample') {
+                try {
+                    $publisher = new CasielEventPublisher();
+                    $publisher->publicarNuevoSample($nuevaPagina->id);
+                } catch (Throwable $e) {
+                    // Si la notificación falla, no detenemos el flujo. Solo lo registramos.
+                    \support\Log::error("Casiel Notification Failed on store(): Sample ID {$nuevaPagina->id} - " . $e->getMessage());
+                }
+            }
+            // --- FIN DE LA INTEGRACIÓN ---
+
             return $this->respuestaExito($nuevaPagina, 201);
         } catch (\support\exception\BusinessException $e) {
             return $this->respuestaError($e->getMessage(), 422);
@@ -153,7 +167,7 @@ class ContentApiController extends ApiBaseController
         if (!empty($errors)) {
             return $this->respuestaError('Faltan campos obligatorios o son incorrectos.', 422, $errors);
         }
-        
+
         if (!$archivo->isValid()) {
             return $this->respuestaError('El archivo subido no es válido.', 422);
         }
@@ -177,7 +191,7 @@ class ContentApiController extends ApiBaseController
                     $metadata[$key] = $value;
                 }
             }
-            
+
             $contentData = [
                 'titulo' => $titulo,
                 'subtitulo' => $request->post('subtitulo'),
@@ -190,9 +204,22 @@ class ContentApiController extends ApiBaseController
             // 5. Crear la entrada de contenido
             $nuevaPagina = $this->paginaService->crearPagina($contentData);
 
+            // 6. Confirmar la transacción en la base de datos
             DB::commit();
-            
-            // Transformar la salida para asegurar consistencia en las claves (id_autor)
+
+            // --- INICIO DE LA INTEGRACIÓN CON CASIEL ---
+            // Se notifica a Casiel DESPUÉS de que los datos se han guardado permanentemente en la BD.
+            try {
+                $publisher = new CasielEventPublisher();
+                $publisher->publicarNuevoSample($nuevaPagina->id);
+            } catch (Throwable $e) {
+                // La subida fue exitosa para el usuario, pero la notificación falló.
+                // Esto NO debe causar un error al usuario. Solo se registra para revisión.
+                \support\Log::error("Casiel Notification Failed on uploadSample(): Sample ID {$nuevaPagina->id} - " . $e->getMessage());
+            }
+            // --- FIN DE LA INTEGRACIÓN ---
+
+            // 7. Transformar la salida para asegurar consistencia en las claves (id_autor)
             $attributes = $nuevaPagina->toArray();
             if (array_key_exists('idautor', $attributes)) {
                 $attributes['id_autor'] = $attributes['idautor'];
@@ -200,7 +227,6 @@ class ContentApiController extends ApiBaseController
             }
 
             return $this->respuestaExito($attributes, 201);
-
         } catch (BusinessException $e) {
             DB::rollBack();
             return $this->respuestaError($e->getMessage(), 422);

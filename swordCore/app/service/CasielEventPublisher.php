@@ -13,23 +13,19 @@ class CasielEventPublisher
 
     public function __construct()
     {
-        // Cargar la configuración desde las variables de entorno
+        // Cargar la configuración desde las variables de entorno de SwordPHP
         $this->config = [
-            'host'     => $_ENV['RABBITMQ_HOST'] ?? 'localhost',
-            'port'     => $_ENV['RABBITMQ_PORT'] ?? 5672,
-            'user'     => $_ENV['RABBITMQ_USER'] ?? 'guest',
+            'host' => $_ENV['RABBITMQ_HOST'] ?? 'localhost',
+            'port' => $_ENV['RABBITMQ_PORT'] ?? 5672,
+            'user' => $_ENV['RABBITMQ_USER'] ?? 'guest',
             'password' => $_ENV['RABBITMQ_PASS'] ?? 'guest',
-            'vhost'    => $_ENV['RABBITMQ_VHOST'] ?? '/',
-            'queue'    => $_ENV['RABBITMQ_QUEUE_CASIEL'] ?? 'casiel_processing_queue',
+            'vhost' => $_ENV['RABBITMQ_VHOST'] ?? '/',
+            'queue' => 'casiel_processing_queue',
+            'dlx_exchange' => 'casiel_dlx', // Dead Letter Exchange
+            'dlq_queue' => 'casiel_dead_letter_queue' // Dead Letter Queue
         ];
     }
 
-    /**
-     * Notifica a Casiel que un nuevo sample ha sido creado y está listo para procesar.
-     *
-     * @param int $idSample El ID del contenido (sample) recién creado en la base de datos.
-     * @return bool True si el mensaje fue enviado, False en caso de error.
-     */
     public function publicarNuevoSample(int $idSample): bool
     {
         try {
@@ -43,35 +39,30 @@ class CasielEventPublisher
 
             $channel = $this->connection->channel();
 
-            // Declarar la cola (si no existe, se crea). Es 'durable' (true) para que no se pierda si RabbitMQ se reinicia.
-            $channel->queue_declare($this->config['queue'], false, true, false, false);
+            // 1. Declara el Dead Letter Exchange (DLX) y la Dead Letter Queue (DLQ)
+            $channel->exchange_declare($this->config['dlx_exchange'], 'direct', false, true, false);
+            $channel->queue_declare($this->config['dlq_queue'], false, true, false, false);
+            $channel->queue_bind($this->config['dlq_queue'], $this->config['dlx_exchange'], $this->config['queue']);
 
-            // Crear el payload del mensaje
-            $payload = json_encode(['id_sample' => $idSample]);
-
-            // Crear el mensaje. Es 'persistent' para que sobreviva a un reinicio de RabbitMQ.
-            $message = new AMQPMessage($payload, [
-                'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT
+            // 2. Declara la cola principal y la asocia con el DLX
+            $queue_args = new \PhpAmqpLib\Wire\AMQPTable([
+                'x-dead-letter-exchange' => $this->config['dlx_exchange'],
+                'x-dead-letter-routing-key' => $this->config['queue']
             ]);
+            $channel->queue_declare($this->config['queue'], false, true, false, false, false, $queue_args);
 
-            // Publicar el mensaje en la cola
+            $payload = json_encode(['id_sample' => $idSample]);
+            $message = new AMQPMessage($payload, ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
+
             $channel->basic_publish($message, '', $this->config['queue']);
 
-            // Cerrar conexión
             $channel->close();
             $this->connection->close();
 
-            // Aquí puedes registrar un log de éxito si lo deseas
-            // log_info("Evento para Casiel publicado con éxito. Sample ID: $idSample");
-
+            \support\Log::info("Evento para Casiel publicado con éxito. Sample ID: $idSample");
             return true;
         } catch (Throwable $e) {
-            // Es MUY IMPORTANTE registrar el error, pero no detener la ejecución.
-            // La subida del sample fue exitosa para el usuario, aunque la notificación a la IA falló.
-            // Podrás reenviar el evento manualmente o Casiel lo tomará en su siguiente ciclo de sondeo (si lo dejas como fallback).
-
-            // log_error("Fallo al publicar evento para Casiel: " . $e->getMessage());
-
+            \support\Log::error("Fallo al publicar evento RabbitMQ para Casiel: " . $e->getMessage());
             return false;
         }
     }

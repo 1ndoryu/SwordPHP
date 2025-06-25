@@ -116,14 +116,13 @@ class ContentApiController extends ApiBaseController
             $nuevaPagina = $this->paginaService->crearPagina($data);
 
             // --- INICIO DE LA INTEGRACIÓN CON CASIEL ---
-            if ($nuevaPagina->tipocontenido === 'sample') {
-                try {
-                    $publisher = new CasielEventPublisher();
-                    $publisher->publicarNuevoSample($nuevaPagina->id);
-                } catch (Throwable $e) {
-                    // Si la notificación falla, no detenemos el flujo. Solo lo registramos.
-                    \support\Log::error("Casiel Notification Failed on store(): Sample ID {$nuevaPagina->id} - " . $e->getMessage());
-                }
+            try {
+                // Asumiendo que has importado la clase con 'use App\Services\CasielEventPublisher;'
+                $publisher = new \App\Services\CasielEventPublisher();
+                $publisher->publicarNuevoSample($nuevaPagina->id);
+            } catch (Throwable $e) {
+                // Si la notificación falla, no detenemos el flujo. Ya se registra dentro del publisher.
+                // Opcionalmente, puedes añadir otro log aquí si lo deseas.
             }
             // --- FIN DE LA INTEGRACIÓN ---
 

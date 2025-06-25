@@ -161,10 +161,8 @@ Route::group('/api/v1', function () {
         Route::delete('/content/{id:\d+}', [ContentApiController::class, 'destroy']);
 
         // Recurso: /media
-        Route::post('/media', [MediaApiController::class, 'upload']);
-        
-        // Recurso: /samples (acciones especiales)
-        Route::post('/samples/upload', [ContentApiController::class, 'uploadSample']);
+        Route::post('/media/upload', [MediaApiController::class, 'upload']);
+        Route::get('/media/{id:\d+}/download', [MediaApiController::class, 'download']);
 
         // Recurso: /options (solo admin)
         Route::get('/options/{key:.+}', [OptionApiController::class, 'show']);

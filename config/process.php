@@ -4,6 +4,7 @@
 use support\Log;
 use support\Request;
 use app\process\Http;
+use app\process\WebhookListener; // <-- AÑADIDO
 
 global $argv;
 
@@ -47,5 +48,14 @@ return [
                 'enable_memory_monitor' => DIRECTORY_SEPARATOR === '/',
             ]
         ]
+    ],
+    // --- INICIO: NUEVO PROCESO ---
+    'webhook-listener' => [
+        'handler' => WebhookListener::class,
+        'count' => 1, // Usualmente, un solo listener es suficiente.
+        'user' => '',
+        'group' => '',
+        'reloadable' => true, // Puede ser recargado si su código cambia
     ]
+    // --- FIN: NUEVO PROCESO ---
 ];

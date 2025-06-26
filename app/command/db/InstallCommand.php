@@ -128,6 +128,23 @@ class InstallCommand extends Command
                 $output->writeln('Log: Tabla "likes" creada correctamente.');
                 Log::channel('database')->info('Tabla "likes" creada correctamente.');
             }
+            
+            // --- INICIO: NUEVA TABLA ---
+            // Webhooks
+            if (!Capsule::schema()->hasTable('webhooks')) {
+                Capsule::schema()->create('webhooks', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('event_name')->index();
+                    $table->string('target_url');
+                    $table->string('secret')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->timestamps();
+                });
+                $output->writeln('Log: Tabla "webhooks" creada correctamente.');
+                Log::channel('database')->info('Tabla "webhooks" creada correctamente.');
+            }
+            // --- FIN: NUEVA TABLA ---
+
         } catch (\Exception $e) {
             $output->writeln('Error: ' . $e->getMessage());
             Log::channel('database')->error('Error durante la instalación: ' . $e->getMessage());

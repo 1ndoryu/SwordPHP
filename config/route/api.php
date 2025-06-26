@@ -10,15 +10,16 @@ use app\controller\UserController;
 use app\controller\CommentController;
 use app\controller\OptionController;
 use app\controller\RoleController;
+use app\controller\WebhookController; // <-- AÑADIDO
 use app\middleware\JwtAuthentication;
-use app\middleware\PermissionMiddleware; // <-- Middleware actualizado
+use app\middleware\PermissionMiddleware;
 
 // Ruta de bienvenida para la API
 Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.9' // Versión actualizada
+        'version' => '1.0.0' // Versión actualizada
     ]);
 });
 
@@ -97,7 +98,17 @@ Route::group('/admin', function () {
         Route::delete('/{id}', [RoleController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.roles.delete'));
     });
 
+    // --- INICIO: NUEVO GRUPO DE RUTAS ---
+    // Grupo para Gestión de Webhooks
+    Route::group('/webhooks', function () {
+        Route::get('', [WebhookController::class, 'index'])->middleware(new PermissionMiddleware('admin.webhooks.list'));
+        Route::post('', [WebhookController::class, 'store'])->middleware(new PermissionMiddleware('admin.webhooks.create'));
+        Route::post('/{id}', [WebhookController::class, 'update'])->middleware(new PermissionMiddleware('admin.webhooks.update'));
+        Route::delete('/{id}', [WebhookController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.webhooks.delete'));
+    });
+    // --- FIN: NUEVO GRUPO DE RUTAS ---
+
+
 })->middleware([
     JwtAuthentication::class // Todas las rutas de admin requieren autenticación.
-    // El RoleMiddleware ha sido reemplazado por los PermissionMiddleware específicos en cada ruta.
 ]);

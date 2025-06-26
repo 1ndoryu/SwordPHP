@@ -34,9 +34,10 @@ class ResetCommand extends Command
             'likes',
             'comments',
             'media',
+            'webhooks', // <-- Añadido
             'contents',
             'users',
-            'roles', // <-- Añadido al final
+            'roles',
             'options',
         ];
 

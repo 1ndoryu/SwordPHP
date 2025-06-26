@@ -177,8 +177,7 @@ return [
             ]
         ],
     ],
-
-    // --- INICIO: NUEVO CANAL ---
+    
     // Canal para el sistema de eventos
     'events' => [
         'handlers' => [
@@ -186,6 +185,29 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/events.log',
+                    15, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
+    
+    // --- INICIO: NUEVO CANAL ---
+    // Canal para el sistema de webhooks
+    'webhooks' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/webhooks.log',
                     15, // $maxFiles
                     $logLevel
                 ],

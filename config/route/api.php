@@ -9,16 +9,16 @@ use app\controller\SystemController;
 use app\controller\UserController;
 use app\controller\CommentController;
 use app\controller\OptionController;
-use app\controller\RoleController; // <-- Añadido
+use app\controller\RoleController;
 use app\middleware\JwtAuthentication;
-use app\middleware\RoleMiddleware;
+use app\middleware\PermissionMiddleware; // <-- Middleware actualizado
 
 // Ruta de bienvenida para la API
 Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.7' // Versión actualizada
+        'version' => '0.9.8' // Versión actualizada
     ]);
 });
 
@@ -44,7 +44,6 @@ Route::group('/user', function () {
         $user->load('role'); // Asegurarse de que el rol está cargado
         return json([
             'success' => true,
-            // Añadir el objeto de rol a la respuesta del perfil
             'user' => $user->only(['id', 'username', 'email', 'role', 'created_at'])
         ]);
     });
@@ -75,27 +74,29 @@ Route::group('/comments', function () {
 Route::post('/media', [MediaController::class, 'store'])->middleware(JwtAuthentication::class);
 
 
-// --- Rutas de Administración (Solo Admin) ---
+// --- Rutas de Administración (Protegidas por Permisos Granulares) ---
 Route::group('/admin', function () {
-    Route::get('/contents', [ContentController::class, 'indexAdmin']);
-    Route::get('/media', [MediaController::class, 'index']);
-    Route::delete('/media/{id}', [MediaController::class, 'destroy']);
+    // El rol 'admin' tiene el permiso '*' y pasará todas estas verificaciones.
+    // Otros roles (como 'editor') necesitarán estos permisos explícitamente.
+
+    Route::get('/contents', [ContentController::class, 'indexAdmin'])->middleware(new PermissionMiddleware('admin.content.list'));
     
-    // Cambiar rol de usuario (POST /admin/users/{id}/role ahora espera 'role_id')
-    Route::post('/users/{id}/role', [UserController::class, 'changeRole']);
+    Route::get('/media', [MediaController::class, 'index'])->middleware(new PermissionMiddleware('admin.media.list'));
+    Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.media.delete'));
+    
+    Route::post('/users/{id}/role', [UserController::class, 'changeRole'])->middleware(new PermissionMiddleware('admin.user.role.change'));
 
-    // Ruta para actualizar opciones globales
-    Route::post('/options', [OptionController::class, 'updateBatch']);
+    Route::post('/options', [OptionController::class, 'updateBatch'])->middleware(new PermissionMiddleware('admin.options.update'));
 
-    // --- NUEVO: Grupo para Gestión de Roles ---
+    // Grupo para Gestión de Roles
     Route::group('/roles', function () {
-        Route::get('', [RoleController::class, 'index']);
-        Route::post('', [RoleController::class, 'store']);
-        Route::post('/{id}', [RoleController::class, 'update']);
-        Route::delete('/{id}', [RoleController::class, 'destroy']);
+        Route::get('', [RoleController::class, 'index'])->middleware(new PermissionMiddleware('admin.roles.list'));
+        Route::post('', [RoleController::class, 'store'])->middleware(new PermissionMiddleware('admin.roles.create'));
+        Route::post('/{id}', [RoleController::class, 'update'])->middleware(new PermissionMiddleware('admin.roles.update'));
+        Route::delete('/{id}', [RoleController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.roles.delete'));
     });
 
 })->middleware([
-    JwtAuthentication::class,
-    new RoleMiddleware('admin')
+    JwtAuthentication::class // Todas las rutas de admin requieren autenticación.
+    // El RoleMiddleware ha sido reemplazado por los PermissionMiddleware específicos en cada ruta.
 ]);

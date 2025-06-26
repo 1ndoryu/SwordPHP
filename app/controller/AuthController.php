@@ -3,8 +3,9 @@
 namespace app\controller;
 
 use app\model\User;
+use app\model\Role; // <-- Añadido para interactuar con el modelo Role
 use Firebase\JWT\JWT;
-use Illuminate\Database\Capsule\Manager as Capsule; // <-- Importar Capsule
+use Illuminate\Database\Capsule\Manager as Capsule;
 use support\Request;
 use support\Response;
 use support\Log;
@@ -36,26 +37,38 @@ class AuthController
 
         try {
             // --- INICIO DE LA CORRECCIÓN ---
-            // La lógica para asignar el primer rol de 'admin' se envuelve en una transacción
-            // para garantizar la atomicidad. Esto previene condiciones de carrera o lecturas
-            // de estado obsoletas en un entorno de aplicación persistente como Workerman,
-            // asegurando que la comprobación de si ya existe un admin sea 100% fiable.
-            $role = Capsule::transaction(function () {
-                $isAdminPresent = User::where('role', 'admin')->lockForUpdate()->exists();
-                return !$isAdminPresent ? 'admin' : 'user';
+            // Se obtienen los roles 'admin' y 'user' por su nombre.
+            $adminRole = Role::where('name', 'admin')->first();
+            $userRole = Role::where('name', 'user')->first();
+
+            // Fallo crítico si los roles por defecto no existen (deberían haber sido creados por db:install)
+            if (!$adminRole || !$userRole) {
+                Log::channel('auth')->critical('Los roles por defecto "admin" o "user" no se encuentran en la base de datos. Ejecute db:install.');
+                return api_response(false, 'Server configuration error: Default roles not found.', null, 500);
+            }
+            
+            // La lógica para asignar el rol se envuelve en una transacción
+            // y ahora utiliza los IDs de los roles.
+            $role_id_to_assign = Capsule::transaction(function () use ($adminRole, $userRole) {
+                // Comprueba correctamente si ya existe un usuario con el role_id de admin.
+                $isAdminPresent = User::where('role_id', $adminRole->id)->lockForUpdate()->exists();
+                return !$isAdminPresent ? $adminRole->id : $userRole->id;
             });
-            // --- FIN DE LA CORRECCIÓN ---
 
             $user = User::create([
                 'username' => $username,
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
-                'role' => $role
+                // Se asigna el role_id correcto en lugar de un string.
+                'role_id' => $role_id_to_assign
             ]);
 
-            Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $role]);
+            $roleName = ($role_id_to_assign === $adminRole->id) ? 'admin' : 'user';
+            Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $roleName]);
 
             return api_response(true, 'User registered successfully.');
+            // --- FIN DE LA CORRECCIÓN ---
+
         } catch (Throwable $e) {
             Log::channel('auth')->error('Error durante el registro de usuario', ['error' => $e->getMessage()]);
             return api_response(false, 'An internal error occurred.', null, 500);
@@ -77,7 +90,7 @@ class AuthController
             return api_response(false, 'Identifier and password are required.', null, 400);
         }
 
-        $user = User::where('username', $identifier)->orWhere('email', $identifier)->first();
+        $user = User::with('role')->where('username', $identifier)->orWhere('email', $identifier)->first();
 
         if (!$user || !password_verify($password, $user->password)) {
             Log::channel('auth')->warning('Intento de login fallido', ['identifier' => $identifier]);
@@ -94,7 +107,9 @@ class AuthController
                 'data' => [
                     'id' => $user->id,
                     'username' => $user->username,
-                    'role' => $user->role
+                    // --- CORRECCIÓN DE CONSISTENCIA ---
+                    // Se obtiene el nombre del rol a través de la relación para el payload.
+                    'role' => $user->role->name ?? null
                 ]
             ];
 

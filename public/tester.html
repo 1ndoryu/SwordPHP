@@ -268,11 +268,13 @@
 				let localUserToken = null;
 				// Los IDs serán predecibles en un entorno limpio
 				const adminId = 1;
-				const userId = 2; 
+				const userId = 2;
+                const userRoleId = 2; // ID del rol 'user' por defecto
 				let contentId = null;
 				let contentSlug = null;
 				let commentId = null;
 				let mediaId = null;
+                let editorRoleId = null;
 
 				async function testStep(name, endpoint, method, body, token, isFile = false, expectedStatus = 200) {
 					log(`\n[PASO] ${name}`, 'step');
@@ -366,7 +368,14 @@
 				log('\n--- FASE 5: Pruebas de Administrador ---', 'warning');
 				await testStep('Listar todos los contenidos (Admin)', '/admin/contents', 'GET', null, localAdminToken, false, 200);
 				await testStep('Listar todos los archivos (Admin)', '/admin/media', 'GET', null, localAdminToken, false, 200);
-				await testStep('Cambiar rol de "user" a "editor" (Admin)', `/admin/users/${userId}/role`, 'POST', { role: 'editor' }, localAdminToken, false, 200);
+                
+                const newEditorRole = await testStep('Crear rol "editor" (Admin)', '/admin/roles', 'POST', { name: 'editor', description: 'Test Editor Role', permissions: ['content.update'] }, localAdminToken, false, 201);
+                if (newEditorRole && newEditorRole.data) {
+                    editorRoleId = newEditorRole.data.id;
+                    await testStep('Cambiar rol de "user" a "editor" (Admin)', `/admin/users/${userId}/role`, 'POST', { role_id: editorRoleId }, localAdminToken, false, 200);
+                } else {
+                    log('[ADVERTENCIA] No se pudo crear el rol "editor", saltando prueba de cambio de rol.', 'warning');
+                }
                 
 				log('\n--- FASE 6: Pruebas del Sistema de Opciones ---', 'warning');
 				const optionsPayload = { site_title: 'Sword v2 Test Site', maintenance_mode: false, posts_per_page: 12 };
@@ -388,6 +397,14 @@
 				if (contentId) {
 					await testStep('Eliminar contenido creado (User)', `/contents/${contentId}`, 'DELETE', null, localUserToken, false, 204);
 				}
+                
+                // --- INICIO DE LA CORRECCIÓN ---
+                // Antes de eliminar el rol "editor", debemos desasignarlo del usuario de prueba.
+                if (editorRoleId) {
+                    await testStep('Revertir rol de "editor" a "user" (Admin)', `/admin/users/${userId}/role`, 'POST', { role_id: userRoleId }, localAdminToken, false, 200);
+                    await testStep('Eliminar rol "editor" creado (Admin)', `/admin/roles/${editorRoleId}`, 'DELETE', null, localAdminToken, false, 204);
+                }
+                // --- FIN DE LA CORRECCIÓN ---
 
 				log('\n===== SUITE DE PRUEBAS FINALIZADA =====', 'warning');
 			}

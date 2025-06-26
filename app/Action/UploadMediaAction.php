@@ -31,8 +31,16 @@ class UploadMediaAction
             $uploadDir = 'uploads/media';
             $filePath = $uploadDir . '/' . $newFileName;
 
-            // Move the file to the public directory.
-            $file->move(public_path($uploadDir) . '/' . $newFileName);
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Ensure the target directory exists before moving the file.
+            $destinationDir = public_path($uploadDir);
+            if (!is_dir($destinationDir)) {
+                // Create the directory recursively if it doesn't exist.
+                mkdir($destinationDir, 0777, true);
+            }
+            
+            $file->move(public_path($filePath));
+            // --- FIN DE LA CORRECCIÓN ---
 
             $media = Media::create([
                 'user_id' => $request->user->id,
@@ -51,6 +59,7 @@ class UploadMediaAction
             Log::channel('media')->error('Error al subir archivo vía Action', ['error' => $e->getMessage(), 'user_id' => $request->user->id]);
 
             $errorMessage = 'An internal error occurred during file upload.';
+            // Provide detailed error in debug mode
             if (env('APP_DEBUG', false)) {
                 $errorMessage = $e->getMessage();
             }

@@ -34,7 +34,12 @@ class AuthController
         }
 
         try {
-            $role = 'user';
+            // --- INICIO DE LA CORRECCIÓN ---
+            // A more robust way to assign the first admin role.
+            // It checks if an admin user already exists, rather than just counting users.
+            $isAdminPresent = User::where('role', 'admin')->exists();
+            $role = !$isAdminPresent ? 'admin' : 'user';
+            // --- FIN DE LA CORRECCIÓN ---
 
             $user = User::create([
                 'username' => $username,

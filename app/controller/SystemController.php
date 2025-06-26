@@ -14,6 +14,10 @@ class SystemController
      */
     public function install(Request $request): Response
     {
+        if (env('APP_ENV') === 'production') {
+            return api_response(false, 'This endpoint is disabled in production.', null, 403);
+        }
+
         try {
             return $this->runShellCommand('db:install');
         } catch (Throwable $e) {
@@ -26,6 +30,10 @@ class SystemController
      */
     public function reset(Request $request): Response
     {
+        if (env('APP_ENV') === 'production') {
+            return api_response(false, 'This endpoint is disabled in production.', null, 403);
+        }
+
         try {
             return $this->runShellCommand('db:reset', ['--force']);
         } catch (Throwable $e) {

@@ -1,20 +1,26 @@
-# ✨ Sword v2: Minimalist Headless CMS
+# ✨ Sword v2: Blazing-Fast Headless CMS
 
-**Sword v2** is a complete rewrite of a CMS, built from the ground up on **Workerman** to be extremely fast, lightweight, and easy to maintain.
+**Sword v2** is a minimalist, high-performance headless CMS built from the ground up on **Workerman**. It is designed for developers who need extreme speed and a simple, maintainable core. By leveraging Workerman's asynchronous, event-driven architecture, Sword v2 avoids the traditional overhead of frameworks like Laravel or Symfony, resulting in exceptionally low latency and high throughput.
 
 It operates as a pure headless API, completely decoupling the logic from the administration panel. Its architecture relies on a simple database schema (`contents`, `users`, `media`, `options`, `comments`, `likes`) that uses `JSONB` to provide maximum flexibility and performance. The goal is to create a powerful core that never becomes complex again.
 
-## 🚀 Core Principles
+## 🚀 Performance
+
+Sword v2's primary advantage is its speed. Built on Workerman, it operates as a long-running process in memory, eliminating the need to bootstrap the entire framework on every single request. This results in:
+
+-   **Minimal Latency:** API responses are served in just a few milliseconds.
+-   **High Throughput:** Capable of handling a large number of concurrent connections with minimal resource consumption.
+-   **Low Memory Footprint:** Efficient memory management allows it to run on modest hardware, making it ideal for a wide range of applications.
 
 1.  **Extreme Simplification:** Code must be simple, readable, and professional.
 2.  **Pure & Decoupled API:** The CMS is exclusively an API responsible for content, authentication, and files.
 3.  **Mandatory Testing:** All core functionalities are validated through a dedicated E2E testing suite.
-4.  **Clean Code:** Code should be self-explanatory, minimizing the need for comments.
+4.  **Clean Code:** Code should be self-explanatory.
 5.  **Granular Security:** Access control is managed by specific permissions, not just broad roles.
 
 ---
 
-##  API Documentation (v0.9.9)
+## API Documentation (v0.9.9)
 
 This documentation provides a detailed overview of all available endpoints.
 
@@ -41,7 +47,6 @@ All API responses follow a standard JSON format:
     "data": {}
 }
 ```
-
 
 ### ⚙️ 1. System Endpoints
 
@@ -78,7 +83,6 @@ Drops all application tables from the database. **Use with extreme caution.**
         }
     }
     ```
-
 
 ### 🔑 2. Authentication Endpoints
 

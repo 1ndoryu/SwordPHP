@@ -135,8 +135,6 @@ return [
         ],
     ],
 
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Canal para funcionalidades sociales (likes, comentarios)
     'social' => [
         'handlers' => [
             [
@@ -157,5 +155,26 @@ return [
             ]
         ],
     ],
-    // --- FIN DE LA MODIFICACIÓN ---
+
+    // Canal para el sistema de opciones
+    'options' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/options.log',
+                    7, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
 ];

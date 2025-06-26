@@ -8,6 +8,7 @@ use app\controller\MediaController;
 use app\controller\SystemController;
 use app\controller\UserController;
 use app\controller\CommentController;
+use app\controller\OptionController;
 use app\middleware\JwtAuthentication;
 use app\middleware\RoleMiddleware;
 
@@ -16,7 +17,7 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.5' // Versión actualizada
+        'version' => '0.9.6' // Versión actualizada
     ]);
 });
 
@@ -25,6 +26,9 @@ Route::group('/system', function () {
     Route::post('/install', [SystemController::class, 'install']);
     Route::post('/reset', [SystemController::class, 'reset']);
 });
+
+// Rutas de Opciones Globales (Pública para obtenerlas)
+Route::get('/options', [OptionController::class, 'index']);
 
 // Rutas de autenticación
 Route::group('/auth', function () {
@@ -40,7 +44,6 @@ Route::group('/user', function () {
             'user' => $request->user->only(['id', 'username', 'email', 'role', 'created_at'])
         ]);
     });
-    // Nuevo endpoint para listar contenidos con "like"
     Route::get('/likes', [UserController::class, 'likedContent']);
 })->middleware(JwtAuthentication::class);
 
@@ -58,31 +61,24 @@ Route::group('/contents', function () {
 
 
 // --- Rutas de Comentarios (Autenticado) ---
-Route::group('/comments', function() {
-    // La ruta para crear un comentario está asociada a un contenido específico.
+Route::group('/comments', function () {
     Route::post('/{content_id}', [CommentController::class, 'store']);
-    // La ruta para borrar un comentario es por su ID directo.
     Route::delete('/{comment_id}', [CommentController::class, 'destroy']);
 })->middleware(JwtAuthentication::class);
 
 
 // --- Rutas de Media (Autenticado) ---
-// Cualquier usuario autenticado puede subir archivos.
 Route::post('/media', [MediaController::class, 'store'])->middleware(JwtAuthentication::class);
 
 
 // --- Rutas de Administración (Solo Admin) ---
 Route::group('/admin', function () {
-    // Ver todos los contenidos (incluyendo borradores)
     Route::get('/contents', [ContentController::class, 'indexAdmin']);
-
-    // Rutas de gestión de Media para Admin
     Route::get('/media', [MediaController::class, 'index']);
     Route::delete('/media/{id}', [MediaController::class, 'destroy']);
-    
-    // Rutas de gestión de Usuarios para Admin
     Route::post('/users/{id}/role', [UserController::class, 'changeRole']);
-
+    // Ruta para actualizar opciones globales
+    Route::post('/options', [OptionController::class, 'updateBatch']);
 })->middleware([
     JwtAuthentication::class,
     new RoleMiddleware('admin')

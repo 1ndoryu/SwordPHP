@@ -242,7 +242,6 @@
 
 			document.getElementById('install-db-btn').addEventListener('click', async () => {
 				if (confirm('¿Estás seguro? Esto ejecutará db:install.')) {
-					// --- CORRECCIÓN: URL y autenticación ---
 					const {data, status} = await apiCall('/system/install', 'POST', null, false);
 					responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
 				}
@@ -250,7 +249,6 @@
 
 			document.getElementById('reset-db-btn').addEventListener('click', async () => {
 				if (confirm('ADVERTENCIA: ¿Seguro que quieres borrar todas las tablas?')) {
-					// --- CORRECCIÓN: URL y autenticación ---
 					const {data, status} = await apiCall('/system/reset', 'POST', null, false);
 					responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
 				}
@@ -274,7 +272,6 @@
 				async function testStep(name, endpoint, method, body, token, isFile = false, expectedStatus = 200) {
 					log(`\n[PASO] ${name}`, 'step');
 					
-					// Determinar si el token se debe usar (todas las rutas excepto /system/*)
 					const useAuth = !endpoint.startsWith('/system/');
 
 					const headers = {};
@@ -296,7 +293,7 @@
 						} else {
 							log(` [FALLO] Se esperaba status ${expectedStatus} pero se recibió ${status}.`, 'error');
 							log(`  Respuesta: ${data.message || 'Sin mensaje.'}`, 'error');
-							if(data.data && data.data.output) log(`   Salida: ${data.data.output}`, 'info');
+							if(data.data && data.data.output) log(`    Salida: ${data.data.output}`, 'info');
 							return null;
 						}
 					} catch (error) {
@@ -305,14 +302,11 @@
 					}
 				}
 				
-				// --- FASE PREVIA: Limpieza y Preparación ---
-				// Se ejecutan sin token, ya que son rutas públicas de sistema.
 				log('\n--- FASE PREVIA: Limpieza del Entorno ---', 'warning');
 				await testStep('Resetear Base de Datos', '/system/reset', 'POST', null, null, false, 200);
 				await testStep('Instalar Base de Datos', '/system/install', 'POST', null, null, false, 200);
 
 				log('\n--- FASE 1: Registro y Autenticación ---', 'warning');
-				// Ahora, el primer usuario registrado será el admin garantizado.
 				await testStep('Registrar usuario "admin"', '/auth/register', 'POST', adminCreds, null, false, 200);
 				await testStep('Registrar usuario "user"', '/auth/register', 'POST', userCreds, null, false, 200);
 
@@ -348,7 +342,20 @@
 				await testStep('Listar todos los contenidos (Admin)', '/admin/contents', 'GET', null, localAdminToken, false, 200);
 				await testStep('Listar todos los archivos (Admin)', '/admin/media', 'GET', null, localAdminToken, false, 200);
 
-				log('\n--- FASE 5: Limpieza de Residuos ---', 'warning');
+                log('\n--- FASE 5: Pruebas del Sistema de Opciones ---', 'warning');
+                const optionsPayload = { site_title: 'Sword v2 Test Site', maintenance_mode: false, posts_per_page: 12 };
+                const updatedOptions = await testStep('Actualizar opciones (Admin)', '/admin/options', 'POST', optionsPayload, localAdminToken, false, 200);
+                
+                if (updatedOptions) {
+                    const publicOptions = await testStep('Obtener opciones (Público)', '/options', 'GET', null, null, false, 200);
+                    if (publicOptions && publicOptions.data.site_title !== 'Sword v2 Test Site') {
+                        log(' [FALLO] La opción "site_title" no coincide con el valor actualizado.', 'error');
+                    } else if (publicOptions) {
+                        log('  [ÉXITO] Las opciones públicas coinciden con las actualizadas.', 'success');
+                    }
+                }
+
+				log('\n--- FASE 6: Limpieza de Residuos ---', 'warning');
 				if (mediaId) {
 					await testStep('Eliminar archivo subido (Admin)', `/admin/media/${mediaId}`, 'DELETE', null, localAdminToken, false, 204);
 				}

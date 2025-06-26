@@ -96,9 +96,10 @@ class SwordQuery
         if (!empty($argumentos['meta_query']) && is_array($argumentos['meta_query'])) {
             foreach ($argumentos['meta_query'] as $meta) {
                 if (isset($meta['key'], $meta['value'])) {
-                    // CORREGIDO: Usar el operador ->> para una comparación de texto en JSONB (PostgreSQL).
-                    // Esto busca el valor de la 'key' en el nivel superior del JSON.
-                    $query->where("metadata->>{$meta['key']}", (string) $meta['value']);
+                    // >>> INICIO: EL ÚNICO CAMBIO REQUERIDO <<<
+                    $dbKey = \Illuminate\Support\Str::camel($meta['key']);
+                    $query->where("metadata->>{$dbKey}", (string) $meta['value']);
+                    // >>> FIN: EL ÚNICO CAMBIO REQUERIDO <<<
                 }
             }
         }

@@ -18,7 +18,7 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.8' // Versión actualizada
+        'version' => '0.9.9' // Versión actualizada
     ]);
 });
 
@@ -44,9 +44,10 @@ Route::group('/user', function () {
         $user->load('role'); // Asegurarse de que el rol está cargado
         return json([
             'success' => true,
-            'user' => $user->only(['id', 'username', 'email', 'role', 'created_at'])
+            'user' => $user->only(['id', 'username', 'email', 'role', 'created_at', 'profile_data'])
         ]);
     });
+    Route::post('/profile', [UserController::class, 'updateProfile']);
     Route::get('/likes', [UserController::class, 'likedContent']);
 })->middleware(JwtAuthentication::class);
 

@@ -94,4 +94,41 @@ class UserController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    /**
+     * Updates the profile information for the authenticated user.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function updateProfile(Request $request): Response
+    {
+        $user = $request->user;
+        $profile_data_updates = $request->post('profile_data');
+
+        if (!is_array($profile_data_updates)) {
+            return api_response(false, 'profile_data must be an object.', null, 400);
+        }
+
+        try {
+            // Merge new data with existing data to avoid overwriting unrelated fields
+            $new_profile_data = array_merge($user->profile_data ?? [], $profile_data_updates);
+            $user->profile_data = $new_profile_data;
+            $user->save();
+
+            Log::channel('auth')->info('User profile updated.', ['user_id' => $user->id]);
+
+            $user->load('role');
+
+            return api_response(true, 'Profile updated successfully.', [
+                'user' => $user->only(['id', 'username', 'email', 'role', 'profile_data'])
+            ]);
+        } catch (Throwable $e) {
+            Log::channel('auth')->error('Error updating user profile.', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage()
+            ]);
+            return api_response(false, 'An internal error occurred while updating the profile.', null, 500);
+        }
+    }
 }

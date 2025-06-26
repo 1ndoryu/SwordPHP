@@ -266,7 +266,12 @@
 				const userCreds = {username: `user_${rand}`, email: `user_${rand}@test.com`, password: 'password123'};
 				let localAdminToken = null;
 				let localUserToken = null;
+				// Los IDs serán predecibles en un entorno limpio
+				const adminId = 1;
+				const userId = 2; 
 				let contentId = null;
+				let contentSlug = null;
+				let commentId = null;
 				let mediaId = null;
 
 				async function testStep(name, endpoint, method, body, token, isFile = false, expectedStatus = 200) {
@@ -292,8 +297,7 @@
 							return data;
 						} else {
 							log(` [FALLO] Se esperaba status ${expectedStatus} pero se recibió ${status}.`, 'error');
-							log(`  Respuesta: ${data.message || 'Sin mensaje.'}`, 'error');
-							if(data.data && data.data.output) log(`    Salida: ${data.data.output}`, 'info');
+							log(`  Respuesta: ${JSON.stringify(data, null, 2)}`, 'error');
 							return null;
 						}
 					} catch (error) {
@@ -321,41 +325,63 @@
 					return;
 				}
 
+				await testStep('Obtener perfil de usuario', '/user/profile', 'GET', null, localUserToken, false, 200);
+				
 				log('\n--- FASE 2: CRUD de Contenidos (Usuario) ---', 'warning');
 				const createdContent = await testStep('Crear contenido', '/contents', 'POST', {status: 'published', content_data: {title: 'Post de Prueba Automático', body: 'Cuerpo del post.'}}, localUserToken, false, 201);
 
 				if (createdContent && createdContent.data) {
 					contentId = createdContent.data.id;
-					await testStep('Ver contenido público', `/contents/${createdContent.data.slug}`, 'GET', null, null, false, 200);
-					await testStep('Actualizar contenido', `/contents/${contentId}`, 'POST', {status: 'draft', content_data: {title: 'Post (Actualizado)'}}, localUserToken, false, 200);
+					contentSlug = createdContent.data.slug;
+					await testStep('Ver contenido público', `/contents/${contentSlug}`, 'GET', null, null, false, 200);
+					await testStep('Actualizar contenido', `/contents/${contentId}`, 'POST', {status: 'published', content_data: {title: 'Post (Actualizado)'}}, localUserToken, false, 200);
 				} else {
 					log('[ADVERTENCIA] No se pudo crear contenido, saltando pruebas dependientes.', 'warning');
 				}
 
-				log('\n--- FASE 3: Pruebas de Media ---', 'warning');
+				log('\n--- FASE 3: Funcionalidades Sociales ---', 'warning');
+				if (contentId) {
+					await testStep('Dar like a contenido', `/contents/${contentId}/like`, 'POST', {}, localUserToken, false, 200);
+					const likedContent = await testStep('Verificar contenido con like', '/user/likes', 'GET', null, localUserToken, false, 200);
+					if (likedContent && likedContent.data && likedContent.data.data.length > 0) {
+						log('  [ÉXITO] El contenido aparece en la lista de likes.', 'success');
+					} else {
+						log('  [FALLO] El contenido no aparece en la lista de likes.', 'error');
+					}
+					await testStep('Quitar like de contenido', `/contents/${contentId}/like`, 'POST', {}, localUserToken, false, 200);
+
+					const newComment = await testStep('Crear comentario', `/comments/${contentId}`, 'POST', { body: 'Este es un comentario de prueba.' }, localUserToken, false, 201);
+					if(newComment && newComment.data) {
+						commentId = newComment.data.id;
+						await testStep('Eliminar comentario', `/comments/${commentId}`, 'DELETE', null, localUserToken, false, 204);
+					}
+				}
+
+				log('\n--- FASE 4: Pruebas de Media ---', 'warning');
 				const formData = new FormData();
 				formData.append('file', new File(['dummy content'], 'test.txt', {type: 'text/plain'}));
 				const uploadedMedia = await testStep('Subir archivo', '/media', 'POST', formData, localUserToken, true, 201);
 				if (uploadedMedia && uploadedMedia.data) mediaId = uploadedMedia.data.id;
 
-				log('\n--- FASE 4: Pruebas de Listado (Admin) ---', 'warning');
+				log('\n--- FASE 5: Pruebas de Administrador ---', 'warning');
 				await testStep('Listar todos los contenidos (Admin)', '/admin/contents', 'GET', null, localAdminToken, false, 200);
 				await testStep('Listar todos los archivos (Admin)', '/admin/media', 'GET', null, localAdminToken, false, 200);
-
-                log('\n--- FASE 5: Pruebas del Sistema de Opciones ---', 'warning');
-                const optionsPayload = { site_title: 'Sword v2 Test Site', maintenance_mode: false, posts_per_page: 12 };
-                const updatedOptions = await testStep('Actualizar opciones (Admin)', '/admin/options', 'POST', optionsPayload, localAdminToken, false, 200);
+				await testStep('Cambiar rol de "user" a "editor" (Admin)', `/admin/users/${userId}/role`, 'POST', { role: 'editor' }, localAdminToken, false, 200);
                 
-                if (updatedOptions) {
-                    const publicOptions = await testStep('Obtener opciones (Público)', '/options', 'GET', null, null, false, 200);
-                    if (publicOptions && publicOptions.data.site_title !== 'Sword v2 Test Site') {
-                        log(' [FALLO] La opción "site_title" no coincide con el valor actualizado.', 'error');
-                    } else if (publicOptions) {
-                        log('  [ÉXITO] Las opciones públicas coinciden con las actualizadas.', 'success');
-                    }
-                }
+				log('\n--- FASE 6: Pruebas del Sistema de Opciones ---', 'warning');
+				const optionsPayload = { site_title: 'Sword v2 Test Site', maintenance_mode: false, posts_per_page: 12 };
+				const updatedOptions = await testStep('Actualizar opciones (Admin)', '/admin/options', 'POST', optionsPayload, localAdminToken, false, 200);
+				
+				if (updatedOptions) {
+					const publicOptions = await testStep('Obtener opciones (Público)', '/options', 'GET', null, null, false, 200);
+					if (publicOptions && publicOptions.data.site_title !== 'Sword v2 Test Site') {
+						log(' [FALLO] La opción "site_title" no coincide con el valor actualizado.', 'error');
+					} else if (publicOptions) {
+						log('  [ÉXITO] Las opciones públicas coinciden con las actualizadas.', 'success');
+					}
+				}
 
-				log('\n--- FASE 6: Limpieza de Residuos ---', 'warning');
+				log('\n--- FASE 7: Limpieza de Residuos ---', 'warning');
 				if (mediaId) {
 					await testStep('Eliminar archivo subido (Admin)', `/admin/media/${mediaId}`, 'DELETE', null, localAdminToken, false, 204);
 				}

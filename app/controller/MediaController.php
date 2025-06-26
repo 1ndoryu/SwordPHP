@@ -3,6 +3,7 @@
 namespace app\controller;
 
 use app\model\Media;
+use app\Action\UploadMediaAction; // Importar la nueva Action
 use support\Request;
 use support\Response;
 use support\Log;
@@ -11,53 +12,15 @@ use Throwable;
 class MediaController
 {
     /**
-     * Store a newly uploaded file.
+     * Store a newly uploaded file by delegating to an action class.
      *
      * @param Request $request
+     * @param UploadMediaAction $action
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request, UploadMediaAction $action): Response
     {
-        $file = $request->file('file');
-
-        if (!$file || !$file->isValid()) {
-            return json(['success' => false, 'message' => 'No file uploaded or invalid file.'], 400);
-        }
-
-        try {
-            // Generate a unique path and name for the file.
-            $extension = $file->getUploadExtension();
-            $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
-            $uploadDir = 'uploads/media';
-            $filePath = $uploadDir . '/' . $newFileName;
-
-            // Move the file to the public directory.
-            $file->move(public_path($uploadDir) . '/' . $newFileName);
-
-            $media = Media::create([
-                'user_id' => $request->user->id,
-                'path' => $filePath,
-                'mime_type' => $file->getUploadMimeType(),
-                'metadata' => [
-                    'original_name' => $file->getUploadName(),
-                    'size_bytes' => $file->getSize(),
-                ]
-            ]);
-
-            Log::channel('media')->info('Archivo subido exitosamente', ['id' => $media->id, 'user_id' => $request->user->id, 'path' => $filePath]);
-
-            return json(['success' => true, 'message' => 'File uploaded successfully.', 'data' => $media], 201);
-        } catch (Throwable $e) {
-            Log::channel('media')->error('Error al subir archivo', ['error' => $e->getMessage(), 'user_id' => $request->user->id]);
-            
-            // --- INICIO DE LA MODIFICACIÓN (DEBUG MEJORADO) ---
-            $errorMessage = 'An internal error occurred during file upload.';
-            if (env('APP_DEBUG', false)) {
-                $errorMessage = $e->getMessage();
-            }
-            return json(['success' => false, 'message' => $errorMessage], 500);
-            // --- FIN DE LA MODIFICACIÓN ---
-        }
+        return $action($request);
     }
 
     /**
@@ -72,10 +35,10 @@ class MediaController
             // Eager load user relationship to show who uploaded the file.
             $media = Media::with('user:id,username')->latest()->paginate(15);
             Log::channel('media')->info('Admin consultó todos los archivos', ['user_id' => $request->user->id]);
-            return json(['success' => true, 'data' => $media]);
+            return api_response(true, 'Media retrieved successfully.', $media->toArray());
         } catch (Throwable $e) {
             Log::channel('media')->error('Error fetching all media for admin', ['error' => $e->getMessage()]);
-            return json(['success' => false, 'message' => 'An internal error occurred.'], 500);
+            return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
 
@@ -91,7 +54,7 @@ class MediaController
     {
         $media = Media::find($id);
         if (!$media) {
-            return json(['success' => false, 'message' => 'Media not found.'], 404);
+            return api_response(false, 'Media not found.', null, 404);
         }
 
         try {
@@ -110,10 +73,10 @@ class MediaController
                 'admin_id' => $request->user->id
             ]);
 
-            return response('', 204); // No Content
+            return new Response(204); // No Content
         } catch (Throwable $e) {
             Log::channel('media')->error('Error deleting media', ['error' => $e->getMessage(), 'media_id' => $id]);
-            return json(['success' => false, 'message' => 'An internal error occurred.'], 500);
+            return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
 }

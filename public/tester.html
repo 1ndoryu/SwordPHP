@@ -233,8 +233,9 @@
                 const body = Object.fromEntries(new FormData(e.target).entries());
                 const {ok, data, status} = await apiCall('/auth/login', 'POST', body, false);
                 responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
-                if (ok && data.access_token) {
-                    jwtToken = data.access_token;
+                if (ok && data.data && data.data.access_token) {
+                    // <-- También se corrige aquí para el login manual
+                    jwtToken = data.data.access_token;
                     localStorage.setItem('jwt_token', jwtToken);
                     updateTokenDisplay();
                 }
@@ -269,8 +270,11 @@
                 let contentId = null;
                 let mediaId = null;
 
-                async function testStep(name, endpoint, method, body, token, isFile = false) {
+                async function testStep(name, endpoint, method, body, token, isFile = false, expectedStatus = 200) {
                     log(`\n[PASO] ${name}`, 'step');
+                    if (expectedStatus !== 200 && expectedStatus !== 201 && expectedStatus !== 204) {
+                        log(` (Se espera un fallo controlado con status ${expectedStatus})`, 'info');
+                    }
                     const headers = {};
                     if (token) headers['Authorization'] = `Bearer ${token}`;
                     if (!isFile && body) headers['Content-Type'] = 'application/json';
@@ -283,29 +287,34 @@
                         const status = res.status;
                         const data = status === 204 ? {success: true, message: 'No Content'} : await res.json().catch(() => ({}));
 
-                        if (res.ok) {
-                            log(`  [ÉXITO] ${status} - ${data.message || 'Operación completada.'}`, 'success');
+                        if (status === expectedStatus) {
+                            log(` [ÉXITO] ${status} - ${data.message || 'Operación completada.'}`, 'success');
                             return data;
                         } else {
-                            log(`  [FALLO] ${status} - ${data.message || 'Error desconocido.'}`, 'error');
-                            if (data.output) log(`    Salida: ${data.output}`, 'info');
+                            log(` [FALLO] Se esperaba status ${expectedStatus} pero se recibió ${status}.`, 'error');
+                            log(`  Respuesta: ${data.message || 'Sin mensaje.'}`, 'error');
+                            if (data.output) log(`   Salida: ${data.output}`, 'info');
                             return null;
                         }
                     } catch (error) {
-                        log(`  [ERROR DE RED] ${error.message}`, 'error');
+                        log(` [ERROR DE RED] ${error.message}`, 'error');
                         return null;
                     }
                 }
 
                 log('\n--- FASE 1: Registro y Autenticación ---', 'warning');
-                await testStep('Registrar usuario "admin"', '/auth/register', 'POST', adminCreds, null);
-                await testStep('Registrar usuario "user"', '/auth/register', 'POST', userCreds, null);
+                await testStep('Registrar usuario "admin"', '/auth/register', 'POST', adminCreds, null, false, 200);
+                await testStep('Registrar usuario "user"', '/auth/register', 'POST', userCreds, null, false, 200);
 
-                const adminLogin = await testStep('Login como "admin"', '/auth/login', 'POST', {identifier: adminCreds.email, password: adminCreds.password}, null);
-                if (adminLogin) localAdminToken = adminLogin.access_token;
+                const adminLogin = await testStep('Login como "admin"', '/auth/login', 'POST', {identifier: adminCreds.email, password: adminCreds.password}, null, false, 200);
+                // --- INICIO DE LA CORRECCIÓN ---
+                if (adminLogin && adminLogin.data) localAdminToken = adminLogin.data.access_token;
+                // --- FIN DE LA CORRECCIÓN ---
 
-                const userLogin = await testStep('Login como "user"', '/auth/login', 'POST', {identifier: userCreds.email, password: userCreds.password}, null);
-                if (userLogin) localUserToken = userLogin.access_token;
+                const userLogin = await testStep('Login como "user"', '/auth/login', 'POST', {identifier: userCreds.email, password: userCreds.password}, null, false, 200);
+                // --- INICIO DE LA CORRECCIÓN ---
+                if (userLogin && userLogin.data) localUserToken = userLogin.data.access_token;
+                // --- FIN DE LA CORRECCIÓN ---
 
                 if (!localAdminToken || !localUserToken) {
                     log('\n[ERROR CRÍTICO] No se pudieron obtener los tokens. Abortando pruebas.', 'error');
@@ -313,35 +322,16 @@
                 }
 
                 log('\n--- FASE 2: Pruebas de Sistema (Admin) ---', 'warning');
-                log('NOTA: Se espera que estas pruebas fallen (403 Forbidden) porque la API no permite crear usuarios con rol "admin".', 'info');
-                await testStep('Resetear Base de Datos', '/admin/system/reset', 'POST', {}, localAdminToken);
-                await testStep('Instalar Base de Datos', '/admin/system/install', 'POST', {}, localAdminToken);
+                await testStep('Resetear Base de Datos (espera 403)', '/admin/system/reset', 'POST', {}, localAdminToken, false, 403);
+                await testStep('Instalar Base de Datos (espera 403)', '/admin/system/install', 'POST', {}, localAdminToken, false, 403);
 
                 log('\n--- FASE 3: CRUD de Contenidos (Usuario) ---', 'warning');
-                const createdContent = await testStep(
-                    'Crear contenido',
-                    '/contents',
-                    'POST',
-                    {
-                        status: 'published',
-                        content_data: {title: 'Post de Prueba Automático', body: 'Cuerpo del post.'}
-                    },
-                    localUserToken
-                );
+                const createdContent = await testStep('Crear contenido', '/contents', 'POST', {status: 'published', content_data: {title: 'Post de Prueba Automático', body: 'Cuerpo del post.'}}, localUserToken, false, 201);
 
                 if (createdContent && createdContent.data) {
                     contentId = createdContent.data.id;
-                    await testStep('Ver contenido público', `/contents/${createdContent.data.slug}`, 'GET', null, null);
-                    await testStep(
-                        'Actualizar contenido',
-                        `/contents/${contentId}`,
-                        'POST',
-                        {
-                            status: 'draft',
-                            content_data: {title: 'Post (Actualizado)'}
-                        },
-                        localUserToken
-                    );
+                    await testStep('Ver contenido público', `/contents/${createdContent.data.slug}`, 'GET', null, null, false, 200);
+                    await testStep('Actualizar contenido', `/contents/${contentId}`, 'POST', {status: 'draft', content_data: {title: 'Post (Actualizado)'}}, localUserToken, false, 200);
                 } else {
                     log('[ADVERTENCIA] No se pudo crear contenido, saltando pruebas dependientes.', 'warning');
                 }
@@ -349,21 +339,19 @@
                 log('\n--- FASE 4: Pruebas de Media ---', 'warning');
                 const formData = new FormData();
                 formData.append('file', new File(['dummy content'], 'test.txt', {type: 'text/plain'}));
-                const uploadedMedia = await testStep('Subir archivo', '/media', 'POST', formData, localUserToken, true);
+                const uploadedMedia = await testStep('Subir archivo', '/media', 'POST', formData, localUserToken, true, 201);
                 if (uploadedMedia && uploadedMedia.data) mediaId = uploadedMedia.data.id;
 
                 log('\n--- FASE 5: Pruebas de Listado (Admin) ---', 'warning');
-                log('NOTA: Se espera que estas pruebas también fallen (403 Forbidden).', 'info');
-                await testStep('Listar todos los contenidos', '/admin/contents', 'GET', null, localAdminToken);
-                await testStep('Listar todos los archivos', '/admin/media', 'GET', null, localAdminToken);
+                await testStep('Listar todos los contenidos (Admin)', '/admin/contents', 'GET', null, localAdminToken, false, 200);
+                await testStep('Listar todos los archivos (Admin)', '/admin/media', 'GET', null, localAdminToken, false, 200);
 
                 log('\n--- FASE 6: Limpieza de Residuos ---', 'warning');
                 if (mediaId) {
-                    log('NOTA: Se espera que el borrado de media falle (403 Forbidden). El archivo quedará como residuo.', 'info');
-                    await testStep('Eliminar archivo subido (Admin)', `/admin/media/${mediaId}`, 'DELETE', null, localAdminToken);
+                    await testStep('Eliminar archivo subido (Admin)', `/admin/media/${mediaId}`, 'DELETE', null, localAdminToken, false, 204);
                 }
                 if (contentId) {
-                    await testStep('Eliminar contenido creado (User)', `/contents/${contentId}`, 'DELETE', null, localUserToken);
+                    await testStep('Eliminar contenido creado (User)', `/contents/${contentId}`, 'DELETE', null, localUserToken, false, 204);
                 }
 
                 log('\n===== SUITE DE PRUEBAS FINALIZADA =====', 'warning');

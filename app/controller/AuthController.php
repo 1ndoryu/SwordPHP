@@ -25,21 +25,16 @@ class AuthController
         $password = $request->post('password');
 
         if (!$username || !$email || !$password) {
-            return json(['success' => false, 'message' => 'Missing required fields.'], 400);
+            return api_response(false, 'Missing required fields.', null, 400);
         }
 
         // Check if user already exists
         if (User::where('username', $username)->orWhere('email', $email)->exists()) {
-            return json(['success' => false, 'message' => 'User already exists.'], 409);
+            return api_response(false, 'User already exists.', null, 409);
         }
 
         try {
-            // --- INICIO DE LA MODIFICACIÓN (CORRECCIÓN DE SEGURIDAD) ---
-            // Se elimina la lógica que asignaba 'admin' al primer usuario.
-            // Todos los usuarios nuevos tendrán el rol 'user' por defecto.
-            // La creación de administradores debe ser un proceso manual y seguro.
             $role = 'user';
-            // --- FIN DE LA MODIFICACIÓN ---
 
             $user = User::create([
                 'username' => $username,
@@ -50,10 +45,10 @@ class AuthController
 
             Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $role]);
 
-            return json(['success' => true, 'message' => 'User registered successfully.']);
+            return api_response(true, 'User registered successfully.');
         } catch (Throwable $e) {
             Log::channel('auth')->error('Error durante el registro de usuario', ['error' => $e->getMessage()]);
-            return json(['success' => false, 'message' => 'An internal error occurred.'], 500);
+            return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
 
@@ -69,14 +64,14 @@ class AuthController
         $password = $request->post('password');
 
         if (!$identifier || !$password) {
-            return json(['success' => false, 'message' => 'Identifier and password are required.'], 400);
+            return api_response(false, 'Identifier and password are required.', null, 400);
         }
 
         $user = User::where('username', $identifier)->orWhere('email', $identifier)->first();
 
         if (!$user || !password_verify($password, $user->password)) {
             Log::channel('auth')->warning('Intento de login fallido', ['identifier' => $identifier]);
-            return json(['success' => false, 'message' => 'Invalid credentials.'], 401);
+            return api_response(false, 'Invalid credentials.', null, 401);
         }
 
         try {
@@ -97,15 +92,14 @@ class AuthController
 
             Log::channel('auth')->info('Usuario ha iniciado sesión', ['user_id' => $user->id]);
 
-            return json([
-                'success' => true,
+            return api_response(true, 'Login successful.', [
                 'token_type' => 'bearer',
                 'access_token' => $jwt,
                 'expires_in' => $payload['exp'] - time()
             ]);
         } catch (Throwable $e) {
             Log::channel('auth')->error('Error durante la generación de JWT', ['error' => $e->getMessage()]);
-            return json(['success' => false, 'message' => 'Could not create token.'], 500);
+            return api_response(false, 'Could not create token.', null, 500);
         }
     }
 }

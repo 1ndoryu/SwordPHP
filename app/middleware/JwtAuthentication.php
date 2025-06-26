@@ -18,7 +18,7 @@ class JwtAuthentication implements MiddlewareInterface
         $authHeader = $request->header('Authorization');
 
         if (!$authHeader || !preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) {
-            return json(['success' => false, 'message' => 'Authorization token not found.'], 401);
+            return api_response(false, 'Authorization token not found.', null, 401);
         }
 
         $token = $matches[1];
@@ -29,7 +29,7 @@ class JwtAuthentication implements MiddlewareInterface
             // Attach user data to the request for use in controllers
             $user = User::find($decoded->data->id);
             if (!$user) {
-                return json(['success' => false, 'message' => 'User not found.'], 401);
+                return api_response(false, 'User not found.', null, 401);
             }
             $request->user = $user;
 
@@ -39,7 +39,7 @@ class JwtAuthentication implements MiddlewareInterface
                 'error' => $e->getMessage(),
                 'ip' => $request->getRealIp()
             ]);
-            return json(['success' => false, 'message' => 'Provided token is invalid.'], 401);
+            return api_response(false, 'Provided token is invalid.', null, 401);
         }
     }
 }

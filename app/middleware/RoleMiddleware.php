@@ -38,7 +38,7 @@ class RoleMiddleware implements MiddlewareInterface
     {
         $user = $request->user;
         if (!$user) {
-            return json(['success' => false, 'message' => 'Authentication required.'], 401);
+            return api_response(false, 'Authentication required.', null, 401);
         }
 
         // Comprobamos si se definieron roles al crear el middleware.
@@ -46,7 +46,7 @@ class RoleMiddleware implements MiddlewareInterface
             Log::channel('auth')->warning('Error de configuración de middleware de rol: No se especificaron roles en el constructor.', [
                 'path' => $request->path()
             ]);
-            return json(['success' => false, 'message' => 'Internal server error: Role middleware misconfigured.'], 500);
+            return api_response(false, 'Internal server error: Role middleware misconfigured.', null, 500);
         }
 
         if (!in_array($user->role, $this->allowed_roles)) {
@@ -56,7 +56,7 @@ class RoleMiddleware implements MiddlewareInterface
                 'required_roles' => $this->allowed_roles,
                 'path' => $request->path()
             ]);
-            return json(['success' => false, 'message' => 'This action is unauthorized.'], 403);
+            return api_response(false, 'This action is unauthorized.', null, 403);
         }
 
         return $handler($request);

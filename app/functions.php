@@ -5,6 +5,7 @@
  */
 
 use app\model\Option;
+use app\services\EventService; // <-- AÑADIDO
 use support\Response;
 use Webman\Redis;
 use support\Log;
@@ -99,3 +100,28 @@ if (!function_exists('get_option')) {
         return array_key_exists($key, $options ?? []) ? $options[$key] : $default;
     }
 }
+
+// --- INICIO: NUEVA FUNCIÓN ---
+if (!function_exists('dispatch_event')) {
+    /**
+     * Dispatches an event to the event queue (e.g., RabbitMQ).
+     * This is a "fire and forget" operation. It logs errors but doesn't block execution.
+     *
+     * @param string $eventName The name of the event (e.g., 'content.created').
+     * @param array $payload The data associated with the event.
+     * @return void
+     */
+    function dispatch_event(string $eventName, array $payload): void
+    {
+        try {
+            EventService::getInstance()->dispatch($eventName, $payload);
+            Log::channel('events')->info("Evento despachado: {$eventName}", ['payload' => $payload]);
+        } catch (Throwable $e) {
+            Log::channel('events')->error("Fallo al despachar evento: {$eventName}", [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+        }
+    }
+}
+// --- FIN: NUEVA FUNCIÓN ---

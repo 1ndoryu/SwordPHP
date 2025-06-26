@@ -177,4 +177,28 @@ return [
             ]
         ],
     ],
+
+    // --- INICIO: NUEVO CANAL ---
+    // Canal para el sistema de eventos
+    'events' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/events.log',
+                    15, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
+    // --- FIN: NUEVO CANAL ---
 ];

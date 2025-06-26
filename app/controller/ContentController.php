@@ -113,6 +113,14 @@ class ContentController
                 'user_id' => $request->user->id,
                 'is_admin' => $request->user->role === 'admin'
             ]);
+
+            // Despachar evento
+            dispatch_event('content.updated', [
+                'id' => $content->id,
+                'user_id' => $request->user->id,
+                'changes' => $request->post()
+            ]);
+
             return api_response(true, 'Content updated successfully.', $content->toArray());
         } catch (Throwable $e) {
             Log::channel('content')->error('Error updating content', ['error' => $e->getMessage(), 'content_id' => $id]);
@@ -144,12 +152,20 @@ class ContentController
         }
 
         try {
+            $content_id = $content->id; // Guardar id antes de borrar
             $content->delete();
             Log::channel('content')->warning('Contenido eliminado', [
                 'id' => $id,
                 'user_id' => $request->user->id,
                 'is_admin' => $request->user->role === 'admin'
             ]);
+
+            // Despachar evento
+            dispatch_event('content.deleted', [
+                'id' => $content_id,
+                'user_id' => $request->user->id
+            ]);
+
             return new Response(204); // No Content
         } catch (Throwable $e) {
             Log::channel('content')->error('Error deleting content', ['error' => $e->getMessage(), 'content_id' => $id]);
@@ -181,6 +197,9 @@ class ContentController
                 $existing_like->delete();
                 $message = 'Like removed successfully.';
                 Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
+                
+                // Despachar evento
+                dispatch_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
             } else {
                 Like::create([
                     'content_id' => $id,
@@ -188,6 +207,9 @@ class ContentController
                 ]);
                 $message = 'Like added successfully.';
                 Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
+
+                // Despachar evento
+                dispatch_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
             }
 
             $like_count = $content->likes()->count();

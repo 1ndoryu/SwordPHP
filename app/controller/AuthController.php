@@ -36,7 +36,6 @@ class AuthController
         }
 
         try {
-            // --- INICIO DE LA CORRECCIÓN ---
             // Se obtienen los roles 'admin' y 'user' por su nombre.
             $adminRole = Role::where('name', 'admin')->first();
             $userRole = Role::where('name', 'user')->first();
@@ -66,8 +65,15 @@ class AuthController
             $roleName = ($role_id_to_assign === $adminRole->id) ? 'admin' : 'user';
             Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $roleName]);
 
+            // Despachar evento de nuevo usuario
+            dispatch_event('user.registered', [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role_name' => $roleName
+            ]);
+
             return api_response(true, 'User registered successfully.');
-            // --- FIN DE LA CORRECCIÓN ---
 
         } catch (Throwable $e) {
             Log::channel('auth')->error('Error durante el registro de usuario', ['error' => $e->getMessage()]);
@@ -107,7 +113,6 @@ class AuthController
                 'data' => [
                     'id' => $user->id,
                     'username' => $user->username,
-                    // --- CORRECCIÓN DE CONSISTENCIA ---
                     // Se obtiene el nombre del rol a través de la relación para el payload.
                     'role' => $user->role->name ?? null
                 ]
@@ -116,6 +121,9 @@ class AuthController
             $jwt = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
 
             Log::channel('auth')->info('Usuario ha iniciado sesión', ['user_id' => $user->id]);
+
+            // Despachar evento de login
+            dispatch_event('user.loggedin', ['user_id' => $user->id]);
 
             return api_response(true, 'Login successful.', [
                 'token_type' => 'bearer',

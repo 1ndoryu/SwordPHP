@@ -10,6 +10,7 @@ use App\service\MediaService;
 use App\service\StorageServiceInterface;
 use support\Request;
 use support\Response;
+use Webman\Exception\NotFoundException;
 
 class MediaApiController extends ApiBaseController
 {
@@ -56,7 +57,7 @@ class MediaApiController extends ApiBaseController
         try {
             $uploadData = $this->storageService->upload($request, $data, $request->usuario->id);
             $media = $this->mediaService->crearDesdeApi($uploadData, $request->usuario->id);
-            return $this->respuestaExito($media, 201);
+            return $this->respuestaExito($media->toArray(), 201);
         } catch (\Exception $e) {
             return $this->respuestaError('Error al procesar el archivo: ' . $e->getMessage(), 500);
         }
@@ -67,29 +68,31 @@ class MediaApiController extends ApiBaseController
         try {
             $media = $this->mediaService->obtenerMediaPorId($id);
 
-            // [CORRECCIÓN] Obtener el proveedor desde los metadatos.
+            // [CORRECCIÓN 1] Obtener el proveedor desde los metadatos del objeto Media.
             $provider = $media->obtenerMeta('provider');
-            if (!$provider) {
+            if (empty($provider) || !is_string($provider)) {
                 throw new \Exception("El proveedor de almacenamiento no está definido para el medio con ID: $id.");
             }
             $this->setStorageProvider($provider);
 
-            // [CORRECCIÓN] Obtener la ruta del archivo y el nombre original.
-            // La ruta del archivo está en la columna 'rutaarchivo'.
+            // [CORRECCIÓN 2] Obtener la ruta del archivo y el nombre original de forma segura.
             $filePath = $media->rutaarchivo;
-            // El nombre original está en los metadatos.
             $originalName = $media->obtenerMeta('nombre_original', basename($filePath));
 
-            if (!$filePath) {
+            if (empty($filePath)) {
                 throw new \Exception("La ruta del archivo no está definida para el medio con ID: $id.");
             }
             
+            // Esta llamada ahora es segura y devolverá un StreamInterface.
             $stream = $this->storageService->download($filePath);
 
             return new Response(200, [
                 'Content-Type' => $media->tipomime,
                 'Content-Disposition' => 'attachment; filename="' . $originalName . '"',
             ], $stream);
+
+        } catch (NotFoundException $e) {
+             return $this->respuestaError('Recurso no encontrado.', 404);
         } catch (\Exception $e) {
             \support\Log::error("Error en MediaApiController@download para ID $id: " . $e->getMessage());
             return $this->respuestaError('Error al descargar el archivo: ' . $e->getMessage(), 500);

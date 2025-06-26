@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use support\Log;
+use app\model\Role; // <-- Añadido
 
 class InstallCommand extends Command
 {
@@ -20,6 +21,33 @@ class InstallCommand extends Command
         Log::channel('database')->info('Iniciando instalación de la base de datos...');
 
         try {
+            // Roles
+            if (!Capsule::schema()->hasTable('roles')) {
+                Capsule::schema()->create('roles', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('name')->unique();
+                    $table->string('description')->nullable();
+                    $table->jsonb('permissions')->nullable();
+                    $table->timestamps();
+                });
+                $output->writeln('Log: Tabla "roles" creada correctamente.');
+                Log::channel('database')->info('Tabla "roles" creada correctamente.');
+
+                // Seed default roles
+                Role::create([
+                    'name' => 'admin',
+                    'description' => 'Super Administrator with all permissions.',
+                    'permissions' => ['*']
+                ]);
+                Role::create([
+                    'name' => 'user',
+                    'description' => 'Standard user with basic content creation permissions.',
+                    'permissions' => ['content.create', 'content.update.own', 'comment.create', 'comment.delete.own']
+                ]);
+                $output->writeln('Log: Roles por defecto ("admin", "user") creados.');
+                Log::channel('database')->info('Roles por defecto ("admin", "user") creados.');
+            }
+
             // Usuarios
             if (!Capsule::schema()->hasTable('users')) {
                 Capsule::schema()->create('users', function (Blueprint $table) {
@@ -27,7 +55,8 @@ class InstallCommand extends Command
                     $table->string('username')->unique();
                     $table->string('email')->unique();
                     $table->string('password');
-                    $table->string('role')->default('user');
+                    $table->unsignedBigInteger('role_id')->nullable();
+                    $table->foreign('role_id')->references('id')->on('roles')->onDelete('set null');
                     $table->jsonb('profile_data')->nullable();
                     $table->timestamps();
                 });

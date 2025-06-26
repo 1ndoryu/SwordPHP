@@ -14,20 +14,24 @@ It operates as a pure headless API, completely decoupling the logic from the adm
 
 ---
 
-## API Documentation (v0.9.6)
+## API Documentation (v0.9.7)
 
 This documentation provides a detailed overview of all available endpoints.
 
 ### **Base URL**
+
 The API root is the base URL of your application. Examples use `http://127.0.0.1:8787`.
 
 ### **Authentication**
+
 Most endpoints require a `Bearer Token` for authentication. First, register a user and then use the `/auth/login` endpoint to obtain a JWT. Include this token in the `Authorization` header for protected requests.
 
 **Header Format:** `Authorization: Bearer <YOUR_JWT_TOKEN>`
 
 ### **General Responses**
+
 All API responses follow a standard JSON format:
+
 ```json
 {
     "success": true, // boolean
@@ -35,8 +39,6 @@ All API responses follow a standard JSON format:
     "data": {} // object or null
 }
 ```
-
-
 
 ### 1\. System Endpoints
 
@@ -46,9 +48,9 @@ Endpoints for installing and resetting the database. Intended for development an
 
 Initializes the database by creating all the necessary tables (`users`, `contents`, `media`, etc.).
 
-  * **Authentication:** None
-  * **Request Body:** None
-  * **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Request Body:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -63,9 +65,9 @@ Initializes the database by creating all the necessary tables (`users`, `content
 
 Drops all application tables from the database. **Use with extreme caution.**
 
-  * **Authentication:** None
-  * **Request Body:** None
-  * **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Request Body:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -76,7 +78,7 @@ Drops all application tables from the database. **Use with extreme caution.**
     }
     ```
 
------
+---
 
 ### 2\. Authentication Endpoints
 
@@ -84,8 +86,8 @@ Drops all application tables from the database. **Use with extreme caution.**
 
 Registers a new user. The first user registered is automatically assigned the `admin` role. Subsequent users will have the `user` role.
 
-  * **Authentication:** None
-  * **Request Body:**
+-   **Authentication:** None
+-   **Request Body:**
     ```json
     {
         "username": "newuser",
@@ -93,14 +95,14 @@ Registers a new user. The first user registered is automatically assigned the `a
         "password": "strongpassword123"
     }
     ```
-  * **Success Response (200 OK):**
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
         "message": "User registered successfully."
     }
     ```
-  * **Error Response (409 Conflict):**
+-   **Error Response (409 Conflict):**
     ```json
     {
         "success": false,
@@ -112,15 +114,15 @@ Registers a new user. The first user registered is automatically assigned the `a
 
 Authenticates a user and returns a JWT access token.
 
-  * **Authentication:** None
-  * **Request Body:**
+-   **Authentication:** None
+-   **Request Body:**
     ```json
     {
         "identifier": "user@example.com", // Can be username or email
         "password": "strongpassword123"
     }
     ```
-  * **Success Response (200 OK):**
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -132,7 +134,7 @@ Authenticates a user and returns a JWT access token.
         }
     }
     ```
-  * **Error Response (401 Unauthorized):**
+-   **Error Response (401 Unauthorized):**
     ```json
     {
         "success": false,
@@ -140,7 +142,7 @@ Authenticates a user and returns a JWT access token.
     }
     ```
 
------
+---
 
 ### 3\. User Endpoints
 
@@ -150,8 +152,8 @@ Endpoints for retrieving authenticated user information.
 
 Retrieves the profile information of the currently authenticated user.
 
-  * **Authentication:** Bearer Token
-  * **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -169,10 +171,10 @@ Retrieves the profile information of the currently authenticated user.
 
 Retrieves a paginated list of content that the authenticated user has liked.
 
-  * **Authentication:** Bearer Token
-  * **Query Parameters:**
-      * `per_page` (integer, optional, default: 15): Number of items per page.
-  * **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Query Parameters:**
+    -   `per_page` (integer, optional, default: 15): Number of items per page.
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -184,18 +186,18 @@ Retrieves a paginated list of content that the authenticated user has liked.
                     "id": 1,
                     "slug": "my-first-post",
                     "type": "post",
-                    "status": "published",
+                    "status": "published"
                     // ... other content fields
                 }
             ],
             "first_page_url": "http://.../?page=1",
-            "last_page": 1,
+            "last_page": 1
             // ... pagination fields
         }
     }
     ```
 
------
+---
 
 ### 4\. Content Endpoints
 
@@ -205,17 +207,17 @@ Endpoints for managing content (posts, pages, etc.).
 
 Retrieves a paginated list of `published` content.
 
-  * **Authentication:** None
-  * **Query Parameters:**
-      * `per_page` (integer, optional, default: 15): Number of items per page.
-  * **Success Response (200 OK):** (Structure is similar to `/user/likes`)
+-   **Authentication:** None
+-   **Query Parameters:**
+    -   `per_page` (integer, optional, default: 15): Number of items per page.
+-   **Success Response (200 OK):** (Structure is similar to `/user/likes`)
 
 #### **`GET /contents/{slug}`**
 
 Retrieves a single piece of `published` content by its slug.
 
-  * **Authentication:** None
-  * **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -240,8 +242,8 @@ Retrieves a single piece of `published` content by its slug.
 
 Creates a new piece of content.
 
-  * **Authentication:** Bearer Token
-  * **Request Body:**
+-   **Authentication:** Bearer Token
+-   **Request Body:**
     ```json
     {
         "type": "post",
@@ -253,14 +255,14 @@ Creates a new piece of content.
         }
     }
     ```
-  * **Success Response (201 Created):** (Returns the created content object)
+-   **Success Response (201 Created):** (Returns the created content object)
 
 #### **`POST /contents/{id}`**
 
 Updates an existing piece of content. The user must be the owner or an admin.
 
-  * **Authentication:** Bearer Token
-  * **Request Body:** (Include only the fields you want to update)
+-   **Authentication:** Bearer Token
+-   **Request Body:** (Include only the fields you want to update)
     ```json
     {
         "status": "published",
@@ -269,21 +271,21 @@ Updates an existing piece of content. The user must be the owner or an admin.
         }
     }
     ```
-  * **Success Response (200 OK):** (Returns the updated content object)
+-   **Success Response (200 OK):** (Returns the updated content object)
 
 #### **`DELETE /contents/{id}`**
 
 Deletes a piece of content. The user must be the owner or an admin.
 
-  * **Authentication:** Bearer Token
-  * **Success Response (204 No Content):** An empty response.
+-   **Authentication:** Bearer Token
+-   **Success Response (204 No Content):** An empty response.
 
 #### **`POST /contents/{id}/like`**
 
 Toggles a "like" on a piece of content for the authenticated user.
 
-  * **Authentication:** Bearer Token
-  * **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -294,7 +296,7 @@ Toggles a "like" on a piece of content for the authenticated user.
     }
     ```
 
------
+---
 
 ### 5\. Comments Endpoints
 
@@ -302,14 +304,14 @@ Toggles a "like" on a piece of content for the authenticated user.
 
 Posts a new comment on a piece of content. The content must be `published`.
 
-  * **Authentication:** Bearer Token
-  * **Request Body:**
+-   **Authentication:** Bearer Token
+-   **Request Body:**
     ```json
     {
         "body": "This is a great post!"
     }
     ```
-  * **Success Response (201 Created):**
+-   **Success Response (201 Created):**
     ```json
     {
         "success": true,
@@ -332,10 +334,10 @@ Posts a new comment on a piece of content. The content must be `published`.
 
 Deletes a comment. The user must be the owner of the comment or an admin.
 
-  * **Authentication:** Bearer Token
-  * **Success Response (204 No Content):** An empty response.
+-   **Authentication:** Bearer Token
+-   **Success Response (204 No Content):** An empty response.
 
------
+---
 
 ### 6\. Media Endpoints
 
@@ -343,9 +345,9 @@ Deletes a comment. The user must be the owner of the comment or an admin.
 
 Uploads a new file.
 
-  * **Authentication:** Bearer Token
-  * **Request Body:** `multipart/form-data` with a file field named `file`.
-  * **Success Response (201 Created):**
+-   **Authentication:** Bearer Token
+-   **Request Body:** `multipart/form-data` with a file field named `file`.
+-   **Success Response (201 Created):**
     ```json
     {
         "success": true,
@@ -364,7 +366,7 @@ Uploads a new file.
     }
     ```
 
------
+---
 
 ### 7\. Options Endpoints
 
@@ -374,8 +376,8 @@ Manage global site settings.
 
 Retrieves all global options as a single key-value object.
 
-  * **Authentication:** None
-  * **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -388,7 +390,7 @@ Retrieves all global options as a single key-value object.
     }
     ```
 
------
+---
 
 ### 8\. Admin Endpoints
 
@@ -397,67 +399,99 @@ These endpoints require `admin` role.
 #### **`GET /admin/contents`**
 
 Retrieves a paginated list of **all** content, regardless of status.
-
-  * **Authentication:** Bearer Token (Admin)
-  * **Query Parameters:**
-      * `per_page` (integer, optional, default: 15): Number of items per page.
-  * **Success Response (200 OK):** (Structure similar to `/contents`)
+ \* **Authentication:** Bearer Token (Admin)
 
 #### **`GET /admin/media`**
 
 Retrieves a paginated list of all uploaded media files.
-
-  * **Authentication:** Bearer Token (Admin)
-  * **Query Parameters:**
-      * `per_page` (integer, optional, default: 15): Number of items per page.
-  * **Success Response (200 OK):** (Structure similar to `/user/likes`, but with media objects)
+ \* **Authentication:** Bearer Token (Admin)
 
 #### **`DELETE /admin/media/{id}`**
 
 Permanently deletes a media file from the server and the database.
-
-  * **Authentication:** Bearer Token (Admin)
-  * **Success Response (204 No Content):** An empty response.
+ \* **Authentication:** Bearer Token (Admin)
 
 #### **`POST /admin/users/{id}/role`**
 
-Changes the role of a specific user.
+Changes the role of a specific user by assigning a `role_id`.
 
-  * **Authentication:** Bearer Token (Admin)
-  * **Request Body:**
-    ```json
-    {
-        "role": "editor" // Allowed values: "admin", "editor", "user"
-    }
-    ```
-  * **Success Response (200 OK):**
-    ```json
-    {
-        "success": true,
-        "message": "User role updated successfully.",
-        "data": {
-            "id": 2,
-            "username": "newuser",
-            "email": "user@example.com",
-            "role": "editor"
-        }
-    }
-    ```
+_ **Authentication:** Bearer Token (Admin)
+ _ **Request Body:**
+   `json
+   {
+       "role_id": 2 
+   }
+   `
+ \* **Success Response (200 OK):** (Returns the user object with the nested role)
 
 #### **`POST /admin/options`**
 
 Batch updates global options.
+ \* **Authentication:** Bearer Token (Admin)
 
-  * **Authentication:** Bearer Token (Admin)
-  * **Request Body:** A JSON object of key-value pairs.
+---
+
+### 9. Role Management Endpoints (Admin Only)
+
+Endpoints for creating, reading, updating, and deleting roles. Permissions are assigned as an array of strings.
+
+**Base Path:** `/admin/roles`
+
+#### **`GET /admin/roles`**
+
+Retrieves a list of all roles.
+
+-   **Authentication:** Bearer Token (Admin)
+-   **Success Response (200 OK):**
     ```json
     {
-        "site_title": "My Awesome Blog",
-        "maintenance_mode": false,
-        "posts_per_page": 10
+        "success": true,
+        "message": "Roles retrieved successfully.",
+        "data": [
+            {
+                "id": 1,
+                "name": "admin",
+                "description": "Super Administrator...",
+                "permissions": ["*"],
+                "created_at": "...",
+                "updated_at": "..."
+            }
+        ]
     }
     ```
-  * **Success Response (200 OK):** (Returns all options after the update)
 
+#### **`POST /admin/roles`**
 
+Creates a new role.
 
+-   **Authentication:** Bearer Token (Admin)
+-   **Request Body:**
+    ```json
+    {
+        "name": "editor",
+        "description": "Can edit all content.",
+        "permissions": ["content.create", "content.update", "content.delete"]
+    }
+    ```
+-   **Success Response (201 Created):** (Returns the created role object)
+
+#### **`POST /admin/roles/{id}`**
+
+Updates an existing role's details and/or permissions.
+
+-   **Authentication:** Bearer Token (Admin)
+-   **Request Body:** (Include only fields to update)
+    ```json
+    {
+        "description": "Can create and edit all content.",
+        "permissions": ["content.create", "content.update"]
+    }
+    ```
+-   **Success Response (200 OK):** (Returns the updated role object)
+
+#### **`DELETE /admin/roles/{id}`**
+
+Deletes a role. Default 'admin' and 'user' roles cannot be deleted. A role cannot be deleted if it is assigned to any users.
+
+-   **Authentication:** Bearer Token (Admin)
+-   **Success Response (204 No Content):** An empty response.

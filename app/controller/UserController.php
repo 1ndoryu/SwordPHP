@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\model\Content;
 use app\model\User;
+use app\model\Role; // <-- Añadido
 use support\Request;
 use support\Response;
 use support\Log;
@@ -30,29 +31,25 @@ class UserController
             return api_response(false, 'Administrators cannot change their own role.', null, 400);
         }
 
-        $new_role = $request->post('role');
-        $allowed_roles = ['admin', 'editor', 'user'];
-
-        if (!$new_role || !in_array($new_role, $allowed_roles)) {
-            return api_response(
-                false,
-                'Invalid or missing role provided.',
-                ['allowed_roles' => $allowed_roles],
-                400
-            );
+        $new_role_id = $request->post('role_id');
+        if (!$new_role_id || !Role::where('id', $new_role_id)->exists()) {
+             return api_response(false, 'Invalid or missing role_id provided.', null, 400);
         }
-
+        
         try {
-            $old_role = $user_to_modify->role;
-            $user_to_modify->role = $new_role;
+            $old_role_id = $user_to_modify->role_id;
+            $user_to_modify->role_id = $new_role_id;
             $user_to_modify->save();
 
             Log::channel('auth')->warning('Rol de usuario modificado por administrador', [
                 'admin_id' => $request->user->id,
                 'modified_user_id' => $user_to_modify->id,
-                'old_role' => $old_role,
-                'new_role' => $new_role,
+                'old_role_id' => $old_role_id,
+                'new_role_id' => $new_role_id,
             ]);
+            
+            // Recargar el usuario con la nueva información del rol
+            $user_to_modify->load('role');
 
             return api_response(
                 true,

@@ -29,16 +29,21 @@ class ResetCommand extends Command
         $output->writeln('<comment>Log: Iniciando el reseteo de la base de datos...</comment>');
         Log::channel('database')->warning('Iniciando el reseteo de la base de datos...');
 
+        // El orden es importante para las claves foráneas
         $tables = [
             'likes',
             'comments',
-            'options',
             'media',
             'contents',
-            'users'
+            'users',
+            'roles', // <-- Añadido al final
+            'options',
         ];
 
         try {
+            // Desactivar temporalmente las restricciones de claves foráneas
+            Capsule::schema()->disableForeignKeyConstraints();
+
             foreach ($tables as $table) {
                 if (Capsule::schema()->hasTable($table)) {
                     Capsule::schema()->drop($table);
@@ -50,7 +55,11 @@ class ResetCommand extends Command
             $output->writeln('<error>Error: ' . $e->getMessage() . '</error>');
             Log::channel('database')->error('Error durante el reseteo: ' . $e->getMessage());
             return Command::FAILURE;
+        } finally {
+            // Siempre reactivar las restricciones
+            Capsule::schema()->enableForeignKeyConstraints();
         }
+
 
         $output->writeln('<info>Log: Reseteo de la base de datos completado.</info>');
         Log::channel('database')->info('Reseteo de la base de datos completado.');

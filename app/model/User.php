@@ -4,7 +4,8 @@ namespace app\model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany; // <-- Añadido
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo; // <-- Añadido
 
 class User extends Model
 {
@@ -26,7 +27,7 @@ class User extends Model
         'username',
         'email',
         'password',
-        'role',
+        'role_id', // <-- MODIFICADO de 'role' a 'role_id'
         'profile_data',
     ];
 
@@ -48,6 +49,34 @@ class User extends Model
         'profile_data' => 'array',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the role associated with the user.
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Check if the user has a specific permission.
+     *
+     * @param string $permission
+     * @return boolean
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (!$this->role || !$this->role->permissions) {
+            return false;
+        }
+
+        // Wildcard permission
+        if (in_array('*', $this->role->permissions)) {
+            return true;
+        }
+
+        return in_array($permission, $this->role->permissions);
+    }
 
     /**
      * Get the likes for the user.

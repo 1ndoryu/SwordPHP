@@ -1,5 +1,4 @@
 <?php
-// ARCHIVO MODIFICADO: app/middleware/RoleMiddleware.php
 
 namespace app\middleware;
 
@@ -40,24 +39,21 @@ class RoleMiddleware implements MiddlewareInterface
         if (!$user) {
             return api_response(false, 'Authentication required.', null, 401);
         }
-
-        // Comprobamos si se definieron roles al crear el middleware.
+        
         if (empty($this->allowed_roles)) {
             Log::channel('auth')->warning('Error de configuración de middleware de rol: No se especificaron roles en el constructor.', [
                 'path' => $request->path()
             ]);
             return api_response(false, 'Internal server error: Role middleware misconfigured.', null, 500);
         }
+        
+        // Se obtiene el nombre del rol a través de la relación.
+        $user_role_name = $user->role->name ?? null;
 
-        // --- INICIO DE LA CORRECCIÓN ---
-        // Se utiliza trim() para eliminar posibles espacios en blanco en el rol del usuario,
-        // haciendo la comprobación más robusta ante inconsistencias en los datos.
-        $user_role = trim($user->role);
-        if (!in_array($user_role, $this->allowed_roles)) {
-            // --- FIN DE LA CORRECCIÓN ---
+        if (!$user_role_name || !in_array($user_role_name, $this->allowed_roles)) {
             Log::channel('auth')->warning('Intento de acceso a ruta protegida por rol no autorizado', [
                 'user_id' => $user->id,
-                'user_role' => $user->role, // Se loguea el rol original para depuración
+                'user_role' => $user_role_name,
                 'required_roles' => $this->allowed_roles,
                 'path' => $request->path()
             ]);

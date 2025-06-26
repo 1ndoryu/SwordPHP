@@ -9,6 +9,7 @@ use app\controller\SystemController;
 use app\controller\UserController;
 use app\controller\CommentController;
 use app\controller\OptionController;
+use app\controller\RoleController; // <-- Añadido
 use app\middleware\JwtAuthentication;
 use app\middleware\RoleMiddleware;
 
@@ -17,7 +18,7 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.6' // Versión actualizada
+        'version' => '0.9.7' // Versión actualizada
     ]);
 });
 
@@ -39,9 +40,12 @@ Route::group('/auth', function () {
 // Rutas de datos del usuario autenticado
 Route::group('/user', function () {
     Route::get('/profile', function (support\Request $request) {
+        $user = $request->user;
+        $user->load('role'); // Asegurarse de que el rol está cargado
         return json([
             'success' => true,
-            'user' => $request->user->only(['id', 'username', 'email', 'role', 'created_at'])
+            // Añadir el objeto de rol a la respuesta del perfil
+            'user' => $user->only(['id', 'username', 'email', 'role', 'created_at'])
         ]);
     });
     Route::get('/likes', [UserController::class, 'likedContent']);
@@ -76,9 +80,21 @@ Route::group('/admin', function () {
     Route::get('/contents', [ContentController::class, 'indexAdmin']);
     Route::get('/media', [MediaController::class, 'index']);
     Route::delete('/media/{id}', [MediaController::class, 'destroy']);
+    
+    // Cambiar rol de usuario (POST /admin/users/{id}/role ahora espera 'role_id')
     Route::post('/users/{id}/role', [UserController::class, 'changeRole']);
+
     // Ruta para actualizar opciones globales
     Route::post('/options', [OptionController::class, 'updateBatch']);
+
+    // --- NUEVO: Grupo para Gestión de Roles ---
+    Route::group('/roles', function () {
+        Route::get('', [RoleController::class, 'index']);
+        Route::post('', [RoleController::class, 'store']);
+        Route::post('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+    });
+
 })->middleware([
     JwtAuthentication::class,
     new RoleMiddleware('admin')

@@ -1,29 +1,23 @@
 <?php
-return  [
-    'default' => 'mysql',
+
+use support\Db;
+
+return [
+    // Conexión por defecto
+    'default' => env('DB_CONNECTION', 'pgsql'),
+
     'connections' => [
-        'mysql' => [
-            'driver'      => 'mysql',
-            'host'        => '127.0.0.1',
-            'port'        => '3306',
-            'database'    => 'your_database',
-            'username'    => 'your_username',
-            'password'    => 'your_password',
-            'charset'     => 'utf8mb4',
-            'collation'   => 'utf8mb4_general_ci',
+        'pgsql' => [
+            'driver'      => 'pgsql',
+            'host'        => env('DB_HOST', '127.0.0.1'),
+            'port'        => env('DB_PORT', '5432'),
+            'database'    => env('DB_DATABASE', 'sword_db'),
+            'username'    => env('DB_USERNAME', 'admin'),
+            'password'    => env('DB_PASSWORD', 'admin'),
+            'charset'     => 'utf8',
             'prefix'      => '',
-            'strict'      => true,
-            'engine'      => null,
-            'options'   => [
-                PDO::ATTR_EMULATE_PREPARES => false, // Must be false for Swoole and Swow drivers.
-            ],
-            'pool' => [
-                'max_connections' => 5,
-                'min_connections' => 1,
-                'wait_timeout' => 3,
-                'idle_timeout' => 60,
-                'heartbeat_interval' => 50,
-            ],
+            'schema'      => 'public',
+            'sslmode'     => 'prefer',
         ],
     ],
 ];

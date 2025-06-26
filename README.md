@@ -2,25 +2,142 @@
 
 **Sword v2** is a minimalist, high-performance headless CMS built from the ground up on **Workerman**. It is designed for developers who need extreme speed and a simple, maintainable core. By leveraging Workerman's asynchronous, event-driven architecture, Sword v2 avoids the traditional overhead of frameworks like Laravel or Symfony, resulting in exceptionally low latency and high throughput.
 
-It operates as a pure headless API, completely decoupling the logic from the administration panel. Its architecture relies on a simple database schema (`contents`, `users`, `media`, `options`, `comments`, `likes`) that uses `JSONB` to provide maximum flexibility and performance. The goal is to create a powerful core that never becomes complex again.
+It operates as a pure headless API, completely decoupling the backend logic from any frontend client or administration panel. Its architecture relies on a simple database schema (`contents`, `users`, `media`, `options`, `comments`, `likes`) that uses `JSONB` to provide maximum flexibility and performance. The goal is to create a powerful core that never becomes complex again.
 
 ## 🚀 Performance
 
 Sword v2's primary advantage is its speed. Built on Workerman, it operates as a long-running process in memory, eliminating the need to bootstrap the entire framework on every single request. This results in:
 
--   **Minimal Latency:** API responses are served in just a few milliseconds.
--   **High Throughput:** Capable of handling a large number of concurrent connections with minimal resource consumption.
--   **Low Memory Footprint:** Efficient memory management allows it to run on modest hardware, making it ideal for a wide range of applications.
+  - **Minimal Latency:** API responses are served in just a few milliseconds.
+  - **High Throughput:** Capable of handling a large number of concurrent connections with minimal resource consumption.
+  - **Low Memory Footprint:** Efficient memory management allows it to run on modest hardware, making it ideal for a wide range of applications.
 
-1.  **Extreme Simplification:** Code must be simple, readable, and professional.
-2.  **Pure & Decoupled API:** The CMS is exclusively an API responsible for content, authentication, and files.
-3.  **Mandatory Testing:** All core functionalities are validated through a dedicated E2E testing suite.
-4.  **Clean Code:** Code should be self-explanatory.
-5.  **Granular Security:** Access control is managed by specific permissions, not just broad roles.
+## 📜 Core Principles
 
----
+1.  **Extreme Simplification:** Code must be simple, readable, and professional. Use the least amount of code possible and never repeat it (DRY principle).
+2.  **Code Standards:** All code is written in **English** using the `snake_case` convention. Variable and function names should be self-explanatory but concise.
+3.  **Pure & Decoupled API:** The CMS is exclusively an API responsible for content, authentication, and files. The admin panel or any client is a completely separate project.
+4.  **Mandatory Testing:** All core functionalities are validated through a dedicated End-to-End (E2E) testing suite to ensure robustness.
+5.  **Clean Code:** Code should be self-explanatory, minimizing the need for comments. If a comment is required, it should explain the "why," not the "what."
+6.  **Channel-based Logging:** Each main feature (auth, content, etc.) has its own separate log file for easier debugging, with a `master.log` capturing all activity.
+7.  **Clean Architecture:** The file structure is organized and granular, avoiding large files with multiple responsibilities.
 
-## API Documentation (v0.9.9)
+-----
+
+## 💾 Installation
+
+### Prerequisites
+
+  - PHP \>= 8.1
+  - Composer
+  - PostgreSQL
+  - Redis (Recommended for caching)
+  - RabbitMQ (Required for the Event System)
+
+### 1\. Local Setup
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone https://your-repository-url/sword-v2.git
+    cd sword-v2
+    ```
+
+2.  **Install PHP dependencies:**
+
+    ```bash
+    composer install
+    ```
+
+3.  **Configure your environment:**
+
+      - Copy the example environment file: `cp .env.example .env`
+      - Edit the `.env` file with your database credentials, RabbitMQ connection details, and generate a unique `JWT_SECRET`:
+        ```bash
+        # You can generate a secret with:
+        # openssl rand -base64 32
+        JWT_SECRET="YOUR_SUPER_SECRET_KEY_HERE"
+        ```
+
+4.  **Set up the database:**
+    Run the installation command to create all necessary tables and default roles.
+
+    ```bash
+    php webman db:install
+    ```
+
+5.  **Start the server:**
+
+    ```bash
+    php start.php start
+    ```
+
+    The API will be running at `http://127.0.0.1:8787`.
+
+### 2\. Docker Setup
+
+A `Dockerfile` is included for containerized deployments.
+
+1.  **Build the image:**
+
+    ```bash
+    docker build -t sword-v2 .
+    ```
+
+2.  **Run the container:**
+    Make sure your `.env` file is configured, as it will be used by the container. You'll need to link it to your PostgreSQL and RabbitMQ services.
+
+    ```bash
+    docker run -p 8787:8787 --env-file .env --name sword-api sword-v2
+    ```
+
+-----
+
+## ⚡ Event System & Webhooks
+
+Sword v2 includes a robust event system built on **RabbitMQ** to decouple application logic and notify external services via webhooks.
+
+### Overview
+
+When a key action occurs in the CMS (like creating content), an event is dispatched to a RabbitMQ queue. A dedicated background process, `WebhookListener`, consumes messages from this queue. For each event, it finds all active webhooks registered for that event and sends them an asynchronous HTTP POST request.
+
+This ensures that external integrations (like a static site generator, a notification service, or a search indexer) are notified immediately without impacting the API's response time.
+
+### Available Events
+
+The following events are currently dispatched:
+
+| Event Name          | Triggered When...                            | Payload Includes                               |
+| ------------------- | -------------------------------------------- | ---------------------------------------------- |
+| `user.registered`   | A new user successfully registers.           | `user_id`, `username`, `email`, `role_name`    |
+| `user.loggedin`     | A user successfully logs in.                 | `user_id`                                      |
+| `content.created`   | A new piece of content is created.           | `id`, `slug`, `type`, `status`, `user_id`, `title` |
+| `content.updated`   | A piece of content is updated.               | `id`, `user_id`, `changes` (the updated data)  |
+| `content.deleted`   | A piece of content is deleted.               | `id`, `user_id`                                |
+| `content.liked`     | A user likes a piece of content.             | `content_id`, `user_id`                        |
+| `content.unliked`   | A user removes their like from content.      | `content_id`, `user_id`                        |
+
+### Webhook Security
+
+To verify that a webhook request originated from your Sword v2 instance, you can configure a `secret` when creating a webhook. If a secret is present, all outgoing requests will include an `X-Sword-Signature` header containing a `sha256` HMAC hash of the request body, signed with your secret.
+
+-----
+
+## 🛡️ Security Considerations (Pentesting)
+
+Security is a core consideration. Here are the key areas to focus on during security analysis:
+
+  - **Authentication & Authorization:** Access is controlled by JWT bearer tokens. All protected endpoints require a valid token. Authorization is granular, based on permissions assigned to roles (e.g., `content.create`, `admin.users.list`). The `admin` role has wildcard `*` access, while other roles must have permissions explicitly granted.
+  - **Input Validation:** All user-supplied data must be rigorously validated and sanitized to prevent common vulnerabilities like XSS, SQL injection, and command injection.
+  - **System Endpoints:** The dangerous `/system/install` and `/system/reset` endpoints are disabled by default when `APP_ENV` is set to `production`. They should never be exposed on a live server.
+  - **Dependency Management:** Regularly update dependencies with `composer update` to patch known vulnerabilities in third-party packages.
+  - **Environment Security:** Never commit your `.env` file to version control. Ensure secrets like `JWT_SECRET`, database credentials, and other API keys are managed securely.
+  - **File Uploads:** Files are uploaded with unique, randomly generated names to prevent path traversal attacks. However, further security measures like strict file type and size validation, and scanning uploaded files for malware, are recommended.
+  - **Webhook Integrity:** Use the `secret` field when creating webhooks to generate a signature. Your webhook consumer should validate this signature to ensure the payload has not been tampered with and originated from your CMS.
+
+-----
+
+## API Documentation (v1.0.0)
 
 This documentation provides a detailed overview of all available endpoints.
 
@@ -50,7 +167,7 @@ All API responses follow a standard JSON format:
 
 ### ⚙️ 1. System Endpoints
 
-Endpoints for installing and resetting the database. Intended for development and testing environments.
+Endpoints for installing and resetting the database. Intended for development and testing environments. **Disabled in production.**
 
 #### **`POST /system/install`**
 
@@ -267,13 +384,13 @@ Creates new content. Requires `content.create` permission.
 
 #### **`POST /contents/{id}`**
 
-Updates existing content. Requires `content.update.own` permission, or `content.update.all` for an admin.
+Updates existing content. Requires `content.update.own` permission, or `content.update.all` for other users' content.
 
   - **Authentication:** Bearer Token
 
 #### **`DELETE /contents/{id}`**
 
-Deletes content. Requires `content.delete.own` permission, or `content.delete.all` for an admin.
+Deletes content. Requires `content.delete.own` permission, or `content.delete.all` for other users' content.
 
   - **Authentication:** Bearer Token
 
@@ -322,7 +439,7 @@ Posts a new comment. Requires `comment.create` permission.
 
 #### **`DELETE /comments/{comment_id}`**
 
-Deletes a comment. Requires `comment.delete.own` permission or `comment.delete.all` for an admin.
+Deletes a comment. Requires `comment.delete.own` permission or `comment.delete.all` for other users' comments.
 
   - **Authentication:** Bearer Token
 
@@ -467,3 +584,34 @@ Updates an existing role. (Requires `admin.roles.update`)
 
 Deletes a role. (Requires `admin.roles.delete`)
 
+-----
+
+### 🎣 10. Webhook Management Endpoints (Admin)
+
+Base Path: `/admin/webhooks`. These endpoints require `admin.webhooks.*` permissions.
+
+#### **`GET /admin/webhooks`**
+
+Retrieves a list of all webhooks. (Requires `admin.webhooks.list`)
+
+#### **`POST /admin/webhooks`**
+
+Creates a new webhook. (Requires `admin.webhooks.create`)
+
+  - **Request Body:**
+    ```json
+    {
+        "event_name": "content.created",
+        "target_url": "https://my-service.com/webhook-receiver",
+        "secret": "a-very-strong-secret-to-validate-payloads",
+        "is_active": true
+    }
+    ```
+
+#### **`POST /admin/webhooks/{id}`**
+
+Updates an existing webhook. (Requires `admin.webhooks.update`)
+
+#### **`DELETE /admin/webhooks/{id}`**
+
+Deletes a webhook. (Requires `admin.webhooks.delete`)

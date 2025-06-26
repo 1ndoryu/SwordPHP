@@ -3,7 +3,6 @@
 namespace app\controller;
 
 use app\model\Option;
-use Illuminate\Database\Capsule\Manager as Capsule; // <-- AÑADIDO: Importar Capsule para el query builder.
 use support\Request;
 use support\Response;
 use support\Log;
@@ -47,32 +46,34 @@ class OptionController
         }
 
         try {
-            // --- INICIO DE LA CORRECCIÓN ---
-            // Se utiliza el query builder en lugar del modelo Eloquent para la escritura.
-            // Esto evita el conflicto con el 'cast' del modelo `Option`, que espera un
-            // array de PHP pero recibe valores primitivos (string, bool, int).
-            // Aquí, codificamos manualmente cada valor a JSON, lo cual es seguro para la
-            // columna `jsonb` de la base de datos. Las lecturas seguirán usando el modelo.
             foreach ($options_to_update as $key => $value) {
-                Capsule::table('options')->updateOrInsert(
+                Option::updateOrCreate(
                     ['key' => $key],
-                    ['value' => json_encode($value)] // Codificación manual a JSON.
+                    ['value' => $value]
                 );
             }
-            // --- FIN DE LA CORRECCIÓN ---
 
-            // Invalidar el caché de opciones en Redis para forzar una recarga en la próxima petición.
-            Redis::del('sword_options');
-            Log::channel('options')->info('Caché de opciones invalidado tras la actualización.', [
-                'admin_id' => $request->user->id
-            ]);
+            // --- INICIO DE LA CORRECCIÓN DE COMPATIBILIDAD ---
+            // Se intenta invalidar el caché de Redis, pero si falla (ej. en Windows),
+            // se captura la excepción y se continúa sin generar un error 500.
+            try {
+                Redis::del('sword_options');
+                Log::channel('options')->info('Caché de opciones invalidado tras la actualización.', [
+                    'admin_id' => $request->user->id
+                ]);
+            } catch (Throwable $e) {
+                Log::channel('options')->warning('No se pudo invalidar el caché de Redis. La aplicación continuará.', [
+                    'error' => $e->getMessage(),
+                    'admin_id' => $request->user->id
+                ]);
+            }
+            // --- FIN DE LA CORRECCIÓN DE COMPATIBILIDAD ---
 
             Log::channel('options')->info('Opciones actualizadas por administrador', [
                 'admin_id' => $request->user->id,
                 'updated_keys' => array_keys($options_to_update)
             ]);
 
-            // Return all current options after update
             $all_options = Option::all()->pluck('value', 'key');
             return api_response(true, 'Options updated successfully.', $all_options->toArray());
         } catch (Throwable $e) {

@@ -29,7 +29,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/master.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [
@@ -51,7 +51,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/database.log',
-                    7,
+                    15,
                     $logLevel
                 ],
                 'formatter' => [
@@ -73,7 +73,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/auth.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [
@@ -98,7 +98,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/content.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [
@@ -120,7 +120,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/media.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [
@@ -141,7 +141,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/social.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [
@@ -163,7 +163,7 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/options.log',
-                    7, // $maxFiles
+                    15, // $maxFiles
                     $logLevel
                 ],
                 'formatter' => [

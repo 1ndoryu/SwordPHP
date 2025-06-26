@@ -16,19 +16,15 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.9.0' // Versión actualizada
+        'version' => '0.9.5' // Versión actualizada
     ]);
 });
 
-// --- INICIO DE LA MODIFICACIÓN ---
 // Rutas de Sistema (Públicas para entorno de desarrollo/testing)
-// NOTA: Estas rutas permiten a cualquiera resetear o instalar la base de datos.
-// En un entorno de producción, deberían protegerse (ej. por IP o una clave secreta).
 Route::group('/system', function () {
     Route::post('/install', [SystemController::class, 'install']);
     Route::post('/reset', [SystemController::class, 'reset']);
 });
-// --- FIN DE LA MODIFICACIÓN ---
 
 // Rutas de autenticación
 Route::group('/auth', function () {
@@ -36,12 +32,16 @@ Route::group('/auth', function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Ejemplo de una ruta protegida (Perfil de usuario)
-Route::get('/user/profile', function (support\Request $request) {
-    return json([
-        'success' => true,
-        'user' => $request->user->only(['id', 'username', 'email', 'role', 'created_at'])
-    ]);
+// Rutas de datos del usuario autenticado
+Route::group('/user', function () {
+    Route::get('/profile', function (support\Request $request) {
+        return json([
+            'success' => true,
+            'user' => $request->user->only(['id', 'username', 'email', 'role', 'created_at'])
+        ]);
+    });
+    // Nuevo endpoint para listar contenidos con "like"
+    Route::get('/likes', [UserController::class, 'likedContent']);
 })->middleware(JwtAuthentication::class);
 
 
@@ -83,7 +83,6 @@ Route::group('/admin', function () {
     // Rutas de gestión de Usuarios para Admin
     Route::post('/users/{id}/role', [UserController::class, 'changeRole']);
 
-    // Las rutas de sistema se han movido para que no requieran autenticación.
 })->middleware([
     JwtAuthentication::class,
     new RoleMiddleware('admin')

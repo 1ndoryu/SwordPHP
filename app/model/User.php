@@ -4,6 +4,7 @@ namespace app\model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany; // <-- Añadido
 
 class User extends Model
 {
@@ -47,4 +48,12 @@ class User extends Model
         'profile_data' => 'array',
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the likes for the user.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
+    }
 }

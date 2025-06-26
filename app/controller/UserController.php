@@ -2,6 +2,7 @@
 
 namespace app\controller;
 
+use app\model\Content;
 use app\model\User;
 use support\Request;
 use support\Response;
@@ -60,6 +61,39 @@ class UserController
             );
         } catch (Throwable $e) {
             Log::channel('auth')->error('Error al cambiar el rol del usuario', ['error' => $e->getMessage()]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+
+    /**
+     * Retrieves a paginated list of content liked by the authenticated user.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function likedContent(Request $request): Response
+    {
+        $user = $request->user;
+
+        try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100);
+
+            // Get IDs of content liked by the user
+            $liked_content_ids = $user->likes()->pluck('content_id');
+
+            // Retrieve and paginate the actual content
+            $liked_contents = Content::whereIn('id', $liked_content_ids)
+                ->where('status', 'published') // Ensure content is still public
+                ->latest()
+                ->paginate($per_page);
+
+            return api_response(true, 'Liked content retrieved successfully.', $liked_contents->toArray());
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error retrieving liked content for user', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }

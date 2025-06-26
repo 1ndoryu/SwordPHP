@@ -32,8 +32,11 @@ class MediaController
     public function index(Request $request): Response
     {
         try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100); // Set a max limit of 100 per page
+
             // Eager load user relationship to show who uploaded the file.
-            $media = Media::with('user:id,username')->latest()->paginate(15);
+            $media = Media::with('user:id,username')->latest()->paginate($per_page);
             Log::channel('media')->info('Admin consultó todos los archivos', ['user_id' => $request->user->id]);
             return api_response(true, 'Media retrieved successfully.', $media->toArray());
         } catch (Throwable $e) {

@@ -17,10 +17,13 @@ class ContentController
      *
      * @return Response
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         try {
-            $contents = Content::where('status', 'published')->latest()->paginate(15);
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100); // Set a max limit of 100 per page
+
+            $contents = Content::where('status', 'published')->latest()->paginate($per_page);
             return api_response(true, 'Contents retrieved successfully.', $contents->toArray());
         } catch (Throwable $e) {
             Log::channel('content')->error('Error fetching contents', ['error' => $e->getMessage()]);
@@ -37,8 +40,11 @@ class ContentController
     public function indexAdmin(Request $request): Response
     {
         try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100); // Set a max limit of 100 per page
+
             // Admin can see all content, regardless of status.
-            $contents = Content::latest()->paginate(15);
+            $contents = Content::latest()->paginate($per_page);
             Log::channel('content')->info('Admin consultó todos los contenidos', ['user_id' => $request->user->id]);
             return api_response(true, 'All contents retrieved successfully for admin.', $contents->toArray());
         } catch (Throwable $e) {

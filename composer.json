@@ -39,7 +39,8 @@
         "doctrine/annotations": "^2.0",
         "webman/redis": "^2.1",
         "php-amqplib/php-amqplib": "^3.7",
-        "laminas/laminas-diactoros": "^3.6"
+        "laminas/laminas-diactoros": "^3.6",
+        "firebase/php-jwt": "^6.11"
     },
     "suggest": {
         "ext-event": "For better performance. "

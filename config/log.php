@@ -14,17 +14,13 @@ return [
             [
                 'class' => Monolog\Handler\GroupHandler::class,
                 'constructor' => [
-                    // Agrupa los manejadores que procesarán los logs del canal 'default'
-                    'handlers' => [
-                        // Aquí podrías redirigir a otros canales si fuese necesario,
-                        // pero para el master log, lo definimos directamente abajo.
-                    ],
+                    'handlers' => [],
                 ],
             ],
         ],
         'processors' => [],
     ],
-    
+
     // Canal 'master' que captura todos los logs
     'master' => [
         'handlers' => [
@@ -46,15 +42,15 @@ return [
             ]
         ],
     ],
-    
-    // Canal de ejemplo para la base de datos
+
+    // Canal para la base de datos
     'database' => [
         'handlers' => [
             [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/database.log',
-                    7, // $maxFiles
+                    7,
                     $logLevel
                 ],
                 'formatter' => [
@@ -66,6 +62,31 @@ return [
                     ],
                 ],
             ]
+        ],
+    ],
+
+    // Canal para la autenticación
+    'auth' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/auth.log',
+                    7, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+        'processors' => [
+            // Aquí se podrían añadir procesadores para añadir más datos a los logs de auth
         ],
     ],
 ];

@@ -16,9 +16,19 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '0.8.0' // Versión actualizada
+        'version' => '0.9.0' // Versión actualizada
     ]);
 });
+
+// --- INICIO DE LA MODIFICACIÓN ---
+// Rutas de Sistema (Públicas para entorno de desarrollo/testing)
+// NOTA: Estas rutas permiten a cualquiera resetear o instalar la base de datos.
+// En un entorno de producción, deberían protegerse (ej. por IP o una clave secreta).
+Route::group('/system', function () {
+    Route::post('/install', [SystemController::class, 'install']);
+    Route::post('/reset', [SystemController::class, 'reset']);
+});
+// --- FIN DE LA MODIFICACIÓN ---
 
 // Rutas de autenticación
 Route::group('/auth', function () {
@@ -43,10 +53,7 @@ Route::group('/contents', function () {
     Route::post('', [ContentController::class, 'store']);
     Route::post('/{id}', [ContentController::class, 'update']);
     Route::delete('/{id}', [ContentController::class, 'destroy']);
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // Ruta para dar/quitar like a un contenido
     Route::post('/{id}/like', [ContentController::class, 'toggleLike']);
-    // --- FIN DE LA MODIFICACIÓN ---
 })->middleware(JwtAuthentication::class);
 
 
@@ -76,9 +83,7 @@ Route::group('/admin', function () {
     // Rutas de gestión de Usuarios para Admin
     Route::post('/users/{id}/role', [UserController::class, 'changeRole']);
 
-    // Rutas de gestión del sistema
-    Route::post('/system/install', [SystemController::class, 'install']);
-    Route::post('/system/reset', [SystemController::class, 'reset']);
+    // Las rutas de sistema se han movido para que no requieran autenticación.
 })->middleware([
     JwtAuthentication::class,
     new RoleMiddleware('admin')

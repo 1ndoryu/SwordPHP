@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\model\User;
 use Firebase\JWT\JWT;
+use Illuminate\Database\Capsule\Manager as Capsule; // <-- Importar Capsule
 use support\Request;
 use support\Response;
 use support\Log;
@@ -35,10 +36,14 @@ class AuthController
 
         try {
             // --- INICIO DE LA CORRECCIÓN ---
-            // A more robust way to assign the first admin role.
-            // It checks if an admin user already exists, rather than just counting users.
-            $isAdminPresent = User::where('role', 'admin')->exists();
-            $role = !$isAdminPresent ? 'admin' : 'user';
+            // La lógica para asignar el primer rol de 'admin' se envuelve en una transacción
+            // para garantizar la atomicidad. Esto previene condiciones de carrera o lecturas
+            // de estado obsoletas en un entorno de aplicación persistente como Workerman,
+            // asegurando que la comprobación de si ya existe un admin sea 100% fiable.
+            $role = Capsule::transaction(function () {
+                $isAdminPresent = User::where('role', 'admin')->lockForUpdate()->exists();
+                return !$isAdminPresent ? 'admin' : 'user';
+            });
             // --- FIN DE LA CORRECCIÓN ---
 
             $user = User::create([

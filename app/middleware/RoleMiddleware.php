@@ -49,10 +49,15 @@ class RoleMiddleware implements MiddlewareInterface
             return api_response(false, 'Internal server error: Role middleware misconfigured.', null, 500);
         }
 
-        if (!in_array($user->role, $this->allowed_roles)) {
+        // --- INICIO DE LA CORRECCIÓN ---
+        // Se utiliza trim() para eliminar posibles espacios en blanco en el rol del usuario,
+        // haciendo la comprobación más robusta ante inconsistencias en los datos.
+        $user_role = trim($user->role);
+        if (!in_array($user_role, $this->allowed_roles)) {
+            // --- FIN DE LA CORRECCIÓN ---
             Log::channel('auth')->warning('Intento de acceso a ruta protegida por rol no autorizado', [
                 'user_id' => $user->id,
-                'user_role' => $user->role,
+                'user_role' => $user->role, // Se loguea el rol original para depuración
                 'required_roles' => $this->allowed_roles,
                 'path' => $request->path()
             ]);

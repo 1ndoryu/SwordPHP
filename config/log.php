@@ -1,4 +1,5 @@
 <?php
+// ARCHIVO MODIFICADO: config/log.php
 
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
@@ -89,4 +90,50 @@ return [
             // Aquí se podrían añadir procesadores para añadir más datos a los logs de auth
         ],
     ],
+
+    // Canal para el contenido
+    'content' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/content.log',
+                    7, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
+
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Canal para la gestión de media
+    'media' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/media.log',
+                    7, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
+    // --- FIN DE LA MODIFICACIÓN ---
 ];

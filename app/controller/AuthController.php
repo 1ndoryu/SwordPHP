@@ -38,7 +38,6 @@ class AuthController
                 'username' => $username,
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
-                // Default role can be handled here or in the database schema
                 'role' => 'user'
             ]);
 

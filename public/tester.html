@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sword v2 - API Tester</title>
+        <style>
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --primary-color: #007bff;
+                --border-color: #444;
+                --input-bg: #2a2a2a;
+                --card-bg: #242424;
+                --success-color: #28a745;
+                --error-color: #dc3545;
+            }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                margin: 0;
+                padding: 20px;
+                font-size: 14px;
+            }
+            h1,
+            h2 {
+                border-bottom: 2px solid var(--primary-color);
+                padding-bottom: 10px;
+            }
+            .container {
+                max-width: 1200px;
+                margin: auto;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .card {
+                background-color: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 20px;
+            }
+            .card h3 {
+                margin-top: 0;
+                color: var(--primary-color);
+            }
+            form {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            input,
+            textarea,
+            select {
+                background-color: var(--input-bg);
+                color: var(--text-color);
+                border: 1px solid var(--border-color);
+                padding: 8px;
+                border-radius: 4px;
+            }
+            textarea {
+                resize: vertical;
+                min-height: 80px;
+            }
+            button {
+                background-color: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+            button:hover {
+                opacity: 0.9;
+            }
+            .response-area {
+                grid-column: span 2;
+                margin-top: 20px;
+            }
+            #response {
+                background-color: black;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                padding: 15px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                min-height: 100px;
+            }
+            .token-status {
+                margin-bottom: 15px;
+                font-style: italic;
+            }
+            .token-status span {
+                font-weight: bold;
+            }
+            .success {
+                color: var(--success-color);
+            }
+            .error {
+                color: var(--error-color);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Sword v2 - API Tester</h1>
+
+        <div class="container">
+            <div class="card">
+                <h3>Autenticación</h3>
+                <div class="token-status">JWT Token: <span id="token-display">No obtenido</span></div>
+                <form id="register-form">
+                    <h4>Registrar Usuario</h4>
+                    <input type="text" name="username" placeholder="Username" required />
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="password" name="password" placeholder="Password" required />
+                    <button type="submit">Register</button>
+                </form>
+                <hr style="margin: 20px 0; border-color: var(--border-color)" />
+                <form id="login-form">
+                    <h4>Login</h4>
+                    <input type="text" name="identifier" placeholder="Username o Email" required />
+                    <input type="password" name="password" placeholder="Password" required />
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Contenidos (CRUD)</h3>
+                <form id="create-content-form">
+                    <h4>Crear Contenido (Requiere Auth)</h4>
+                    <input type="text" name="title" placeholder="Título del contenido" required />
+                    <textarea name="body" placeholder='{"key": "value", "content": "..."}' required></textarea>
+                    <select name="status">
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                    </select>
+                    <button type="submit">Crear</button>
+                </form>
+                <hr style="margin: 20px 0; border-color: var(--border-color)" />
+                <h4>Obtener Contenidos</h4>
+                <button id="get-all-contents">Obtener todos (Publicados)</button>
+            </div>
+        </div>
+
+        <div class="response-area">
+            <h2>Respuesta de la API</h2>
+            <pre id="response">Las respuestas de la API aparecerán aquí...</pre>
+        </div>
+
+        <script>
+            const API_BASE_URL = 'http://127.0.0.1:8787';
+            const responseEl = document.getElementById('response');
+            const tokenDisplayEl = document.getElementById('token-display');
+
+            let jwtToken = localStorage.getItem('jwt_token') || null;
+            updateTokenDisplay();
+
+            function updateTokenDisplay() {
+                if (jwtToken) {
+                    tokenDisplayEl.textContent = 'Guardado en LocalStorage';
+                    tokenDisplayEl.className = 'success';
+                } else {
+                    tokenDisplayEl.textContent = 'No obtenido';
+                    tokenDisplayEl.className = 'error';
+                }
+            }
+
+            async function apiCall(endpoint, method = 'GET', body = null, needsAuth = false) {
+                const headers = {'Content-Type': 'application/json'};
+                if (needsAuth) {
+                    if (!jwtToken) {
+                        displayResponse({error: 'Token JWT no encontrado. Por favor, haz login primero.'}, 401);
+                        return;
+                    }
+                    headers['Authorization'] = `Bearer ${jwtToken}`;
+                }
+
+                try {
+                    const config = {
+                        method,
+                        headers
+                    };
+                    if (body) {
+                        config.body = JSON.stringify(body);
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                    const data = await response.json().catch(() => null); // Handle empty responses like 204
+                    displayResponse(data, response.status);
+
+                    // If login was successful, store the token
+                    if (endpoint === '/auth/login' && response.ok && data.access_token) {
+                        jwtToken = data.access_token;
+                        localStorage.setItem('jwt_token', jwtToken);
+                        updateTokenDisplay();
+                    }
+                } catch (error) {
+                    displayResponse({error: error.message}, 500);
+                }
+            }
+
+            function displayResponse(data, status) {
+                responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+                if (status >= 200 && status < 300) {
+                    responseEl.style.borderColor = 'var(--success-color)';
+                } else {
+                    responseEl.style.borderColor = 'var(--error-color)';
+                }
+            }
+
+            // Event Listeners
+            document.getElementById('register-form').addEventListener('submit', e => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const body = Object.fromEntries(formData.entries());
+                apiCall('/auth/register', 'POST', body);
+            });
+
+            document.getElementById('login-form').addEventListener('submit', e => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const body = Object.fromEntries(formData.entries());
+                apiCall('/auth/login', 'POST', body);
+            });
+
+            document.getElementById('get-all-contents').addEventListener('click', e => {
+                e.preventDefault();
+                apiCall('/contents', 'GET');
+            });
+
+            document.getElementById('create-content-form').addEventListener('submit', e => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                let body = {
+                    status: formData.get('status'),
+                    content_data: {
+                        title: formData.get('title')
+                    }
+                };
+                try {
+                    // Try to parse the body as JSON, merge if successful
+                    const jsonData = JSON.parse(formData.get('body'));
+                    body.content_data = {...body.content_data, ...jsonData};
+                } catch (err) {
+                    // If not valid JSON, just use it as simple text
+                    body.content_data.body = formData.get('body');
+                }
+                apiCall('/contents', 'POST', body, true);
+            });
+        </script>
+    </body>
+</html>

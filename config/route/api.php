@@ -1,5 +1,5 @@
 <?php
-// ARCHIVO MODIFICADO: config/route/api.php
+// config/route/api.php
 
 use Webman\Route;
 use app\controller\AuthController;
@@ -10,7 +10,7 @@ use app\controller\UserController;
 use app\controller\CommentController;
 use app\controller\OptionController;
 use app\controller\RoleController;
-use app\controller\WebhookController; // <-- AÑADIDO
+use app\controller\WebhookController;
 use app\middleware\JwtAuthentication;
 use app\middleware\PermissionMiddleware;
 
@@ -19,7 +19,7 @@ Route::get('/', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',
-        'version' => '1.0.0' // Versión actualizada
+        'version' => '1.0.0'
     ]);
 });
 
@@ -72,8 +72,9 @@ Route::group('/comments', function () {
 })->middleware(JwtAuthentication::class);
 
 
-// --- Rutas de Media (Autenticado) ---
+// --- Rutas de Media ---
 Route::post('/media', [MediaController::class, 'store'])->middleware(JwtAuthentication::class);
+Route::get('/media/{id}', [MediaController::class, 'show']);
 
 
 // --- Rutas de Administración (Protegidas por Permisos Granulares) ---
@@ -82,10 +83,10 @@ Route::group('/admin', function () {
     // Otros roles (como 'editor') necesitarán estos permisos explícitamente.
 
     Route::get('/contents', [ContentController::class, 'indexAdmin'])->middleware(new PermissionMiddleware('admin.content.list'));
-    
+
     Route::get('/media', [MediaController::class, 'index'])->middleware(new PermissionMiddleware('admin.media.list'));
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.media.delete'));
-    
+
     Route::post('/users/{id}/role', [UserController::class, 'changeRole'])->middleware(new PermissionMiddleware('admin.user.role.change'));
 
     Route::post('/options', [OptionController::class, 'updateBatch'])->middleware(new PermissionMiddleware('admin.options.update'));
@@ -98,7 +99,6 @@ Route::group('/admin', function () {
         Route::delete('/{id}', [RoleController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.roles.delete'));
     });
 
-    // --- INICIO: NUEVO GRUPO DE RUTAS ---
     // Grupo para Gestión de Webhooks
     Route::group('/webhooks', function () {
         Route::get('', [WebhookController::class, 'index'])->middleware(new PermissionMiddleware('admin.webhooks.list'));
@@ -106,9 +106,6 @@ Route::group('/admin', function () {
         Route::post('/{id}', [WebhookController::class, 'update'])->middleware(new PermissionMiddleware('admin.webhooks.update'));
         Route::delete('/{id}', [WebhookController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.webhooks.delete'));
     });
-    // --- FIN: NUEVO GRUPO DE RUTAS ---
-
-
 })->middleware([
     JwtAuthentication::class // Todas las rutas de admin requieren autenticación.
 ]);

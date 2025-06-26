@@ -1,4 +1,5 @@
 <?php
+// app/Action/UploadMediaAction.php
 
 namespace app\Action;
 
@@ -25,27 +26,22 @@ class UploadMediaAction
         }
 
         try {
-            // --- INICIO DE LA CORRECCIÓN ---
             // Se obtienen los metadatos del archivo ANTES de moverlo.
-            // La llamada a getSize() falla después de mover el archivo temporal.
             $originalName = $file->getUploadName();
             $mimeType = $file->getUploadMimeType();
             $sizeBytes = $file->getSize();
-            // --- FIN DE LA CORRECCIÓN ---
 
             // Generate a unique path and name for the file.
             $extension = $file->getUploadExtension();
             $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
             $uploadDir = 'uploads/media';
             $filePath = $uploadDir . '/' . $newFileName;
-            
+
             // Asegurar que el directorio de destino exista y sea escribible.
             $destinationDir = public_path($uploadDir);
             if (!is_dir($destinationDir)) {
-                // Se crea el directorio recursivamente si no existe.
                 mkdir($destinationDir, 0777, true);
             }
-            // Se fuerza el permiso de escritura en el directorio para evitar errores de 500.
             @chmod($destinationDir, 0777);
 
             $file->move(public_path($filePath));
@@ -53,10 +49,10 @@ class UploadMediaAction
             $media = Media::create([
                 'user_id' => $request->user->id,
                 'path' => $filePath,
-                'mime_type' => $mimeType, // Usar la variable guardada
+                'mime_type' => $mimeType,
                 'metadata' => [
-                    'original_name' => $originalName, // Usar la variable guardada
-                    'size_bytes' => $sizeBytes, // Usar la variable guardada
+                    'original_name' => $originalName,
+                    'size_bytes' => $sizeBytes,
                 ]
             ]);
 

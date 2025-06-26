@@ -1,4 +1,5 @@
 <?php
+// tests/Feature/ApiFlowTest.php
 
 // Hook para resetear la base de datos antes de CADA test.
 // Esto asegura que cada prueba se ejecuta en un ambiente limpio y aislado.
@@ -36,7 +37,7 @@ test('full api e2e flow', function () {
     $userBody = json_decode($loginUserResponse->getBody()->getContents(), true);
     $userToken = $userBody['data']['access_token'];
     expect($userToken)->toBeString()->not->toBeEmpty();
-    
+
     // --- FASE 2: Perfil de Usuario ---
     $profileResponse = $this->getJson('/user/profile', $userToken);
     expect($profileResponse->getStatusCode())->toBe(200);
@@ -77,9 +78,29 @@ test('full api e2e flow', function () {
     $mediaId = $uploadData['data']['id'];
     expect($mediaId)->toBeInt();
 
+    // --- INICIO: TEST PARA GET /media/{id} ---
+    // Verificar el nuevo endpoint GET /media/{id} con un ID válido
+    $getMediaResponse = $this->getJson("/media/{$mediaId}");
+    expect($getMediaResponse->getStatusCode())->toBe(200);
+    $mediaData = json_decode($getMediaResponse->getBody()->getContents(), true);
+    expect($mediaData['success'])->toBeTrue();
+    expect($mediaData['data']['id'])->toBe($mediaId);
+    expect($mediaData['data']['path'])->toBeString();
+    expect($mediaData['data']['metadata']['original_name'])->toBe('test.txt');
+
+    // Verificar caso de media no encontrada (404)
+    $getNonExistentMediaResponse = $this->getJson('/media/99999');
+    expect($getNonExistentMediaResponse->getStatusCode())->toBe(404);
+    $notFoundData = json_decode($getNonExistentMediaResponse->getBody()->getContents(), true);
+    expect($notFoundData['success'])->toBeFalse();
+    expect($notFoundData['message'])->toBe('Media not found.');
+    // --- FIN: TEST PARA GET /media/{id} ---
+
     // Crear rol "editor"
     $roleResponse = $this->postJson('/admin/roles', [
-        'name' => 'editor', 'description' => 'Test Editor Role', 'permissions' => ['content.update']
+        'name' => 'editor',
+        'description' => 'Test Editor Role',
+        'permissions' => ['content.update']
     ], $adminToken);
     expect($roleResponse->getStatusCode())->toBe(201);
     $roleData = json_decode($roleResponse->getBody()->getContents(), true);
@@ -91,7 +112,7 @@ test('full api e2e flow', function () {
 
     // Admin elimina el archivo subido
     $this->deleteJson("/admin/media/{$mediaId}", $adminToken)->getStatusCode(204);
-    
+
     // User elimina su propio contenido
     $this->deleteJson("/contents/{$contentId}", $userToken)->getStatusCode(204);
 

@@ -1,9 +1,10 @@
 <?php
+// app/controller/MediaController.php
 
 namespace app\controller;
 
 use app\model\Media;
-use app\Action\UploadMediaAction; // Importar la nueva Action
+use app\Action\UploadMediaAction;
 use support\Request;
 use support\Response;
 use support\Log;
@@ -21,6 +22,24 @@ class MediaController
     public function store(Request $request, UploadMediaAction $action): Response
     {
         return $action($request);
+    }
+
+    /**
+     * Display the specified media resource.
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return Response
+     */
+    public function show(Request $request, int $id): Response
+    {
+        $media = Media::find($id);
+
+        if (!$media) {
+            return api_response(false, 'Media not found.', null, 404);
+        }
+
+        return api_response(true, 'Media retrieved successfully.', $media->toArray());
     }
 
     /**

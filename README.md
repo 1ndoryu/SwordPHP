@@ -8,9 +8,9 @@ It operates as a pure headless API, completely decoupling the backend logic from
 
 Sword v2's primary advantage is its speed. Built on Workerman, it operates as a long-running process in memory, eliminating the need to bootstrap the entire framework on every single request. This results in:
 
-  - **Minimal Latency:** API responses are served in just a few milliseconds.
-  - **High Throughput:** Capable of handling a large number of concurrent connections with minimal resource consumption.
-  - **Low Memory Footprint:** Efficient memory management allows it to run on modest hardware, making it ideal for a wide range of applications.
+-   **Minimal Latency:** API responses are served in just a few milliseconds.
+-   **High Throughput:** Capable of handling a large number of concurrent connections with minimal resource consumption.
+-   **Low Memory Footprint:** Efficient memory management allows it to run on modest hardware, making it ideal for a wide range of applications.
 
 ## 📜 Core Principles
 
@@ -22,17 +22,17 @@ Sword v2's primary advantage is its speed. Built on Workerman, it operates as a 
 6.  **Channel-based Logging:** Each main feature (auth, content, etc.) has its own separate log file for easier debugging, with a `master.log` capturing all activity.
 7.  **Clean Architecture:** The file structure is organized and granular, avoiding large files with multiple responsibilities.
 
------
+---
 
 ## 💾 Installation
 
 ### Prerequisites
 
-  - PHP \>= 8.1
-  - Composer
-  - PostgreSQL
-  - Redis (Recommended for caching)
-  - RabbitMQ (Required for the Event System)
+-   PHP \>= 8.1
+-   Composer
+-   PostgreSQL
+-   Redis (Recommended for caching)
+-   RabbitMQ (Required for the Event System)
 
 ### 1\. Local Setup
 
@@ -51,8 +51,8 @@ Sword v2's primary advantage is its speed. Built on Workerman, it operates as a 
 
 3.  **Configure your environment:**
 
-      - Copy the example environment file: `cp .env.example .env`
-      - Edit the `.env` file with your database credentials, RabbitMQ connection details, and generate a unique `JWT_SECRET`:
+    -   Copy the example environment file: `cp .env.example .env`
+    -   Edit the `.env` file with your database credentials, RabbitMQ connection details, and generate a unique `JWT_SECRET`:
         ```bash
         # You can generate a secret with:
         # openssl rand -base64 32
@@ -91,7 +91,7 @@ A `Dockerfile` is included for containerized deployments.
     docker run -p 8787:8787 --env-file .env --name sword-api sword-v2
     ```
 
------
+---
 
 ## ⚡ Event System & Webhooks
 
@@ -107,35 +107,35 @@ This ensures that external integrations (like a static site generator, a notific
 
 The following events are currently dispatched:
 
-| Event Name          | Triggered When...                            | Payload Includes                               |
-| ------------------- | -------------------------------------------- | ---------------------------------------------- |
-| `user.registered`   | A new user successfully registers.           | `user_id`, `username`, `email`, `role_name`    |
-| `user.loggedin`     | A user successfully logs in.                 | `user_id`                                      |
-| `content.created`   | A new piece of content is created.           | `id`, `slug`, `type`, `status`, `user_id`, `title` |
-| `content.updated`   | A piece of content is updated.               | `id`, `user_id`, `changes` (the updated data)  |
-| `content.deleted`   | A piece of content is deleted.               | `id`, `user_id`                                |
-| `content.liked`     | A user likes a piece of content.             | `content_id`, `user_id`                        |
-| `content.unliked`   | A user removes their like from content.      | `content_id`, `user_id`                        |
+| Event Name        | Triggered When...                       | Payload Includes                                   |
+| ----------------- | --------------------------------------- | -------------------------------------------------- |
+| `user.registered` | A new user successfully registers.      | `user_id`, `username`, `email`, `role_name`        |
+| `user.loggedin`   | A user successfully logs in.            | `user_id`                                          |
+| `content.created` | A new piece of content is created.      | `id`, `slug`, `type`, `status`, `user_id`, `title` |
+| `content.updated` | A piece of content is updated.          | `id`, `user_id`, `changes` (the updated data)      |
+| `content.deleted` | A piece of content is deleted.          | `id`, `user_id`                                    |
+| `content.liked`   | A user likes a piece of content.        | `content_id`, `user_id`                            |
+| `content.unliked` | A user removes their like from content. | `content_id`, `user_id`                            |
 
 ### Webhook Security
 
 To verify that a webhook request originated from your Sword v2 instance, you can configure a `secret` when creating a webhook. If a secret is present, all outgoing requests will include an `X-Sword-Signature` header containing a `sha256` HMAC hash of the request body, signed with your secret.
 
------
+---
 
 ## 🛡️ Security Considerations (Pentesting)
 
 Security is a core consideration. Here are the key areas to focus on during security analysis:
 
-  - **Authentication & Authorization:** Access is controlled by JWT bearer tokens. All protected endpoints require a valid token. Authorization is granular, based on permissions assigned to roles (e.g., `content.create`, `admin.users.list`). The `admin` role has wildcard `*` access, while other roles must have permissions explicitly granted.
-  - **Input Validation:** All user-supplied data must be rigorously validated and sanitized to prevent common vulnerabilities like XSS, SQL injection, and command injection.
-  - **System Endpoints:** The dangerous `/system/install` and `/system/reset` endpoints are disabled by default when `APP_ENV` is set to `production`. They should never be exposed on a live server.
-  - **Dependency Management:** Regularly update dependencies with `composer update` to patch known vulnerabilities in third-party packages.
-  - **Environment Security:** Never commit your `.env` file to version control. Ensure secrets like `JWT_SECRET`, database credentials, and other API keys are managed securely.
-  - **File Uploads:** Files are uploaded with unique, randomly generated names to prevent path traversal attacks. However, further security measures like strict file type and size validation, and scanning uploaded files for malware, are recommended.
-  - **Webhook Integrity:** Use the `secret` field when creating webhooks to generate a signature. Your webhook consumer should validate this signature to ensure the payload has not been tampered with and originated from your CMS.
+-   **Authentication & Authorization:** Access is controlled by JWT bearer tokens. All protected endpoints require a valid token. Authorization is granular, based on permissions assigned to roles (e.g., `content.create`, `admin.users.list`). The `admin` role has wildcard `*` access, while other roles must have permissions explicitly granted.
+-   **Input Validation:** All user-supplied data must be rigorously validated and sanitized to prevent common vulnerabilities like XSS, SQL injection, and command injection.
+-   **System Endpoints:** The dangerous `/system/install` and `/system/reset` endpoints are disabled by default when `APP_ENV` is set to `production`. They should never be exposed on a live server.
+-   **Dependency Management:** Regularly update dependencies with `composer update` to patch known vulnerabilities in third-party packages.
+-   **Environment Security:** Never commit your `.env` file to version control. Ensure secrets like `JWT_SECRET`, database credentials, and other API keys are managed securely.
+-   **File Uploads:** Files are uploaded with unique, randomly generated names to prevent path traversal attacks. However, further security measures like strict file type and size validation, and scanning uploaded files for malware, are recommended.
+-   **Webhook Integrity:** Use the `secret` field when creating webhooks to generate a signature. Your webhook consumer should validate this signature to ensure the payload has not been tampered with and originated from your CMS.
 
------
+---
 
 ## API Documentation (v1.0.0)
 
@@ -173,8 +173,8 @@ Endpoints for installing and resetting the database. Intended for development an
 
 Initializes the database by creating all the necessary tables and default roles (`admin`, `user`).
 
-  - **Authentication:** None
-  - **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -189,8 +189,8 @@ Initializes the database by creating all the necessary tables and default roles 
 
 Drops all application tables from the database. **Use with extreme caution.**
 
-  - **Authentication:** None
-  - **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -207,8 +207,8 @@ Drops all application tables from the database. **Use with extreme caution.**
 
 Registers a new user. The first user registered is automatically assigned the `admin` role. Subsequent users will have the `user` role.
 
-  - **Authentication:** None
-  - **Request Body:**
+-   **Authentication:** None
+-   **Request Body:**
     ```json
     {
         "username": "newuser",
@@ -216,7 +216,7 @@ Registers a new user. The first user registered is automatically assigned the `a
         "password": "strongpassword123"
     }
     ```
-  - **Success Response (200 OK):**
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -228,15 +228,15 @@ Registers a new user. The first user registered is automatically assigned the `a
 
 Authenticates a user and returns a JWT access token.
 
-  - **Authentication:** None
-  - **Request Body:**
+-   **Authentication:** None
+-   **Request Body:**
     ```json
     {
         "identifier": "user@example.com",
         "password": "strongpassword123"
     }
     ```
-  - **Success Response (200 OK):**
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -257,8 +257,8 @@ Endpoints for managing user-specific data.
 
 Retrieves the profile information of the currently authenticated user.
 
-  - **Authentication:** Bearer Token
-  - **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -286,8 +286,8 @@ Retrieves the profile information of the currently authenticated user.
 
 Updates the `profile_data` JSON object for the authenticated user.
 
-  - **Authentication:** Bearer Token
-  - **Request Body:**
+-   **Authentication:** Bearer Token
+-   **Request Body:**
     ```json
     {
         "profile_data": {
@@ -297,7 +297,7 @@ Updates the `profile_data` JSON object for the authenticated user.
         }
     }
     ```
-  - **Success Response (200 OK):** (Returns the updated user object)
+-   **Success Response (200 OK):** (Returns the updated user object)
 
 #### **Example: Changing a Profile Picture**
 
@@ -316,8 +316,8 @@ Updates the `profile_data` JSON object for the authenticated user.
 
 Retrieves a paginated list of content that the authenticated user has liked.
 
-  - **Authentication:** Bearer Token
-  - **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -338,7 +338,7 @@ Retrieves a paginated list of content that the authenticated user has liked.
     }
     ```
 
------
+---
 
 ### 📄 4. Content Endpoints
 
@@ -348,14 +348,14 @@ Endpoints for managing content (posts, pages, etc.).
 
 Retrieves a paginated list of `published` content.
 
-  - **Authentication:** None
+-   **Authentication:** None
 
 #### **`GET /contents/{slug}`**
 
 Retrieves a single piece of `published` content by its slug.
 
-  - **Authentication:** None
-  - **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -380,26 +380,26 @@ Retrieves a single piece of `published` content by its slug.
 
 Creates new content. Requires `content.create` permission.
 
-  - **Authentication:** Bearer Token
+-   **Authentication:** Bearer Token
 
 #### **`POST /contents/{id}`**
 
 Updates existing content. Requires `content.update.own` permission, or `content.update.all` for other users' content.
 
-  - **Authentication:** Bearer Token
+-   **Authentication:** Bearer Token
 
 #### **`DELETE /contents/{id}`**
 
 Deletes content. Requires `content.delete.own` permission, or `content.delete.all` for other users' content.
 
-  - **Authentication:** Bearer Token
+-   **Authentication:** Bearer Token
 
 #### **`POST /contents/{id}/like`**
 
 Toggles a "like" on content. Requires authentication.
 
-  - **Authentication:** Bearer Token
-  - **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -410,7 +410,7 @@ Toggles a "like" on content. Requires authentication.
     }
     ```
 
------
+---
 
 ### 💬 5. Comments Endpoints
 
@@ -418,8 +418,8 @@ Toggles a "like" on content. Requires authentication.
 
 Posts a new comment. Requires `comment.create` permission.
 
-  - **Authentication:** Bearer Token
-  - **Success Response (201 Created):**
+-   **Authentication:** Bearer Token
+-   **Success Response (201 Created):**
     ```json
     {
         "success": true,
@@ -441,9 +441,9 @@ Posts a new comment. Requires `comment.create` permission.
 
 Deletes a comment. Requires `comment.delete.own` permission or `comment.delete.all` for other users' comments.
 
-  - **Authentication:** Bearer Token
+-   **Authentication:** Bearer Token
 
------
+---
 
 ### 🖼️ 6. Media Endpoints
 
@@ -451,9 +451,9 @@ Deletes a comment. Requires `comment.delete.own` permission or `comment.delete.a
 
 Uploads a new file. Requires `media.upload` permission.
 
-  - **Authentication:** Bearer Token
-  - **Request Body:** `multipart/form-data` with a file field named `file`.
-  - **Success Response (201 Created):**
+-   **Authentication:** Bearer Token
+-   **Request Body:** `multipart/form-data` with a file field named `file`.
+-   **Success Response (201 Created):**
     ```json
     {
         "success": true,
@@ -471,7 +471,41 @@ Uploads a new file. Requires `media.upload` permission.
     }
     ```
 
------
+#### **`GET /media/{id}`**
+
+Retrieves a single media file object by its ID. This is useful for clients like Casiel that need to resolve a media path from an ID stored in a content object.
+
+-   **Authentication:** None
+-   **URL Parameters:**
+    -   `id` (integer, required): The ID of the media file.
+-   **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Media retrieved successfully.",
+        "data": {
+            "id": 5,
+            "path": "uploads/media/abcdef123456.jpg",
+            "mime_type": "image/jpeg",
+            "user_id": 1,
+            "metadata": {
+                "original_name": "my-vacation.jpg",
+                "size_bytes": 123456
+            },
+            "created_at": "2025-06-26T20:15:00.000000Z",
+            "updated_at": "2025-06-26T20:15:00.000000Z"
+        }
+    }
+    ```
+-   **Error Response (404 Not Found):**
+    ```json
+    {
+        "success": false,
+        "message": "Media not found."
+    }
+    ```
+
+---
 
 ### 🌐 7. Options Endpoints
 
@@ -481,8 +515,8 @@ Manage global site settings.
 
 Retrieves all global options.
 
-  - **Authentication:** None
-  - **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -495,7 +529,7 @@ Retrieves all global options.
     }
     ```
 
------
+---
 
 ### 👑 8. Admin Endpoints
 
@@ -527,7 +561,7 @@ Changes a user's role. (Requires `admin.user.role.change`)
 
 Batch updates global options. (Requires `admin.options.update`)
 
------
+---
 
 ### 🛂 9. Role Management Endpoints (Admin)
 
@@ -537,7 +571,7 @@ Base Path: `/admin/roles`. These endpoints require `admin.roles.*` permissions.
 
 Retrieves a list of all roles. (Requires `admin.roles.list`)
 
-  - **Success Response (200 OK):**
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -559,7 +593,7 @@ Retrieves a list of all roles. (Requires `admin.roles.list`)
 
 Creates a new role. (Requires `admin.roles.create`)
 
-  - **Request Body:**
+-   **Request Body:**
     ```json
     {
         "name": "editor",
@@ -572,7 +606,7 @@ Creates a new role. (Requires `admin.roles.create`)
 
 Updates an existing role. (Requires `admin.roles.update`)
 
-  - **Request Body:**
+-   **Request Body:**
     ```json
     {
         "description": "Can now also delete content.",
@@ -584,7 +618,7 @@ Updates an existing role. (Requires `admin.roles.update`)
 
 Deletes a role. (Requires `admin.roles.delete`)
 
------
+---
 
 ### 🎣 10. Webhook Management Endpoints (Admin)
 
@@ -598,7 +632,7 @@ Retrieves a list of all webhooks. (Requires `admin.webhooks.list`)
 
 Creates a new webhook. (Requires `admin.webhooks.create`)
 
-  - **Request Body:**
+-   **Request Body:**
     ```json
     {
         "event_name": "content.created",

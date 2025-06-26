@@ -1,5 +1,4 @@
 <?php
-// ARCHIVO NUEVO: app/controller/MediaController.php
 
 namespace app\controller;
 
@@ -50,7 +49,14 @@ class MediaController
             return json(['success' => true, 'message' => 'File uploaded successfully.', 'data' => $media], 201);
         } catch (Throwable $e) {
             Log::channel('media')->error('Error al subir archivo', ['error' => $e->getMessage(), 'user_id' => $request->user->id]);
-            return json(['success' => false, 'message' => 'An internal error occurred during file upload.'], 500);
+            
+            // --- INICIO DE LA MODIFICACIÓN (DEBUG MEJORADO) ---
+            $errorMessage = 'An internal error occurred during file upload.';
+            if (env('APP_DEBUG', false)) {
+                $errorMessage = $e->getMessage();
+            }
+            return json(['success' => false, 'message' => $errorMessage], 500);
+            // --- FIN DE LA MODIFICACIÓN ---
         }
     }
 

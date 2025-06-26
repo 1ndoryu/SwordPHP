@@ -1,12 +1,12 @@
 <?php
-// ARCHIVO MODIFICADO: config/middleware.php
+// ARCHIVO CORREGIDO: config/middleware.php
 
 /**
  * Middleware configuration file
  */
 return [
-    // Global middleware. En este array se colocarían los middleware que se ejecutan en TODAS las peticiones.
+    // Global middleware. Se deja vacío como estaba.
     '' => [],
 
-    // Se han eliminado los alias. El middleware se aplicará directamente en las rutas usando el nombre de la clase.
+    // Se elimina por completo la entrada de alias ('role' => ...) que causaba el error.
 ];

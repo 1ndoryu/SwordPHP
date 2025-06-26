@@ -113,7 +113,6 @@ return [
         ],
     ],
 
-    // --- INICIO DE LA MODIFICACIÓN ---
     // Canal para la gestión de media
     'media' => [
         'handlers' => [
@@ -121,6 +120,29 @@ return [
                 'class' => RotatingFileHandler::class,
                 'constructor' => [
                     runtime_path() . '/logs/media.log',
+                    7, // $maxFiles
+                    $logLevel
+                ],
+                'formatter' => [
+                    'class' => LineFormatter::class,
+                    'constructor' => [
+                        "[%datetime%] %level_name%: %message% %context%\n",
+                        'Y-m-d H:i:s',
+                        true
+                    ],
+                ],
+            ]
+        ],
+    ],
+
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Canal para funcionalidades sociales (likes, comentarios)
+    'social' => [
+        'handlers' => [
+            [
+                'class' => RotatingFileHandler::class,
+                'constructor' => [
+                    runtime_path() . '/logs/social.log',
                     7, // $maxFiles
                     $logLevel
                 ],

@@ -34,14 +34,21 @@ class AuthController
         }
 
         try {
+            // --- INICIO DE LA MODIFICACIÓN (CORRECCIÓN DE SEGURIDAD) ---
+            // Se elimina la lógica que asignaba 'admin' al primer usuario.
+            // Todos los usuarios nuevos tendrán el rol 'user' por defecto.
+            // La creación de administradores debe ser un proceso manual y seguro.
+            $role = 'user';
+            // --- FIN DE LA MODIFICACIÓN ---
+
             $user = User::create([
                 'username' => $username,
                 'email' => $email,
                 'password' => password_hash($password, PASSWORD_DEFAULT),
-                'role' => 'user'
+                'role' => $role
             ]);
 
-            Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id]);
+            Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $role]);
 
             return json(['success' => true, 'message' => 'User registered successfully.']);
         } catch (Throwable $e) {

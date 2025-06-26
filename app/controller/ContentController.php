@@ -4,6 +4,7 @@
 namespace app\controller;
 
 use app\model\Content;
+use app\model\Like; // <-- Añadido
 use support\Request;
 use support\Response;
 use support\Log;
@@ -176,6 +177,55 @@ class ContentController
             return response('', 204); // No content
         } catch (Throwable $e) {
             Log::channel('content')->error('Error deleting content', ['error' => $e->getMessage(), 'content_id' => $id]);
+            return json(['success' => false, 'message' => 'An internal error occurred.'], 500);
+        }
+    }
+
+    /**
+     * Toggle a like on a specific content.
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return Response
+     */
+    public function toggleLike(Request $request, int $id): Response
+    {
+        $content = Content::find($id);
+        if (!$content) {
+            return json(['success' => false, 'message' => 'Content not found.'], 404);
+        }
+
+        $user_id = $request->user->id;
+        $message = '';
+
+        try {
+            $existing_like = Like::where('content_id', $id)->where('user_id', $user_id)->first();
+
+            if ($existing_like) {
+                $existing_like->delete();
+                $message = 'Like removed successfully.';
+                Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
+            } else {
+                Like::create([
+                    'content_id' => $id,
+                    'user_id' => $user_id,
+                ]);
+                $message = 'Like added successfully.';
+                Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
+            }
+
+            // Devolver la respuesta con el nuevo conteo de likes.
+            $like_count = $content->likes()->count();
+
+            return json([
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'like_count' => $like_count
+                ]
+            ]);
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error al dar/quitar like', ['error' => $e->getMessage(), 'content_id' => $id]);
             return json(['success' => false, 'message' => 'An internal error occurred.'], 500);
         }
     }

@@ -26,6 +26,7 @@
     "require": {
         "php": ">=8.1",
         "workerman/webman-framework": "^2.1",
+        "webman/console": "^1.2",
         "monolog/monolog": "^2.0",
         "illuminate/database": "^12.18",
         "phpoption/phpoption": "^1.9",

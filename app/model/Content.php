@@ -5,10 +5,11 @@ namespace app\model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany; // <-- Añadido
 
 class Content extends Model
 {
-    use HasFactory; // <-- AÑADIR ESTA LÍNEA
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -45,5 +46,13 @@ class Content extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the likes for the content.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
     }
 }

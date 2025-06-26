@@ -14,25 +14,35 @@
                 --card-bg: #242424;
                 --success-color: #28a745;
                 --error-color: #dc3545;
+                --warning-color: #ffc107;
             }
             body {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                background-color: var(--bg-color);
+                background-color: #0b0b0b;
                 color: var(--text-color);
                 margin: 0;
                 padding: 20px;
-                font-size: 14px;
+                font-size: 12px;
+                display: flex;
+                flex-direction: row;
+                gap: 20px;
             }
             h1,
-            h2 {
+            h2,
+            h3 {
                 border-bottom: 2px solid var(--primary-color);
                 padding-bottom: 10px;
             }
-            .container {
-                max-width: 1200px;
-                margin: auto;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
+            h3 {
+                margin-top: 0;
+                color: var(--primary-color);
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .main-container {
+                display: flex;
+                flex-direction: column;
+                width: 50%;
                 gap: 20px;
             }
             .card {
@@ -40,10 +50,9 @@
                 border: 1px solid var(--border-color);
                 border-radius: 8px;
                 padding: 20px;
-            }
-            .card h3 {
-                margin-top: 0;
-                color: var(--primary-color);
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
             }
             form {
                 display: flex;
@@ -52,12 +61,15 @@
             }
             input,
             textarea,
-            select {
+            select,
+            button {
                 background-color: var(--input-bg);
                 color: var(--text-color);
                 border: 1px solid var(--border-color);
-                padding: 8px;
+                padding: 10px;
                 border-radius: 4px;
+                width: 100%;
+                box-sizing: border-box;
             }
             textarea {
                 resize: vertical;
@@ -67,17 +79,24 @@
                 background-color: var(--primary-color);
                 color: white;
                 border: none;
-                padding: 10px;
-                border-radius: 4px;
                 cursor: pointer;
                 font-weight: bold;
+                transition: opacity 0.2s;
             }
             button:hover {
                 opacity: 0.9;
             }
+            button.danger {
+                background-color: var(--error-color);
+            }
+            button.warning {
+                background-color: var(--warning-color);
+                color: #1a1a1a;
+            }
             .response-area {
-                grid-column: span 2;
-                margin-top: 20px;
+                width: 50%;
+                display: flex;
+                flex-direction: column;
             }
             #response {
                 background-color: black;
@@ -86,10 +105,11 @@
                 padding: 15px;
                 white-space: pre-wrap;
                 word-wrap: break-word;
-                min-height: 100px;
+                flex-grow: 1;
+                overflow-y: auto;
+                font-family: 'Courier New', Courier, monospace;
             }
             .token-status {
-                margin-bottom: 15px;
                 font-style: italic;
             }
             .token-status span {
@@ -101,46 +121,39 @@
             .error {
                 color: var(--error-color);
             }
+            hr {
+                width: 100%;
+                margin: 0;
+                border: none;
+                border-top: 1px solid var(--border-color);
+            }
         </style>
     </head>
     <body>
-        <h1>Sword v2 - API Tester</h1>
+        <div class="main-container">
+            <h1>Sword v2 - API Tester</h1>
 
-        <div class="container">
+            <div class="card">
+                <h3>Suite de Pruebas Automatizada</h3>
+                <p>Ejecuta una serie de pruebas E2E que validan el flujo principal de la aplicación. Los resultados detallados aparecerán en la consola de respuesta.</p>
+                <button id="run-all-tests" class="warning">Ejecutar Suite de Pruebas Completa</button>
+            </div>
+
             <div class="card">
                 <h3>Autenticación</h3>
                 <div class="token-status">JWT Token: <span id="token-display">No obtenido</span></div>
-                <form id="register-form">
-                    <h4>Registrar Usuario</h4>
-                    <input type="text" name="username" placeholder="Username" required />
-                    <input type="email" name="email" placeholder="Email" required />
-                    <input type="password" name="password" placeholder="Password" required />
-                    <button type="submit">Register</button>
-                </form>
-                <hr style="margin: 20px 0; border-color: var(--border-color)" />
                 <form id="login-form">
-                    <h4>Login</h4>
-                    <input type="text" name="identifier" placeholder="Username o Email" required />
-                    <input type="password" name="password" placeholder="Password" required />
+                    <input type="text" name="identifier" placeholder="Username o Email" required value="admin@test.com" />
+                    <input type="password" name="password" placeholder="Password" required value="password123" />
                     <button type="submit">Login</button>
                 </form>
             </div>
 
             <div class="card">
-                <h3>Contenidos (CRUD)</h3>
-                <form id="create-content-form">
-                    <h4>Crear Contenido (Requiere Auth)</h4>
-                    <input type="text" name="title" placeholder="Título del contenido" required />
-                    <textarea name="body" placeholder='{"key": "value", "content": "..."}' required></textarea>
-                    <select name="status">
-                        <option value="draft">Draft</option>
-                        <option value="published">Published</option>
-                    </select>
-                    <button type="submit">Crear</button>
-                </form>
-                <hr style="margin: 20px 0; border-color: var(--border-color)" />
-                <h4>Obtener Contenidos</h4>
-                <button id="get-all-contents">Obtener todos (Publicados)</button>
+                <h3>Administración del Sistema (Admin)</h3>
+                <p>Acciones manuales. Usar con precaución.</p>
+                <button id="install-db-btn" class="warning">Instalar Base de Datos</button>
+                <button id="reset-db-btn" class="danger">Resetear Base de Datos</button>
             </div>
         </div>
 
@@ -150,7 +163,7 @@
         </div>
 
         <script>
-            const API_BASE_URL = 'http://127.0.0.1:8787';
+            const API_BASE_URL = window.location.origin;
             const responseEl = document.getElementById('response');
             const tokenDisplayEl = document.getElementById('token-display');
 
@@ -167,88 +180,194 @@
                 }
             }
 
-            async function apiCall(endpoint, method = 'GET', body = null, needsAuth = false) {
-                const headers = {'Content-Type': 'application/json'};
+            const log = (message, type = 'info') => {
+                const colorMap = {
+                    info: '#e0e0e0',
+                    success: 'var(--success-color)',
+                    error: 'var(--error-color)',
+                    warning: '#f0ad4e',
+                    step: 'var(--primary-color)'
+                };
+                responseEl.innerHTML += `<span style="color:${colorMap[type]}">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>\n`;
+                responseEl.scrollTop = responseEl.scrollHeight;
+            };
+
+            async function apiCall(endpoint, method = 'GET', body = null, needsAuth = true, isFile = false) {
+                const headers = {};
                 if (needsAuth) {
                     if (!jwtToken) {
-                        displayResponse({error: 'Token JWT no encontrado. Por favor, haz login primero.'}, 401);
-                        return;
+                        log('Error: Token JWT no encontrado. Por favor, haz login primero.', 'error');
+                        return {ok: false, data: {message: 'Token no disponible'}, status: 401};
                     }
                     headers['Authorization'] = `Bearer ${jwtToken}`;
                 }
+                if (!isFile && body) {
+                    headers['Content-Type'] = 'application/json';
+                }
 
                 try {
-                    const config = {
-                        method,
-                        headers
-                    };
+                    const config = {method, headers};
                     if (body) {
-                        config.body = JSON.stringify(body);
+                        config.body = isFile ? body : JSON.stringify(body);
                     }
 
-                    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-                    const data = await response.json().catch(() => null); // Handle empty responses like 204
-                    displayResponse(data, response.status);
+                    const res = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                    const status = res.status;
+                    let data;
 
-                    // If login was successful, store the token
-                    if (endpoint === '/auth/login' && response.ok && data.access_token) {
-                        jwtToken = data.access_token;
-                        localStorage.setItem('jwt_token', jwtToken);
-                        updateTokenDisplay();
+                    if (status === 204) {
+                        data = {success: true, message: 'Operación exitosa (No Content)'};
+                    } else {
+                        data = await res.json().catch(() => ({success: false, message: 'No se pudo decodificar la respuesta JSON.'}));
                     }
+                    return {ok: res.ok, data, status};
                 } catch (error) {
-                    displayResponse({error: error.message}, 500);
+                    log(`Error de Red: ${error.message}`, 'error');
+                    return {ok: false, data: {message: error.message}, status: 0};
                 }
             }
 
-            function displayResponse(data, status) {
+            // --- Event Listeners Manuales ---
+            document.getElementById('login-form').addEventListener('submit', async e => {
+                e.preventDefault();
+                const body = Object.fromEntries(new FormData(e.target).entries());
+                const {ok, data, status} = await apiCall('/auth/login', 'POST', body, false);
                 responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
-                if (status >= 200 && status < 300) {
-                    responseEl.style.borderColor = 'var(--success-color)';
-                } else {
-                    responseEl.style.borderColor = 'var(--error-color)';
+                if (ok && data.access_token) {
+                    jwtToken = data.access_token;
+                    localStorage.setItem('jwt_token', jwtToken);
+                    updateTokenDisplay();
                 }
-            }
-
-            // Event Listeners
-            document.getElementById('register-form').addEventListener('submit', e => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const body = Object.fromEntries(formData.entries());
-                apiCall('/auth/register', 'POST', body);
             });
 
-            document.getElementById('login-form').addEventListener('submit', e => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const body = Object.fromEntries(formData.entries());
-                apiCall('/auth/login', 'POST', body);
+            document.getElementById('install-db-btn').addEventListener('click', async () => {
+                if (confirm('¿Estás seguro? Esto ejecutará db:install.')) {
+                    const {data, status} = await apiCall('/admin/system/install', 'POST', {});
+                    responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+                }
             });
 
-            document.getElementById('get-all-contents').addEventListener('click', e => {
-                e.preventDefault();
-                apiCall('/contents', 'GET');
+            document.getElementById('reset-db-btn').addEventListener('click', async () => {
+                if (confirm('ADVERTENCIA: ¿Seguro que quieres borrar todas las tablas?')) {
+                    const {data, status} = await apiCall('/admin/system/reset', 'POST', {});
+                    responseEl.textContent = `Status: ${status}\n\n${JSON.stringify(data, null, 2)}`;
+                }
             });
 
-            document.getElementById('create-content-form').addEventListener('submit', e => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                let body = {
-                    status: formData.get('status'),
-                    content_data: {
-                        title: formData.get('title')
+            // --- Suite de Pruebas Automática ---
+            document.getElementById('run-all-tests').addEventListener('click', runFullTestSuite);
+
+            async function runFullTestSuite() {
+                responseEl.innerHTML = '';
+                log('===== INICIANDO SUITE DE PRUEBAS E2E =====', 'warning');
+
+                const rand = Date.now();
+                const adminCreds = {username: `admin_${rand}`, email: `admin_${rand}@test.com`, password: 'password123'};
+                const userCreds = {username: `user_${rand}`, email: `user_${rand}@test.com`, password: 'password123'};
+                let localAdminToken = null;
+                let localUserToken = null;
+                let contentId = null;
+                let mediaId = null;
+
+                async function testStep(name, endpoint, method, body, token, isFile = false) {
+                    log(`\n[PASO] ${name}`, 'step');
+                    const headers = {};
+                    if (token) headers['Authorization'] = `Bearer ${token}`;
+                    if (!isFile && body) headers['Content-Type'] = 'application/json';
+
+                    const config = {method, headers};
+                    if (body) config.body = isFile ? body : JSON.stringify(body);
+
+                    try {
+                        const res = await fetch(API_BASE_URL + endpoint, config);
+                        const status = res.status;
+                        const data = status === 204 ? {success: true, message: 'No Content'} : await res.json().catch(() => ({}));
+
+                        if (res.ok) {
+                            log(`  [ÉXITO] ${status} - ${data.message || 'Operación completada.'}`, 'success');
+                            return data;
+                        } else {
+                            log(`  [FALLO] ${status} - ${data.message || 'Error desconocido.'}`, 'error');
+                            if (data.output) log(`    Salida: ${data.output}`, 'info');
+                            return null;
+                        }
+                    } catch (error) {
+                        log(`  [ERROR DE RED] ${error.message}`, 'error');
+                        return null;
                     }
-                };
-                try {
-                    // Try to parse the body as JSON, merge if successful
-                    const jsonData = JSON.parse(formData.get('body'));
-                    body.content_data = {...body.content_data, ...jsonData};
-                } catch (err) {
-                    // If not valid JSON, just use it as simple text
-                    body.content_data.body = formData.get('body');
                 }
-                apiCall('/contents', 'POST', body, true);
-            });
+
+                log('\n--- FASE 1: Registro y Autenticación ---', 'warning');
+                await testStep('Registrar usuario "admin"', '/auth/register', 'POST', adminCreds, null);
+                await testStep('Registrar usuario "user"', '/auth/register', 'POST', userCreds, null);
+
+                const adminLogin = await testStep('Login como "admin"', '/auth/login', 'POST', {identifier: adminCreds.email, password: adminCreds.password}, null);
+                if (adminLogin) localAdminToken = adminLogin.access_token;
+
+                const userLogin = await testStep('Login como "user"', '/auth/login', 'POST', {identifier: userCreds.email, password: userCreds.password}, null);
+                if (userLogin) localUserToken = userLogin.access_token;
+
+                if (!localAdminToken || !localUserToken) {
+                    log('\n[ERROR CRÍTICO] No se pudieron obtener los tokens. Abortando pruebas.', 'error');
+                    return;
+                }
+
+                log('\n--- FASE 2: Pruebas de Sistema (Admin) ---', 'warning');
+                log('NOTA: Se espera que estas pruebas fallen (403 Forbidden) porque la API no permite crear usuarios con rol "admin".', 'info');
+                await testStep('Resetear Base de Datos', '/admin/system/reset', 'POST', {}, localAdminToken);
+                await testStep('Instalar Base de Datos', '/admin/system/install', 'POST', {}, localAdminToken);
+
+                log('\n--- FASE 3: CRUD de Contenidos (Usuario) ---', 'warning');
+                const createdContent = await testStep(
+                    'Crear contenido',
+                    '/contents',
+                    'POST',
+                    {
+                        status: 'published',
+                        content_data: {title: 'Post de Prueba Automático', body: 'Cuerpo del post.'}
+                    },
+                    localUserToken
+                );
+
+                if (createdContent && createdContent.data) {
+                    contentId = createdContent.data.id;
+                    await testStep('Ver contenido público', `/contents/${createdContent.data.slug}`, 'GET', null, null);
+                    await testStep(
+                        'Actualizar contenido',
+                        `/contents/${contentId}`,
+                        'POST',
+                        {
+                            status: 'draft',
+                            content_data: {title: 'Post (Actualizado)'}
+                        },
+                        localUserToken
+                    );
+                } else {
+                    log('[ADVERTENCIA] No se pudo crear contenido, saltando pruebas dependientes.', 'warning');
+                }
+
+                log('\n--- FASE 4: Pruebas de Media ---', 'warning');
+                const formData = new FormData();
+                formData.append('file', new File(['dummy content'], 'test.txt', {type: 'text/plain'}));
+                const uploadedMedia = await testStep('Subir archivo', '/media', 'POST', formData, localUserToken, true);
+                if (uploadedMedia && uploadedMedia.data) mediaId = uploadedMedia.data.id;
+
+                log('\n--- FASE 5: Pruebas de Listado (Admin) ---', 'warning');
+                log('NOTA: Se espera que estas pruebas también fallen (403 Forbidden).', 'info');
+                await testStep('Listar todos los contenidos', '/admin/contents', 'GET', null, localAdminToken);
+                await testStep('Listar todos los archivos', '/admin/media', 'GET', null, localAdminToken);
+
+                log('\n--- FASE 6: Limpieza de Residuos ---', 'warning');
+                if (mediaId) {
+                    log('NOTA: Se espera que el borrado de media falle (403 Forbidden). El archivo quedará como residuo.', 'info');
+                    await testStep('Eliminar archivo subido (Admin)', `/admin/media/${mediaId}`, 'DELETE', null, localAdminToken);
+                }
+                if (contentId) {
+                    await testStep('Eliminar contenido creado (User)', `/contents/${contentId}`, 'DELETE', null, localUserToken);
+                }
+
+                log('\n===== SUITE DE PRUEBAS FINALIZADA =====', 'warning');
+            }
         </script>
     </body>
 </html>

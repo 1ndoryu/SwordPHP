@@ -5,23 +5,23 @@ description: Documentación completa y detallada de la API RESTful para Kamples,
 
 # Documentación de la API de Kamples
 
-## 1. Introducción y Filosofía
+## 1\. Introducción y Filosofía
 
 Bienvenido a la documentación de la API RESTful de SwordPHP para Kamples. Esta API está diseñada siguiendo los principios de predictibilidad y facilidad de uso, permitiéndote interactuar con tu contenido, usuarios y configuraciones de forma programática y eficiente.
 
 -   **URL Base:** Todas las rutas de la API están prefijadas con `/api/v1`. La URL completa sería `https://tu-dominio.com/api/v1`.
--   **Formato de Datos:** Todas las peticiones y respuestas utilizan el formato `JSON`. La cabecera `Content-Type: application/json` es requerida para las peticiones `POST` y `PUT`.
+-   **Formato de Datos:** Todas las peticiones y respuestas utilizan el formato `JSON`. La cabecera `Content-Type: application/json` es requerida para las peticiones `POST` y `PUT` que envían datos en este formato.
 -   **Convención de Nombres:** Todos los nombres de los campos (claves) en las peticiones y respuestas JSON utilizan `snake_case` para mantener la consistencia (ej: `nombre_usuario`, `created_at`).
 
-## 2. Autenticación
+## 2\. Autenticación
 
 La mayoría de los endpoints requieren un **Bearer Token** para la autenticación.
 
 ### Flujo de Autenticación
 
-1. **Obtener un Token:** Envía las credenciales de un usuario al endpoint `POST /auth/token`.
-2. **Usar el Token:** Incluye el token recibido en la cabecera `Authorization` de cada petición a un endpoint protegido: `Authorization: Bearer <TU_TOKEN_DE_API>`.
-3. **Verificar Sesión:** Para obtener los datos del usuario actual y confirmar que tu token es válido, haz una petición a `GET /api/v1/users/me`.
+1.  **Obtener un Token:** Envía las credenciales de un usuario al endpoint `POST /auth/token`.
+2.  **Usar el Token:** Incluye el token recibido en la cabecera `Authorization` de cada petición a un endpoint protegido: `Authorization: Bearer <TU_TOKEN_DE_API>`.
+3.  **Verificar Sesión:** Para obtener los datos del usuario actual y confirmar que tu token es válido, haz una petición a `GET /api/v1/users/me`.
 
 ### `POST /auth/token`
 
@@ -31,7 +31,7 @@ Intercambia credenciales de usuario por un token de API.
 -   **Cuerpo de la Petición:**
     ```json
     {
-        "nombre_usuario": "artista_uno",
+        "nombre_usuario": "autor_uno",
         "clave": "contraseña_segura"
     }
     ```
@@ -42,25 +42,23 @@ Intercambia credenciales de usuario por un token de API.
             "token": "aqui_el_jwt_o_bearer_token_generado_muy_largo_y_seguro",
             "usuario": {
                 "id": 2,
-                "nombre_usuario": "artista_uno",
-                "nombre_mostrado": "Artista Uno",
-                "correo_electronico": "artista@kamples.com",
-                "rol": "artista"
+                "nombre_usuario": "autor_uno",
+                "nombre_mostrado": "Autor Uno",
+                "correo_electronico": "autor@kamples.com",
+                "rol": "autor"
             }
         }
     }
     ```
 -   **Respuestas de Error:** `401 Unauthorized` si las credenciales son incorrectas, `422 Unprocessable Entity` si faltan campos.
 
-## 3. Convenciones y Buenas Prácticas
+## 3\. Convenciones y Buenas Prácticas
 
 ### Estructura de Respuesta
 
 -   **Para Respuestas Exitosas (2xx):**
-
     -   Si devuelve un solo recurso: `{ "data": { ...objeto_recurso } }`
     -   Si devuelve una lista de recursos: `{ "data": { "items": [ ... ], "pagination": { ... } } }`
-
 -   **Para Respuestas de Error (4xx, 5xx):**
     -   Usa siempre esta estructura: `{ "error": { "code": <código_http>, "message": "<mensaje>", "details": [ ... ] } }`
     -   El campo `details` es opcional y sirve para desglosar errores, como fallos de validación.
@@ -83,7 +81,7 @@ Para garantizar la estabilidad y el uso justo, la API está protegida por un lí
 -   `X-RateLimit-Remaining`: El número de peticiones restantes en la ventana actual.
 -   `X-RateLimit-Reset`: El tiempo (en segundos Unix) hasta que se reinicie el límite.
 
-## 4. Roles y Permisos
+## 4\. Roles y Permisos
 
 La API utiliza un sistema de **Roles y Capacidades** para gestionar el acceso a los recursos. Este diseño granular te permite un control total sobre lo que cada tipo de usuario puede hacer.
 
@@ -106,7 +104,6 @@ A continuación se describen los roles que vienen por defecto con SwordPHP:
 ### Matriz de Capacidades por Rol
 
 La siguiente tabla muestra las capacidades asignadas a cada rol por defecto. Una `✓` indica que el rol posee esa capacidad.
-
 
 | Capacidad            | admin | editor | autor | colaborador | suscriptor |
 | -------------------- | :---: | :----: | :---: | :---------: | :--------: |
@@ -142,28 +139,29 @@ Por ejemplo, la configuración por defecto permite a los `autores` crear `sample
 
 Esta flexibilidad te permite, por ejemplo, crear un rol `gestor_eventos` que solo tenga permiso para crear y gestionar un tipo de contenido `evento`.
 
-## 5. Recursos de la API (Endpoints)
+## 5\. Recursos de la API (Endpoints)
 
 ### Recurso: `/media`
 
 #### `POST /media/upload`
 
-Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa. El comportamiento se controla con el parámetro `storage_provider`.
+Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa. Tras una subida exitosa, la API crea un registro en la base de datos y devuelve el objeto `Media` completo. Este objeto contiene el `id` que luego puedes usar para asociar el archivo a cualquier pieza de contenido.
 
 -   **Permisos:** Cualquier usuario autenticado.
--   **Cuerpo de la Petición (multipart/form-data):**
 
-    -   **Para subidas locales (por defecto):**
-        -   `storage_provider` (string, opcional): `local` o `casiel`. Si se omite, se usa `local`.
+-   **Cuerpo de la Petición:** Se aceptan dos modos:
+
+    -   **Subida Local (multipart/form-data):**
         -   `file` (file, **obligatorio**): El archivo a subir.
-        -   `titulo` (string, opcional): Un título para el archivo. Si no se proporciona, se usará el nombre del archivo.
-
-    -   **Para importación desde URL:**
+        -   `titulo` (string, opcional): Un título para el archivo. Si no se proporciona, se usará el nombre original del archivo.
+        -   `storage_provider` (string, opcional): `local` o `casiel`. Por defecto es `local`.
+    -   **Importación desde URL (application/json):**
         -   `storage_provider` (string, **obligatorio**): Debe ser `external`.
         -   `url` (string, **obligatorio**): La URL pública del archivo a importar.
         -   `titulo` (string, opcional): Un título para el archivo. Si no se proporciona, se extraerá de la URL.
 
 -   **Ejemplo de Petición (subida local):**
+
     ```bash
     curl -X POST \
       https://tu-dominio.com/api/v1/media/upload \
@@ -173,6 +171,7 @@ Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa
     ```
 
 -   **Ejemplo de Petición (importación desde URL):**
+
     ```bash
     curl -X POST \
       https://tu-dominio.com/api/v1/media/upload \
@@ -185,16 +184,28 @@ Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa
           }'
     ```
 
--   **Respuesta Exitosa (201 Created):**
+-   **Respuesta Exitosa (201 Created):** Devuelve el objeto `Media` completo recién creado.
+
     ```json
     {
         "data": {
-            "media_id": 123,
-            "url": "https://ruta.del.proveedor/archivo_unico.wav",
-            "provider": "local",
-            "mime_type": "audio/wav",
-            "nombre_original": "mi_sample.wav",
-            "size": 45000000
+            "id": 123,
+            "idautor": 1,
+            "titulo": "mi_sample.mp3",
+            "leyenda": null,
+            "textoalternativo": null,
+            "descripcion": null,
+            "rutaarchivo": "202506/667b5e4c0a1b2.mp3",
+            "tipomime": "audio/mpeg",
+            "metadata": {
+                "provider": "local",
+                "url": "https://tu-dominio.com/swordContent/media/202506/667b5e4c0a1b2.mp3",
+                "size": 4500000,
+                "nombre_original": "mi_sample.mp3"
+            },
+            "created_at": "2025-06-25T21:45:16.000000Z",
+            "updated_at": "2025-06-25T21:45:16.000000Z",
+            "url_publica": "https://tu-dominio.com/swordContent/media/202506/667b5e4c0a1b2.mp3"
         }
     }
     ```
@@ -204,13 +215,18 @@ Sube un archivo (imagen, audio, etc.) o importa un archivo desde una URL externa
 Descarga el archivo original asociado a un registro de media. El comportamiento exacto depende del proveedor de almacenamiento (`storageService`) configurado en el backend:
 
 -   **Si el proveedor es un servicio en la nube (ej. S3, Casiel):** La API devolverá una redirección (`302 Found`) a una URL de descarga segura y pre-firmada. El cliente debe seguir esta redirección para obtener el archivo.
+
 -   **Si el proveedor es el almacenamiento local:** La API devolverá el archivo directamente en el cuerpo de la respuesta con las cabeceras `Content-Disposition` apropiadas para iniciar la descarga en el navegador.
 
 -   **Permisos:** Requiere autenticación. La lógica de negocio puede aplicar permisos adicionales (ej. solo el propietario puede descargar).
+
 -   **Respuesta Exitosa:**
+
     -   `302 Found` con una cabecera `Location` apuntando a la URL de descarga.
     -   `200 OK` con el contenido del archivo.
+
 -   **Respuestas de Error:**
+
     -   `404 Not Found`: Si el `media` o el archivo físico no existen.
     -   `501 Not Implemented`: Si el `storageService` configurado no soporta descargas directas.
 
@@ -247,10 +263,10 @@ Recupera una única pieza de contenido por su ID.
 
 #### `POST /content`
 
-Crea una nueva pieza de contenido. Para asociar un archivo (como un audio a un `sample`), primero debes subirlo usando `POST /media/upload` para obtener el `media_id`.
+Crea una nueva pieza de contenido. Para asociar un archivo (como un audio a un `sample`), primero debes subirlo usando `POST /media/upload` para obtener el `id` del medio.
 
 -   **Permisos:** Requiere la capacidad `create_content` para el tipo de contenido especificado.
--   **Nota sobre Metadata:** El campo `metadata` es un objeto JSON flexible. Para asociar un archivo subido, incluye la clave `media_id`.
+-   **Nota sobre Metadata:** El campo `metadata` es un objeto JSON flexible. Para asociar un archivo subido, incluye la clave `media_id` con el `id` obtenido del endpoint de subida.
 -   **Cuerpo de la Petición (ejemplo para un `sample`):**
     ```json
     {
@@ -388,7 +404,7 @@ Recupera el objeto completo de la configuración de permisos activa en el sistem
                 "autor": ["sample"]
             }
         }
-    } 
+    }
     ```
 
 #### `PUT /permisos`

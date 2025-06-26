@@ -66,14 +66,32 @@ class MediaApiController extends ApiBaseController
     {
         try {
             $media = $this->mediaService->obtenerMediaPorId($id);
-            $this->setStorageProvider($media->provider);
-            $stream = $this->storageService->download($media->path);
+
+            // [CORRECCIÓN] Obtener el proveedor desde los metadatos.
+            $provider = $media->obtenerMeta('provider');
+            if (!$provider) {
+                throw new \Exception("El proveedor de almacenamiento no está definido para el medio con ID: $id.");
+            }
+            $this->setStorageProvider($provider);
+
+            // [CORRECCIÓN] Obtener la ruta del archivo y el nombre original.
+            // La ruta del archivo está en la columna 'rutaarchivo'.
+            $filePath = $media->rutaarchivo;
+            // El nombre original está en los metadatos.
+            $originalName = $media->obtenerMeta('nombre_original', basename($filePath));
+
+            if (!$filePath) {
+                throw new \Exception("La ruta del archivo no está definida para el medio con ID: $id.");
+            }
+            
+            $stream = $this->storageService->download($filePath);
 
             return new Response(200, [
-                'Content-Type' => $media->mime_type,
-                'Content-Disposition' => 'attachment; filename="' . $media->nombre_original . '"',
+                'Content-Type' => $media->tipomime,
+                'Content-Disposition' => 'attachment; filename="' . $originalName . '"',
             ], $stream);
         } catch (\Exception $e) {
+            \support\Log::error("Error en MediaApiController@download para ID $id: " . $e->getMessage());
             return $this->respuestaError('Error al descargar el archivo: ' . $e->getMessage(), 500);
         }
     }

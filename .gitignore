@@ -1,2 +1,5 @@
-*.py
+copiar.py
 /status
+.env
+documentacion-api.md
+previewApi.md

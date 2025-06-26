@@ -39,7 +39,7 @@ Sword v2's primary advantage is its speed. Built on Workerman, it operates as a 
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://your-repository-url/sword-v2.git
+    git clone https://github.com/1ndoryu/SwordPHP
     cd sword-v2
     ```
 

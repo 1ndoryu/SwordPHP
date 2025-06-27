@@ -17,6 +17,8 @@ class DiagnoseCommand extends Command
     {
         $output->writeln('<info>Log: Iniciando diagnóstico de conexión con RabbitMQ...</info>');
 
+        $connection_timeout = (int)env('RABBITMQ_CONNECTION_TIMEOUT', 5); // Leemos el nuevo timeout
+
         $config = [
             'host' => env('RABBITMQ_HOST'),
             'port' => env('RABBITMQ_PORT'),
@@ -33,8 +35,7 @@ class DiagnoseCommand extends Command
             "  - PORT: <fg=cyan>{$config['port']}</>",
             "  - USER: <fg=cyan>{$config['user']}</>",
             "  - VHOST: <fg=cyan>{$config['vhost']}</>",
-            "  - WORKER QUEUE: <fg=cyan>{$config['work_queue']}</>",
-            "  - EVENTS QUEUE: <fg=cyan>{$config['events_queue']}</>",
+            "  - TIMEOUT: <fg=cyan>{$connection_timeout} segundos</>", // Mostramos el timeout
         ]);
         $output->writeln('');
 
@@ -50,7 +51,16 @@ class DiagnoseCommand extends Command
                 $config['port'],
                 $config['user'],
                 $config['pass'],
-                $config['vhost']
+                $config['vhost'],
+                false,              // insist
+                'AMQPLAIN',         // login_method
+                null,               // login_response
+                'en_US',            // locale
+                $connection_timeout, // connection_timeout <-- USAMOS EL VALOR
+                $connection_timeout,  // read_write_timeout <-- USAMOS EL VALOR
+                null,
+                false,
+                0
             );
 
             if ($connection->isConnected()) {
@@ -64,16 +74,12 @@ class DiagnoseCommand extends Command
 
             $output->writeln('<error>Error: La conexión no se pudo establecer por una razón desconocida (isConnected() devolvió false).</error>');
             return Command::FAILURE;
+
         } catch (Throwable $e) {
             $output->writeln('<error>===============================================================</error>');
             $output->writeln('<error>¡FALLO! No se pudo conectar a RabbitMQ. Causa del error:</error>');
             $output->writeln("<error>{$e->getMessage()}</error>");
             $output->writeln('<error>===============================================================</error>');
-            $output->writeln('');
-            $output->writeln('<comment>Sugerencias:</comment>');
-            $output->writeln('<comment> - Verifica que el servidor de Sword puede resolver el DNS de RabbitMQ.</comment>');
-            $output->writeln('<comment> - Asegúrate de que no haya un firewall bloqueando el puerto ' . $config['port'] . '.</comment>');
-            $output->writeln('<comment> - Confirma que las credenciales (usuario, contraseña, vhost) son correctas.</comment>');
             return Command::FAILURE;
         }
     }

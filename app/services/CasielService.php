@@ -38,12 +38,24 @@ class CasielService
     private function connect(): void
     {
         try {
+            // Leemos el timeout del .env, con un default de 5 segundos
+            $connection_timeout = (int)env('RABBITMQ_CONNECTION_TIMEOUT', 5);
+
             $this->connection = new AMQPStreamConnection(
                 env('RABBITMQ_HOST'),
                 env('RABBITMQ_PORT'),
                 env('RABBITMQ_USER'),
                 env('RABBITMQ_PASS'),
-                env('RABBITMQ_VHOST')
+                env('RABBITMQ_VHOST'),
+                false,           // insist
+                'AMQPLAIN',      // login_method
+                null,            // login_response
+                'en_US',         // locale
+                $connection_timeout, // connection_timeout <-- USAMOS EL VALOR
+                30,              // read_write_timeout (puede ser más largo)
+                null,
+                false,
+                0
             );
             $this->channel = $this->connection->channel();
             $this->channel->queue_declare($this->queueName, false, true, false, false);
@@ -54,7 +66,7 @@ class CasielService
             $this->connection = null;
         }
     }
-    
+
     /**
      * Gets the singleton instance of the CasielService.
      */
@@ -86,7 +98,7 @@ class CasielService
     {
         if (!$this->isConnected()) {
             Log::channel('master')->warning('CasielService: Conexión con RabbitMQ perdida. Intentando reconectar...');
-            $this->close(); 
+            $this->close();
             $this->connect();
 
             if (!$this->isConnected()) {
@@ -129,7 +141,7 @@ class CasielService
             $this->connection = null;
         }
     }
-    
+
     /**
      * Allows replacing the singleton instance with a mock object for testing.
      * WARNING: This should ONLY be used in a test environment.
@@ -140,7 +152,7 @@ class CasielService
     {
         self::$instance = $instance;
     }
-    
+
     /**
      * Make clone private to prevent cloning the instance.
      */

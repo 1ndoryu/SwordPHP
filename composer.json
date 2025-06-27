@@ -77,7 +77,8 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
         "pestphp/pest": "^2.0",
-        "guzzlehttp/guzzle": "^7.0"
+        "guzzlehttp/guzzle": "^7.0",
+        "mockery/mockery": "^1.6"
     },
     "config": {
         "allow-plugins": {

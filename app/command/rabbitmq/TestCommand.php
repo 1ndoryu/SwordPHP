@@ -1,5 +1,4 @@
 <?php
-// ARCHIVO NUEVO: app/command/rabbitmq/TestCommand.php
 
 namespace app\command\rabbitmq;
 
@@ -11,15 +10,15 @@ use Throwable;
 class TestCommand extends Command
 {
     protected static $defaultName = 'rabbitmq:test';
-    protected static $defaultDescription = 'Sends a test event to RabbitMQ to verify the connection and publishing.';
+    protected static $defaultDescription = 'Sends a test event to the internal events queue to verify connection.';
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln('<info>Log: Iniciando prueba de publicación de evento en RabbitMQ...</info>');
+        $output->writeln('<info>Log: Iniciando prueba de publicación a la cola de eventos internos...</info>');
 
         $eventName = 'test.event.' . time();
         $payload = [
-            'message' => 'This is a test message from Sword.',
+            'message' => 'This is a test event from Sword.',
             'timestamp' => date('Y-m-d H:i:s')
         ];
 
@@ -29,16 +28,12 @@ class TestCommand extends Command
 
             $queueName = config('event.queue');
             $output->writeln("<info>Log: ¡Éxito! El evento de prueba '{$eventName}' fue despachado a la cola '{$queueName}'.</info>");
-            $output->writeln('<comment>Log: Por favor, verifica la consola de administración de RabbitMQ para confirmar que el mensaje ha llegado.</comment>');
+            $output->writeln('<comment>Log: Verifica la consola de RabbitMQ para confirmar que el mensaje ha llegado.</comment>');
             return Command::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln('<error>Error: Fallo al despachar el evento de prueba.</error>');
             $output->writeln('<error>Causa: ' . $e->getMessage() . '</error>');
-            $output->writeln('<comment>Log: Revisa los siguientes puntos:');
-            $output->writeln('  1. ¿Está RabbitMQ corriendo y accesible desde la aplicación?');
-            $output->writeln('  2. ¿Son correctas las credenciales en tu archivo .env (RABBITMQ_HOST, PORT, USER, PASS, VHOST)?');
-            $output->writeln('  3. ¿Existe el virtual host especificado en RabbitMQ?');
-            $output->writeln('  4. Revisa los logs en `runtime/logs/events.log` y `runtime/logs/master.log` para más detalles.</comment>');
+            $output->writeln('<comment>Log: Revisa la configuración de RabbitMQ en .env y config/event.php.</comment>');
             return Command::FAILURE;
         }
     }

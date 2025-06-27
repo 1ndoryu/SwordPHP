@@ -3,7 +3,7 @@
 namespace app\Action;
 
 use app\model\Content;
-use app\services\CasielService; // <-- SIN CAMBIOS, SOLO PARA CONTEXTO
+use app\services\CasielService;
 use Illuminate\Support\Str;
 use support\Request;
 use support\Response;
@@ -44,22 +44,17 @@ class CreateContentAction
             Log::channel('content')->info('Nuevo contenido creado vía Action', ['id' => $content->id, 'user_id' => $user->id]);
 
             // Despachar evento interno (para webhooks de Sword, etc.)
-            // Se añade media_id para que esté disponible en los webhooks si es necesario.
             dispatch_event('content.created', [
                 'id' => $content->id,
                 'slug' => $content->slug,
                 'type' => $content->type,
-                'status' => $content->status,
-                'user_id' => $user->id,
-                'title' => $content->content_data['title'] ?? '',
-                'media_id' => $data['content_data']['media_id'] ?? null
+                'user_id' => $user->id
             ]);
 
             // --- INICIO: NOTIFICACIÓN A CASIEL ---
             // Si el contenido es un 'audio_sample' y tiene un 'media_id', notificar a Casiel.
             if ($content->type === 'audio_sample' && !empty($data['content_data']['media_id'])) {
                 try {
-                    // MODIFICADO: Usar el Singleton en lugar de 'new'
                     $casielService = CasielService::getInstance();
                     $casielService->notifyNewAudio((int)$content->id, (int)$data['content_data']['media_id']);
                 } catch (Throwable $e) {

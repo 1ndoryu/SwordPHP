@@ -13,7 +13,7 @@ use Throwable;
  */
 class CasielService
 {
-    private static ?self $instance = null;
+    private static ?object $instance = null; // Acepta cualquier objeto para permitir mocks
     private ?AMQPStreamConnection $connection = null;
     private ?\PhpAmqpLib\Channel\AMQPChannel $channel = null;
     private ?string $queueName;
@@ -29,7 +29,14 @@ class CasielService
             $this->connection = null;
             return;
         }
+        $this->connect();
+    }
 
+    /**
+     * Establishes the connection to RabbitMQ.
+     */
+    private function connect(): void
+    {
         try {
             $this->connection = new AMQPStreamConnection(
                 env('RABBITMQ_HOST'),
@@ -42,14 +49,12 @@ class CasielService
             $this->channel->queue_declare($this->queueName, false, true, false, false);
 
             Log::channel('master')->info('CasielService: Conexión con RabbitMQ establecida y canal abierto.');
-
-            // This is handled by Workerman's lifecycle now, not shutdown function.
         } catch (Throwable $e) {
             Log::channel('master')->error('CasielService: No se pudo conectar con RabbitMQ', ['error' => $e->getMessage()]);
             $this->connection = null;
         }
     }
-
+    
     /**
      * Gets the singleton instance of the CasielService.
      */
@@ -62,21 +67,30 @@ class CasielService
     }
 
     /**
+     * Checks if the RabbitMQ connection is active.
+     */
+    private function isConnected(): bool
+    {
+        return $this->connection && $this->connection->isConnected() && $this->channel && $this->channel->is_open();
+    }
+
+    /**
      * Publishes a new audio processing job to Casiel's work queue.
      *
      * @param integer $contentId The ID of the content entry.
      * @param integer $mediaId The ID of the associated media file.
      * @return void
-     * @throws \Exception if the RabbitMQ channel is not available.
+     * @throws \Exception if the RabbitMQ channel is not available after attempting to reconnect.
      */
     public function notifyNewAudio(int $contentId, int $mediaId): void
     {
-        if (!$this->channel) {
-            // Attempt to reconnect if connection was lost.
-            Log::channel('master')->warning('CasielService: El canal de RabbitMQ no estaba disponible. Intentando reconectar...');
-            $this->__construct(); // Recal lthe constructor to re-initialize
-            if (!$this->channel) {
-                 throw new \Exception('CasielService: El canal de RabbitMQ no está disponible. Revisa los logs de conexión.');
+        if (!$this->isConnected()) {
+            Log::channel('master')->warning('CasielService: Conexión con RabbitMQ perdida. Intentando reconectar...');
+            $this->close(); 
+            $this->connect();
+
+            if (!$this->isConnected()) {
+                throw new \Exception('CasielService: No se pudo restablecer la conexión con RabbitMQ. El mensaje no se enviará.');
             }
         }
 
@@ -106,14 +120,25 @@ class CasielService
     public function close(): void
     {
         try {
-            if ($this->channel) $this->channel->close();
-            if ($this->connection) $this->connection->close();
-            $this->channel = null;
-            $this->connection = null;
-            Log::channel('master')->info('CasielService: Conexión con RabbitMQ cerrada.');
+            if ($this->channel && $this->channel->is_open()) $this->channel->close();
+            if ($this->connection && $this->connection->isConnected()) $this->connection->close();
         } catch (Throwable $e) {
             // Ignore exceptions on shutdown
+        } finally {
+            $this->channel = null;
+            $this->connection = null;
         }
+    }
+    
+    /**
+     * Allows replacing the singleton instance with a mock object for testing.
+     * WARNING: This should ONLY be used in a test environment.
+     *
+     * @param object|null $instance The mock instance or null to reset.
+     */
+    public static function setInstanceForTesting(?object $instance): void
+    {
+        self::$instance = $instance;
     }
     
     /**

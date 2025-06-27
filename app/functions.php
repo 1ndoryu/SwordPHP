@@ -5,7 +5,7 @@
  */
 
 use app\model\Option;
-use app\services\EventService; // <-- AÑADIDO
+use app\services\EventService;
 use support\Response;
 use Webman\Redis;
 use support\Log;
@@ -60,7 +60,6 @@ if (!function_exists('get_option')) {
         $cache_key = 'sword_options';
         $options = null;
 
-        // 1. Intenta obtener las opciones desde el caché de Redis.
         try {
             $cached_options = Redis::get($cache_key);
             if ($cached_options) {
@@ -72,13 +71,11 @@ if (!function_exists('get_option')) {
             ]);
         }
 
-        // 2. Si el caché está vacío o falló, obtén las opciones desde la base de datos.
         if ($options === null) {
             try {
                 Log::channel('options')->info('Cargando opciones desde la base de datos.');
                 $options = Option::all()->pluck('value', 'key')->toArray();
 
-                // Intenta guardar en caché para la próxima vez, sin fallar si no se puede.
                 try {
                     Redis::setex($cache_key, 86400, json_encode($options));
                 } catch (Throwable $e) {
@@ -87,16 +84,14 @@ if (!function_exists('get_option')) {
                     ]);
                 }
             } catch (Throwable $e) {
-                // Si la base de datos falla, es un error crítico.
                 Log::channel('master')->error('Error crítico al obtener opciones de la DB en get_option()', [
                     'key' => $key,
                     'error' => $e->getMessage()
                 ]);
-                return $default; // Devuelve el valor por defecto en caso de error de DB.
+                return $default;
             }
         }
 
-        // 3. Devuelve el valor de la opción específica del array de opciones.
         return array_key_exists($key, $options ?? []) ? $options[$key] : $default;
     }
 }

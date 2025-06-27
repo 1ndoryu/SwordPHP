@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Psr\Http\Message\ResponseInterface;
+use Mockery; // Añadido
 
 abstract class TestCase extends BaseTestCase
 {
@@ -32,6 +33,16 @@ abstract class TestCase extends BaseTestCase
             'http_errors' => false, // Do not throw exceptions on 4xx/5xx status codes
             'timeout' => 10.0,
         ]);
+    }
+
+    /**
+     * This method is called after each test.
+     * We use it to close the Mockery container and verify expectations.
+     */
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        Mockery::close();
     }
 
     /**

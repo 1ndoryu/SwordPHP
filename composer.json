@@ -49,15 +49,17 @@
     },
     "autoload": {
         "psr-4": {
-            "": "./",
             "app\\": "app/",
-            "App\\": "app/",
-            "app\\View\\Components\\": "app/view/components",
             "support\\": "support/"
         },
         "files": [
             "app/functions.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "scripts": {
         "post-package-install": [

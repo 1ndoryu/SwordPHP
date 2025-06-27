@@ -3,7 +3,7 @@
 namespace app\Action;
 
 use app\model\Content;
-use app\services\CasielService; // <-- AÑADIR IMPORT
+use app\services\CasielService; // <-- SIN CAMBIOS, SOLO PARA CONTEXTO
 use Illuminate\Support\Str;
 use support\Request;
 use support\Response;
@@ -59,7 +59,8 @@ class CreateContentAction
             // Si el contenido es un 'audio_sample' y tiene un 'media_id', notificar a Casiel.
             if ($content->type === 'audio_sample' && !empty($data['content_data']['media_id'])) {
                 try {
-                    $casielService = new CasielService();
+                    // MODIFICADO: Usar el Singleton en lugar de 'new'
+                    $casielService = CasielService::getInstance();
                     $casielService->notifyNewAudio((int)$content->id, (int)$data['content_data']['media_id']);
                 } catch (Throwable $e) {
                     // La notificación a servicios externos no debe romper la operación principal.

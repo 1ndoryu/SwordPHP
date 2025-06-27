@@ -9,22 +9,23 @@ use Throwable;
 
 /**
  * Service dedicated to publishing messages for the Casiel worker.
+ * Implemented as a Singleton to ensure a persistent connection.
  */
 class CasielService
 {
+    private static ?self $instance = null;
     private ?AMQPStreamConnection $connection = null;
     private ?\PhpAmqpLib\Channel\AMQPChannel $channel = null;
     private ?string $queueName;
 
     /**
-     * Establishes the connection to RabbitMQ upon instantiation.
+     * Private constructor to prevent direct instantiation and establish the connection.
      */
-    public function __construct()
+    private function __construct()
     {
         $this->queueName = env('RABBITMQ_WORK_QUEUE');
         if (empty($this->queueName)) {
             Log::channel('master')->error('La cola de trabajos de Casiel (RABBITMQ_WORK_QUEUE) no está configurada en .env');
-            // Prevent further execution if config is missing
             $this->connection = null;
             return;
         }
@@ -38,16 +39,26 @@ class CasielService
                 env('RABBITMQ_VHOST')
             );
             $this->channel = $this->connection->channel();
-
-            // Declare the queue to ensure it exists. It must be durable.
             $this->channel->queue_declare($this->queueName, false, true, false, false);
 
-            // Gracefully close the connection on script shutdown.
-            register_shutdown_function([$this, 'close']);
+            Log::channel('master')->info('CasielService: Conexión con RabbitMQ establecida y canal abierto.');
+
+            // This is handled by Workerman's lifecycle now, not shutdown function.
         } catch (Throwable $e) {
             Log::channel('master')->error('CasielService: No se pudo conectar con RabbitMQ', ['error' => $e->getMessage()]);
             $this->connection = null;
         }
+    }
+
+    /**
+     * Gets the singleton instance of the CasielService.
+     */
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
     /**
@@ -61,10 +72,14 @@ class CasielService
     public function notifyNewAudio(int $contentId, int $mediaId): void
     {
         if (!$this->channel) {
-            throw new \Exception('CasielService: El canal de RabbitMQ no está disponible. Revisa los logs de conexión.');
+            // Attempt to reconnect if connection was lost.
+            Log::channel('master')->warning('CasielService: El canal de RabbitMQ no estaba disponible. Intentando reconectar...');
+            $this->__construct(); // Recal lthe constructor to re-initialize
+            if (!$this->channel) {
+                 throw new \Exception('CasielService: El canal de RabbitMQ no está disponible. Revisa los logs de conexión.');
+            }
         }
 
-        // Create the specific payload format that Casiel expects.
         $payload = [
             'data' => [
                 'content_id' => $contentId,
@@ -75,7 +90,7 @@ class CasielService
 
         $message = new AMQPMessage(
             $messageBody,
-            ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT] // Make message persistent
+            ['delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]
         );
 
         $this->channel->basic_publish($message, '', $this->queueName);
@@ -93,8 +108,21 @@ class CasielService
         try {
             if ($this->channel) $this->channel->close();
             if ($this->connection) $this->connection->close();
+            $this->channel = null;
+            $this->connection = null;
+            Log::channel('master')->info('CasielService: Conexión con RabbitMQ cerrada.');
         } catch (Throwable $e) {
             // Ignore exceptions on shutdown
         }
     }
+    
+    /**
+     * Make clone private to prevent cloning the instance.
+     */
+    private function __clone() {}
+
+    /**
+     * Make wakeup private to prevent unserializing the instance.
+     */
+    public function __wakeup() {}
 }

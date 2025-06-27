@@ -1,0 +1,34 @@
+# docker-compose.yml para tu aplicación PHP
+
+services:
+  # Puedes cambiar 'mi-app-php' por el nombre que prefieras para tu servicio
+  sword-php:
+    # 'build: .' le dice a Docker Compose que construya una imagen
+    # usando el Dockerfile que se encuentra en el directorio actual.
+    build: .
+
+    # Es una buena práctica darle un nombre específico al contenedor
+    container_name: sword-php
+
+    # Reinicia el contenedor automáticamente si se detiene por un error
+    restart: unless-stopped
+
+    # Publica el puerto 8787 del contenedor en el puerto 8787 del host.
+    # Puedes quitar esto si no necesitas acceder a la app desde el exterior.
+    ports:
+      - "8787:8787"
+
+    # Carga las variables de entorno desde un archivo .env
+    # Aquí irán tus credenciales de RabbitMQ, base de datos, etc.
+    env_file:
+      - .env
+
+    # Conecta este servicio a la red externa de RabbitMQ.
+    networks:
+      - kamples-rabbitmq-vin1nv
+
+# Declara la red de RabbitMQ como una red externa.
+# Esto le dice a Docker que no intente crearla, sino que use la que ya existe.
+networks:
+  kamples-rabbitmq-vin1nv:
+    external: true

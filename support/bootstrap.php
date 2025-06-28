@@ -1,13 +1,16 @@
 <?php
-
-if (class_exists('Dotenv\Dotenv') && file_exists(base_path(false) . '/.env')) {
-    if (method_exists('Dotenv\Dotenv', 'createUnsafeMutable')) {
-        Dotenv\Dotenv::createUnsafeMutable(base_path(false))->load();
-    } else {
-        Dotenv\Dotenv::createMutable(base_path(false))->load();
-    }
-}
-
+/**
+ * This file is part of webman.
+ *
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the MIT-LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @author    walkor<walkor@workerman.net>
+ * @copyright walkor<walkor@workerman.net>
+ * @link      http://www.workerman.net/
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ */
 
 use Dotenv\Dotenv;
 use support\Log;

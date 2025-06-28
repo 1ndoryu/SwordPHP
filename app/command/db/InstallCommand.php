@@ -37,7 +37,9 @@ class InstallCommand extends Command
                 Role::create([
                     'name' => 'admin',
                     'description' => 'Super Administrator with all permissions.',
-                    'permissions' => ['*']
+                    // --- INICIO: ACTUALIZACIÓN DE PERMISOS ---
+                    'permissions' => ['*', 'admin.content.view']
+                    // --- FIN: ACTUALIZACIÓN DE PERMISOS ---
                 ]);
                 Role::create([
                     'name' => 'user',

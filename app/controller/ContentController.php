@@ -71,6 +71,33 @@ class ContentController
         return api_response(true, 'Content retrieved successfully.', $content->toArray());
     }
 
+    // --- INICIO: NUEVO MÉTODO ---
+    /**
+     * Display the specified resource for an administrator, regardless of status.
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return Response
+     */
+    public function showAdmin(Request $request, int $id): Response
+    {
+        try {
+            $content = Content::find($id);
+
+            if (!$content) {
+                Log::channel('content')->info('Admin intentó ver un contenido inexistente', ['id' => $id, 'admin_id' => $request->user->id]);
+                return api_response(false, 'Content not found.', null, 404);
+            }
+
+            Log::channel('content')->info('Admin vio un contenido específico', ['id' => $id, 'admin_id' => $request->user->id]);
+            return api_response(true, 'Admin content retrieved successfully.', $content->toArray());
+        } catch (Throwable $e) {
+            Log::channel('content')->error('Error en showAdmin', ['error' => $e->getMessage(), 'id' => $id]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+    // --- FIN: NUEVO MÉTODO ---
+
     /**
      * Store a newly created resource in storage by delegating to an action class.
      *

@@ -561,6 +561,72 @@ Changes a user's role. (Requires `admin.user.role.change`)
 
 Batch updates global options. (Requires `admin.options.update`)
 
+#### **`GET /admin/contents/by-hash/{hash}`**
+
+Busca contenidos que tengan un `audio_hash` específico en su campo `content_data`. Es una herramienta clave para la detección de duplicados, como archivos de audio. (Requiere `admin.content.list`)
+
+  - **URL Parameters:**
+      - `hash` (string, required): El hash perceptual del archivo a buscar.
+  - **Success Response (Found, 200 OK):** Devuelve un array con todos los contenidos que coinciden con el hash.
+    ```json
+    {
+        "success": true,
+        "message": "Content with specified hash found.",
+        "data": [
+            {
+                "id": 101,
+                "slug": "existing-audio-sample",
+                "content_data": {
+                    "title": "Existing Audio",
+                    "audio_hash": "a1b2c3d4e5f6"
+                }
+            }
+        ]
+    }
+    ```
+  - **Success Response (Not Found, 200 OK):** Crucialmente, devuelve `200 OK` con `data` como `null` para indicar que la búsqueda se completó sin encontrar duplicados.
+    ```json
+    {
+        "success": true,
+        "message": "Content with specified hash not found.",
+        "data": null
+    }
+    ```
+
+#### **`GET /admin/contents/filter-by-data`**
+
+Realiza una búsqueda genérica y paginada de contenidos, filtrando por un par clave-valor arbitrario dentro del campo JSON `content_data`. (Requiere `admin.content.list`)
+
+  - **Query Parameters:**
+      - `key` (string, required): La clave dentro del objeto `content_data` por la que se desea filtrar.
+      - `value` (string, required): El valor que debe coincidir con la clave especificada.
+      - `per_page` (integer, optional): Número de resultados por página.
+  - **Example Request:**
+    ```
+    GET /admin/contents/filter-by-data?key=source_id&value=ext-54321
+    ```
+  - **Success Response (200 OK):** Devuelve una lista paginada de los contenidos que coinciden con el filtro.
+    ```json
+    {
+        "success": true,
+        "message": "Contents filtered successfully.",
+        "data": {
+            "current_page": 1,
+            "data": [
+                {
+                    "id": 105,
+                    "slug": "imported-item-54321",
+                    "content_data": {
+                        "title": "Imported Item",
+                        "source_id": "ext-54321"
+                    }
+                }
+            ],
+            "total": 1
+        }
+    }
+    ```
+
 ---
 
 ### 🛂 9. Role Management Endpoints (Admin)
@@ -649,3 +715,4 @@ Updates an existing webhook. (Requires `admin.webhooks.update`)
 #### **`DELETE /admin/webhooks/{id}`**
 
 Deletes a webhook. (Requires `admin.webhooks.delete`)
+

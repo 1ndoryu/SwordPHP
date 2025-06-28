@@ -84,6 +84,11 @@ Route::group('/admin', function () {
 
     Route::get('/contents', [ContentController::class, 'indexAdmin'])->middleware(new PermissionMiddleware('admin.content.list'));
 
+    // --- INICIO: NUEVAS RUTAS DE BÚSQUEDA DE CONTENIDO ---
+    Route::get('/contents/by-hash/{hash}', [ContentController::class, 'findByHash'])->middleware(new PermissionMiddleware('admin.content.list'));
+    Route::get('/contents/filter-by-data', [ContentController::class, 'filterByData'])->middleware(new PermissionMiddleware('admin.content.list'));
+    // --- FIN: NUEVAS RUTAS DE BÚSQUEDA DE CONTENIDO ---
+
     Route::get('/media', [MediaController::class, 'index'])->middleware(new PermissionMiddleware('admin.media.list'));
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.media.delete'));
 

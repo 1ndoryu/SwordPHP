@@ -220,4 +220,78 @@ class ContentController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    /**
+     * Find content by a specific hash in its metadata.
+     * Only accessible by administrators.
+     *
+     * @param Request $request
+     * @param string $hash
+     * @return Response
+     */
+    public function findByHash(Request $request, string $hash): Response
+    {
+        try {
+            // The query looks for an exact match of the value of 'audio_hash' inside the JSONB field.
+            $contents = Content::where('content_data->audio_hash', $hash)->get();
+
+            if ($contents->isEmpty()) {
+                Log::channel('content')->info('Búsqueda por hash no encontró resultados.', ['hash' => $hash, 'admin_id' => $request->user->id]);
+                return api_response(true, 'Content with specified hash not found.', null);
+            }
+
+            Log::channel('content')->info('Búsqueda por hash encontró contenido(s).', ['hash' => $hash, 'count' => $contents->count(), 'admin_id' => $request->user->id]);
+            return api_response(true, 'Content with specified hash found.', $contents->toArray());
+
+        } catch (Throwable $e) {
+            Log::channel('content')->error('Error en búsqueda por hash', ['error' => $e->getMessage(), 'hash' => $hash]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+
+    /**
+     * Filter content by an arbitrary key-value pair in its metadata.
+     * Only accessible by administrators.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function filterByData(Request $request): Response
+    {
+        $key = $request->get('key');
+        $value = $request->get('value');
+
+        if (empty($key) || !isset($value)) {
+            return api_response(false, 'Both "key" and "value" query parameters are required.', null, 400);
+        }
+
+        // Sanitize the key to prevent potential injection issues.
+        // Allow only alphanumeric characters and underscores.
+        $sanitized_key = preg_replace('/[^A-Za-z0-9_]/', '', $key);
+        if ($sanitized_key !== $key) {
+             return api_response(false, 'Invalid character in "key". Only alphanumeric and underscores are allowed.', null, 400);
+        }
+
+        try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100);
+
+            // Build the query using the sanitized key.
+            $query_path = 'content_data->' . $sanitized_key;
+            $contents = Content::where($query_path, $value)->latest()->paginate($per_page);
+
+            Log::channel('content')->info('Admin filtró contenidos por content_data', [
+                'key' => $sanitized_key,
+                'value' => $value,
+                'results' => $contents->total(),
+                'admin_id' => $request->user->id
+            ]);
+
+            return api_response(true, 'Contents filtered successfully.', $contents->toArray());
+
+        } catch (Throwable $e) {
+            Log::channel('content')->error('Error en filtrado por content_data', ['error' => $e->getMessage(), 'key' => $key, 'value' => $value]);
+            return api_response(false, 'An internal error occurred during filtering.', null, 500);
+        }
+    }
 }

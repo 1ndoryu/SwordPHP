@@ -82,12 +82,13 @@ Route::group('/admin', function () {
     // El rol 'admin' tiene el permiso '*' y pasará todas estas verificaciones.
     // Otros roles (como 'editor') necesitarán estos permisos explícitamente.
 
-    Route::get('/contents', [ContentController::class, 'indexAdmin'])->middleware(new PermissionMiddleware('admin.content.list'));
-    // --- INICIO: NUEVA RUTA ---
-    Route::get('/contents/{id}', [ContentController::class, 'showAdmin'])->middleware(new PermissionMiddleware('admin.content.view'));
-    // --- FIN: NUEVA RUTA ---
-    Route::get('/contents/by-hash/{hash}', [ContentController::class, 'findByHash'])->middleware(new PermissionMiddleware('admin.content.list'));
+    // --- ORDEN DE RUTAS CORREGIDO ---
+    // Las rutas específicas/estáticas se definen ANTES de las rutas dinámicas/variables.
     Route::get('/contents/filter-by-data', [ContentController::class, 'filterByData'])->middleware(new PermissionMiddleware('admin.content.list'));
+    Route::get('/contents/by-hash/{hash}', [ContentController::class, 'findByHash'])->middleware(new PermissionMiddleware('admin.content.list'));
+    Route::get('/contents', [ContentController::class, 'indexAdmin'])->middleware(new PermissionMiddleware('admin.content.list'));
+    Route::get('/contents/{id}', [ContentController::class, 'showAdmin'])->middleware(new PermissionMiddleware('admin.content.view'));
+    // --- FIN DE LA CORRECCIÓN ---
 
     Route::get('/media', [MediaController::class, 'index'])->middleware(new PermissionMiddleware('admin.media.list'));
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware(new PermissionMiddleware('admin.media.delete'));

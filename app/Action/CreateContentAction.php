@@ -57,7 +57,6 @@ class CreateContentAction
 
             Log::channel('content')->info('Nuevo contenido creado vía Action', ['id' => $content->id, 'user_id' => $user->id]);
 
-            // Dispatch internal event (for Sword webhooks, etc.)
             rabbit_event('content.created', [
                 'id' => $content->id,
                 'slug' => $content->slug,
@@ -65,20 +64,16 @@ class CreateContentAction
                 'user_id' => $user->id
             ]);
 
-            // --- START: NOTIFICATION TO CASIEL (MODIFIED) ---
             if ($content->type === 'audio_sample' && !empty($data['content_data']['media_id'])) {
                 try {
-                    casiel_audio_job((int)$content->id, (int)$data['content_data']['media_id']);
+                    casielEvento((int)$content->id, (int)$data['content_data']['media_id']);
                 } catch (Throwable $e) {
-                    // Notifying external services should not break the main operation.
-                    // Only the error is logged.
                     Log::channel('content')->error('Fallo al intentar notificar a Casiel', [
                         'content_id' => $content->id,
                         'error' => $e->getMessage()
                     ]);
                 }
             }
-            // --- END: NOTIFICATION TO CASIEL (MODIFIED) ---
 
             return api_response(true, 'Content created successfully.', $content->toArray(), 201);
         } catch (Throwable $e) {

@@ -143,7 +143,7 @@ if (!function_exists('rabbit_event')) {
 // --- FIN: ALIAS SIMPLIFICADO ---
 
 // --- INICIO: HELPER PARA JOPHIEL ---
-if (!function_exists('jophiel_event')) {
+if (!function_exists('jophielEvento')) {
     /**
      * Despacha un evento al exchange/topic de Jophiel.
      *
@@ -151,23 +151,21 @@ if (!function_exists('jophiel_event')) {
      * @param array $payload Datos específicos del evento.
      * @return void
      */
-    function jophiel_event(string $nombreEvento, array $payload = []): void
+    function jophielEvento(string $nombreEvento, array $payload = []): void
     {
         try {
             \app\services\JophielService::getInstance()->dispatch($nombreEvento, $payload);
         } catch (Throwable $e) {
             // Registra pero no interrumpe el flujo principal
-            \support\Log::channel('events')->error("Fallo al despachar evento vía jophiel_event: {$nombreEvento}", [
+            \support\Log::channel('events')->error("Fallo al despachar evento vía jophielEvento: {$nombreEvento}", [
                 'error' => $e->getMessage(),
                 'payload' => $payload
             ]);
         }
     }
 }
-// --- FIN: HELPER PARA JOPHIEL ---
 
-// --- INICIO: HELPER PARA CASIEL ---
-if (!function_exists('casiel_audio_job')) {
+if (!function_exists('casielEvento')) {
     /**
      * Envía un trabajo de procesamiento de audio al worker Casiel.
      *
@@ -175,7 +173,7 @@ if (!function_exists('casiel_audio_job')) {
      * @param int $mediaId   ID del archivo multimedia.
      * @return void
      */
-    function casiel_audio_job(int $contentId, int $mediaId): void
+    function casielEvento(int $contentId, int $mediaId): void
     {
         try {
             (new \app\services\CasielService())->notifyNewAudio($contentId, $mediaId);
@@ -188,4 +186,3 @@ if (!function_exists('casiel_audio_job')) {
         }
     }
 }
-// --- FIN: HELPER PARA CASIEL ---

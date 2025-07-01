@@ -118,7 +118,7 @@ class WebhookController
             Log::channel('content')->info('Metadata de Casiel guardada en el contenido.', ['content_id' => $content_id]);
 
             // Dispatch the event for Jophiel
-            jophiel_event('sample.lifecycle.created', [
+            jophielEvento('sample.lifecycle.created', [
                 'sample_id' => $content->id,
                 'creator_id' => $content->user_id,
                 'metadata' => $content->content_data // Send the full, merged metadata

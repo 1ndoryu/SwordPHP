@@ -21,7 +21,7 @@ class TestWorkerCommand extends Command
 
         try {
             // Usamos el servicio de Casiel directamente
-            casiel_audio_job($contentId, $mediaId);
+            casielEvento($contentId, $mediaId);
 
             $queueName = env('RABBITMQ_WORK_QUEUE');
             $output->writeln("<info>Log: ¡Éxito! El trabajo de prueba para content_id:{$contentId} fue despachado a la cola '{$queueName}'.</info>");

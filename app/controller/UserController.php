@@ -178,7 +178,7 @@ class UserController
             ]);
 
             // Dispatch event for Jophiel
-            jophiel_event('user.interaction.follow', [
+            jophielEvento('user.interaction.follow', [
                 'user_id' => $follower_user->id,
                 'followed_user_id' => $user_to_follow->id
             ]);
@@ -228,7 +228,7 @@ class UserController
             ]);
 
             // Dispatch event for Jophiel
-            jophiel_event('user.interaction.unfollow', [
+            jophielEvento('user.interaction.unfollow', [
                 'user_id' => $follower_user->id,
                 'unfollowed_user_id' => $user_to_unfollow->id
             ]);

@@ -151,7 +151,7 @@ class ContentController
 
             // --- INICIO: EVENTO PARA JOPHIEL ---
             if ($content->type === 'audio_sample' && isset($updates['content_data'])) {
-                jophiel_event('sample.lifecycle.updated', [
+                jophielEvento('sample.lifecycle.updated', [
                     'sample_id' => $content->id,
                     'creator_id' => $content->user_id,
                     'metadata' => $content->content_data // Enviar la metadata completa actualizada
@@ -209,7 +209,7 @@ class ContentController
 
             // --- INICIO: EVENTO PARA JOPHIEL ---
             if ($content_type === 'audio_sample') {
-                jophiel_event('sample.lifecycle.deleted', [
+                jophielEvento('sample.lifecycle.deleted', [
                     'sample_id' => $content_id
                 ]);
             }
@@ -251,7 +251,7 @@ class ContentController
 
                 // --- INICIO: EVENTO PARA JOPHIEL ---
                 if ($content->type === 'audio_sample') {
-                    jophiel_event('user.interaction.unlike', [
+                    jophielEvento('user.interaction.unlike', [
                         'user_id' => $user_id,
                         'sample_id' => $id
                     ]);
@@ -270,7 +270,7 @@ class ContentController
                 
                 // --- INICIO: EVENTO PARA JOPHIEL ---
                 if ($content->type === 'audio_sample') {
-                    jophiel_event('user.interaction.like', [
+                    jophielEvento('user.interaction.like', [
                         'user_id' => $user_id,
                         'sample_id' => $id
                     ]);

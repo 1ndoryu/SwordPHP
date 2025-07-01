@@ -1,10 +1,12 @@
 <?php
+// app\controller\ContentController.php
 
 namespace app\controller;
 
 use app\model\Content;
 use app\model\Like;
-use app\Action\CreateContentAction; // <-- Importar la nueva clase
+use app\Action\CreateContentAction;
+use app\services\JophielService; // <-- Importar JophielService
 use support\Request;
 use support\Response;
 use support\Log;
@@ -71,7 +73,6 @@ class ContentController
         return api_response(true, 'Content retrieved successfully.', $content->toArray());
     }
 
-    // --- INICIO: NUEVO MÉTODO ---
     /**
      * Display the specified resource for an administrator, regardless of status.
      *
@@ -96,7 +97,6 @@ class ContentController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
-    // --- FIN: NUEVO MÉTODO ---
 
     /**
      * Store a newly created resource in storage by delegating to an action class.
@@ -134,19 +134,30 @@ class ContentController
         }
 
         try {
-            $content->update($request->post());
+            $updates = $request->post();
+            $content->update($updates);
             Log::channel('content')->info('Contenido actualizado', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
                 'is_admin' => $request->user->role === 'admin'
             ]);
 
-            // Despachar evento
+            // Despachar evento interno
             dispatch_event('content.updated', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
-                'changes' => $request->post()
+                'changes' => $updates
             ]);
+
+            // --- INICIO: EVENTO PARA JOPHIEL ---
+            if ($content->type === 'audio_sample' && isset($updates['content_data'])) {
+                JophielService::getInstance()->dispatch('sample.lifecycle.updated', [
+                    'sample_id' => $content->id,
+                    'creator_id' => $content->user_id,
+                    'metadata' => $content->content_data // Enviar la metadata completa actualizada
+                ]);
+            }
+            // --- FIN: EVENTO PARA JOPHIEL ---
 
             return api_response(true, 'Content updated successfully.', $content->toArray());
         } catch (Throwable $e) {
@@ -179,19 +190,30 @@ class ContentController
         }
 
         try {
-            $content_id = $content->id; // Guardar id antes de borrar
+            $content_id = $content->id;
+            $content_type = $content->type; // Guardar datos antes de borrar
+            
             $content->delete();
+            
             Log::channel('content')->warning('Contenido eliminado', [
                 'id' => $id,
                 'user_id' => $request->user->id,
                 'is_admin' => $request->user->role === 'admin'
             ]);
 
-            // Despachar evento
+            // Despachar evento interno
             dispatch_event('content.deleted', [
                 'id' => $content_id,
                 'user_id' => $request->user->id
             ]);
+
+            // --- INICIO: EVENTO PARA JOPHIEL ---
+            if ($content_type === 'audio_sample') {
+                JophielService::getInstance()->dispatch('sample.lifecycle.deleted', [
+                    'sample_id' => $content_id
+                ]);
+            }
+            // --- FIN: EVENTO PARA JOPHIEL ---
 
             return new Response(204); // No Content
         } catch (Throwable $e) {
@@ -225,8 +247,17 @@ class ContentController
                 $message = 'Like removed successfully.';
                 Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
                 
-                // Despachar evento
                 dispatch_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
+
+                // --- INICIO: EVENTO PARA JOPHIEL ---
+                if ($content->type === 'audio_sample') {
+                    JophielService::getInstance()->dispatch('user.interaction.unlike', [
+                        'user_id' => $user_id,
+                        'sample_id' => $id
+                    ]);
+                }
+                // --- FIN: EVENTO PARA JOPHIEL ---
+
             } else {
                 Like::create([
                     'content_id' => $id,
@@ -234,9 +265,17 @@ class ContentController
                 ]);
                 $message = 'Like added successfully.';
                 Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
-
-                // Despachar evento
+                
                 dispatch_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
+                
+                // --- INICIO: EVENTO PARA JOPHIEL ---
+                if ($content->type === 'audio_sample') {
+                    JophielService::getInstance()->dispatch('user.interaction.like', [
+                        'user_id' => $user_id,
+                        'sample_id' => $id
+                    ]);
+                }
+                // --- FIN: EVENTO PARA JOPHIEL ---
             }
 
             $like_count = $content->likes()->count();

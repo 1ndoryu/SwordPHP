@@ -1,8 +1,11 @@
 <?php
+// app\controller\WebhookController.php
 
 namespace app\controller;
 
 use app\model\Webhook;
+use app\model\Content; // <-- Añadido
+use app\services\JophielService; // <-- Añadido
 use support\Request;
 use support\Response;
 use support\Log;
@@ -81,4 +84,55 @@ class WebhookController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    // --- INICIO: NUEVO MÉTODO ---
+    /**
+     * Handles the incoming webhook from Casiel service after audio analysis.
+     * This triggers the 'sample.lifecycle.created' event for Jophiel.
+     *
+     * @param Request $request
+     * @return Response
+     */
+    public function handleCasielProcessed(Request $request): Response
+    {
+        $data = $request->post();
+        $content_id = $data['content_id'] ?? null;
+        $metadata = $data['metadata'] ?? null;
+
+        if (!$content_id || !$metadata) {
+            Log::channel('webhooks')->warning('Webhook de Casiel recibido con datos incompletos.', ['data' => $data]);
+            return api_response(false, 'Incomplete data: content_id and metadata are required.', null, 400);
+        }
+
+        try {
+            $content = Content::find($content_id);
+            if (!$content) {
+                Log::channel('webhooks')->error('Webhook de Casiel para un content_id inexistente.', ['content_id' => $content_id]);
+                return api_response(false, 'Content not found.', null, 404);
+            }
+
+            // Update the content with the new metadata from Casiel
+            $content->content_data = array_merge($content->content_data ?? [], $metadata);
+            $content->save();
+
+            Log::channel('content')->info('Metadata de Casiel guardada en el contenido.', ['content_id' => $content_id]);
+
+            // Dispatch the event for Jophiel
+            JophielService::getInstance()->dispatch('sample.lifecycle.created', [
+                'sample_id' => $content->id,
+                'creator_id' => $content->user_id,
+                'metadata' => $content->content_data // Send the full, merged metadata
+            ]);
+            
+            return api_response(true, 'Casiel webhook processed and event dispatched to Jophiel.');
+
+        } catch (Throwable $e) {
+            Log::channel('webhooks')->error('Error crítico procesando el webhook de Casiel.', [
+                'error' => $e->getMessage(),
+                'content_id' => $content_id
+            ]);
+            return api_response(false, 'Internal server error while processing webhook.', null, 500);
+        }
+    }
+    // --- FIN: NUEVO MÉTODO ---
 }

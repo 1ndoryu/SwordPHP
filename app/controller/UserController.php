@@ -1,10 +1,13 @@
 <?php
+// app/controller/UserController.php
 
 namespace app\controller;
 
 use app\model\Content;
 use app\model\User;
-use app\model\Role; // <-- Añadido
+use app\model\Role;
+use app\model\UserFollow;
+use app\services\JophielService;
 use support\Request;
 use support\Response;
 use support\Log;
@@ -131,4 +134,115 @@ class UserController
             return api_response(false, 'An internal error occurred while updating the profile.', null, 500);
         }
     }
+
+    // --- INICIO: NUEVOS MÉTODOS ---
+
+    /**
+     * Follow a user.
+     *
+     * @param Request $request
+     * @param integer $id The ID of the user to follow.
+     * @return Response
+     */
+    public function follow(Request $request, int $id): Response
+    {
+        $follower_user = $request->user;
+        $user_to_follow = User::find($id);
+
+        if (!$user_to_follow) {
+            return api_response(false, 'User to follow not found.', null, 404);
+        }
+
+        if ($follower_user->id === $user_to_follow->id) {
+            return api_response(false, 'You cannot follow yourself.', null, 400);
+        }
+
+        try {
+            // Check if already following
+            $existing_follow = UserFollow::where('user_id', $follower_user->id)
+                ->where('followed_user_id', $user_to_follow->id)
+                ->first();
+
+            if ($existing_follow) {
+                return api_response(true, 'You are already following this user.', null, 200);
+            }
+            
+            UserFollow::create([
+                'user_id' => $follower_user->id,
+                'followed_user_id' => $user_to_follow->id,
+            ]);
+
+            Log::channel('social')->info('Usuario comenzó a seguir a otro', [
+                'follower_id' => $follower_user->id,
+                'followed_id' => $user_to_follow->id,
+            ]);
+
+            // Dispatch event for Jophiel
+            JophielService::getInstance()->dispatch('user.interaction.follow', [
+                'user_id' => $follower_user->id,
+                'followed_user_id' => $user_to_follow->id
+            ]);
+
+            return api_response(true, "You are now following {$user_to_follow->username}.");
+
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error al seguir a un usuario', [
+                'error' => $e->getMessage(),
+                'follower_id' => $follower_user->id,
+                'followed_id' => $user_to_follow->id,
+            ]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+
+    /**
+     * Unfollow a user.
+     *
+     * @param Request $request
+     * @param integer $id The ID of the user to unfollow.
+     * @return Response
+     */
+    public function unfollow(Request $request, int $id): Response
+    {
+        $follower_user = $request->user;
+        $user_to_unfollow = User::find($id);
+
+        if (!$user_to_unfollow) {
+            return api_response(false, 'User to unfollow not found.', null, 404);
+        }
+
+        try {
+            $follow_relation = UserFollow::where('user_id', $follower_user->id)
+                ->where('followed_user_id', $user_to_unfollow->id)
+                ->first();
+
+            if (!$follow_relation) {
+                return api_response(true, 'You are not following this user.', null, 200);
+            }
+
+            $follow_relation->delete();
+            
+            Log::channel('social')->info('Usuario dejó de seguir a otro', [
+                'follower_id' => $follower_user->id,
+                'unfollowed_id' => $user_to_unfollow->id,
+            ]);
+
+            // Dispatch event for Jophiel
+            JophielService::getInstance()->dispatch('user.interaction.unfollow', [
+                'user_id' => $follower_user->id,
+                'unfollowed_user_id' => $user_to_unfollow->id
+            ]);
+
+            return api_response(true, "You have unfollowed {$user_to_unfollow->username}.");
+
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error al dejar de seguir a un usuario', [
+                'error' => $e->getMessage(),
+                'follower_id' => $follower_user->id,
+                'unfollowed_id' => $user_to_unfollow->id,
+            ]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+    // --- FIN: NUEVOS MÉTODOS ---
 }

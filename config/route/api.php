@@ -4,6 +4,7 @@
 use Webman\Route;
 use app\controller\AuthController;
 use app\controller\ContentController;
+use app\controller\FeedController;
 use app\controller\MediaController;
 use app\controller\SystemController;
 use app\controller\UserController;
@@ -29,6 +30,9 @@ Route::group('/system', function () {
     Route::post('/reset', [SystemController::class, 'reset']);
 });
 
+// Webhook público desde Casiel
+Route::post('/webhooks/casiel/processed', [WebhookController::class, 'handleCasielProcessed']);
+
 // Rutas de Opciones Globales (Pública para obtenerlas)
 Route::get('/options', [OptionController::class, 'index']);
 
@@ -52,6 +56,13 @@ Route::group('/user', function () {
     Route::get('/likes', [UserController::class, 'likedContent']);
 })->middleware(JwtAuthentication::class);
 
+// --- INICIO: NUEVAS RUTAS DE FOLLOW (protegidas) ---
+Route::post('/users/{id}/follow', [UserController::class, 'follow'])->middleware(JwtAuthentication::class);
+Route::delete('/users/{id}/unfollow', [UserController::class, 'unfollow'])->middleware(JwtAuthentication::class);
+// --- FIN: NUEVAS RUTAS DE FOLLOW ---
+
+// Ruta para el Feed de Jophiel
+Route::get('/feed', [FeedController::class, 'getFeed'])->middleware(JwtAuthentication::class);
 
 // --- Rutas de Contenido (CRUD Público y Autenticado) ---
 Route::get('/contents', [ContentController::class, 'index']);

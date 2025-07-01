@@ -1,4 +1,5 @@
 <?php
+// app/command/db/ResetCommand.php
 
 namespace app\command\db;
 
@@ -33,8 +34,9 @@ class ResetCommand extends Command
         $tables = [
             'likes',
             'comments',
+            'user_follows', // <-- Añadido
             'media',
-            'webhooks', // <-- Añadido
+            'webhooks',
             'contents',
             'users',
             'roles',

@@ -1,11 +1,12 @@
 <?php
+// app/model/User.php
 
 namespace app\model;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo; // <-- Añadido
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Model
 {
@@ -27,7 +28,7 @@ class User extends Model
         'username',
         'email',
         'password',
-        'role_id', // <-- MODIFICADO de 'role' a 'role_id'
+        'role_id',
         'profile_data',
     ];
 
@@ -85,4 +86,24 @@ class User extends Model
     {
         return $this->hasMany(Like::class);
     }
+
+    // --- INICIO: NUEVAS RELACIONES ---
+    /**
+     * The users that this user follows.
+     * (The users that this user is following).
+     */
+    public function following(): HasMany
+    {
+        return $this->hasMany(UserFollow::class, 'user_id');
+    }
+
+    /**
+     * The users that follow this user.
+     * (The user's followers).
+     */
+    public function followers(): HasMany
+    {
+        return $this->hasMany(UserFollow::class, 'followed_user_id');
+    }
+    // --- FIN: NUEVAS RELACIONES ---
 }

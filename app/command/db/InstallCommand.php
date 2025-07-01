@@ -1,4 +1,5 @@
 <?php
+// app/command/db/InstallCommand.php
 
 namespace app\command\db;
 
@@ -8,7 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use support\Log;
-use app\model\Role; // <-- Añadido
+use app\model\Role;
 
 class InstallCommand extends Command
 {
@@ -37,9 +38,7 @@ class InstallCommand extends Command
                 Role::create([
                     'name' => 'admin',
                     'description' => 'Super Administrator with all permissions.',
-                    // --- INICIO: ACTUALIZACIÓN DE PERMISOS ---
                     'permissions' => ['*', 'admin.content.view']
-                    // --- FIN: ACTUALIZACIÓN DE PERMISOS ---
                 ]);
                 Role::create([
                     'name' => 'user',
@@ -132,6 +131,20 @@ class InstallCommand extends Command
             }
             
             // --- INICIO: NUEVA TABLA ---
+            // User Follows
+            if (!Capsule::schema()->hasTable('user_follows')) {
+                Capsule::schema()->create('user_follows', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // The one who follows
+                    $table->foreignId('followed_user_id')->constrained('users')->onDelete('cascade'); // The one being followed
+                    $table->timestamps();
+                    $table->unique(['user_id', 'followed_user_id']);
+                });
+                $output->writeln('Log: Tabla "user_follows" creada correctamente.');
+                Log::channel('database')->info('Tabla "user_follows" creada correctamente.');
+            }
+            // --- FIN: NUEVA TABLA ---
+
             // Webhooks
             if (!Capsule::schema()->hasTable('webhooks')) {
                 Capsule::schema()->create('webhooks', function (Blueprint $table) {
@@ -145,7 +158,6 @@ class InstallCommand extends Command
                 $output->writeln('Log: Tabla "webhooks" creada correctamente.');
                 Log::channel('database')->info('Tabla "webhooks" creada correctamente.');
             }
-            // --- FIN: NUEVA TABLA ---
 
         } catch (\Exception $e) {
             $output->writeln('Error: ' . $e->getMessage());

@@ -57,7 +57,7 @@ if (!function_exists('get_option')) {
      */
     function get_option(string $key, $default = null)
     {
-        $cache_key = 'sword_options';
+        $cache_key = \app\config\AppConstants::OPTIONS_CACHE_KEY;
         $options = null;
 
         try {
@@ -77,7 +77,7 @@ if (!function_exists('get_option')) {
                 $options = Option::all()->pluck('value', 'key')->toArray();
 
                 try {
-                    Redis::setex($cache_key, 86400, json_encode($options));
+                    Redis::setex($cache_key, \app\config\AppConstants::OPTIONS_CACHE_TTL, json_encode($options));
                 } catch (Throwable $e) {
                     Log::channel('options')->warning('No se pudo escribir en el caché de Redis.', [
                         'error' => $e->getMessage()

@@ -539,6 +539,40 @@ These endpoints require specific `admin.*` permissions.
 
 Retrieves all content, regardless of status. (Requires `admin.content.list`)
 
+#### **`GET /admin/contents/{id}`**
+
+Retrieves a single content item by its ID, regardless of status. (Requires `admin.content.view`)
+
+  - **URL Parameters:**
+      - `id` (integer, required): The ID of the content to retrieve.
+  - **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Admin content retrieved successfully.",
+        "data": {
+            "id": 42,
+            "slug": "draft-post",
+            "type": "post",
+            "status": "draft",
+            "user_id": 3,
+            "content_data": {
+                "title": "Draft Post",
+                "body": "This post is still being edited."
+            },
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    }
+    ```
+  - **Error Response (404 Not Found):**
+    ```json
+    {
+        "success": false,
+        "message": "Content not found."
+    }
+    ```
+
 #### **`GET /admin/media`**
 
 Retrieves all media files. (Requires `admin.media.list`)
@@ -715,4 +749,61 @@ Updates an existing webhook. (Requires `admin.webhooks.update`)
 #### **`DELETE /admin/webhooks/{id}`**
 
 Deletes a webhook. (Requires `admin.webhooks.delete`)
+
+---
+
+### 📡 11. Feed Endpoint
+
+Endpoint that returns a personalized recommendation feed powered by **Jophiel** for the authenticated user.
+
+#### **`GET /feed`**
+
+Returns an ordered list of recommended content (`audio_sample` type) for the current user.
+
+  - **Authentication:** Bearer Token
+  - **Query Parameters:**
+      - `per_page` (integer, optional): Page size used for the fallback feed when Jophiel is unavailable. Defaults to `20`.
+  - **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Feed retrieved successfully.",
+        "data": {
+            "current_page": 1,
+            "data": [
+                {
+                    "id": 101,
+                    "slug": "lofi-beat-001",
+                    "type": "audio_sample",
+                    "status": "published",
+                    "user_id": 5,
+                    "content_data": {
+                        "title": "Lofi Beat #1",
+                        "duration": 31,
+                        "audio_hash": "a1b2c3d4"
+                    },
+                    "created_at": "...",
+                    "updated_at": "..."
+                }
+            ],
+            "first_page_url": null,
+            "last_page": 1,
+            "last_page_url": null,
+            "next_page_url": null,
+            "path": "/feed",
+            "per_page": 1,
+            "prev_page_url": null,
+            "to": 1,
+            "total": 1
+        }
+    }
+    ```
+  - **Fallback Response (200 OK):** When Jophiel is unreachable, the CMS sends the latest published content with the message `Jophiel unavailable. Sending latest content feed.` The structure is identical to the success response.
+  - **Error Response (500 Internal Server Error):**
+    ```json
+    {
+        "success": false,
+        "message": "An internal error occurred."
+    }
+    ```
 

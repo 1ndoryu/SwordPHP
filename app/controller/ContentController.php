@@ -1,19 +1,22 @@
 <?php
-// app\controller\ContentController.php
 
 namespace app\controller;
 
 use app\model\Content;
 use app\model\Like;
 use app\Action\CreateContentAction;
-use app\services\JophielService; // <-- Importar JophielService
+use app\traits\HasValidation;
+use app\traits\HandlesErrors;
+use app\traits\HandlesAuthorization;
+use app\config\AppConstants;
 use support\Request;
 use support\Response;
-use support\Log;
 use Throwable;
 
 class ContentController
 {
+    use HasValidation, HandlesErrors, HandlesAuthorization;
+
     /**
      * Display a paginated listing of the resource.
      *
@@ -22,14 +25,18 @@ class ContentController
     public function index(Request $request): Response
     {
         try {
-            $per_page = (int) $request->get('per_page', 15);
-            $per_page = min($per_page, 100); // Set a max limit of 100 per page
+            $per_page = $this->validatePagination(
+                (int) $request->get('per_page', AppConstants::DEFAULT_PER_PAGE),
+                AppConstants::MAX_PER_PAGE
+            );
 
-            $contents = Content::where('status', 'published')->latest()->paginate($per_page);
+            $contents = Content::where('status', AppConstants::STATUS_PUBLISHED)
+                ->latest()
+                ->paginate($per_page);
+                
             return api_response(true, 'Contents retrieved successfully.', $contents->toArray());
         } catch (Throwable $e) {
-            Log::channel('content')->error('Error fetching contents', ['error' => $e->getMessage()]);
-            return api_response(false, 'An internal error occurred.', null, 500);
+            return $this->handleError($e, 'content', 'Error fetching contents');
         }
     }
 
@@ -42,16 +49,19 @@ class ContentController
     public function indexAdmin(Request $request): Response
     {
         try {
-            $per_page = (int) $request->get('per_page', 15);
-            $per_page = min($per_page, 100); // Set a max limit of 100 per page
+            $per_page = $this->validatePagination(
+                (int) $request->get('per_page', AppConstants::DEFAULT_PER_PAGE),
+                AppConstants::MAX_PER_PAGE
+            );
 
-            // Admin can see all content, regardless of status.
+            // Admin can see all content, regardless of status
             $contents = Content::latest()->paginate($per_page);
-            Log::channel('content')->info('Admin consultó todos los contenidos', ['user_id' => $request->user->id]);
+            
+            $this->logSuccess('content', 'Admin consultó todos los contenidos', ['user_id' => $request->user->id]);
+            
             return api_response(true, 'All contents retrieved successfully for admin.', $contents->toArray());
         } catch (Throwable $e) {
-            Log::channel('content')->error('Error fetching all contents for admin', ['error' => $e->getMessage()]);
-            return api_response(false, 'An internal error occurred.', null, 500);
+            return $this->handleError($e, 'content', 'Error fetching all contents for admin');
         }
     }
 
@@ -64,7 +74,9 @@ class ContentController
      */
     public function show(Request $request, string $slug): Response
     {
-        $content = Content::where('slug', $slug)->where('status', 'published')->first();
+        $content = Content::where('slug', $slug)
+            ->where('status', AppConstants::STATUS_PUBLISHED)
+            ->first();
 
         if (!$content) {
             return api_response(false, 'Content not found.', null, 404);
@@ -124,45 +136,41 @@ class ContentController
             return api_response(false, 'Content not found.', null, 404);
         }
 
-        if ($request->user->role !== 'admin' && $content->user_id !== $request->user->id) {
-            Log::channel('auth')->warning('Intento de modificación no autorizado', [
-                'user_id' => $request->user->id,
-                'content_id' => $id,
-                'owner_id' => $content->user_id
-            ]);
-            return api_response(false, 'This action is unauthorized.', null, 403);
+        // Check authorization using trait
+        $auth_error = $this->checkContentModificationAuth($request->user, $content);
+        if ($auth_error) {
+            return $auth_error;
         }
 
         try {
             $updates = $request->post();
             $content->update($updates);
-            Log::channel('content')->info('Contenido actualizado', [
+            
+            $this->logSuccess('content', 'Contenido actualizado', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
-                'is_admin' => $request->user->role === 'admin'
+                'is_admin' => $this->isAdmin($request->user)
             ]);
 
-            // Despachar evento interno
+            // Dispatch internal event
             rabbit_event('content.updated', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
                 'changes' => $updates
             ]);
 
-            // --- INICIO: EVENTO PARA JOPHIEL ---
-            if ($content->type === 'audio_sample' && isset($updates['content_data'])) {
+            // Jophiel event for audio samples
+            if ($content->type === AppConstants::CONTENT_TYPE_AUDIO_SAMPLE && isset($updates['content_data'])) {
                 jophielEvento('sample.lifecycle.updated', [
                     'sample_id' => $content->id,
                     'creator_id' => $content->user_id,
-                    'metadata' => $content->content_data // Enviar la metadata completa actualizada
+                    'metadata' => $content->content_data
                 ]);
             }
-            // --- FIN: EVENTO PARA JOPHIEL ---
 
             return api_response(true, 'Content updated successfully.', $content->toArray());
         } catch (Throwable $e) {
-            Log::channel('content')->error('Error updating content', ['error' => $e->getMessage(), 'content_id' => $id]);
-            return api_response(false, 'An internal error occurred.', null, 500);
+            return $this->handleError($e, 'content', 'Error updating content', ['content_id' => $id]);
         }
     }
 

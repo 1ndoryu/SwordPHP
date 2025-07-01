@@ -4,15 +4,18 @@ namespace app\Action;
 
 use app\model\Content;
 use app\model\User;
-use app\services\CasielService; 
+use app\config\AppConstants;
+use app\traits\HasValidation;
+use app\traits\HandlesErrors;
 use Illuminate\Support\Str;
 use support\Request;
 use support\Response;
 use Throwable;
-use support\Log;
 
 class CreateContentAction
 {
+    use HasValidation, HandlesErrors;
+
     /**
      * Handles the HTTP request from the controller.
      * Extracts data and delegates to the core business logic.
@@ -50,12 +53,15 @@ class CreateContentAction
             $content = Content::create([
                 'user_id' => $user->id,
                 'slug' => $slug,
-                'type' => $data['type'] ?? 'post',
-                'status' => $data['status'] ?? 'draft',
+                'type' => $data['type'] ?? AppConstants::DEFAULT_CONTENT_TYPE,
+                'status' => $data['status'] ?? AppConstants::DEFAULT_CONTENT_STATUS,
                 'content_data' => $data['content_data'] ?? [],
             ]);
 
-            Log::channel('content')->info('Nuevo contenido creado vía Action', ['id' => $content->id, 'user_id' => $user->id]);
+            $this->logSuccess('content', 'Nuevo contenido creado vía Action', [
+                'id' => $content->id, 
+                'user_id' => $user->id
+            ]);
 
             rabbit_event('content.created', [
                 'id' => $content->id,
@@ -64,21 +70,21 @@ class CreateContentAction
                 'user_id' => $user->id
             ]);
 
-            if ($content->type === 'audio_sample' && !empty($data['content_data']['media_id'])) {
+            // Notify Casiel for audio samples
+            if ($content->type === AppConstants::CONTENT_TYPE_AUDIO_SAMPLE && !empty($data['content_data']['media_id'])) {
                 try {
                     casielEvento((int)$content->id, (int)$data['content_data']['media_id']);
                 } catch (Throwable $e) {
-                    Log::channel('content')->error('Fallo al intentar notificar a Casiel', [
-                        'content_id' => $content->id,
-                        'error' => $e->getMessage()
+                    // Log error but don't fail the content creation
+                    $this->handleError($e, 'content', 'Fallo al intentar notificar a Casiel', [
+                        'content_id' => $content->id
                     ]);
                 }
             }
 
             return api_response(true, 'Content created successfully.', $content->toArray(), 201);
         } catch (Throwable $e) {
-            Log::channel('content')->error('Error creando contenido vía Action', ['error' => $e->getMessage(), 'user_id' => $user->id]);
-            return api_response(false, 'An internal error occurred.', null, 500);
+            return $this->handleError($e, 'content', 'Error creando contenido vía Action', ['user_id' => $user->id]);
         }
     }
 }

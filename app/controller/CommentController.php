@@ -4,6 +4,7 @@ namespace app\controller;
 
 use app\model\Comment;
 use app\model\Content;
+use app\services\JophielService;
 use support\Request;
 use support\Response;
 use support\Log;
@@ -20,7 +21,8 @@ class CommentController
      */
     public function store(Request $request, int $content_id): Response
     {
-        if (!Content::where('id', $content_id)->where('status', 'published')->exists()) {
+        $content = Content::where('id', $content_id)->where('status', 'published')->first();
+        if (!$content) {
             return api_response(false, 'Content not found or not published.', null, 404);
         }
 
@@ -39,6 +41,15 @@ class CommentController
             $comment->load('user:id,username');
 
             Log::channel('social')->info('Nuevo comentario creado', ['comment_id' => $comment->id, 'user_id' => $request->user->id]);
+
+            // --- INICIO: EVENTO PARA JOPHIEL ---
+            if ($content->type === 'audio_sample') {
+                JophielService::getInstance()->dispatch('user.interaction.comment', [
+                    'user_id' => (int)$request->user->id,
+                    'sample_id' => (int)$content->id,
+                ]);
+            }
+            // --- FIN: EVENTO PARA JOPHIEL ---
 
             return api_response(true, 'Comment posted successfully.', $comment->toArray(), 201);
         } catch (Throwable $e) {

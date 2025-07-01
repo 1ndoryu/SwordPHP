@@ -92,18 +92,18 @@ class User extends Model
      * The users that this user follows.
      * (The users that this user is following).
      */
-    public function following(): HasMany
+    public function following()
     {
-        return $this->hasMany(UserFollow::class, 'user_id');
+        return $this->belongsToMany(User::class, 'user_follows', 'user_id', 'followed_user_id');
     }
 
     /**
      * The users that follow this user.
      * (The user's followers).
      */
-    public function followers(): HasMany
+    public function followers()
     {
-        return $this->hasMany(UserFollow::class, 'followed_user_id');
+        return $this->belongsToMany(User::class, 'user_follows', 'followed_user_id', 'user_id');
     }
     // --- FIN: NUEVAS RELACIONES ---
 }

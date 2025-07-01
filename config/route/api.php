@@ -59,6 +59,10 @@ Route::group('/user', function () {
 // --- INICIO: NUEVAS RUTAS DE FOLLOW (protegidas) ---
 Route::post('/users/{id}/follow', [UserController::class, 'follow'])->middleware(JwtAuthentication::class);
 Route::delete('/users/{id}/unfollow', [UserController::class, 'unfollow'])->middleware(JwtAuthentication::class);
+
+// Rutas para obtener seguidores y seguidos (públicas)
+Route::get('/users/{id}/followers', [UserController::class, 'followers']);
+Route::get('/users/{id}/following', [UserController::class, 'following']);
 // --- FIN: NUEVAS RUTAS DE FOLLOW ---
 
 // Ruta para el Feed de Jophiel

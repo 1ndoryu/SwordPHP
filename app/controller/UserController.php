@@ -244,5 +244,67 @@ class UserController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    /**
+     * Retrieves a paginated list of followers for a specific user.
+     *
+     * @param Request $request
+     * @param integer $id The ID of the user.
+     * @return Response
+     */
+    public function followers(Request $request, int $id): Response
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return api_response(false, 'User not found.', null, 404);
+        }
+
+        try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100);
+
+            $followers = $user->followers()->with('role')->paginate($per_page);
+
+            return api_response(true, 'Followers retrieved successfully.', $followers->toArray());
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error retrieving followers for user', [
+                'user_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
+
+    /**
+     * Retrieves a paginated list of users that a specific user is following.
+     *
+     * @param Request $request
+     * @param integer $id The ID of the user.
+     * @return Response
+     */
+    public function following(Request $request, int $id): Response
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return api_response(false, 'User not found.', null, 404);
+        }
+
+        try {
+            $per_page = (int) $request->get('per_page', 15);
+            $per_page = min($per_page, 100);
+
+            $following = $user->following()->with('role')->paginate($per_page);
+
+            return api_response(true, 'Following list retrieved successfully.', $following->toArray());
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error retrieving following list for user', [
+                'user_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
     // --- FIN: NUEVOS MÉTODOS ---
 }

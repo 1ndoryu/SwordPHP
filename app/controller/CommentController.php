@@ -44,7 +44,7 @@ class CommentController
 
             // --- INICIO: EVENTO PARA JOPHIEL ---
             if ($content->type === 'audio_sample') {
-                JophielService::getInstance()->dispatch('user.interaction.comment', [
+                jophiel_event('user.interaction.comment', [
                     'user_id' => (int)$request->user->id,
                     'sample_id' => (int)$content->id,
                 ]);

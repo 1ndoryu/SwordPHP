@@ -2,7 +2,6 @@
 
 namespace app\command\rabbitmq;
 
-use app\services\CasielService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,15 +21,11 @@ class TestWorkerCommand extends Command
 
         try {
             // Usamos el servicio de Casiel directamente
-            $casielService = CasielService::getInstance();
-            $casielService->notifyNewAudio($contentId, $mediaId);
+            casiel_audio_job($contentId, $mediaId);
 
             $queueName = env('RABBITMQ_WORK_QUEUE');
             $output->writeln("<info>Log: ¡Éxito! El trabajo de prueba para content_id:{$contentId} fue despachado a la cola '{$queueName}'.</info>");
             $output->writeln('<comment>Log: Verifica la consola de RabbitMQ para confirmar que el mensaje ha llegado.</comment>');
-            
-            // Cerrar la conexión explícitamente al final del script
-            $casielService->close();
             
             return Command::SUCCESS;
         } catch (Throwable $e) {

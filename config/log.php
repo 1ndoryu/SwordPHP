@@ -1,5 +1,5 @@
 <?php
-// ARCHIVO MODIFICADO: config/log.php
+// ARCHIVO CORREGIDO: config/log.php
 
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
@@ -8,219 +8,116 @@ use Monolog\Logger;
 // Determinar el nivel de log desde el .env, con un valor por defecto
 $logLevel = Logger::toMonologLevel(env('LOG_LEVEL', 'DEBUG'));
 
+// Formatter para logs específicos (formato más simple)
+$specific_formatter = [
+    'class' => LineFormatter::class,
+    'constructor' => [
+        "[%datetime%] %level_name%: %message% %context% %extra%\n",
+        'Y-m-d H:i:s',
+        true, // allowInlineLineBreaks
+        true  // ignoreEmptyContextAndExtra
+    ],
+];
+
+// Formatter para el log maestro (incluye el nombre del canal para más contexto)
+$master_formatter = [
+    'class' => LineFormatter::class,
+    'constructor' => [
+        "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
+        'Y-m-d H:i:s',
+        true, // allowInlineLineBreaks
+        true  // ignoreEmptyContextAndExtra
+    ],
+];
+
+// Definición de la configuración del handler maestro (para ser reutilizada)
+$master_handler_config = [
+    'class' => RotatingFileHandler::class,
+    'constructor' => [
+        runtime_path() . '/logs/master.log',
+        15, // $maxFiles
+        $logLevel
+    ],
+    'formatter' => $master_formatter,
+];
+
+// Función helper para crear la configuración de un handler específico de canal
+$create_specific_handler_config = function (string $channel_log_file) use ($logLevel, $specific_formatter) {
+    return [
+        'class' => RotatingFileHandler::class,
+        'constructor' => [
+            $channel_log_file,
+            15, // $maxFiles
+            $logLevel
+        ],
+        'formatter' => $specific_formatter,
+    ];
+};
+
 return [
-    // Canal de log por defecto (enviará a 'master')
+    // El canal por defecto escribe directamente en el log maestro.
+    // Se usa cuando se llama a Log::info(...) sin especificar un canal.
     'default' => [
         'handlers' => [
-            [
-                'class' => Monolog\Handler\GroupHandler::class,
-                'constructor' => [
-                    'handlers' => [],
-                ],
-            ],
+            $master_handler_config,
         ],
         'processors' => [],
     ],
 
-    // Canal 'master' que captura todos los logs
+    // El canal 'master' también escribe solo en master.log.
     'master' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/master.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $master_handler_config,
         ],
     ],
 
-    // Canal para la base de datos
+    // Canales específicos que escriben en su propio archivo Y en master.log
     'database' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/database.log',
-                    15,
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/database.log'),
+            $master_handler_config
         ],
     ],
-
-    // Canal para la autenticación
     'auth' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/auth.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
-        ],
-        'processors' => [
-            // Aquí se podrían añadir procesadores para añadir más datos a los logs de auth
+            $create_specific_handler_config(runtime_path() . '/logs/auth.log'),
+            $master_handler_config
         ],
     ],
-
-    // Canal para el contenido
     'content' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/content.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/content.log'),
+            $master_handler_config
         ],
     ],
-
-    // Canal para la gestión de media
     'media' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/media.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/media.log'),
+            $master_handler_config
         ],
     ],
-
     'social' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/social.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/social.log'),
+            $master_handler_config
         ],
     ],
-
-    // Canal para el sistema de opciones
     'options' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/options.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/options.log'),
+            $master_handler_config
         ],
     ],
-    
-    // Canal para el sistema de eventos
     'events' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/events.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/events.log'),
+            $master_handler_config
         ],
     ],
-    
-    // --- INICIO: NUEVO CANAL ---
-    // Canal para el sistema de webhooks
     'webhooks' => [
         'handlers' => [
-            [
-                'class' => RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/webhooks.log',
-                    15, // $maxFiles
-                    $logLevel
-                ],
-                'formatter' => [
-                    'class' => LineFormatter::class,
-                    'constructor' => [
-                        "[%datetime%] %level_name%: %message% %context%\n",
-                        'Y-m-d H:i:s',
-                        true
-                    ],
-                ],
-            ]
+            $create_specific_handler_config(runtime_path() . '/logs/webhooks.log'),
+            $master_handler_config
         ],
     ],
-    // --- FIN: NUEVO CANAL ---
 ];

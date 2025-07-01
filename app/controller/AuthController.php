@@ -66,7 +66,7 @@ class AuthController
             Log::channel('auth')->info('Nuevo usuario registrado', ['username' => $username, 'user_id' => $user->id, 'role' => $roleName]);
 
             // Despachar evento de nuevo usuario
-            dispatch_event('user.registered', [
+            rabbit_event('user.registered', [
                 'user_id' => $user->id,
                 'username' => $user->username,
                 'email' => $user->email,
@@ -123,7 +123,7 @@ class AuthController
             Log::channel('auth')->info('Usuario ha iniciado sesión', ['user_id' => $user->id]);
 
             // Despachar evento de login
-            dispatch_event('user.loggedin', ['user_id' => $user->id]);
+            rabbit_event('user.loggedin', ['user_id' => $user->id]);
 
             return api_response(true, 'Login successful.', [
                 'token_type' => 'bearer',

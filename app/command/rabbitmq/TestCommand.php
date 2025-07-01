@@ -24,7 +24,7 @@ class TestCommand extends Command
 
         try {
             // Usamos la función global que es la que se usa en la aplicación
-            dispatch_event($eventName, $payload);
+            rabbit_event($eventName, $payload);
 
             $queueName = config('event.queue');
             $output->writeln("<info>Log: ¡Éxito! El evento de prueba '{$eventName}' fue despachado a la cola '{$queueName}'.</info>");

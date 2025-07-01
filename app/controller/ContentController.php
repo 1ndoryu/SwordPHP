@@ -143,7 +143,7 @@ class ContentController
             ]);
 
             // Despachar evento interno
-            dispatch_event('content.updated', [
+            rabbit_event('content.updated', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
                 'changes' => $updates
@@ -151,7 +151,7 @@ class ContentController
 
             // --- INICIO: EVENTO PARA JOPHIEL ---
             if ($content->type === 'audio_sample' && isset($updates['content_data'])) {
-                JophielService::getInstance()->dispatch('sample.lifecycle.updated', [
+                jophiel_event('sample.lifecycle.updated', [
                     'sample_id' => $content->id,
                     'creator_id' => $content->user_id,
                     'metadata' => $content->content_data // Enviar la metadata completa actualizada
@@ -202,14 +202,14 @@ class ContentController
             ]);
 
             // Despachar evento interno
-            dispatch_event('content.deleted', [
+            rabbit_event('content.deleted', [
                 'id' => $content_id,
                 'user_id' => $request->user->id
             ]);
 
             // --- INICIO: EVENTO PARA JOPHIEL ---
             if ($content_type === 'audio_sample') {
-                JophielService::getInstance()->dispatch('sample.lifecycle.deleted', [
+                jophiel_event('sample.lifecycle.deleted', [
                     'sample_id' => $content_id
                 ]);
             }
@@ -247,11 +247,11 @@ class ContentController
                 $message = 'Like removed successfully.';
                 Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
                 
-                dispatch_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
+                rabbit_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
 
                 // --- INICIO: EVENTO PARA JOPHIEL ---
                 if ($content->type === 'audio_sample') {
-                    JophielService::getInstance()->dispatch('user.interaction.unlike', [
+                    jophiel_event('user.interaction.unlike', [
                         'user_id' => $user_id,
                         'sample_id' => $id
                     ]);
@@ -266,11 +266,11 @@ class ContentController
                 $message = 'Like added successfully.';
                 Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
                 
-                dispatch_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
+                rabbit_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
                 
                 // --- INICIO: EVENTO PARA JOPHIEL ---
                 if ($content->type === 'audio_sample') {
-                    JophielService::getInstance()->dispatch('user.interaction.like', [
+                    jophiel_event('user.interaction.like', [
                         'user_id' => $user_id,
                         'sample_id' => $id
                     ]);

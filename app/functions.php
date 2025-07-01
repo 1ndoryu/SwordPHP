@@ -120,3 +120,72 @@ if (!function_exists('dispatch_event')) {
     }
 }
 // --- FIN: NUEVA FUNCIÓN ---
+
+// --- INICIO: ALIAS SIMPLIFICADO ---
+// Un alias más sencillo y descriptivo para despachar eventos a RabbitMQ.
+if (!function_exists('rabbit_event')) {
+    /**
+     * Alias de `dispatch_event`, pensado para que sea más intuitivo en castellano.
+     * Permite despachar un evento a RabbitMQ con una sola llamada.
+     *
+     * Ejemplo de uso:
+     * rabbit_event('usuario.creado', ['id' => 123]);
+     *
+     * @param string $nombreEvento Nombre del evento, p. ej. 'usuario.creado'.
+     * @param array $payload Datos asociados al evento.
+     * @return void
+     */
+    function rabbit_event(string $nombreEvento, array $payload = []): void
+    {
+        dispatch_event($nombreEvento, $payload);
+    }
+}
+// --- FIN: ALIAS SIMPLIFICADO ---
+
+// --- INICIO: HELPER PARA JOPHIEL ---
+if (!function_exists('jophiel_event')) {
+    /**
+     * Despacha un evento al exchange/topic de Jophiel.
+     *
+     * @param string $nombreEvento Routing key / nombre del evento. Ej. 'user.interaction.like'
+     * @param array $payload Datos específicos del evento.
+     * @return void
+     */
+    function jophiel_event(string $nombreEvento, array $payload = []): void
+    {
+        try {
+            \app\services\JophielService::getInstance()->dispatch($nombreEvento, $payload);
+        } catch (Throwable $e) {
+            // Registra pero no interrumpe el flujo principal
+            \support\Log::channel('events')->error("Fallo al despachar evento vía jophiel_event: {$nombreEvento}", [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+        }
+    }
+}
+// --- FIN: HELPER PARA JOPHIEL ---
+
+// --- INICIO: HELPER PARA CASIEL ---
+if (!function_exists('casiel_audio_job')) {
+    /**
+     * Envía un trabajo de procesamiento de audio al worker Casiel.
+     *
+     * @param int $contentId ID del contenido.
+     * @param int $mediaId   ID del archivo multimedia.
+     * @return void
+     */
+    function casiel_audio_job(int $contentId, int $mediaId): void
+    {
+        try {
+            (new \app\services\CasielService())->notifyNewAudio($contentId, $mediaId);
+        } catch (Throwable $e) {
+            \support\Log::channel('events')->error('Fallo al despachar trabajo a Casiel', [
+                'content_id' => $contentId,
+                'media_id' => $mediaId,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+}
+// --- FIN: HELPER PARA CASIEL ---

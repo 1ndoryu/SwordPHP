@@ -3,7 +3,8 @@
 namespace app\Action;
 
 use app\model\Content;
-use app\services\CasielService;
+use app\model\User;
+use app\services\CasielService; 
 use Illuminate\Support\Str;
 use support\Request;
 use support\Response;
@@ -13,7 +14,8 @@ use support\Log;
 class CreateContentAction
 {
     /**
-     * Valida los datos y crea un nuevo contenido.
+     * Handles the HTTP request from the controller.
+     * Extracts data and delegates to the core business logic.
      *
      * @param Request $request
      * @return Response
@@ -22,7 +24,19 @@ class CreateContentAction
     {
         $data = $request->post();
         $user = $request->user;
+        return $this->execute($user, $data);
+    }
 
+    /**
+     * Core business logic for creating content.
+     * Decoupled from the HTTP Request object for better reusability and testing.
+     *
+     * @param User $user The user creating the content.
+     * @param array $data The content data.
+     * @return Response
+     */
+    public function execute(User $user, array $data): Response
+    {
         if (empty($data['content_data']['title'])) {
             return api_response(false, 'Title is required.', null, 400);
         }
@@ -43,30 +57,28 @@ class CreateContentAction
 
             Log::channel('content')->info('Nuevo contenido creado vía Action', ['id' => $content->id, 'user_id' => $user->id]);
 
-            // Despachar evento interno (para webhooks de Sword, etc.)
-            dispatch_event('content.created', [
+            // Dispatch internal event (for Sword webhooks, etc.)
+            rabbit_event('content.created', [
                 'id' => $content->id,
                 'slug' => $content->slug,
                 'type' => $content->type,
                 'user_id' => $user->id
             ]);
 
-            // --- INICIO: NOTIFICACIÓN A CASIEL ---
-            // Si el contenido es un 'audio_sample' y tiene un 'media_id', notificar a Casiel.
+            // --- START: NOTIFICATION TO CASIEL (MODIFIED) ---
             if ($content->type === 'audio_sample' && !empty($data['content_data']['media_id'])) {
                 try {
-                    $casielService = CasielService::getInstance();
-                    $casielService->notifyNewAudio((int)$content->id, (int)$data['content_data']['media_id']);
+                    casiel_audio_job((int)$content->id, (int)$data['content_data']['media_id']);
                 } catch (Throwable $e) {
-                    // La notificación a servicios externos no debe romper la operación principal.
-                    // Solo se registra el error.
+                    // Notifying external services should not break the main operation.
+                    // Only the error is logged.
                     Log::channel('content')->error('Fallo al intentar notificar a Casiel', [
                         'content_id' => $content->id,
                         'error' => $e->getMessage()
                     ]);
                 }
             }
-            // --- FIN: NOTIFICACIÓN A CASIEL ---
+            // --- END: NOTIFICATION TO CASIEL (MODIFIED) ---
 
             return api_response(true, 'Content created successfully.', $content->toArray(), 201);
         } catch (Throwable $e) {

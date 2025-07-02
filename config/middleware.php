@@ -5,8 +5,10 @@
  * Middleware configuration file
  */
 return [
-    // Global middleware. Se deja vacío como estaba.
-    '' => [],
+    // Global middleware.
+    '' => [
+        app\middleware\RequestLogger::class, // Logs every incoming request
+    ],
 
     // Se elimina por completo la entrada de alias ('role' => ...) que causaba el error.
 ];

@@ -12,6 +12,7 @@ use app\config\AppConstants;
 use support\Request;
 use support\Response;
 use Throwable;
+use support\Log;
 
 class ContentController
 {

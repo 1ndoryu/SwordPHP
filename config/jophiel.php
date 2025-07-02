@@ -14,7 +14,7 @@ return [
      * Jophiel API configuration for fetching recommendations
      */
     'api' => [
-        'base_url' => env('JOPHIEL_API_URL', 'http://127.0.0.1:8787'),
+        'base_url' => env('JOPHIEL_API_URL', 'http://127.0.0.1:8789'),
         'timeout' => env('JOPHIEL_API_TIMEOUT', 5), // Timeout in seconds
     ]
 ];

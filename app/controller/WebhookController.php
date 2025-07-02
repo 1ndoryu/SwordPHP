@@ -117,12 +117,9 @@ class WebhookController
 
             Log::channel('content')->info('Metadata de Casiel guardada en el contenido.', ['content_id' => $content_id]);
 
-            // Dispatch the event for Jophiel
-            jophielEvento('sample.lifecycle.created', [
-                'sample_id' => $content->id,
-                'creator_id' => $content->user_id,
-                'metadata' => $content->content_data // Send the full, merged metadata
-            ]);
+            // Dispatch the event for Jophiel usando el nuevo DTO
+            $event = \app\events\SampleCreatedEvent::fromContent($content);
+            jophielEvento($event->getName(), $event->toPayload());
             
             return api_response(true, 'Casiel webhook processed and event dispatched to Jophiel.');
 

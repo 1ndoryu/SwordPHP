@@ -1,10 +1,11 @@
 <?php
-
+// ARCHIVO MODIFICADO: config/process.php
 
 use support\Log;
 use support\Request;
 use app\process\Http;
-use app\process\WebhookListener; // <-- AÑADIDO
+use app\process\WebhookListener;
+use app\process\JophielSyncProcess; // <-- AÑADIDO
 
 global $argv;
 
@@ -49,13 +50,20 @@ return [
             ]
         ]
     ],
-    // --- INICIO: NUEVO PROCESO ---
     'webhook-listener' => [
         'handler' => WebhookListener::class,
         'count' => 1, // Usualmente, un solo listener es suficiente.
         'user' => '',
         'group' => '',
         'reloadable' => true, // Puede ser recargado si su código cambia
+    ],
+    // --- INICIO: NUEVO PROCESO DE SINCRONIZACIÓN ---
+    'jophiel-sync' => [
+        'handler' => JophielSyncProcess::class,
+        'count'   => 1, // Solo se necesita una instancia de este proceso.
+        'user'    => '',
+        'group'   => '',
+        'reloadable' => true,
     ]
-    // --- FIN: NUEVO PROCESO ---
+    // --- FIN: NUEVO PROCESO DE SINCRONIZACIÓN ---
 ];

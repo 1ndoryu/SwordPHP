@@ -410,9 +410,57 @@ Toggles a "like" on content. Requires authentication.
     }
     ```
 
+#### **`GET /contents/{id}/likes`**
+
+Retrieves the current number of likes for a specific content without modifying its state.
+
+-   **Authentication:** None
+-   **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Like count retrieved successfully.",
+        "data": {
+            "like_count": 42
+        }
+    }
+    ```
+
 ---
 
 ### 💬 5. Comments Endpoints
+
+#### **`GET /comments/{content_id}`**
+
+Retrieves a paginated list of comments for a published piece of content.
+
+-   **Authentication:** None
+-   **Query Parameters:**
+    -   `per_page` (integer, optional, default `20`, max `100`): Items per page.
+-   **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Comments retrieved successfully.",
+        "data": {
+            "current_page": 1,
+            "data": [
+                {
+                    "id": 10,
+                    "content_id": 1,
+                    "user_id": 5,
+                    "body": "Great track!",
+                    "user": {
+                        "id": 5,
+                        "username": "john_doe"
+                    },
+                    "created_at": "2025-07-02T12:00:00.000000Z"
+                }
+            ],
+            "total": 3
+        }
+    }
+    ```
 
 #### **`POST /comments/{content_id}`**
 
@@ -442,6 +490,83 @@ Posts a new comment. Requires `comment.create` permission.
 Deletes a comment. Requires `comment.delete.own` permission or `comment.delete.all` for other users' comments.
 
 -   **Authentication:** Bearer Token
+
+---
+
+### 🤝 Follow Endpoints
+
+Estos endpoints permiten a los usuarios seguir o dejar de seguir a otros usuarios, además de consultar las listas de seguidores y seguidos.
+
+Base Path: `/users/{id}`
+
+#### **`POST /users/{id}/follow`**
+Sigue al usuario especificado.
+
+- **Authentication:** Bearer Token
+- **Success Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "You are now following {username}."
+}
+```
+- **Error Response (400 Bad Request):** Al intentar seguirte a ti mismo o si ya sigues al usuario.
+
+#### **`DELETE /users/{id}/unfollow`**
+Deja de seguir al usuario especificado.
+
+- **Authentication:** Bearer Token
+- **Success Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "You are no longer following {username}."
+}
+```
+
+#### **`GET /users/{id}/followers`**
+Devuelve una lista paginada de los seguidores del usuario.
+
+- **Authentication:** None
+- **Success Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Followers retrieved successfully.",
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 5,
+                "username": "john_doe"
+            }
+        ],
+        "total": 12
+    }
+}
+```
+
+#### **`GET /users/{id}/following`**
+Devuelve una lista paginada de los usuarios que el usuario especificado está siguiendo.
+
+- **Authentication:** None
+- **Success Response (200 OK):**
+```json
+{
+    "success": true,
+    "message": "Following retrieved successfully.",
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 8,
+                "username": "jane_doe"
+            }
+        ],
+        "total": 20
+    }
+}
+```
 
 ---
 

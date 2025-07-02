@@ -369,4 +369,24 @@ class ContentController
             return api_response(false, 'An internal error occurred during filtering.', null, 500);
         }
     }
+
+    /**
+     * Retrieve like count for a specific content without mutating state.
+     *
+     * @param Request $request
+     * @param integer $id
+     * @return Response
+     */
+    public function likes(Request $request, int $id): Response
+    {
+        $content = Content::find($id);
+        if (!$content) {
+            return api_response(false, 'Content not found.', null, 404);
+        }
+
+        $like_count = $content->likes()->count();
+        return api_response(true, 'Like count retrieved successfully.', [
+            'like_count' => $like_count
+        ]);
+    }
 }

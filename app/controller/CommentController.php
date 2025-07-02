@@ -90,4 +90,38 @@ class CommentController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    /**
+     * List comments for a given content.
+     *
+     * @param Request $request
+     * @param integer $content_id
+     * @return Response
+     */
+    public function index(Request $request, int $content_id): Response
+    {
+        $content = Content::where('id', $content_id)->where('status', 'published')->first();
+        if (!$content) {
+            return api_response(false, 'Content not found or not published.', null, 404);
+        }
+
+        try {
+            // Simple pagination control (1-100)
+            $per_page = (int) $request->get('per_page', 20);
+            $per_page = max(1, min($per_page, 100));
+
+            $comments = Comment::where('content_id', $content_id)
+                ->latest()
+                ->with('user:id,username')
+                ->paginate($per_page);
+
+            return api_response(true, 'Comments retrieved successfully.', $comments->toArray());
+        } catch (Throwable $e) {
+            Log::channel('social')->error('Error al listar comentarios', [
+                'error' => $e->getMessage(),
+                'content_id' => $content_id
+            ]);
+            return api_response(false, 'An internal error occurred.', null, 500);
+        }
+    }
 }

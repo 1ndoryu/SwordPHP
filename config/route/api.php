@@ -70,6 +70,8 @@ Route::get('/feed', [FeedController::class, 'getFeed'])->middleware(JwtAuthentic
 
 // --- Rutas de Contenido (CRUD Público y Autenticado) ---
 Route::get('/contents', [ContentController::class, 'index']);
+// Nueva ruta para obtener la cantidad de likes (debe ir antes de la ruta {slug} para evitar colisión)
+Route::get('/contents/{id}/likes', [ContentController::class, 'likes']);
 Route::get('/contents/{slug}', [ContentController::class, 'show']);
 
 Route::group('/contents', function () {
@@ -81,6 +83,9 @@ Route::group('/contents', function () {
 
 
 // --- Rutas de Comentarios (Autenticado) ---
+// Ruta pública para listar los comentarios de un contenido
+Route::get('/comments/{content_id}', [CommentController::class, 'index']);
+
 Route::group('/comments', function () {
     Route::post('/{content_id}', [CommentController::class, 'store']);
     Route::delete('/{comment_id}', [CommentController::class, 'destroy']);

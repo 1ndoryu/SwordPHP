@@ -500,23 +500,28 @@ Estos endpoints permiten a los usuarios seguir o dejar de seguir a otros usuario
 Base Path: `/users/{id}`
 
 #### **`POST /users/{id}/follow`**
+
 Sigue al usuario especificado.
 
-- **Authentication:** Bearer Token
-- **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
+
 ```json
 {
     "success": true,
     "message": "You are now following {username}."
 }
 ```
-- **Error Response (400 Bad Request):** Al intentar seguirte a ti mismo o si ya sigues al usuario.
+
+-   **Error Response (400 Bad Request):** Al intentar seguirte a ti mismo o si ya sigues al usuario.
 
 #### **`DELETE /users/{id}/unfollow`**
+
 Deja de seguir al usuario especificado.
 
-- **Authentication:** Bearer Token
-- **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Success Response (200 OK):**
+
 ```json
 {
     "success": true,
@@ -525,10 +530,12 @@ Deja de seguir al usuario especificado.
 ```
 
 #### **`GET /users/{id}/followers`**
+
 Devuelve una lista paginada de los seguidores del usuario.
 
-- **Authentication:** None
-- **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
+
 ```json
 {
     "success": true,
@@ -547,10 +554,12 @@ Devuelve una lista paginada de los seguidores del usuario.
 ```
 
 #### **`GET /users/{id}/following`**
+
 Devuelve una lista paginada de los usuarios que el usuario especificado está siguiendo.
 
-- **Authentication:** None
-- **Success Response (200 OK):**
+-   **Authentication:** None
+-   **Success Response (200 OK):**
+
 ```json
 {
     "success": true,
@@ -670,9 +679,9 @@ Retrieves all content, regardless of status. (Requires `admin.content.list`)
 
 Retrieves a single content item by its ID, regardless of status. (Requires `admin.content.view`)
 
-  - **URL Parameters:**
-      - `id` (integer, required): The ID of the content to retrieve.
-  - **Success Response (200 OK):**
+-   **URL Parameters:**
+    -   `id` (integer, required): The ID of the content to retrieve.
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -692,7 +701,7 @@ Retrieves a single content item by its ID, regardless of status. (Requires `admi
         }
     }
     ```
-  - **Error Response (404 Not Found):**
+-   **Error Response (404 Not Found):**
     ```json
     {
         "success": false,
@@ -726,9 +735,9 @@ Batch updates global options. (Requires `admin.options.update`)
 
 Busca contenidos que tengan un `audio_hash` específico en su campo `content_data`. Es una herramienta clave para la detección de duplicados, como archivos de audio. (Requiere `admin.content.list`)
 
-  - **URL Parameters:**
-      - `hash` (string, required): El hash perceptual del archivo a buscar.
-  - **Success Response (Found, 200 OK):** Devuelve un array con todos los contenidos que coinciden con el hash.
+-   **URL Parameters:**
+    -   `hash` (string, required): El hash perceptual del archivo a buscar.
+-   **Success Response (Found, 200 OK):** Devuelve un array con todos los contenidos que coinciden con el hash.
     ```json
     {
         "success": true,
@@ -745,7 +754,7 @@ Busca contenidos que tengan un `audio_hash` específico en su campo `content_dat
         ]
     }
     ```
-  - **Success Response (Not Found, 200 OK):** Crucialmente, devuelve `200 OK` con `data` como `null` para indicar que la búsqueda se completó sin encontrar duplicados.
+-   **Success Response (Not Found, 200 OK):** Crucialmente, devuelve `200 OK` con `data` como `null` para indicar que la búsqueda se completó sin encontrar duplicados.
     ```json
     {
         "success": true,
@@ -758,15 +767,15 @@ Busca contenidos que tengan un `audio_hash` específico en su campo `content_dat
 
 Realiza una búsqueda genérica y paginada de contenidos, filtrando por un par clave-valor arbitrario dentro del campo JSON `content_data`. (Requiere `admin.content.list`)
 
-  - **Query Parameters:**
-      - `key` (string, required): La clave dentro del objeto `content_data` por la que se desea filtrar.
-      - `value` (string, required): El valor que debe coincidir con la clave especificada.
-      - `per_page` (integer, optional): Número de resultados por página.
-  - **Example Request:**
+-   **Query Parameters:**
+    -   `key` (string, required): La clave dentro del objeto `content_data` por la que se desea filtrar.
+    -   `value` (string, required): El valor que debe coincidir con la clave especificada.
+    -   `per_page` (integer, optional): Número de resultados por página.
+-   **Example Request:**
     ```
     GET /admin/contents/filter-by-data?key=source_id&value=ext-54321
     ```
-  - **Success Response (200 OK):** Devuelve una lista paginada de los contenidos que coinciden con el filtro.
+-   **Success Response (200 OK):** Devuelve una lista paginada de los contenidos que coinciden con el filtro.
     ```json
     {
         "success": true,
@@ -887,10 +896,10 @@ Endpoint that returns a personalized recommendation feed powered by **Jophiel** 
 
 Returns an ordered list of recommended content (`audio_sample` type) for the current user.
 
-  - **Authentication:** Bearer Token
-  - **Query Parameters:**
-      - `per_page` (integer, optional): Page size used for the fallback feed when Jophiel is unavailable. Defaults to `20`.
-  - **Success Response (200 OK):**
+-   **Authentication:** Bearer Token
+-   **Query Parameters:**
+    -   `per_page` (integer, optional): Page size used for the fallback feed when Jophiel is unavailable. Defaults to `20`.
+-   **Success Response (200 OK):**
     ```json
     {
         "success": true,
@@ -925,12 +934,11 @@ Returns an ordered list of recommended content (`audio_sample` type) for the cur
         }
     }
     ```
-  - **Fallback Response (200 OK):** When Jophiel is unreachable, the CMS sends the latest published content with the message `Jophiel unavailable. Sending latest content feed.` The structure is identical to the success response.
-  - **Error Response (500 Internal Server Error):**
+-   **Fallback Response (200 OK):** When Jophiel is unreachable, the CMS sends the latest published content with the message `Jophiel unavailable. Sending latest content feed.` The structure is identical to the success response.
+-   **Error Response (500 Internal Server Error):**
     ```json
     {
         "success": false,
         "message": "An internal error occurred."
     }
     ```
-

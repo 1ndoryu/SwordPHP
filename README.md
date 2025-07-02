@@ -461,6 +461,7 @@ Uploads a new file. Requires `media.upload` permission.
         "data": {
             "id": 5,
             "path": "uploads/media/abcdef123456.jpg",
+            "full_url": "http://127.0.0.1:8787/uploads/media/abcdef123456.jpg",
             "mime_type": "image/jpeg",
             "user_id": 1,
             "metadata": {
@@ -486,6 +487,7 @@ Retrieves a single media file object by its ID. This is useful for clients like 
         "data": {
             "id": 5,
             "path": "uploads/media/abcdef123456.jpg",
+            "full_url": "http://127.0.0.1:8787/uploads/media/abcdef123456.jpg",
             "mime_type": "image/jpeg",
             "user_id": 1,
             "metadata": {

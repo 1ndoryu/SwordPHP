@@ -18,8 +18,26 @@ class EventService
      */
     private function __construct()
     {
+        $this->connect();
+
+        // Register a shutdown function to gracefully close the connection.
+        register_shutdown_function([$this, 'close']);
+    }
+
+    /**
+     * Establishes a fresh connection and channel to RabbitMQ.
+     * Any previous connection will be closed beforehand.
+     *
+     * @return void
+     */
+    private function connect(): void
+    {
+        // Cierra cualquier conexión previa por seguridad
+        $this->close();
+
         try {
             $config = config('event');
+
             $this->connection = new AMQPStreamConnection(
                 $config['rabbitmq']['host'],
                 $config['rabbitmq']['port'],
@@ -27,22 +45,28 @@ class EventService
                 $config['rabbitmq']['password'],
                 $config['rabbitmq']['vhost']
             );
+
             $this->channel = $this->connection->channel();
 
-            // Declare a durable queue to make sure messages are not lost if RabbitMQ restarts.
+            // Declare the queue as durable to persist messages across restarts
             $this->channel->queue_declare($config['queue'], false, true, false, false);
 
-            Log::channel('events')->info('Conexión con RabbitMQ establecida y canal abierto.');
-
-            // Register a shutdown function to gracefully close the connection.
-            register_shutdown_function([$this, 'close']);
+            Log::channel('events')->info('EventService: Conexión con RabbitMQ establecida.');
         } catch (Throwable $e) {
-            Log::channel('events')->critical('No se pudo establecer la conexión con RabbitMQ', [
+            Log::channel('events')->critical('EventService: No se pudo conectar a RabbitMQ.', [
                 'error' => $e->getMessage()
             ]);
-            // Set connection to null so we know it failed.
             $this->connection = null;
+            $this->channel = null;
         }
+    }
+
+    /**
+     * Checks if both the connection and channel are open.
+     */
+    private function isConnected(): bool
+    {
+        return $this->connection && $this->connection->isConnected() && $this->channel && $this->channel->is_open();
     }
 
     /**
@@ -66,8 +90,16 @@ class EventService
      */
     public function dispatch(string $eventName, array $payload): void
     {
-        if (!$this->connection) {
-            throw new \Exception('La conexión con RabbitMQ no está disponible.');
+        // Reconecta si es necesario
+        if (!$this->isConnected()) {
+            Log::channel('events')->warning('EventService: Conexión perdida. Intentando reconectar...');
+            $this->connect();
+
+            // Si aún no hay conexión tras el intento, abortar silenciosamente para no romper el flujo principal
+            if (!$this->isConnected()) {
+                Log::channel('events')->error("EventService: Sin conexión a RabbitMQ. Evento descartado: {$eventName}");
+                return;
+            }
         }
 
         $messageBody = json_encode([
@@ -83,7 +115,33 @@ class EventService
         );
 
         $queueName = config('event.queue');
-        $this->channel->basic_publish($message, '', $queueName);
+
+        try {
+            $this->channel->basic_publish($message, '', $queueName);
+            Log::channel('events')->info("EventService: Evento despachado: {$eventName}");
+        } catch (Throwable $e) {
+            // Intentar una reconexión rápida y un segundo intento
+            Log::channel('events')->warning('EventService: Error al publicar, intentando reintentar...', [
+                'error' => $e->getMessage()
+            ]);
+
+            $this->connect();
+
+            if ($this->isConnected()) {
+                try {
+                    $this->channel->basic_publish($message, '', $queueName);
+                    Log::channel('events')->info("EventService: Evento despachado tras reconexión: {$eventName}");
+                } catch (Throwable $e2) {
+                    // Falla definitiva
+                    Log::channel('events')->error("EventService: Fallo definitivo al despachar evento: {$eventName}", [
+                        'error' => $e2->getMessage(),
+                        'payload' => $payload
+                    ]);
+                }
+            } else {
+                Log::channel('events')->error("EventService: No se pudo reconectar para despachar evento: {$eventName}");
+            }
+        }
     }
 
     /**

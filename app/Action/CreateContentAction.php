@@ -70,7 +70,6 @@ class CreateContentAction
                 'user_id' => $user->id
             ]);
 
-            // Notify Casiel for audio samples
             if ($content->type === AppConstants::CONTENT_TYPE_AUDIO_SAMPLE && !empty($data['content_data']['media_id'])) {
                 try {
                     casielEvento((int)$content->id, (int)$data['content_data']['media_id']);

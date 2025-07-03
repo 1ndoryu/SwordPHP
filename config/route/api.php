@@ -64,6 +64,7 @@ Route::delete('/users/{id}/unfollow', [UserController::class, 'unfollow'])->midd
 Route::get('/users/{id}/followers', [UserController::class, 'followers']);
 Route::get('/users/{id}/following', [UserController::class, 'following']);
 // --- FIN: NUEVAS RUTAS DE FOLLOW ---
+Route::get('/users/{id}', [UserController::class, 'show']);
 
 // Ruta para el Feed de Jophiel
 Route::get('/feed', [FeedController::class, 'getFeed'])->middleware(JwtAuthentication::class);

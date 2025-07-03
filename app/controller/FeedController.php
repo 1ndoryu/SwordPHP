@@ -24,7 +24,17 @@ class FeedController
         $config = config('jophiel.api');
 
         try {
-            $jophiel_url = rtrim($config['base_url'], '/') . '/v1/feed/' . $user->id;
+            // 1) Validar y reenviar parámetros de paginación a Jophiel
+            $page     = max(1, (int) $request->get('page', 1));
+            $per_page = (int) $request->get('per_page', 20);
+            $per_page = max(1, min($per_page, 100)); // Límite definido por Jophiel
+
+            $query_params = http_build_query([
+                'page'     => $page,
+                'per_page' => $per_page,
+            ]);
+
+            $jophiel_url = rtrim($config['base_url'], '/') . '/v1/feed/' . $user->id . '?' . $query_params;
 
             // Petición síncrona (bloqueante) usando file_get_contents
             $context = stream_context_create([
@@ -56,6 +66,7 @@ class FeedController
 
             $data       = json_decode($body, true);
             $sample_ids = $data['sample_ids'] ?? [];
+            $pagination = $data['pagination'] ?? null;
 
             if (empty($sample_ids)) {
                 return api_response(true, 'Feed is empty.', ['data' => []]);
@@ -75,21 +86,32 @@ class FeedController
                 }
             }
 
-            // Estructura de paginación para consistencia del cliente
+            // Reutilizar metadatos de paginación de Jophiel o generar uno simple si no está disponible
+            if ($pagination) {
+                // Reescribir las URLs para que apunten a la propia API de Sword (/feed)
+                $buildLocalUrl = function (?string $remoteUrl) use ($request) {
+                    if (!$remoteUrl) return null;
+                    // Analizar query params
+                    $qs = parse_url($remoteUrl, PHP_URL_QUERY);
+                    return $request->path() . ($qs ? '?' . $qs : '');
+                };
+
+                $pagination['next_page_url'] = $buildLocalUrl($pagination['next_page_url'] ?? null);
+                $pagination['prev_page_url'] = $buildLocalUrl($pagination['prev_page_url'] ?? null);
+            } else {
+                $pagination = [
+                    'current_page'   => 1,
+                    'per_page'       => count($ordered_contents),
+                    'total'          => count($ordered_contents),
+                    'last_page'      => 1,
+                    'next_page_url'  => null,
+                    'prev_page_url'  => null,
+                ];
+            }
+
             $paginated_response = [
-                'current_page'   => 1,
-                'data'           => $ordered_contents,
-                'first_page_url' => null,
-                'from'           => 1,
-                'last_page'      => 1,
-                'last_page_url'  => null,
-                'links'          => [],
-                'next_page_url'  => null,
-                'path'           => $request->path(),
-                'per_page'       => count($ordered_contents),
-                'prev_page_url'  => null,
-                'to'             => count($ordered_contents),
-                'total'          => count($ordered_contents),
+                'data'       => $ordered_contents,
+                'pagination' => $pagination,
             ];
 
             return api_response(true, 'Feed retrieved successfully.', $paginated_response);
@@ -107,13 +129,29 @@ class FeedController
     {
         try {
             $per_page = (int) $request->get('per_page', 20);
+            $per_page = max(1, min($per_page, 100));
+
+            $page = max(1, (int) $request->get('page', 1));
 
             $contents = Content::where('type', 'audio_sample')
                 ->where('status', 'published')
                 ->latest()
-                ->paginate($per_page);
+                ->paginate($per_page, ['*'], 'page', $page);
 
-            return api_response(true, 'Jophiel unavailable. Sending latest content feed.', $contents->toArray());
+            // Convertir a la misma estructura de retorno que getFeed
+            $response = [
+                'data'       => $contents->items(),
+                'pagination' => [
+                    'current_page'   => $contents->currentPage(),
+                    'per_page'       => $contents->perPage(),
+                    'total'          => $contents->total(),
+                    'last_page'      => $contents->lastPage(),
+                    'next_page_url'  => $contents->nextPageUrl() ? $request->path() . '?' . parse_url($contents->nextPageUrl(), PHP_URL_QUERY) : null,
+                    'prev_page_url'  => $contents->previousPageUrl() ? $request->path() . '?' . parse_url($contents->previousPageUrl(), PHP_URL_QUERY) : null,
+                ],
+            ];
+
+            return api_response(true, 'Jophiel unavailable. Sending latest content feed.', $response);
         } catch (Throwable $e) {
             return api_response(false, 'An internal error occurred while fetching fallback feed.', null, 500);
         }

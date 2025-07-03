@@ -499,6 +499,32 @@ Estos endpoints permiten a los usuarios seguir o dejar de seguir a otros usuario
 
 Base Path: `/users/{id}`
 
+#### **`GET /users/{id}`**
+
+Devuelve la información pública del usuario, incluyendo la URL de su avatar.
+
+-   **Authentication:** None
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "success": true,
+      "data": {
+        "id": 1,
+        "username": "andoryyu",
+        "profile_data": {
+          "avatar_url": "/uploads/media/abcd.jpg"
+        }
+      }
+    }
+    ```
+-   **Error Response (404 Not Found):**
+    ```json
+    {
+      "success": false,
+      "message": "User not found."
+    }
+    ```
+
 #### **`POST /users/{id}/follow`**
 
 Sigue al usuario especificado.
@@ -898,14 +924,14 @@ Returns an ordered list of recommended content (`audio_sample` type) for the cur
 
 -   **Authentication:** Bearer Token
 -   **Query Parameters:**
-    -   `per_page` (integer, optional): Page size used for the fallback feed when Jophiel is unavailable. Defaults to `20`.
+    -   `page` (integer, optional): Número de página solicitada (base 1). Por defecto `1`.
+    -   `per_page` (integer, optional): Número de ítems por página. Por defecto `20`. Máximo `100`.
 -   **Success Response (200 OK):**
     ```json
     {
         "success": true,
         "message": "Feed retrieved successfully.",
         "data": {
-            "current_page": 1,
             "data": [
                 {
                     "id": 101,
@@ -922,15 +948,14 @@ Returns an ordered list of recommended content (`audio_sample` type) for the cur
                     "updated_at": "..."
                 }
             ],
-            "first_page_url": null,
-            "last_page": 1,
-            "last_page_url": null,
-            "next_page_url": null,
-            "path": "/feed",
-            "per_page": 1,
-            "prev_page_url": null,
-            "to": 1,
-            "total": 1
+            "pagination": {
+                "current_page": 1,
+                "per_page": 20,
+                "total": 78,
+                "last_page": 4,
+                "next_page_url": "/feed?page=2&per_page=20",
+                "prev_page_url": null
+            }
         }
     }
     ```

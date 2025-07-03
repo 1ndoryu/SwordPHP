@@ -306,5 +306,27 @@ class UserController
             return api_response(false, 'An internal error occurred.', null, 500);
         }
     }
+
+    /**
+     * Show the public profile of a user.
+     *
+     * @param Request $request
+     * @param integer $id The ID of the user.
+     * @return Response
+     */
+    public function show(Request $request, int $id): Response
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return api_response(false, 'User not found.', null, 404);
+        }
+
+        return api_response(true, 'User retrieved successfully.', [
+            'id' => $user->id,
+            'username' => $user->username,
+            'profile_data' => $user->profile_data ?? new \stdClass()
+        ]);
+    }
     // --- FIN: NUEVOS MÉTODOS ---
 }

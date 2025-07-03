@@ -405,7 +405,8 @@ Toggles a "like" on content. Requires authentication.
         "success": true,
         "message": "Like added successfully.",
         "data": {
-            "like_count": 15
+            "like_count": 16,
+            "liked": true
         }
     }
     ```
@@ -421,7 +422,24 @@ Retrieves the current number of likes for a specific content without modifying i
         "success": true,
         "message": "Like count retrieved successfully.",
         "data": {
-            "like_count": 42
+            "like_count": 42,
+            "liked": false
+        }
+    }
+    ```
+
+#### **`GET /contents/{id}/likes/users`**
+
+Returns the list of user IDs that have liked the specified content. Useful for detailed analytics or social features.
+
+-   **Authentication:** None
+-   **Success Response (200 OK):**
+    ```json
+    {
+        "success": true,
+        "message": "Liked user IDs retrieved successfully.",
+        "data": {
+            "user_ids": [1, 4, 7, 20]
         }
     }
     ```

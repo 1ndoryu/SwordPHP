@@ -13,6 +13,8 @@ use support\Request;
 use support\Response;
 use Throwable;
 use support\Log;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class ContentController
 {
@@ -247,6 +249,7 @@ class ContentController
 
         $user_id = $request->user->id;
         $message = '';
+        $liked = false; // Nuevo flag para indicar estado final
 
         try {
             $existing_like = Like::where('content_id', $id)->where('user_id', $user_id)->first();
@@ -254,6 +257,7 @@ class ContentController
             if ($existing_like) {
                 $existing_like->delete();
                 $message = 'Like removed successfully.';
+                $liked = false;
                 Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
                 
                 rabbit_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
@@ -273,6 +277,7 @@ class ContentController
                     'user_id' => $user_id,
                 ]);
                 $message = 'Like added successfully.';
+                $liked = true;
                 Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
                 
                 rabbit_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
@@ -289,7 +294,7 @@ class ContentController
 
             $like_count = $content->likes()->count();
 
-            return api_response(true, $message, ['like_count' => $like_count]);
+            return api_response(true, $message, ['like_count' => $like_count, 'liked' => $liked]);
         } catch (Throwable $e) {
             Log::channel('social')->error('Error al dar/quitar like', ['error' => $e->getMessage(), 'content_id' => $id]);
             return api_response(false, 'An internal error occurred.', null, 500);
@@ -385,8 +390,47 @@ class ContentController
         }
 
         $like_count = $content->likes()->count();
+
+        // Nuevo cálculo de liked tratando de identificar al usuario de forma opcional
+        $liked = false;
+        $user_id = null;
+
+        if ($request->user) {
+            $user_id = $request->user->id;
+        } else {
+            // Intentar extraer token opcionalmente sin forzar autenticación
+            $authHeader = $request->header('Authorization');
+            if ($authHeader && preg_match('/^Bearer\s+(.*?)$/', $authHeader, $matches)) {
+                try {
+                    $decoded = JWT::decode($matches[1], new Key(env('JWT_SECRET'), 'HS256'));
+                    $user_id = $decoded->data->id ?? null;
+                } catch (\Throwable $e) {
+                    // Ignorar errores de token para mantener endpoint público
+                }
+            }
+        }
+
+        if ($user_id) {
+            $liked = $content->likes()->where('user_id', $user_id)->exists();
+        }
+
         return api_response(true, 'Like count retrieved successfully.', [
-            'like_count' => $like_count
+            'like_count' => $like_count,
+            'liked' => $liked
+        ]);
+    }
+
+    // Nuevo método para obtener los IDs de usuarios que dieron like
+    public function likeUsers(Request $request, int $id): Response
+    {
+        $content = Content::find($id);
+        if (!$content) {
+            return api_response(false, 'Content not found.', null, 404);
+        }
+
+        $user_ids = $content->likes()->pluck('user_id')->toArray();
+        return api_response(true, 'Liked user IDs retrieved successfully.', [
+            'user_ids' => $user_ids
         ]);
     }
 }

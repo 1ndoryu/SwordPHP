@@ -73,6 +73,7 @@ Route::get('/feed', [FeedController::class, 'getFeed'])->middleware(JwtAuthentic
 Route::get('/contents', [ContentController::class, 'index']);
 // Nueva ruta para obtener la cantidad de likes (debe ir antes de la ruta {slug} para evitar colisión)
 Route::get('/contents/{id}/likes', [ContentController::class, 'likes']);
+Route::get('/contents/{id}/likes/users', [ContentController::class, 'likeUsers']);
 Route::get('/contents/{slug}', [ContentController::class, 'show']);
 
 Route::group('/contents', function () {

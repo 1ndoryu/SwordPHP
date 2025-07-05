@@ -14,6 +14,7 @@ use app\controller\RoleController;
 use app\controller\WebhookController;
 use app\middleware\JwtAuthentication;
 use app\middleware\PermissionMiddleware;
+use app\controller\SearchController;
 
 // Ruta de bienvenida para la API
 Route::get('/', function () {
@@ -68,6 +69,9 @@ Route::get('/users/{id}', [UserController::class, 'show']);
 
 // Ruta para el Feed de Jophiel
 Route::get('/feed', [FeedController::class, 'getFeed'])->middleware(JwtAuthentication::class);
+
+// Ruta para la búsqueda híbrida
+Route::get('/search', [SearchController::class, 'search']);
 
 // --- Rutas de Contenido (CRUD Público y Autenticado) ---
 Route::get('/contents', [ContentController::class, 'index']);

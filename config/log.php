@@ -35,7 +35,7 @@ $master_handler_config = [
     'class' => RotatingFileHandler::class,
     'constructor' => [
         runtime_path() . '/logs/master.log',
-        15, // $maxFiles
+        2, // $maxFiles
         $logLevel
     ],
     'formatter' => $master_formatter,
@@ -47,7 +47,7 @@ $create_specific_handler_config = function (string $channel_log_file) use ($logL
         'class' => RotatingFileHandler::class,
         'constructor' => [
             $channel_log_file,
-            15, // $maxFiles
+            2, // $maxFiles
             $logLevel
         ],
         'formatter' => $specific_formatter,

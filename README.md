@@ -985,3 +985,72 @@ Returns an ordered list of recommended content (`audio_sample` type) for the cur
         "message": "An internal error occurred."
     }
     ```
+
+### 🔍 12. Hybrid Search Endpoint
+
+Endpoint que combina la relevancia textual de PostgreSQL con la personalización de **Jophiel** para devolver un listado ordenado de muestras (samples).
+
+#### **`GET /search`**
+
+| Parámetro  | Tipo      | Obligatorio | Descripción                                                             |
+|------------|-----------|-------------|-------------------------------------------------------------------------|
+| `q`        | `string`  | Sí          | Término de búsqueda. Se normaliza internamente con `plainto_tsquery`.   |
+| `user_id`  | `integer` | Sí          | ID del usuario que realiza la búsqueda (para personalización).          |
+| `page`     | `integer` | No          | Número de página (empieza en **1**). _Default:_ `1`.                    |
+| `per_page` | `integer` | No          | Resultados por página (1-100). _Default:_ `20`.                         |
+
+##### Ejemplo de petición
+
+```bash
+curl -X GET "https://sword.local/search?q=guitar+ambient&user_id=42&per_page=10&page=2"
+```
+
+##### Respuesta exitosa (`200 OK`)
+
+```json
+{
+  "success": true,
+  "message": "Search results retrieved successfully.",
+  "data": {
+    "user_id": 42,
+    "generated_at": "2023-11-21T15:34:12Z",
+    "sample_ids": [987, 654, 321],
+    "pagination": {
+      "current_page": 2,
+      "per_page": 10,
+      "total": 57,
+      "last_page": 6,
+      "next_page_url": "/search?q=guitar+ambient&user_id=42&page=3&per_page=10",
+      "prev_page_url": "/search?q=guitar+ambient&user_id=42&page=1&per_page=10"
+    }
+  }
+}
+```
+
+##### Errores comunes
+
+| Código | Significado         | Causa típica                     |
+|--------|---------------------|----------------------------------|
+| `400`  | Petición inválida   | Falta `q` o `user_id` (o `user_id` = 0). |
+| `500`  | Error interno       | Excepción inesperada (ver logs). |
+
+##### Configuración de pesos
+
+Los pesos que balancean la puntuación híbrida viven en `config/search.php`:
+
+```php
+return [
+    'score_weights' => [
+        'text_relevance'  => 0.5,
+        'personalization' => 0.5,
+    ],
+];
+```
+
+La fórmula aplicada por Jophiel es:
+
+```
+SearchScoreFinal = (text_rank * peso_texto) + (ScoreFinal * peso_personalizacion)
+```
+
+---

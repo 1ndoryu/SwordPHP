@@ -55,7 +55,7 @@ class RequestLogger implements MiddlewareInterface
      */
     private function determineChannel(string $path): string
     {
-        if (str_starts_with($path, '/contents') || str_starts_with($path, '/feed')) {
+        if (str_starts_with($path, '/contents') || str_starts_with($path, '/feed') || str_starts_with($path, '/search')) {
             return 'content';
         }
         if (str_starts_with($path, '/auth') || str_starts_with($path, '/user') || str_starts_with($path, '/users')) {

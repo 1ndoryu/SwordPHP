@@ -1,0 +1,116 @@
+/* Estilos del Layout de Administración */
+
+.layoutAdministracion {
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
+
+.barraLateral {
+    background-color: var(--fondoSecundario);
+    border-right: 1px solid var(--bordeColor);
+    padding: 20px;
+    margin-bottom: auto;
+    min-width: 160px;
+    height: 100%;
+}
+
+.marcaBarraLateral {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+    display: block;
+}
+
+.enlaceNavegacion {
+    display: block;
+    padding: 6px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    color: var(--textoSecundario);
+}
+
+.enlaceNavegacion:hover,
+.enlaceNavegacon.activo {
+    background-color: var(--fondoTerciario);
+    color: var(--textoPrimario);
+}
+
+.contenidoPrincipal {
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+}
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--bordeColor);
+}
+
+.menuUsuario {
+    font-size: 0.95rem;
+}
+
+/* Estilos de Auth/Login */
+.tarjetaLogin {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.tituloLogin {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+.grupoFormulario {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.grupoFormulario label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--textoSecundario);
+}
+
+.grupoFormulario input {
+    width: 100%;
+}
+
+.botonPrimario {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--acentoPrimario);
+    color: white;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.botonPrimario:hover {
+    background-color: var(--acentoHover);
+}
+
+/* Componentes de Dashboard */
+.widgetsEscritorio {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.tarjeta {
+    background-color: var(--fondoSecundario);
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid var(--bordeColor);
+}

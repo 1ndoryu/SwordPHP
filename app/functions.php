@@ -186,3 +186,26 @@ if (!function_exists('casielEvento')) {
         }
     }
 }
+
+if (!function_exists('render_view')) {
+    /**
+     * Render a PHP view file.
+     * @param string $template Path to the view file relative to 'app/view/', without extension. e.g. 'admin/dashboard'
+     * @param array $vars Data to pass to the view.
+     * @return string
+     */
+    function render_view(string $template, array $vars = []): string
+    {
+        ob_start();
+        extract($vars);
+        $file = base_path() . "/app/view/{$template}.php";
+        if (is_file($file)) {
+            require $file;
+        } else {
+            // Manejo de error simple para desarrollo
+            echo "Error: View file not found: {$file}";
+            \support\Log::error("View not found: {$file}");
+        }
+        return ob_get_clean();
+    }
+}

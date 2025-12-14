@@ -8,10 +8,10 @@
 
 | Aspecto                 | Decisión                                             |
 | ----------------------- | ---------------------------------------------------- |
-| **Panel Admin**         | SPA React servido por Workerman en `/admin`          |
+| **Panel Admin**         | PHP server-side rendered (SSR) con vistas nativas    |
 | **Motor de Plantillas** | PHP puro (sin dependencias externas)                 |
 | **Base de Datos**       | PostgreSQL con JSONB (existente)                     |
-| **Autenticación**       | JWT (existente)                                      |
+| **Autenticación**       | JWT / Session cookie para admin                      |
 | **Estilos Admin**       | CSS centralizado, dark mode, Source Sans Pro 12-13px |
 
 ---
@@ -20,28 +20,24 @@
 
 ```
 SwordPHP/
-├── app/                        # Backend API (existente)
+├── app/                        # Backend API y Controladores
 │   ├── controller/
+│   │   ├── admin/              # Controladores del Panel Admin (NUEVO)
+│   │   └── ...                 # Controladores de API existentes
 │   ├── model/
 │   ├── middleware/
+│   ├── view/                   # Vistas (Plantillas PHP)
+│   │   ├── admin/              # Vistas del Panel Admin
+│   │   │   ├── layouts/        # Layout principal, header, sidebar
+│   │   │   ├── pages/          # Páginas específicas (dashboard, posts, etc.)
+│   │   │   └── components/     # Fragmentos reutilizables (forms, tables)
+│   │   └── ...
 │   └── ...
-├── admin/                      # Panel de Administración (NUEVO)
-│   ├── src/
-│   │   ├── components/         # Componentes React reutilizables
-│   │   │   ├── ui/             # Botones, inputs, modales, etc.
-│   │   │   ├── layout/         # Sidebar, Header, etc.
-│   │   │   └── forms/          # Campos de formulario
-│   │   ├── pages/              # Vistas/Páginas del admin
-│   │   ├── hooks/              # Custom hooks
-│   │   ├── services/           # Comunicación con API
-│   │   ├── context/            # React Context (auth, theme)
-│   │   └── styles/             # CSS centralizado
-│   │       ├── variables.css   # Variables CSS
-│   │       ├── init.css        # Reset y estilos base
-│   │       └── components/     # Estilos por componente
-│   ├── public/
-│   └── dist/                   # Build producción (servido por Workerman)
-├── themes/                     # Temas para frontend público (NUEVO)
+├── admin/                      # Assets estáticos del admin (CSS, JS, img)
+│   ├── css/
+│   ├── js/
+│   └── img/
+├── themes/                     # Temas para frontend público
 │   └── developer/              # Tema base minimalista
 │       ├── templates/
 │       │   ├── index.php       # Página de inicio
@@ -113,53 +109,42 @@ SwordPHP/
 
 ---
 
-### FASE 1: Infraestructura del Panel Admin
-**Duración estimada:** 1-2 semanas  
+### FASE 1: Infraestructura del Panel Admin (PHP SSR)
+**Duración estimada:** 1 semana  
 **Estado:** [x] En Progreso
 
 #### Objetivo
-Tener el panel React funcionando, servido por Workerman, con autenticación.
+Tener el panel renderizado desde el servidor (PHP) con un sistema de layouts y autenticación basada en cookies/sesión.
 
 #### Tareas
 
-- [x] **1.1 Configurar proyecto React con Vite**
-  - Inicializar proyecto en `/admin` con Vite
-  - Configurar TypeScript (opcional pero recomendado)
-  - Estructura de carpetas según arquitectura definida
+- [ ] **1.1 Estructura de Vistas y Layouts**
+  - Crear directorio `app/view/admin`
+  - Implementar sistema de helper `view()` simple
+  - Crear layout base `layout.php` (Header, Sidebar, Footer)
+  - Configurar assets (CSS/JS) en `public/admin`
 
-- [x] **1.2 Configurar Workerman para servir el SPA**
-  - Modificar configuración de rutas estáticas
-  - Ruta `/admin` sirve `admin/dist/index.html`
-  - Fallback para rutas del SPA (history mode)
+- [ ] **1.2 Configuración de Rutas Admin**
+  - Crear grupo de rutas `/admin` en `config/route/admin.php`
+  - Controlador `Admin/DashboardController`
+  - Controlador `Admin/AuthController`
 
-- [x] **1.3 Sistema de diseño base**
-  - Crear `variables.css` con paleta de colores
-  - Crear `init.css` con reset y estilos globales
-  - Importar Source Sans Pro desde Google Fonts
-  - Componentes UI base: Button, Input, Card, Modal
+- [ ] **1.3 Sistema de Diseño (CSS Puro)**
+  - Migrar variables y estilos base a `public/admin/css`
+  - `variables.css` (Colores, fuentes)
+  - `style.css` (Layout, reset, utilidades)
+  - Componentes CSS puros (sin JS innecesario)
 
-- [x] **1.4 Layout principal del admin**
-  - Componente `Sidebar` (navegación lateral colapsable)
-  - Componente `Header` (usuario, notificaciones)
-  - Componente `MainContent` (área de trabajo)
-  - Sistema de rutas con React Router
-
-- [ ] **1.5 Autenticación en el panel**
-  - Página de Login
-  - Servicio de autenticación (llamadas a API)
-  - Context de autenticación (AuthContext)
-  - Persistencia del token (localStorage)
-  - Rutas protegidas (PrivateRoute)
-  - Redirección automática si no autenticado
-
-- [ ] **1.6 Dashboard inicial**
-  - Página de bienvenida/resumen
-  - Estadísticas básicas (contenidos, usuarios, medios)
+- [ ] **1.4 Autenticación Admin**
+  - Login form (POST a `Admin/AuthController`)
+  - Middleware `AdminAuth` para proteger rutas `/admin`
+  - Uso de sesiones PHP nativas o cookies seguras
+  - Logout
 
 #### Entregables
-- Panel accesible en `http://localhost:8787/admin`
-- Login funcional con JWT
-- Layout base con navegación
+- Panel accesible en `http://localhost:8787/admin` sin necesidad de build steps (npm)
+- Login funcional
+- Layout responsivo con Sidebar
 
 ---
 
@@ -587,21 +572,14 @@ Panel de ajustes del sitio.
 
 ## Notas Técnicas
 
-### Integración React + Workerman
+### Renderizado de Vistas PHP
 
-Workerman servirá los archivos estáticos del build de React. La configuración requerirá:
+Las vistas se renderizarán usando `ob_start()` y `ob_get_clean()` para capturar el HTML.
+Se usará una función helper `render_view($template, $data = [])` que:
+1. Extrae las variables `$data`.
+2. Incluye el archivo de vista `app/view/$template.php`.
+3. Retorna el string HTML capturado.
 
-1. **Ruta catch-all para el SPA:**
-   ```php
-   // Todas las rutas bajo /admin que no sean archivos estáticos
-   // deben devolver index.html para que React Router maneje el routing
-   ```
-
-2. **Archivos estáticos:**
-   ```php
-   // Servir CSS, JS, imágenes del build
-   // Ruta: /admin/assets/*
-   ```
 
 ### Campos Personalizados - Estructura JSONB
 

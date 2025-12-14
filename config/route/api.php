@@ -104,7 +104,7 @@ Route::get('/media/{id}', [MediaController::class, 'show']);
 
 
 // --- Rutas de Administración (Protegidas por Permisos Granulares) ---
-Route::group('/admin', function () {
+Route::group('/api/admin', function () {
     // El rol 'admin' tiene el permiso '*' y pasará todas estas verificaciones.
     // Otros roles (como 'editor') necesitarán estos permisos explícitamente.
 

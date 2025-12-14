@@ -97,7 +97,7 @@ test('full api e2e flow', function () {
     // --- FIN: TEST PARA GET /media/{id} ---
 
     // Crear rol "editor"
-    $roleResponse = $this->postJson('/admin/roles', [
+    $roleResponse = $this->postJson('/api/admin/roles', [
         'name' => 'editor',
         'description' => 'Test Editor Role',
         'permissions' => ['content.update']
@@ -111,7 +111,7 @@ test('full api e2e flow', function () {
     $this->deleteJson("/comments/{$commentId}", $userToken)->getStatusCode(204);
 
     // Admin elimina el archivo subido
-    $this->deleteJson("/admin/media/{$mediaId}", $adminToken)->getStatusCode(204);
+    $this->deleteJson("/api/admin/media/{$mediaId}", $adminToken)->getStatusCode(204);
 
     // User elimina su propio contenido
     $this->deleteJson("/contents/{$contentId}", $userToken)->getStatusCode(204);
@@ -119,8 +119,8 @@ test('full api e2e flow', function () {
     // Admin revierte el rol del usuario para poder eliminar el rol 'editor'
     $userId = 2; // El segundo usuario registrado
     $userRoleId = 2; // El rol 'user' por defecto
-    $this->postJson("/admin/users/{$userId}/role", ['role_id' => $userRoleId], $adminToken);
+    $this->postJson("/api/admin/users/{$userId}/role", ['role_id' => $userRoleId], $adminToken);
 
     // Admin elimina el rol creado
-    $this->deleteJson("/admin/roles/{$editorRoleId}", $adminToken)->getStatusCode(204);
+    $this->deleteJson("/api/admin/roles/{$editorRoleId}", $adminToken)->getStatusCode(204);
 });

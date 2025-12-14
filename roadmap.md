@@ -166,7 +166,7 @@ CRUD completo de contenidos desde el panel admin.
   - Galeria de imagenes adjuntas
   - Selector de medios integrado (depende de FASE 4)
 
-- [ ] **2.7 Sistema de Papelera** (PENDIENTE)
+- [x] **2.7 Sistema de Papelera**
   - Soft delete en lugar de eliminacion permanente
   - Vista de contenidos en papelera
   - Restaurar contenidos

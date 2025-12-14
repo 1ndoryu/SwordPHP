@@ -8,9 +8,8 @@
     --textoSecundario: #a3a3a3;
     --textoTenue: #737373;
 
-
-    --acentoPrimario: #3b82f6;
-    --acentoHover: #2563eb;
+    --acentoPrimario: #ef4444;
+    --acentoHover: #d23232;
 
     --exito: #22c55e;
     --advertencia: #f59e0b;
@@ -35,4 +34,5 @@
     background: var(--fondoSecundario);
     border-radius: 5px;
     border: var(--borde);
+    margin: auto;
 }

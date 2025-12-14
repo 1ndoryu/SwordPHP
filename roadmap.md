@@ -69,39 +69,12 @@ SwordPHP/
 | **Tamaño de fuente** | 12-13px (compacto)                           |
 | **Sombras**          | Ninguna (diseño flat)                        |
 | **Bordes**           | Sutiles, 1px, colores oscuros                |
+| **IDs HTML**         | camelCase obligatorio (ej: `tabInicio`)      |
 | **Iconos**           | Lucide React (minimalistas, línea)           |
 | **Espaciado**        | Compacto, alta densidad de información       |
 | **Animaciones**      | Solo transiciones funcionales (150-200ms)    |
 | **Color de acento**  | Por definir (sugerencia: azul o verde menta) |
-
-### Paleta de Colores Sugerida
-
-```css
-:root {
-    /* Fondos */
-    --bg-primary: #0d0d0d;
-    --bg-secondary: #1a1a1a;
-    --bg-tertiary: #262626;
-    --bg-hover: #333333;
-    
-    /* Textos */
-    --text-primary: #e5e5e5;
-    --text-secondary: #a3a3a3;
-    --text-muted: #737373;
-    
-    /* Acentos */
-    --accent-primary: #3b82f6;
-    --accent-hover: #2563eb;
-    
-    /* Estados */
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --error: #ef4444;
-    
-    /* Bordes */
-    --border-color: #2e2e2e;
-}
-```
+| **Navegación Tabs**  | Cambio sin recarga de página (CSS/JS)        |
 
 ---
 
@@ -118,28 +91,29 @@ Tener el panel renderizado desde el servidor (PHP) con un sistema de layouts y a
 
 #### Tareas
 
-- [ ] **1.1 Estructura de Vistas y Layouts**
+- [x] **1.1 Estructura de Vistas y Layouts**
   - Crear directorio `app/view/admin`
   - Implementar sistema de helper `view()` simple
   - Crear layout base `layout.php` (Header, Sidebar, Footer)
   - Configurar assets (CSS/JS) en `public/admin`
 
-- [ ] **1.2 Configuración de Rutas Admin**
+- [x] **1.2 Configuración de Rutas Admin**
   - Crear grupo de rutas `/admin` en `config/route/admin.php`
   - Controlador `Admin/DashboardController`
   - Controlador `Admin/AuthController`
 
-- [ ] **1.3 Sistema de Diseño (CSS Puro)**
-  - Migrar variables y estilos base a `public/admin/css`
-  - `variables.css` (Colores, fuentes)
-  - `style.css` (Layout, reset, utilidades)
+- [x] **1.3 Sistema de Diseño (CSS Puro)**
+  - Migrar y centralizar estilos en `public/admin/css/style.css`
+  - Implementar `AssetManager` para versionado automático
+  - Refactorizar nomenclaturas de clases a español
   - Componentes CSS puros (sin JS innecesario)
+  - [x] Implementar tabs que cambien sin recargar la página
 
-- [ ] **1.4 Autenticación Admin**
-  - Login form (POST a `Admin/AuthController`)
-  - Middleware `AdminAuth` para proteger rutas `/admin`
-  - Uso de sesiones PHP nativas o cookies seguras
-  - Logout
+- [x] **1.4 Autenticación Admin**
+  - [x] Login form (POST a `Admin/AuthController`)
+  - [x] Middleware `AdminAuth` para proteger rutas `/admin`
+  - [x] Uso de sesiones PHP nativas o cookies seguras
+  - [x] Logout
 
 #### Entregables
 - Panel accesible en `http://localhost:8787/admin` sin necesidad de build steps (npm)
@@ -148,48 +122,59 @@ Tener el panel renderizado desde el servidor (PHP) con un sistema de layouts y a
 
 ---
 
-### FASE 2: Gestión de Contenidos
-**Duración estimada:** 1-2 semanas  
-**Estado:** [ ] Pendiente
+### FASE 2: Gestion de Contenidos
+**Duracion estimada:** 1-2 semanas  
+**Estado:** [x] En Progreso
 
 #### Objetivo
 CRUD completo de contenidos desde el panel admin.
 
 #### Tareas
 
-- [ ] **2.1 Listado de contenidos**
-  - Tabla con columnas: título, tipo, estado, autor, fecha
-  - Paginación
+- [x] **2.1 Listado de contenidos**
+  - Tabla con columnas: titulo, tipo, estado, autor, fecha
+  - Paginacion
   - Filtros por tipo y estado
-  - Búsqueda por título
-  - Acciones rápidas (editar, eliminar, ver)
+  - Busqueda por titulo
+  - Acciones rapidas (editar, eliminar, ver)
 
-- [ ] **2.2 Editor de contenido**
-  - Formulario de creación/edición
-  - Campo de título
-  - Editor de contenido (textarea o editor WYSIWYG simple)
-  - Selector de slug (autocompletado desde título)
+- [x] **2.2 Editor de contenido**
+  - Formulario de creacion/edicion
+  - Campo de titulo
+  - Editor de contenido (textarea)
+  - Selector de slug (autocompletado desde titulo)
   - Selector de estado (borrador, publicado)
 
-- [ ] **2.3 Panel lateral del editor**
+- [x] **2.3 Panel lateral del editor**
   - Selector de estado y visibilidad
-  - Fecha de publicación
-  - Imagen destacada (conectar con medios)
-  - Campos personalizados (preparar para Fase 3)
+  - Informacion del contenido (tipo, fechas, ID)
+  - Campos personalizados/Metadatos (implementado con content_data JSONB)
+  - Vista de JSON crudo para depuracion
 
-- [ ] **2.4 Acciones del editor**
+- [x] **2.4 Acciones del editor**
   - Guardar como borrador
   - Publicar
   - Actualizar
-  - Eliminar (con confirmación)
+  - Eliminar (con confirmacion via modal)
 
-- [ ] **2.5 Vista previa**
-  - Botón para previsualizar contenido
-  - Abrir en nueva pestaña o modal
+- [x] **2.5 Vista previa**
+  - Boton para previsualizar contenido
+  - Abrir en nueva pestana
+
+- [ ] **2.6 Imagenes del contenido** (PENDIENTE)
+  - Imagen de portada/destacada
+  - Galeria de imagenes adjuntas
+  - Selector de medios integrado (depende de FASE 4)
+
+- [ ] **2.7 Sistema de Papelera** (PENDIENTE)
+  - Soft delete en lugar de eliminacion permanente
+  - Vista de contenidos en papelera
+  - Restaurar contenidos
+  - Vaciar papelera (eliminar permanentemente)
 
 #### Entregables
 - Crear, editar, eliminar y listar posts desde el panel
-- Cambiar estado de publicación
+- Cambiar estado de publicacion
 
 ---
 

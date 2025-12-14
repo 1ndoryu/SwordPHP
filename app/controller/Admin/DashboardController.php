@@ -12,7 +12,7 @@ class DashboardController
         $content = render_view('admin/pages/dashboard');
         return render_view('admin/layouts/layout', [
             'title' => 'Dashboard',
-            'user' => 'Admin',
+            'user' => $request->session()->get('admin_username') ?? 'Admin',
             'content' => $content
         ]);
     }

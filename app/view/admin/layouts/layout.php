@@ -16,7 +16,7 @@
             <aside class="barraLateral">
                 <nav>
                     <a href="/admin" class="enlaceNavegacion activo">Dashboard</a>
-                    <a href="/admin/posts" class="enlaceNavegacion">Entradas</a>
+                    <a href="/admin/contents" class="enlaceNavegacion">Contenidos</a>
                     <a href="/admin/media" class="enlaceNavegacion">Medios</a>
                     <a href="/admin/users" class="enlaceNavegacion">Usuarios</a>
                     <a href="/admin/settings" class="enlaceNavegacion">Ajustes</a>
@@ -26,15 +26,17 @@
                 <header class="encabezado">
                     <h1><?= $title ?? 'Dashboard' ?></h1>
                     <div class="menuUsuario">
-                        Hola, <?= $user ?? 'Usuario' ?> | <a href="/admin/logout">Salir</a>
+                        Hola, <?= $user ?? 'Usuario' ?> | <a href="/admin/logout" data-no-spa>Salir</a>
                     </div>
                 </header>
-                <div class="contenido">
+                <div class="contenido" id="contenidoPrincipal">
                     <?php if (isset($content)) echo $content; ?>
                 </div>
             </main>
         </div>
     </div>
+    <?= \app\services\AssetManager::js('admin/js/tabs.js') ?>
+    <?= \app\services\AssetManager::js('admin/js/spa.js') ?>
 </body>
 
 </html>

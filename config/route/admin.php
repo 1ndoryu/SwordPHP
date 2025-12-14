@@ -26,5 +26,11 @@ Route::group('/admin', function () {
         Route::put('/contents/{id:\d+}', [ContentController::class, 'update']);
         Route::post('/contents/{id:\d+}', [ContentController::class, 'update']);
         Route::delete('/contents/{id:\d+}', [ContentController::class, 'destroy']);
+
+        // Rutas de Papelera
+        Route::get('/contents/trash', [ContentController::class, 'trash']);
+        Route::post('/contents/{id:\d+}/restore', [ContentController::class, 'restore']);
+        Route::delete('/contents/{id:\d+}/force', [ContentController::class, 'forceDestroy']);
+        Route::post('/contents/trash/empty', [ContentController::class, 'emptyTrash']);
     })->middleware([AdminAuth::class]);
 });

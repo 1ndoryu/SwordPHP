@@ -246,7 +246,7 @@ class ContentController
     }
 
     /**
-     * Elimina un contenido.
+     * Envia un contenido a la papelera (soft delete).
      */
     public function destroy(Request $request, int $id)
     {
@@ -258,12 +258,107 @@ class ContentController
 
         $contentItem->delete();
 
-        // Si es una peticion AJAX
         if ($request->isAjax()) {
-            return json(['success' => true]);
+            return json(['success' => true, 'message' => 'Contenido enviado a la papelera']);
         }
 
-        return redirect('/admin/contents?deleted=1');
+        return redirect('/admin/contents?trashed=1');
+    }
+
+    /**
+     * Muestra el listado de contenidos en la papelera.
+     */
+    public function trash(Request $request)
+    {
+        $page = (int) $request->get('page', 1);
+        $search = $request->get('search', '');
+
+        $query = Content::onlyTrashed()->with('user')->orderBy('deleted_at', 'desc');
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw("content_data->>'title' ILIKE ?", ["%{$search}%"])
+                    ->orWhere('slug', 'ILIKE', "%{$search}%");
+            });
+        }
+
+        $total = $query->count();
+        $totalPages = ceil($total / self::ITEMS_PER_PAGE);
+        $offset = ($page - 1) * self::ITEMS_PER_PAGE;
+
+        $contents = $query->skip($offset)->take(self::ITEMS_PER_PAGE)->get();
+
+        $viewData = [
+            'contents' => $contents,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'total' => $total,
+            'filters' => [
+                'search' => $search
+            ]
+        ];
+
+        $content = render_view('admin/pages/contents/trash', $viewData);
+        return render_view('admin/layouts/layout', [
+            'title' => 'Papelera',
+            'user' => $request->session()->get('admin_username') ?? 'Admin',
+            'content' => $content
+        ]);
+    }
+
+    /**
+     * Restaura un contenido de la papelera.
+     */
+    public function restore(Request $request, int $id)
+    {
+        $contentItem = Content::onlyTrashed()->find($id);
+
+        if (!$contentItem) {
+            return json(['success' => false, 'message' => 'Contenido no encontrado en papelera']);
+        }
+
+        $contentItem->restore();
+
+        if ($request->isAjax()) {
+            return json(['success' => true, 'message' => 'Contenido restaurado correctamente']);
+        }
+
+        return redirect('/admin/contents/trash?restored=1');
+    }
+
+    /**
+     * Elimina permanentemente un contenido de la papelera.
+     */
+    public function forceDestroy(Request $request, int $id)
+    {
+        $contentItem = Content::onlyTrashed()->find($id);
+
+        if (!$contentItem) {
+            return json(['success' => false, 'message' => 'Contenido no encontrado en papelera']);
+        }
+
+        $contentItem->forceDelete();
+
+        if ($request->isAjax()) {
+            return json(['success' => true, 'message' => 'Contenido eliminado permanentemente']);
+        }
+
+        return redirect('/admin/contents/trash?deleted=1');
+    }
+
+    /**
+     * Vacia toda la papelera.
+     */
+    public function emptyTrash(Request $request)
+    {
+        $count = Content::onlyTrashed()->count();
+        Content::onlyTrashed()->forceDelete();
+
+        if ($request->isAjax()) {
+            return json(['success' => true, 'message' => "Se eliminaron $count contenido(s) permanentemente"]);
+        }
+
+        return redirect('/admin/contents/trash?emptied=1');
     }
 
     /**

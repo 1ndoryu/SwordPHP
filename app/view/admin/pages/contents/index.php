@@ -8,6 +8,9 @@
             <button type="button" class="botonSecundario botonEliminarSeleccionados" id="botonEliminarSeleccionados" style="display: none;">
                 Eliminar (<span id="contadorSeleccionados">0</span>)
             </button>
+            <a href="/admin/contents/trash" class="botonSecundario enlacePapelera">
+                Papelera
+            </a>
         </div>
         <div class="barraHerramientasDerecha">
             <form method="GET" action="/admin/contents" class="formularioFiltros" id="formularioFiltros">
@@ -155,8 +158,8 @@
 <!-- Modal de confirmacion de eliminacion -->
 <div id="modalEliminar" class="modalOverlay" style="display: none;">
     <div class="modalContenido">
-        <h3>Confirmar eliminacion</h3>
-        <p id="mensajeModalEliminar">Esta accion eliminara el contenido permanentemente. No se puede deshacer.</p>
+        <h3>Enviar a papelera</h3>
+        <p id="mensajeModalEliminar">El contenido sera enviado a la papelera. Podras restaurarlo mas tarde.</p>
         <div class="modalAcciones">
             <button type="button" class="botonSecundario" onclick="cerrarModalEliminar()">Cancelar</button>
             <button type="button" class="botonPeligro" id="botonConfirmarEliminar">Eliminar</button>
@@ -225,7 +228,7 @@
         if (filasSeleccionadas.size > 0) {
             eliminarMultiples = true;
             document.getElementById('mensajeModalEliminar').textContent =
-                'Se eliminaran ' + filasSeleccionadas.size + ' contenido(s). Esta accion no se puede deshacer.';
+                'Se enviaran ' + filasSeleccionadas.size + ' contenido(s) a la papelera. Podras restaurarlos mas tarde.';
             document.getElementById('modalEliminar').style.display = 'flex';
         }
     });
@@ -234,7 +237,7 @@
         idAEliminar = id;
         eliminarMultiples = false;
         document.getElementById('mensajeModalEliminar').textContent =
-            'Esta accion eliminara el contenido permanentemente. No se puede deshacer.';
+            'El contenido sera enviado a la papelera. Podras restaurarlo mas tarde.';
         document.getElementById('modalEliminar').style.display = 'flex';
     }
 

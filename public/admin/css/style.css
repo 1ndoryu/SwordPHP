@@ -530,6 +530,15 @@
     background-color: rgba(239, 68, 68, 0.15);
 }
 
+.botonRestaurar {
+    background-color: transparent;
+    color: #22c55e;
+}
+
+.botonRestaurar:hover {
+    background-color: rgba(34, 197, 94, 0.15);
+}
+
 /* Celda vacia */
 .celdaVacia {
     padding: 60px 20px !important;

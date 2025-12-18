@@ -138,7 +138,7 @@ export const Contents = () => {
                             {contents.map(item => (
                                 <tr key={item.id} className="filaContenido">
                                     <td className="columnaTitulo">
-                                        <Link to={`/${item.type}/${item.id}/edit`} className="enlaceTitulo">
+                                        <Link to={`/admin/${item.type}/${item.id}/edit`} className="enlaceTitulo">
                                             {item.content_data?.title || item.title || '(Sin título)'}
                                         </Link>
                                         <span className="slugContenido">/{item.slug}</span>

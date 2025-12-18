@@ -167,3 +167,8 @@
     color: var(--textoSecundario);
     margin-bottom: 12px;
 }
+
+/* Clase para ocultar elementos */
+.oculto {
+    display: none !important;
+}

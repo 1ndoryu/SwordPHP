@@ -15,3 +15,29 @@
     border-radius: var(--radioMedio);
     border: 1px solid var(--bordeColor);
 }
+
+/* Grilla principal del dashboard */
+.grillaDashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--espacioGrande);
+}
+
+/* Grupo de info del sistema */
+.grupoInfoSistema {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioBase);
+}
+
+/* Grupo de accesos rapidos */
+.grupoAccesosRapidos {
+    display: flex;
+    gap: var(--espacioMedio);
+    flex-wrap: wrap;
+}
+
+/* Margen inferior generico */
+.margenInferior {
+    margin-bottom: var(--espacioGrande);
+}

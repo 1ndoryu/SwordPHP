@@ -1,144 +1,69 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {Media, Pagination} from '../../types';
+import React, {useState, useCallback} from 'react';
+import {Media} from '../../types';
 import {Button} from '../ui/Button';
 import {Select} from '../form/Select';
 import {FileText, Music, Video} from 'lucide-react';
 
+/* Hooks */
+import {useMediaFetch, useFileUpload} from '../../hooks';
+
+/* Componentes */
+import {MediaDetailsPanel} from './MediaDetailsPanel';
+
 interface MediaLibraryProps {
     onSelect?: (media: Media) => void;
-    multiSelect?: boolean; // Not fully implemented in this version
+    multiSelect?: boolean;
     className?: string;
-    embedded?: boolean; // If true, adjusts layout for embedding in a page
+    embedded?: boolean;
 }
 
 export const MediaLibrary = ({onSelect, multiSelect, className = '', embedded = false}: MediaLibraryProps) => {
-    const [files, setFiles] = useState<Media[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [pagination, setPagination] = useState<Pagination | null>(null);
-
-    // Filters
-    const [filterType, setFilterType] = useState('');
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(1);
-
-    // Upload
-    const [isDragging, setIsDragging] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Selection
+    /* Estado de seleccion */
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    useEffect(() => {
-        fetchMedia();
-    }, [page, filterType, search]); // Debounce search in real app
+    /* Hook de fetch de medios */
+    const {files, loading, pagination, filterType, search, page, setFilterType, setSearch, setPage, refetch} = useMediaFetch();
 
-    const fetchMedia = async () => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams({
-                format: 'json',
-                page: page.toString(),
-                type: filterType,
-                search: search
-            });
-            const res = await fetch(`/admin/media/selector?${params}`);
-            const data = await res.json();
+    /* Hook de upload */
+    const {isDragging, fileInputRef, handleUpload, handleDragOver, handleDragLeave, handleDrop, triggerFileInput} = useFileUpload({
+        onUploadComplete: refetch
+    });
 
-            if (data.success) {
-                setFiles(data.medios);
-                setPagination(data.pagination);
+    /* Handlers */
+    const handleItemClick = useCallback(
+        (media: Media) => {
+            setSelectedId(media.id);
+            setSelectedMedia(media);
+            if (onSelect) {
+                onSelect(media);
             }
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+        [onSelect]
+    );
 
-    const handleUpload = async (fileList: FileList | null) => {
-        if (!fileList || fileList.length === 0) return;
-
-        const formData = new FormData();
-        formData.append('file', fileList[0]); // Handle single file for now
-
-        try {
-            setLoading(true);
-            const res = await fetch('/admin/media/upload', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                // Refresh list or prepend
-                fetchMedia();
-                if (onSelect) {
-                    // Optionally auto-select uploaded file
-                }
-            } else {
-                alert(data.message || 'Error uploading file');
-            }
-        } catch (e) {
-            alert('Upload failed');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        handleUpload(e.dataTransfer.files);
-    };
-
-    const handleItemClick = (media: Media) => {
-        setSelectedId(media.id);
-        setSelectedMedia(media);
-        if (onSelect) {
-            onSelect(media);
-        }
-    };
-
-    const cerrarDetalles = () => {
+    const cerrarDetalles = useCallback(() => {
         setSelectedId(null);
         setSelectedMedia(null);
-    };
-
-    const formatBytes = (bytes: number) => {
-        if (bytes > 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
-        return (bytes / 1024).toFixed(2) + ' KB';
-    };
+    }, []);
 
     const getIconForType = (mime: string) => {
-        if (mime.startsWith('image/')) return null; // Use thumbnail
+        if (mime.startsWith('image/')) return null;
         if (mime.startsWith('video/')) return <Video className="iconoTipo" />;
         if (mime.startsWith('audio/')) return <Music className="iconoTipo" />;
         return <FileText className="iconoTipo" />;
     };
 
     return (
-        <div className={`contenedorMedios ${className}`}>
+        <div className={`contenedorMedios ${className}`} id="contenedorMedios">
+            {/* Barra de herramientas */}
             <div className="barraHerramientas">
                 <div className="barraHerramientasIzquierda">
-                    <Button variant="primary" id="botonSubirArchivo" onClick={() => fileInputRef.current?.click()}>
+                    <Button variant="primary" id="botonSubirArchivo" onClick={triggerFileInput}>
                         + Subir archivo
                     </Button>
-                    <input type="file" ref={fileInputRef} id="inputArchivoOculto" style={{display: 'none'}} onChange={e => handleUpload(e.target.files)} multiple accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx" />
+                    <input type="file" ref={fileInputRef} id="inputArchivoOculto" className="oculto" onChange={e => handleUpload(e.target.files)} multiple accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx" />
                     <Button variant={viewMode === 'grid' ? 'primary' : 'secondary'} onClick={() => setViewMode('grid')} className="botonToggleVista" id="botonVistaGrilla" title="Vista grilla">
                         &#9638;
                     </Button>
@@ -171,6 +96,7 @@ export const MediaLibrary = ({onSelect, multiSelect, className = '', embedded = 
                 </div>
             </div>
 
+            {/* Zona de drop */}
             <div className={`zonaDropMedios ${isDragging ? 'zonaDropActiva' : ''}`} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
                 <span className="zonaDropIcono">📂</span>
                 <p className="zonaDropContenido">Arrastra archivos aquí para subirlos</p>
@@ -184,6 +110,7 @@ export const MediaLibrary = ({onSelect, multiSelect, className = '', embedded = 
                 </div>
             )}
 
+            {/* Grilla de medios */}
             <div className={`grillaMedios ${viewMode === 'grid' ? 'vistaGrilla' : 'vistaLista'}`}>
                 {files.map(file => (
                     <div key={file.id} className={`itemMedio ${selectedId === file.id ? 'seleccionado' : ''}`} onClick={() => handleItemClick(file)}>
@@ -207,6 +134,7 @@ export const MediaLibrary = ({onSelect, multiSelect, className = '', embedded = 
                 ))}
             </div>
 
+            {/* Paginacion */}
             {pagination && pagination.total_pages > 1 && (
                 <div className="selectorPaginacion">
                     <Button disabled={page === 1} onClick={() => setPage(p => p - 1)} variant="secondary">
@@ -221,73 +149,8 @@ export const MediaLibrary = ({onSelect, multiSelect, className = '', embedded = 
                 </div>
             )}
 
-            {selectedMedia && (
-                <div id="panelDetallesMedio" className="panelDetallesMedio">
-                    <div className="encabezadoDetalles">
-                        <h3>Detalles del archivo</h3>
-                        <button type="button" className="botonCerrarDetalles" onClick={cerrarDetalles}>
-                            ×
-                        </button>
-                    </div>
-                    <div className="contenidoDetalles">
-                        <div className="previewDetalles" id="previewDetalles">
-                            {selectedMedia.mime_type.startsWith('image/') ? <img src={`/${selectedMedia.path}`} alt={selectedMedia.metadata?.alt_text || selectedMedia.metadata?.original_name} /> : <div className="miniaturaPlaceholder">{getIconForType(selectedMedia.mime_type)}</div>}
-                        </div>
-                        <form id="formDetallesMedio" className="formDetallesMedio">
-                            <input type="hidden" id="detalleMediaId" name="id" value={selectedMedia.id} />
-
-                            <div className="grupoFormulario">
-                                <label htmlFor="detalleTitulo">Titulo</label>
-                                <input type="text" id="detalleTitulo" name="title" className="inputFormulario" defaultValue={selectedMedia.metadata?.title || ''} />
-                            </div>
-
-                            <div className="grupoFormulario">
-                                <label htmlFor="detalleAltText">Texto alternativo</label>
-                                <input type="text" id="detalleAltText" name="alt_text" className="inputFormulario" defaultValue={selectedMedia.metadata?.alt_text || ''} />
-                            </div>
-
-                            <div className="grupoFormulario">
-                                <label htmlFor="detalleDescripcion">Descripcion</label>
-                                <textarea id="detalleDescripcion" name="description" className="inputFormulario textareaFormulario" rows={3} defaultValue={selectedMedia.metadata?.description || ''} />
-                            </div>
-
-                            <div className="infoArchivoDetalles">
-                                <p>
-                                    <strong>Nombre:</strong> <span id="detalleNombre">{selectedMedia.metadata?.original_name}</span>
-                                </p>
-                                <p>
-                                    <strong>Tipo:</strong> <span id="detalleTipo">{selectedMedia.mime_type}</span>
-                                </p>
-                                <p>
-                                    <strong>Tamano:</strong> <span id="detalleTamano">{formatBytes(selectedMedia.metadata?.size_bytes || 0)}</span>
-                                </p>
-                                <p>
-                                    <strong>Subido:</strong> <span id="detalleFecha">{new Date(selectedMedia.created_at).toLocaleString('es-ES')}</span>
-                                </p>
-                            </div>
-
-                            <div className="grupoFormulario">
-                                <label>URL del archivo</label>
-                                <div className="grupoUrlCopiar">
-                                    <input type="text" id="detalleUrl" className="inputFormulario" readOnly value={`${window.location.origin}/${selectedMedia.path}`} />
-                                    <button type="button" className="botonSecundario" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/${selectedMedia.path}`)}>
-                                        Copiar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="accionesDetalles">
-                                <button type="submit" className="botonPrimario">
-                                    Guardar cambios
-                                </button>
-                                <button type="button" className="botonPeligro">
-                                    Eliminar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            {/* Panel de detalles */}
+            {selectedMedia && <MediaDetailsPanel media={selectedMedia} onClose={cerrarDetalles} />}
         </div>
     );
 };

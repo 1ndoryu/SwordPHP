@@ -28,7 +28,7 @@ export const MediaSelector = ({isOpen, onClose, onSelect, title = 'Seleccionar M
             title={title}
             className="selectorMediosContenedor" // Reuse existing CSS class for size/layout
         >
-            <div style={{display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden'}}>
+            <div className="contenedorFlexModal">
                 {/* Override some styles via style prop if needed because MediaLibrary has toolbar which we want */}
                 <MediaLibrary
                     onSelect={setSelected}

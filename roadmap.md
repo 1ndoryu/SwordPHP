@@ -150,356 +150,126 @@ SwordPHP/
 
 ---
 
-### PROYECTO: MIGRACIÓN A REACT + TYPESCRIPT
-**Estado:** [x] Completado ✅
-**Prioridad:** MÁXIMA (Sustituye desarrollo en PHP puro)
-**Estrategia:** "Strangler Fig" (Reemplazo progresivo sobre la misma URL)
+## ✅ FASES COMPLETADAS (Resumen)
 
-#### Arquitectura Híbrida (Vite + PHP)
-- **Frontend:** React 18, TypeScript, React Router DOM.
-- **Build:** Vite genera assets estáticos en `public/admin/build`.
-- **Backend:** PHP sirve el HTML base (`layout`) e inyecta datos iniciales en `window.sword`.
-- **Estilos:** Se mantienen **intactos** `init.css`, `style.css` y `variables.css`. React usa `className` clásicos.
-
-#### Tareas de Migración
-
-- [x] **M1. Infraestructura Base**
-  - [x] Configurar Vite + TypeScript
-  - [x] Crear servicio `Vite.php` para inyección de assets (Dev/Prod)
-  - [x] Configurar `layout.php` con contenedor raíz `#root`
-  - [x] Establecer objeto de hidratación `window.sword`
-
-- [x] **M2. Biblioteca de Componentes UI** (Portar de `view/admin/components`)
-  - *Objetivo: Replicar HTML exacto para heredar CSS automáticamente*
-  - [x] `ui/components/ui/Button.tsx` (ex `boton.php`)
-  - [x] `ui/components/ui/Panel.tsx` (ex `panel.php`)
-  - [x] `ui/components/ui/Badge.tsx` (ex `etiqueta.php`)
-  - [x] `ui/components/ui/Alert.tsx` (ex `alerta.php`)
-  - [x] `ui/components/form/Input.tsx` (ex `campoTexto.php`)
-  - [x] `ui/components/form/Textarea.tsx` (ex `areaTexto.php`)
-  - [x] `ui/components/form/Select.tsx` (ex `selector.php`)
-  - [x] `ui/components/structure/Toolbar.tsx` (ex `barraHerramientas.php`)
-
-- [x] **M3. Páginas Principales**
-  - [x] **Dashboard:** Vista simple con widgets.
-  - [x] **Listado de Contenidos (`/contents`):**
-    - Tabla dinámica con filtros.
-    - Paginación cliente/servidor (API).
-  - [x] **Editor (`/contents/editor`):**
-    - Manejo de estado de formulario complejo.
-    - Campos JSONB dinámicos.
-    - Integración de Selector de Medios (Básico por URL).
-
-- [x] **M4. Gestión de Medios**
-  - [x] Puerto de `media/index.php` a React.
-  - [x] Componente `MediaLibrary.tsx` reutilizable.
-  - [x] Modal `MediaSelector` global.
-
-- [x] **M5. Rutas y API**
-  - [x] Configurar controladores PHP para responder JSON cuando se pida `Accept: application/json`.
-  - [x] Configurar React Router para manejar navegación interna.
-
-- [x] **M6. Limpieza de Legacy JS**
-  - *Eliminar archivos una vez su funcionalidad esté portada:*
-  - [x] `public/admin/js/spa.js` (Reemplazado por React Router)
-  - [x] `public/admin/js/tabs.js` (Reemplazado por componentes UI)
-  - [x] `public/admin/js/editor.js` (Reemplazado por React Editor)
-  - [x] `public/admin/js/medios.js` (Reemplazado por React Media Library)
-  - [x] `public/admin/js/selectorMedios.js` (Reemplazado por React Media Selector)
+Las siguientes fases han sido completadas exitosamente. Se mantiene el resumen para referencia histórica.
 
 ---
 
+### PROYECTO: MIGRACIÓN A REACT + TYPESCRIPT ✅
+**Estado:** Completado | **Estrategia:** "Strangler Fig"
+
+**Arquitectura:** React 18 + TypeScript + Vite → `public/admin/build` | PHP sirve layout + `window.sword`
+
+**Logros:**
+- M1. Infraestructura Base (Vite, `Vite.php`, `layout.php`, `window.sword`)
+- M2. Biblioteca UI (Button, Panel, Badge, Alert, Input, Textarea, Select, Toolbar)
+- M3. Páginas (Dashboard, Listado de Contenidos, Editor con campos JSONB)
+- M4. Gestión de Medios (MediaLibrary, MediaSelector modal)
+- M5. Rutas y API (JSON responses, React Router)
+- M6. Limpieza Legacy JS (spa.js, tabs.js, editor.js, medios.js, selectorMedios.js eliminados)
+
 ---
 
-### FASE 1: Infraestructura del Panel Admin (PHP SSR)
-**Duración estimada:** 1 semana  
-**Estado:** [x] En Progreso
+### FASE 1: Infraestructura del Panel Admin ✅
+**Logros:** Layout, rutas `/admin`, sistema CSS, autenticación (login/logout/middleware)
+
+### FASE 2: Gestión de Contenidos ✅
+**Logros:** CRUD completo, editor con panel lateral, papelera soft-delete, imagen destacada
+
+**Pendiente menor:** Galería de imágenes adjuntas
+
+### FASE 3: Sistema de Post Types ✅
+**Logros:** PostTypeRegistry híbrido (código + BD), sidebar dinámico, rutas comodín
+
+**Pendiente opcional:** UI de gestión, campos personalizados drag & drop
+
+### FASE 4: Sistema de Medios ✅
+**Logros:** Librería con grilla/lista, upload drag & drop, selector modal, metadatos
+
+**Pendiente menor:** Barra de progreso, validación tipos/tamaños, autor, contenidos adjuntos
+
+### REVISIÓN PRE-FASE 5: Refactorización PHP ✅
+**Logros:**
+- R1. `media/index.php` (523 → 205 líneas)
+- R2. `Admin/ContentController.php` (544 → ~300 líneas) + `ContentService.php`
+- R3. `contents/editor.php` (456 → 230 líneas)
+- R4. `ContentController.php` API evaluado como estructuralmente correcto
+- R5. `medios.css` dividido en `mediosGrilla.css` + `mediosDetalles.css`
+- R6. Componentes PHP reutilizables (formularios, UI base, estructura)
+
+---
+
+## 🔄 PRÓXIMAS FASES
+
+---
+
+### REVISIÓN REACT: Refactorización de Componentes
+**Estado:** [x] Completado  
+**Prioridad:** Alta (bloqueante para FASE 5)
 
 #### Objetivo
-Tener el panel renderizado desde el servidor (PHP) con un sistema de layouts y autenticación basada en cookies/sesión.
+Revisar y refactorizar los componentes React existentes para asegurar calidad, mantenibilidad y cumplimiento de principios SOLID antes de continuar con nuevas funcionalidades.
 
-#### Tareas
+#### Tareas Completadas
 
-- [x] **1.1 Estructura de Vistas y Layouts**
-  - Crear directorio `app/view/admin`
-  - Implementar sistema de helper `view()` simple
-  - Crear layout base `layout.php` (Header, Sidebar, Footer)
-  - Configurar assets (CSS/JS) en `public/admin`
+- [x] **RC1. Eliminación de Estilos Inline**
+  - Dashboard.tsx: 4 estilos inline → clases CSS (grillaDashboard, grupoInfoSistema, etc.)
+  - Modal.tsx: z-index inline → CSS
+  - MediaSelector.tsx: flex container → contenedorFlexModal
+  - Editor.tsx: display:none → clase .oculto
 
-- [x] **1.2 Configuración de Rutas Admin**
-  - Crear grupo de rutas `/admin` en `config/route/admin.php`
-  - Controlador `Admin/DashboardController`
-  - Controlador `Admin/AuthController`
+- [x] **RC2. Refactorización de Editor.tsx**
+  - De 371 líneas → ~140 líneas
+  - De 15 useState → 1 useState local + hooks
+  - Creados hooks:
+    - `useEditorForm` (manejo de formulario, guardado, metadatos)
+    - `useContentFetch` (fetch de contenido)
+  - Creados componentes:
+    - `MetadataEditor` (UI de metadatos)
+    - `EditorSidebar` (panel lateral)
 
-- [x] **1.3 Sistema de Diseño (CSS Puro)**
-  - Migrar y centralizar estilos en `public/admin/css/style.css`
-  - Implementar `AssetManager` para versionado automático
-  - Refactorizar nomenclaturas de clases a español
-  - Componentes CSS puros (sin JS innecesario)
-  - [x] Implementar tabs que cambien sin recargar la página
+- [x] **RC3. Refactorización de MediaLibrary.tsx**
+  - De 294 líneas → ~170 líneas
+  - De 10 useState → 3 useState locales + hooks
+  - Creados hooks:
+    - `useMediaFetch` (fetch con filtros/paginación)
+    - `useFileUpload` (drag & drop + upload)
+  - Creado componente:
+    - `MediaDetailsPanel` (panel de detalles)
 
-- [x] **1.4 Autenticación Admin**
-  - [x] Login form (POST a `Admin/AuthController`)
-  - [x] Middleware `AdminAuth` para proteger rutas `/admin`
-  - [x] Uso de sesiones PHP nativas o cookies seguras
-  - [x] Logout
+- [x] **RC4. Correcciones Adicionales**
+  - Contents.tsx: Corregida ruta de enlace (/${item.type} → /admin/${item.type})
+  - Todas las clases CSS en archivos centralizados
+
+#### Estructura de Hooks Creada
+```
+app/view/admin/ui/hooks/
+├── index.ts
+├── useEditorForm.ts
+├── useContentFetch.ts
+├── useMediaFetch.ts
+└── useFileUpload.ts
+```
+
+#### Componentes Extraídos
+```
+app/view/admin/ui/components/
+├── editor/
+│   ├── index.ts
+│   ├── MetadataEditor.tsx
+│   └── EditorSidebar.tsx
+└── media/
+    ├── MediaLibrary.tsx (refactorizado)
+    ├── MediaSelector.tsx
+    └── MediaDetailsPanel.tsx (nuevo)
+```
 
 #### Entregables
-- Panel accesible en `http://localhost:8787/admin` sin necesidad de build steps (npm)
-- Login funcional
-- Layout responsivo con Sidebar
-
----
-
-### FASE 2: Gestion de Contenidos
-**Duracion estimada:** 1-2 semanas  
-**Estado:** [x] En Progreso
-
-#### Objetivo
-CRUD completo de contenidos desde el panel admin.
-
-#### Tareas
-
-- [x] **2.1 Listado de contenidos**
-  - Tabla con columnas: titulo, tipo, estado, autor, fecha
-  - Paginacion
-  - Filtros por tipo y estado
-  - Busqueda por titulo
-  - Acciones rapidas (editar, eliminar, ver)
-
-- [x] **2.2 Editor de contenido**
-  - Formulario de creacion/edicion
-  - Campo de titulo
-  - Editor de contenido (textarea)
-  - Selector de slug (autocompletado desde titulo)
-  - Selector de estado (borrador, publicado)
-
-- [x] **2.3 Panel lateral del editor**
-  - Selector de estado y visibilidad
-  - Informacion del contenido (tipo, fechas, ID)
-  - Campos personalizados/Metadatos (implementado con content_data JSONB)
-  - Vista de JSON crudo para depuracion
-
-- [x] **2.4 Acciones del editor**
-  - Guardar como borrador
-  - Publicar
-  - Actualizar
-  - Eliminar (con confirmacion via modal)
-
-- [x] **2.5 Vista previa**
-  - Boton para previsualizar contenido
-  - Abrir en nueva pestana
-
-- [x] **2.6 Imagenes del contenido**
-  - [x] Imagen de portada/destacada (integrado via selector de medios)
-  - [ ] Galeria de imagenes adjuntas (pendiente)
-  - [x] Selector de medios integrado (ver FASE 4.3)
-
-- [x] **2.7 Sistema de Papelera**
-  - Soft delete en lugar de eliminacion permanente
-  - Vista de contenidos en papelera
-  - Restaurar contenidos
-  - Vaciar papelera (eliminar permanentemente)
-
-#### Entregables
-- Crear, editar, eliminar y listar posts desde el panel
-- Cambiar estado de publicacion
-
----
-
-### FASE 3: Sistema de Post Types
-**Duración estimada:** 2 semanas  
-**Estado:** [x] Completado (versión simplificada)
-
-#### Objetivo
-Post Types dinámicos que aparezcan automáticamente en el sidebar del admin.
-
-#### Implementación Realizada (Enfoque Híbrido)
-
-- [x] **3.1 PostTypeRegistry Service** (`app/services/PostTypeRegistry.php`)
-  - Tipos predefinidos en código (`post`, `page`) con configuración completa
-  - Detección automática de tipos desde la BD (contenido creado via API)
-  - Posibilidad de registrar tipos manualmente con `register()`
-  - No requiere tabla adicional en BD
-
-- [x] **3.2 Sidebar Dinámico**
-  - Los Post Types aparecen automáticamente en el menú
-  - Configuración: nombre, icono, orden, visibilidad
-  - Soporte para tipos creados via API (como `audio_sample`)
-
-- [x] **3.3 Rutas Dinámicas**
-  - Ruta comodín `/admin/{type}` acepta cualquier tipo válido
-  - Validación: tipo debe existir en registro o tener contenido en BD
-  - Papelera por tipo: `/admin/{type}/trash`
-
-- [x] **3.4 Filtrado por Tipo**
-  - Listado de contenidos filtrado por Post Type
-  - Papelera filtrada por tipo
-  - URLs de edición/creación respetan el tipo
-
-#### Decisión de Diseño
-Se optó por **NO crear tabla `post_types`** en BD. En su lugar:
-- Los tipos base se definen en código (máximo control)
-- Los tipos creados via API se detectan automáticamente
-- Esto mantiene la filosofía headless del CMS
-
-#### Pendiente para Futuro (Opcional)
-- [ ] UI para gestionar Post Types (si se requiere)
-- [ ] Sistema de campos personalizados (tipos: text, textarea, number, date, select, image, etc.)
-- [ ] Constructor de campos drag & drop
-
-#### Entregables Completados
-- Post Types dinámicos sin necesidad de tabla en BD
-- Sidebar que muestra todos los tipos (predefinidos + detectados)
-- Rutas y filtrado por tipo
-
----
-
-### FASE 4: Sistema de Medios
-**Duración estimada:** 1 semana  
-**Estado:** [x] Completado ✅ (funcionalidad core; mejoras menores pendientes para futuro)
-
-#### Objetivo
-Librería de medios completa estilo WordPress.
-
-#### Tareas
-
-- [x] **4.1 Vista de librería de medios**
-  - Vista de grilla con miniaturas
-  - Vista de lista con detalles
-  - Toggle entre vistas
-
-- [x] **4.2 Upload de archivos**
-  - Zona de drag & drop
-  - Botón de selección de archivos
-  - Upload múltiple
-  - [ ] Barra de progreso (pendiente)
-  - [ ] Validación de tipos y tamaños (pendiente)
-
-- [x] **4.3 Modal selector de medios**
-  - Componente reutilizable para seleccionar medios (`SelectorMedios` class)
-  - Integración con editor de contenidos (imagen destacada)
-  - Filtros por tipo (imagen, video, documento)
-  - CSS: `public/admin/css/componentes/selectorMedios.css`
-  - JS: `public/admin/js/selectorMedios.js`
-
-- [x] **4.4 Detalles de medio**
-  - Vista/edición de metadatos
-  - Alt text, título, descripción
-  - Información del archivo (tamaño, dimensiones, tipo)
-  - URL del archivo
-  - [ ] Mostrar autor del archivo (pendiente)
-  - [ ] Mostrar posts/contenidos adjuntos (pendiente)
-
-- [x] **4.5 Acciones sobre medios**
-  - Eliminar (con confirmación)
-  - Copiar URL
-  - [ ] Descargar (pendiente)
-
-#### Refactorización Pendiente
-
-- [x] **4.6 Refactorizar `index.php` de medios** ✅
-  - JS extraído a `admin/js/medios.js` (320 líneas)
-  - Vista reducida a ~195 líneas
-  - Componentes reutilizables via `paginacion.php`
-
-#### Entregables
-- Galería de medios funcional
-- Upload con drag & drop
-- Selector de medios integrable en cualquier formulario
-- Imagen destacada en editor de contenidos
-
----
-
-### REVISIÓN PRE-FASE 5: Refactorización de Archivos Grandes
-**Estado:** [x] Completado ✅  
-**Prioridad:** Alta (bloqueante para FASE 5) - **DESBLOQUEADA**
-
-> **Nota:** Límites orientativos (ver "Refactorización Pragmática" arriba):
-> - Componentes/Servicios/Controladores: **~300 líneas** (flexible si está bien estructurado)
-> - Hooks personalizados: **~120 líneas**  
-> - Archivos de utilidades: **~150 líneas**
-> - Archivos de estilos CSS: **~300 líneas**
-
-#### Archivos PHP que exceden límites
-
-| Archivo                                      | Líneas | Límite | Excede | Prioridad     |
-| -------------------------------------------- | ------ | ------ | ------ | ------------- |
-| `app/view/admin/pages/media/index.php`       | 205    | 300    | OK     | ✅             |
-| `app/controller/Admin/ContentController.php` | ~300   | 300    | OK     | ✅             |
-| `app/view/admin/pages/contents/editor.php`   | 230    | 300    | OK     | ✅             |
-| `app/controller/ContentController.php`       | 435    | ~350   | OK*    | ✅ (ACEPTABLE) |
-| `app/view/admin/pages/contents/index.php`    | 301    | 300    | +1     | 🟢 Baja        |
-
-> *El ContentController API tiene 14 métodos distintos con responsabilidades específicas (likes, filtros JSONB, eventos Jophiel). Es estructuralmente correcto.
-| `app/services/ContentService.php`            | ~260   | 300    | OK     | ✅ (NUEVO) |
-| `app/controller/UserController.php`          | 283    | 300    | OK     | ✅         |
-| `app/view/admin/pages/contents/trash.php`    | 259    | 300    | OK     | ✅         |
-
-#### Archivos CSS/JS que exceden límites
-
-| Archivo                                           | Líneas | Límite | Excede | Prioridad   |
-| ------------------------------------------------- | ------ | ------ | ------ | ----------- |
-| `public/admin/css/componentes/medios.css`         | ~12    | 300    | OK     | ✅ (imports) |
-| `public/admin/css/componentes/mediosGrilla.css`   | ~230   | 300    | OK     | ✅ (NUEVO)   |
-| `public/admin/css/componentes/mediosDetalles.css` | ~170   | 300    | OK     | ✅ (NUEVO)   |
-| `public/admin/js/selectorMedios.js`               | 292    | 300    | OK     | ✅           |
-| `public/admin/css/componentes/selectorMedios.css` | 286    | 300    | OK     | ✅           |
-
-#### Plan de Refactorización
-
-- [x] **R1. `media/index.php` (523 → 205 líneas)** ✅
-  - Extraído JS a `public/admin/js/medios.js` (320 líneas)
-  - HTML limpio solo con markup
-  - **Meta cumplida:** < 200 líneas para la vista
-
-- [x] **R2. `Admin/ContentController.php` (544 → ~300 líneas)** ✅
-  - Creado `app/services/ContentService.php` (~260 líneas)
-  - Extraída lógica: slugs, metadatos, CRUD, papelera
-  - El controlador solo maneja request/response (SRP)
-  - **Meta cumplida:** < 300 líneas para el controlador
-
-- [x] **R3. `contents/editor.php` (456 → 230 líneas)** ✅
-  - Extraído JS a `public/admin/js/editor.js` (260 líneas)
-  - Datos pasados via data-attributes
-  - **Meta cumplida:** < 250 líneas para la vista
-
-- [x] **R4. `ContentController.php` API** ✅ (Re-evaluado)
-  - El controlador tiene 14 métodos específicos de API (likes, eventos Jophiel, filtros JSONB)
-  - Ya usa Action classes y traits para reutilización
-  - **Acción realizada:** Se creó `app/services/LikeService.php` para encapsular lógica de likes futura
-  - **Decisión:** Mantener controlador actual, migrar progresivamente al servicio
-  - **Nueva evaluación:** Estructuralmente correcto
-
-- [x] **R5. `medios.css` (407 → dividido)** ✅
-  - Creado `mediosGrilla.css` (~230 líneas): items, miniaturas, overlays
-  - Creado `mediosDetalles.css` (~170 líneas): panel lateral, formularios
-  - Archivo original ahora solo importa componentes
-  - **Meta cumplida:** < 200 líneas por archivo
-
-- [x] **R6. Componentes HTML Reutilizables** ✅ (Completado)
-  - [x] **Componentes Existentes:**
-    - `paginacion.php`: Rango inteligente de páginas.
-    - `modalConfirmacion.php`: Modal básico para confirmaciones.
-  - [x] **Nuevos Componentes a Extraer (Exhaustivo):**
-    - [x] **Grupo: Formularios** (`components/fomularios/`)
-      - `campoTexto.php`: Label + input estándar + texto ayuda/error.
-      - `areaTexto.php`: Label + textarea + contador (opcional).
-      - `selector.php`: Select wrapper con soporte de array de opciones.
-      - `casillaVerificacion.php`: Checkbox con label alineado.
-    - [x] **Grupo: UI Base** (`components/ui/`)
-      - `panel.php`: Contenedor para secciones (sidebar o contenido principal) con encabezado/cuerpo/pie.
-      - `etiqueta.php`: Etiquetas de estado (publicado, borrador) y tipo.
-      - `alerta.php`: Mensajes de éxito, error o advertencia.
-      - `boton.php`: Estandarización de clases (primario, secundario, peligro, icono).
-    - [x] **Grupo: Estructura** (`components/estructura/`)
-      - `barraHerramientas.php`: Barra superior de listados (botones izquierda + filtros derecha).
-      - `estadoVacio.php`: Mensaje amigable cuando no hay resultados (icono + texto + botón acción).
-      - `tablaDatos.php`: (Opcional) Abstracción para tablas con encabezados ordenables.
-  - [x] **Implementación en Vistas:**
-    - Refactorizar `contents/editor.php` usando componentes de Form y Panel.
-    - Refactorizar `contents/index.php` usando Toolbar, Badge y EmptyState.
-    - Refactorizar `media/index.php` usando Toolbar y Modal.
+- ✅ Componentes React refactorizados y documentados
+- ✅ Hooks personalizados para lógica reutilizable
+- ✅ Código TypeScript sin estilos inline
+- ✅ Panel admin React 100% funcional
 
 ---
 

@@ -12,7 +12,7 @@ export const Modal = ({isOpen, onClose, children, title, className = ''}: ModalP
     if (!isOpen) return null;
 
     return (
-        <div className="modalOverlay" onClick={onClose} style={{zIndex: 10000}}>
+        <div className="modalOverlay" onClick={onClose}>
             <div className={`modalContenido ${className}`} onClick={e => e.stopPropagation()}>
                 {title && <h3>{title}</h3>}
                 {children}

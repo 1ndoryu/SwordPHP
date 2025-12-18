@@ -100,6 +100,14 @@
     justify-content: flex-end;
 }
 
+/* Contenedor flex para modal */
+.contenedorFlexModal {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
 /* Contenido del selector (grilla) */
 .selectorMediosContenido {
     flex: 1;

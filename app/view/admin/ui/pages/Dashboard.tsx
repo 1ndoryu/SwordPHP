@@ -6,16 +6,16 @@ import {Button} from '../components/ui/Button';
 
 export const Dashboard = () => {
     return (
-        <div>
-            <div style={{marginBottom: '20px'}}>
+        <div id="dashboard">
+            <div className="margenInferior">
                 <Alert variant="info" dismissible>
                     Bienvenido a SwordPHP v2. El panel está migrando a React.
                 </Alert>
             </div>
 
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+            <div className="grillaDashboard">
                 <Panel title="Estado del Sistema">
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                    <div className="grupoInfoSistema">
                         <div>
                             Versión: <Badge variant="primary">v2.0.0</Badge>
                         </div>
@@ -25,8 +25,7 @@ export const Dashboard = () => {
                 </Panel>
 
                 <Panel title="Accesos Rápidos">
-                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
-                        {/* Note: href used with Button renders an anchor tag */}
+                    <div className="grupoAccesosRapidos">
                         <Button variant="primary" href="/admin/post/create">
                             Nuevo Post
                         </Button>

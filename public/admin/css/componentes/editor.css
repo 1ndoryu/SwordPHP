@@ -1,0 +1,169 @@
+/*
+ * Editor de Contenido
+ * Formulario de edición y panel lateral
+ */
+
+.contenedorEditor {
+    width: 100%;
+}
+
+.alertaExito {
+    padding: 12px var(--espacioGrande);
+    background-color: var(--exitoFondo);
+    border: 1px solid var(--exitoBorde);
+    border-radius: var(--radioMedio);
+    color: var(--exito);
+    margin-bottom: var(--espacioGrande);
+}
+
+.formularioEditor {
+    width: 100%;
+}
+
+.editorGrid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 25px;
+}
+
+@media (max-width: 900px) {
+    .editorGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.editorPrincipal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioGrande);
+}
+
+.etiquetaCampo {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--textoPrimario);
+}
+
+.ayudaCampo {
+    font-weight: normal;
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+    margin-left: var(--espacioBase);
+}
+
+.inputTitulo {
+    padding: 12px var(--espacioMedio);
+}
+
+.grupoSlug {
+    margin-top: -10px;
+}
+
+.previewSlug {
+    display: flex;
+    align-items: center;
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    overflow: hidden;
+}
+
+.prefijoSlug {
+    padding: 8px 12px;
+    background-color: var(--fondoTerciario);
+    color: var(--textoSecundario);
+    font-size: var(--fuentePequena);
+    white-space: nowrap;
+}
+
+.inputSlug {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    flex: 1;
+}
+
+.inputSlug:focus {
+    outline: none;
+}
+
+.textareaContenido {
+    width: 100%;
+    min-height: 400px;
+    padding: var(--espacioMedio);
+    font-family: var(--fuenteFamilia);
+    font-size: var(--fuenteBase);
+    line-height: 1.6;
+    resize: vertical;
+}
+
+/* Panel lateral */
+.editorLateral {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioGrande);
+}
+
+.panelLateral {
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioMedio);
+    overflow: hidden;
+}
+
+.tituloPanelLateral {
+    padding: 12px var(--espacioMedio);
+    background-color: var(--fondoTerciario);
+    border-bottom: 1px solid var(--bordeColor);
+    font-size: var(--fuenteBase);
+    font-weight: 600;
+}
+
+.contenidoPanelLateral {
+    padding: var(--espacioMedio);
+}
+
+.selectEstado {
+    width: 100%;
+    padding: 8px 12px;
+}
+
+.infoPublicacion {
+    margin-top: var(--espacioMedio);
+    padding-top: var(--espacioMedio);
+    border-top: 1px solid var(--bordeColor);
+    font-size: var(--fuentePequena);
+}
+
+.infoPublicacion p {
+    margin-bottom: 8px;
+    color: var(--textoSecundario);
+}
+
+.infoPublicacion strong {
+    color: var(--textoPrimario);
+}
+
+.accionesPanelLateral {
+    margin-top: var(--espacioMedio);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioBase);
+}
+
+/* Panel Zona de Peligro */
+.panelPeligro {
+    border-color: var(--errorBorde);
+}
+
+.tituloPeligro {
+    background-color: var(--errorFondo);
+    color: var(--error);
+}
+
+.advertenciaPeligro {
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+    margin-bottom: 12px;
+}

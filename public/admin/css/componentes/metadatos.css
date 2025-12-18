@@ -1,0 +1,144 @@
+/*
+ * Sección de Metadatos
+ * Manejo de meta keys y valores
+ */
+
+.seccionMetadatos {
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioMedio);
+    padding: var(--espacioGrande);
+    margin-top: var(--espacioBase);
+}
+
+.encabezadoMetadatos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espacioMedio);
+    padding-bottom: var(--espacioMedio);
+    border-bottom: 1px solid var(--bordeColor);
+}
+
+.seccionMetadatos .tituloSeccion {
+    font-size: var(--fuenteBase);
+    font-weight: 600;
+    margin: 0;
+}
+
+.listaMetadatos {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filaMetadato {
+    gap: var(--espacioBase);
+    padding: 0px;
+    border-radius: var(--radioBase);
+    display: flex;
+    align-content: center;
+    width: 100%;
+}
+
+.filaMetadatoNueva {
+    animation: fadeIn var(--transicionMedia) ease;
+}
+
+.campoMetaClave,
+.campoMetaValor {
+    display: flex;
+    flex-direction: column;
+}
+
+.campoMetaValor {
+    width: 100%;
+    background: unset;
+}
+
+.inputMetaClave {
+    padding: 8px var(--espacioBase);
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    font-family: monospace;
+    font-size: var(--fuentePequena);
+}
+
+.inputMetaClave[readonly] {
+    background-color: transparent;
+    border-color: transparent;
+    font-weight: 500;
+}
+
+.inputMetaValor {
+    padding: 8px var(--espacioBase);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    font-size: var(--fuentePequena);
+    width: 100%;
+}
+
+.textareaMetaValor {
+    min-height: 80px;
+    font-family: monospace;
+    resize: vertical;
+}
+
+.accionesMetadato {
+    display: flex;
+    gap: var(--espacioPequeno);
+    align-items: center;
+}
+
+.mensajeSinMetadatos {
+    padding: var(--espacioExtraGrande);
+    text-align: center;
+    color: var(--textoSecundario);
+    font-size: var(--fuentePequena);
+}
+
+.mensajeSinMetadatos p {
+    margin: 0;
+}
+
+/* Detalles JSON colapsables */
+.detallesJson {
+    font-size: var(--fuentePequena);
+}
+
+.detallesJson summary {
+    cursor: pointer;
+    color: var(--textoSecundario);
+    padding: var(--espacioPequeno) 0;
+}
+
+.detallesJson summary:hover {
+    color: var(--textoPrimario);
+}
+
+.preJsonData {
+    margin-top: var(--espacioBase);
+    padding: 12px;
+    background-color: var(--fondoPrimario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    font-family: monospace;
+    font-size: 11px;
+    overflow-x: auto;
+    max-height: 300px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+@media (max-width: 768px) {
+    .filaMetadato {
+        grid-template-columns: 1fr;
+    }
+
+    .accionesMetadato {
+        justify-content: flex-end;
+    }
+}

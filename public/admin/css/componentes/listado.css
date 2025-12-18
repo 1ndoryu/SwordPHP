@@ -1,0 +1,228 @@
+/*
+ * Listado de Contenidos
+ * Tabla, barra de herramientas, filtros y paginación
+ */
+
+.contenedorListado {
+    width: 100%;
+}
+
+/* Barra de herramientas */
+.barraHerramientas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espacioGrande);
+    gap: var(--espacioMedio);
+    flex-wrap: wrap;
+}
+
+.barraHerramientasIzquierda {
+    display: flex;
+    gap: var(--espacioBase);
+}
+
+.barraHerramientasDerecha {
+    display: flex;
+    gap: var(--espacioBase);
+}
+
+.formularioFiltros {
+    display: flex;
+    gap: var(--espacioBase);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.selectFiltro {
+    padding: 8px 12px;
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    font-size: var(--fuentePequena);
+    min-width: 150px;
+}
+
+.grupoBusqueda {
+    display: flex;
+    gap: var(--espacioPequeno);
+}
+
+.inputBusqueda {
+    padding: 8px 12px;
+    min-width: 200px;
+}
+
+/* Resumen del listado */
+.resumenListado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espacioMedio);
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+}
+
+.enlaceLimpiarFiltros {
+    color: var(--acentoPrimario);
+}
+
+.enlaceLimpiarFiltros:hover {
+    text-decoration: underline;
+}
+
+/* Tabla de contenidos */
+.contenedorTabla {
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioMedio);
+    overflow: hidden;
+}
+
+.tablaContenidos {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tablaContenidos th,
+.tablaContenidos td {
+    padding: 12px var(--espacioMedio);
+    text-align: left;
+    border-bottom: 1px solid var(--bordeColor);
+}
+
+.tablaContenidos th {
+    background-color: var(--fondoTerciario);
+    font-weight: 600;
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tablaContenidos tbody tr:hover {
+    background-color: var(--fondoTerciario);
+}
+
+.tablaContenidos tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Filas clickeables y seleccionables */
+.filaContenido {
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.filaContenido:hover {
+    background-color: var(--fondoTerciario);
+}
+
+.filaSeleccionada {
+    background-color: var(--errorFondo) !important;
+    border-left: 3px solid var(--acentoPrimario);
+}
+
+.filaSeleccionada:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+/* Ayuda de seleccion */
+.ayudaSeleccion {
+    font-size: var(--fuentePequena);
+    color: var(--textoTenue);
+    margin-left: auto;
+    margin-right: var(--espacioMedio);
+}
+
+/* Columnas especificas */
+.columnaCheckbox {
+    width: 40px;
+    text-align: center;
+}
+
+.checkboxTabla {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.columnaTitulo {
+    min-width: 250px;
+}
+
+.enlaceTitulo {
+    font-weight: 500;
+    color: var(--textoPrimario);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.enlaceTitulo:hover {
+    color: var(--acentoPrimario);
+}
+
+.slugContenido {
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+}
+
+.columnaTipo,
+.columnaEstado,
+.columnaAutor {
+    width: 120px;
+}
+
+.columnaFecha {
+    width: 150px;
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+}
+
+.columnaAcciones {
+    width: 180px;
+}
+
+/* Celda vacia */
+.celdaVacia {
+    padding: 60px var(--espacioGrande) !important;
+}
+
+.mensajeVacio {
+    text-align: center;
+    color: var(--textoSecundario);
+}
+
+.mensajeVacio p {
+    margin-bottom: var(--espacioMedio);
+}
+
+/* Paginacion */
+.paginacion {
+    display: flex;
+    justify-content: center;
+    gap: var(--espacioPequeno);
+    margin-top: var(--espacioGrande);
+}
+
+.botonPagina {
+    padding: 8px 14px;
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    text-decoration: none;
+    font-size: var(--fuentePequena);
+    transition: all var(--transicionRapida);
+}
+
+.botonPagina:hover {
+    background-color: var(--fondoTerciario);
+}
+
+.paginaActual {
+    background-color: var(--acentoPrimario);
+    border-color: var(--acentoPrimario);
+    color: white;
+}

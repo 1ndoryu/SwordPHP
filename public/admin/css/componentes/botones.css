@@ -1,0 +1,198 @@
+/*
+ * Estilos de Botones
+ * Todos los tipos de botones del admin
+ */
+
+/* Boton principal */
+.botonPrimario {
+    width: 100%;
+    padding: var(--espacioBase);
+    background-color: var(--acentoPrimario);
+    color: white;
+    border-radius: var(--radioBase);
+    font-weight: bold;
+}
+
+.botonPrimario:hover {
+    background-color: var(--acentoHover);
+}
+
+/* Boton secundario */
+.botonSecundario {
+    padding: 8px 16px;
+    background-color: var(--fondoTerciario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    cursor: pointer;
+    font-family: var(--fuenteFamilia);
+    transition: all var(--transicionRapida);
+}
+
+.botonSecundario:hover {
+    background-color: var(--bordeColor);
+}
+
+/* Boton de peligro */
+.botonPeligro {
+    padding: 8px 16px;
+    background-color: var(--error);
+    border: none;
+    border-radius: var(--radioBase);
+    color: white;
+    cursor: pointer;
+    font-family: var(--fuenteFamilia);
+    font-weight: 500;
+    transition: all var(--transicionRapida);
+}
+
+.botonPeligro:hover {
+    background-color: #dc2626;
+}
+
+/* Boton de buscar */
+.botonBuscar {
+    padding: 8px 16px;
+    background-color: var(--fondoTerciario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioBase);
+    color: var(--textoPrimario);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.botonBuscar:hover {
+    background-color: var(--bordeColor);
+}
+
+/* Boton nuevo */
+.botonNuevo {
+    padding: 8px 16px;
+    font-size: var(--fuenteBase);
+}
+
+/* Grupo de acciones */
+.grupoAcciones {
+    display: flex;
+    gap: 8px;
+}
+
+.botonAccion {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: var(--radioBase);
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    border: none;
+    font-family: var(--fuenteFamilia);
+}
+
+.botonEditar {
+    background-color: var(--fondoTerciario);
+    color: var(--textoPrimario);
+    text-decoration: none;
+}
+
+.botonEditar:hover {
+    background-color: var(--bordeColor);
+}
+
+.botonVer {
+    background-color: transparent;
+    color: var(--textoSecundario);
+    text-decoration: none;
+}
+
+.botonVer:hover {
+    color: var(--textoPrimario);
+}
+
+.botonEliminar {
+    background-color: transparent;
+    color: var(--error);
+}
+
+.botonEliminar:hover {
+    background-color: var(--errorFondo);
+}
+
+.botonRestaurar {
+    background-color: transparent;
+    color: var(--exito);
+}
+
+.botonRestaurar:hover {
+    background-color: var(--exitoFondo);
+}
+
+/* Botones del editor */
+.botonGuardar {
+    width: 100%;
+}
+
+.botonBorrador {
+    width: 100%;
+    text-align: center;
+}
+
+.botonVistaPrevia {
+    width: 100%;
+    text-align: center;
+    display: block;
+}
+
+/* Boton agregar meta */
+.botonAgregarMeta {
+    padding: 6px 12px;
+    background-color: var(--acentoPrimario);
+    color: white;
+    border: none;
+    border-radius: var(--radioBase);
+    font-size: var(--fuentePequena);
+    cursor: pointer;
+    transition: background-color var(--transicionRapida);
+}
+
+.botonAgregarMeta:hover {
+    background-color: var(--acentoHover);
+}
+
+/* Botones de metadatos */
+.botonEditarClave,
+.botonConvertirJson {
+    background-color: var(--fondoSecundario);
+    border-radius: var(--radioBase);
+    color: var(--textoSecundario);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+    padding: 9px 10px;
+}
+
+.botonEditarClave:hover,
+.botonConvertirJson:hover {
+    background-color: var(--bordeColor);
+    color: var(--textoPrimario);
+}
+
+.botonEliminarMeta {
+    padding: 5px 8px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radioBase);
+    color: var(--error);
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--transicionRapida);
+}
+
+.botonEliminarMeta:hover {
+    background-color: var(--errorFondo);
+    border-color: var(--errorBorde);
+}
+
+/* Boton eliminar contenido */
+.botonEliminarContenido {
+    width: 100%;
+}

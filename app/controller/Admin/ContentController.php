@@ -4,6 +4,7 @@ namespace app\controller\Admin;
 
 use support\Request;
 use app\model\Content;
+use app\services\PostTypeRegistry;
 
 /**
  * Controlador para la gestion de contenidos en el panel admin.
@@ -17,20 +18,61 @@ class ContentController
     private const ITEMS_PER_PAGE = 15;
 
     /**
-     * Muestra el listado de contenidos con filtros y paginacion.
+     * Obtiene el Post Type desde la URL actual.
+     * Acepta tipos registrados y tipos que existan en la BD.
+     * 
+     * @param Request $request
+     * @param string|null $typeParam Tipo pasado como parametro de ruta
+     * @return string|null
      */
-    public function index(Request $request)
+    private function obtenerPostTypeDesdeUrl(Request $request, ?string $typeParam = null): ?string
     {
+        // Si viene como parametro de ruta, usarlo directamente
+        if ($typeParam && $typeParam !== 'contents') {
+            // Verificar si existe en el registro o en la BD
+            if (PostTypeRegistry::existe($typeParam)) {
+                return $typeParam;
+            }
+            // Verificar si hay contenidos con ese tipo en la BD
+            if (Content::where('type', $typeParam)->exists()) {
+                return $typeParam;
+            }
+        }
+
+        // Fallback: extraer de la URL
+        $path = $request->path();
+        $segments = explode('/', trim($path, '/'));
+
+        if (count($segments) >= 2) {
+            $posibleTipo = $segments[1];
+            if ($posibleTipo !== 'contents' && PostTypeRegistry::existe($posibleTipo)) {
+                return $posibleTipo;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Muestra el listado de contenidos con filtros y paginacion.
+     * 
+     * @param Request $request
+     * @param string|null $type Tipo de contenido desde la ruta
+     */
+    public function index(Request $request, ?string $type = null)
+    {
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
+        $postTypeConfig = $postType ? PostTypeRegistry::get($postType) : null;
+
         $page = (int) $request->get('page', 1);
-        $type = $request->get('type', '');
         $status = $request->get('status', '');
         $search = $request->get('search', '');
 
         $query = Content::with('user')->orderBy('created_at', 'desc');
 
-        // Aplicar filtro por tipo
-        if (!empty($type)) {
-            $query->where('type', $type);
+        // Filtrar por Post Type si viene desde una ruta específica
+        if ($postType) {
+            $query->where('type', $postType);
         }
 
         // Aplicar filtro por estado
@@ -52,8 +94,11 @@ class ContentController
 
         $contents = $query->skip($offset)->take(self::ITEMS_PER_PAGE)->get();
 
-        // Obtener tipos unicos para el filtro
-        $types = Content::select('type')->distinct()->pluck('type')->toArray();
+        // Obtener tipos unicos para el filtro (solo si no hay postType especifico)
+        $types = $postType ? [] : Content::select('type')->distinct()->pluck('type')->toArray();
+
+        $baseUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
+        $titulo = $postTypeConfig ? $postTypeConfig['nombre'] : 'Contenidos';
 
         $viewData = [
             'contents' => $contents,
@@ -61,8 +106,10 @@ class ContentController
             'totalPages' => $totalPages,
             'total' => $total,
             'types' => $types,
+            'postType' => $postType,
+            'postTypeConfig' => $postTypeConfig,
+            'baseUrl' => $baseUrl,
             'filters' => [
-                'type' => $type,
                 'status' => $status,
                 'search' => $search
             ]
@@ -70,43 +117,51 @@ class ContentController
 
         $content = render_view('admin/pages/contents/index', $viewData);
         return render_view('admin/layouts/layout', [
-            'title' => 'Contenidos',
+            'title' => $titulo,
             'user' => $request->session()->get('admin_username') ?? 'Admin',
-            'content' => $content
+            'content' => $content,
+            'currentPostType' => $postType
         ]);
     }
 
     /**
      * Muestra el formulario de creacion de contenido.
      */
-    public function create(Request $request)
+    public function create(Request $request, ?string $type = null)
     {
-        $type = $request->get('type', 'post');
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type) ?? 'post';
+        $postTypeConfig = PostTypeRegistry::get($postType);
+        $baseUrl = "/admin/{$postType}";
 
         $content = render_view('admin/pages/contents/editor', [
             'mode' => 'create',
-            'type' => $type,
+            'type' => $postType,
+            'postType' => $postType,
+            'postTypeConfig' => $postTypeConfig,
+            'baseUrl' => $baseUrl,
             'content' => null
         ]);
 
+        $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
         return render_view('admin/layouts/layout', [
-            'title' => 'Nuevo Contenido',
+            'title' => "Nueva {$nombreSingular}",
             'user' => $request->session()->get('admin_username') ?? 'Admin',
-            'content' => $content
+            'content' => $content,
+            'currentPostType' => $postType
         ]);
     }
 
     /**
      * Almacena un nuevo contenido.
      */
-    public function store(Request $request)
+    public function store(Request $request, ?string $type = null)
     {
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type) ?? 'post';
         $userId = $request->session()->get('admin_user_id');
 
         $title = $request->post('title', '');
         $contentBody = $request->post('content', '');
         $slug = $request->post('slug', '');
-        $type = $request->post('type', 'post');
         $status = $request->post('status', 'draft');
 
         // Generar slug si esta vacio
@@ -145,54 +200,91 @@ class ContentController
             }
         }
 
+        // Procesar imagen destacada
+        $featuredImageId = $request->post('featured_image_id', '');
+        $featuredImageUrl = $request->post('featured_image_url', '');
+        if (!empty($featuredImageId) && !empty($featuredImageUrl)) {
+            $contentData['featured_image'] = [
+                'id' => (int) $featuredImageId,
+                'url' => $featuredImageUrl
+            ];
+        }
+
         $newContent = Content::create([
             'slug' => $slug,
-            'type' => $type,
+            'type' => $postType,
             'status' => $status,
             'user_id' => $userId,
             'content_data' => $contentData
         ]);
 
-        return redirect('/admin/contents/' . $newContent->id . '/edit?saved=1');
+        return redirect("/admin/{$postType}/{$newContent->id}/edit?saved=1");
     }
 
     /**
      * Muestra el formulario de edicion de contenido.
      */
-    public function edit(Request $request, int $id)
+    public function edit(Request $request, ?string $type = null, ?int $id = null)
     {
+        // Webman pasa los params en orden según la ruta, manejar ambos casos
+        if ($id === null && is_numeric($type)) {
+            $id = (int) $type;
+            $type = null;
+        }
+
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $contentItem = Content::find($id);
 
         if (!$contentItem) {
-            return redirect('/admin/contents?error=not_found');
+            $redirectUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
+            return redirect($redirectUrl . '?error=not_found');
         }
+
+        // Usar el tipo del contenido si no viene de la URL
+        $postType = $postType ?? $contentItem->type;
+        $postTypeConfig = PostTypeRegistry::get($postType);
+        $baseUrl = "/admin/{$postType}";
 
         $saved = $request->get('saved', 0);
 
         $content = render_view('admin/pages/contents/editor', [
             'mode' => 'edit',
             'type' => $contentItem->type,
+            'postType' => $postType,
+            'postTypeConfig' => $postTypeConfig,
+            'baseUrl' => $baseUrl,
             'contentItem' => $contentItem,
             'saved' => $saved
         ]);
 
+        $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
         return render_view('admin/layouts/layout', [
-            'title' => 'Editar Contenido',
+            'title' => "Editar {$nombreSingular}",
             'user' => $request->session()->get('admin_username') ?? 'Admin',
-            'content' => $content
+            'content' => $content,
+            'currentPostType' => $postType
         ]);
     }
 
     /**
      * Actualiza un contenido existente.
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, ?string $type = null, ?int $id = null)
     {
+        if ($id === null && is_numeric($type)) {
+            $id = (int) $type;
+            $type = null;
+        }
+
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $contentItem = Content::find($id);
 
         if (!$contentItem) {
-            return redirect('/admin/contents?error=not_found');
+            $redirectUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
+            return redirect($redirectUrl . '?error=not_found');
         }
+
+        $postType = $postType ?? $contentItem->type;
 
         $title = $request->post('title', '');
         $contentBody = $request->post('content', '');
@@ -237,19 +329,35 @@ class ContentController
             }
         }
 
+        // Procesar imagen destacada
+        $featuredImageId = $request->post('featured_image_id', '');
+        $featuredImageUrl = $request->post('featured_image_url', '');
+        if (!empty($featuredImageId) && !empty($featuredImageUrl)) {
+            $contentData['featured_image'] = [
+                'id' => (int) $featuredImageId,
+                'url' => $featuredImageUrl
+            ];
+        }
+
         $contentItem->slug = $slug;
         $contentItem->status = $status;
         $contentItem->content_data = $contentData;
         $contentItem->save();
 
-        return redirect('/admin/contents/' . $id . '/edit?saved=1');
+        return redirect("/admin/{$postType}/{$id}/edit?saved=1");
     }
 
     /**
      * Envia un contenido a la papelera (soft delete).
      */
-    public function destroy(Request $request, int $id)
+    public function destroy(Request $request, ?string $type = null, ?int $id = null)
     {
+        if ($id === null && is_numeric($type)) {
+            $id = (int) $type;
+            $type = null;
+        }
+
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $contentItem = Content::find($id);
 
         if (!$contentItem) {
@@ -262,18 +370,25 @@ class ContentController
             return json(['success' => true, 'message' => 'Contenido enviado a la papelera']);
         }
 
-        return redirect('/admin/contents?trashed=1');
+        $redirectUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
+        return redirect($redirectUrl . '?trashed=1');
     }
 
     /**
      * Muestra el listado de contenidos en la papelera.
      */
-    public function trash(Request $request)
+    public function trash(Request $request, ?string $type = null)
     {
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $page = (int) $request->get('page', 1);
         $search = $request->get('search', '');
 
         $query = Content::onlyTrashed()->with('user')->orderBy('deleted_at', 'desc');
+
+        // Filtrar por tipo si viene especificado
+        if ($postType) {
+            $query->where('type', $postType);
+        }
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -288,11 +403,15 @@ class ContentController
 
         $contents = $query->skip($offset)->take(self::ITEMS_PER_PAGE)->get();
 
+        $baseUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
+
         $viewData = [
             'contents' => $contents,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'total' => $total,
+            'postType' => $postType,
+            'baseUrl' => $baseUrl,
             'filters' => [
                 'search' => $search
             ]
@@ -302,15 +421,22 @@ class ContentController
         return render_view('admin/layouts/layout', [
             'title' => 'Papelera',
             'user' => $request->session()->get('admin_username') ?? 'Admin',
-            'content' => $content
+            'content' => $content,
+            'currentPostType' => $postType
         ]);
     }
 
     /**
      * Restaura un contenido de la papelera.
      */
-    public function restore(Request $request, int $id)
+    public function restore(Request $request, ?string $type = null, ?int $id = null)
     {
+        if ($id === null && is_numeric($type)) {
+            $id = (int) $type;
+            $type = null;
+        }
+
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $contentItem = Content::onlyTrashed()->find($id);
 
         if (!$contentItem) {
@@ -323,14 +449,21 @@ class ContentController
             return json(['success' => true, 'message' => 'Contenido restaurado correctamente']);
         }
 
-        return redirect('/admin/contents/trash?restored=1');
+        $redirectUrl = $postType ? "/admin/{$postType}/trash" : '/admin/contents/trash';
+        return redirect($redirectUrl . '?restored=1');
     }
 
     /**
      * Elimina permanentemente un contenido de la papelera.
      */
-    public function forceDestroy(Request $request, int $id)
+    public function forceDestroy(Request $request, ?string $type = null, ?int $id = null)
     {
+        if ($id === null && is_numeric($type)) {
+            $id = (int) $type;
+            $type = null;
+        }
+
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
         $contentItem = Content::onlyTrashed()->find($id);
 
         if (!$contentItem) {
@@ -343,22 +476,31 @@ class ContentController
             return json(['success' => true, 'message' => 'Contenido eliminado permanentemente']);
         }
 
-        return redirect('/admin/contents/trash?deleted=1');
+        $redirectUrl = $postType ? "/admin/{$postType}/trash" : '/admin/contents/trash';
+        return redirect($redirectUrl . '?deleted=1');
     }
 
     /**
-     * Vacia toda la papelera.
+     * Vacia toda la papelera (o solo la de un tipo específico).
      */
-    public function emptyTrash(Request $request)
+    public function emptyTrash(Request $request, ?string $type = null)
     {
-        $count = Content::onlyTrashed()->count();
-        Content::onlyTrashed()->forceDelete();
+        $postType = $this->obtenerPostTypeDesdeUrl($request, $type);
+
+        $query = Content::onlyTrashed();
+        if ($postType) {
+            $query->where('type', $postType);
+        }
+
+        $count = $query->count();
+        $query->forceDelete();
 
         if ($request->isAjax()) {
             return json(['success' => true, 'message' => "Se eliminaron $count contenido(s) permanentemente"]);
         }
 
-        return redirect('/admin/contents/trash?emptied=1');
+        $redirectUrl = $postType ? "/admin/{$postType}/trash" : '/admin/contents/trash';
+        return redirect($redirectUrl . '?emptied=1');
     }
 
     /**

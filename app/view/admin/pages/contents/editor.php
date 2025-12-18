@@ -6,6 +6,12 @@ $slug = $isEdit ? $contentItem->slug : '';
 $status = $isEdit ? $contentItem->status : 'draft';
 $contentId = $isEdit ? $contentItem->id : null;
 
+// Configuracion del Post Type
+$baseUrl = $baseUrl ?? '/admin/contents';
+$postType = $postType ?? 'post';
+$postTypeConfig = $postTypeConfig ?? null;
+$nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
+
 // Obtener metadatos adicionales (excluyendo title y content)
 $metadatos = [];
 if ($isEdit && is_array($contentItem->content_data)) {
@@ -20,13 +26,13 @@ if ($isEdit && is_array($contentItem->content_data)) {
 <div id="editorContenido" class="contenedorEditor">
     <?php if (isset($saved) && $saved): ?>
         <div class="alertaExito">
-            Contenido guardado correctamente.
+            <?= $nombreSingular ?> guardado correctamente.
         </div>
     <?php endif; ?>
 
     <form
         method="POST"
-        action="<?= $isEdit ? '/admin/contents/' . $contentId : '/admin/contents' ?>"
+        action="<?= $isEdit ? $baseUrl . '/' . $contentId : $baseUrl ?>"
         class="formularioEditor"
         id="formularioEditor">
         <input type="hidden" name="_method" value="<?= $isEdit ? 'PUT' : 'POST' ?>">
@@ -165,6 +171,39 @@ if ($isEdit && is_array($contentItem->content_data)) {
                             <button type="submit" name="status" value="draft" class="botonSecundario botonBorrador">
                                 Guardar borrador
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imagen Destacada -->
+                <?php
+                $imagenDestacada = $isEdit ? ($contentItem->content_data['featured_image'] ?? null) : null;
+                $imagenUrl = $imagenDestacada ? ($imagenDestacada['url'] ?? '') : '';
+                ?>
+                <div class="panelLateral">
+                    <h3 class="tituloPanelLateral">Imagen destacada</h3>
+                    <div class="contenidoPanelLateral">
+                        <div class="campoImagenDestacada" id="campoImagenDestacada">
+                            <div class="previewImagenDestacada" id="previewImagenDestacada">
+                                <?php if ($imagenUrl): ?>
+                                    <img src="<?= htmlspecialchars($imagenUrl) ?>" alt="Imagen destacada">
+                                <?php else: ?>
+                                    <div class="placeholderImagen">
+                                        <span class="iconoPlaceholder">🖼️</span>
+                                        <span>Sin imagen</span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="accionesImagenDestacada">
+                                <button type="button" class="botonSecundario" id="botonSeleccionarImagen">
+                                    <?= $imagenUrl ? 'Cambiar' : 'Seleccionar' ?>
+                                </button>
+                                <button type="button" class="botonSecundario" id="botonQuitarImagen" style="<?= $imagenUrl ? '' : 'display:none' ?>">
+                                    Quitar
+                                </button>
+                            </div>
+                            <input type="hidden" name="featured_image_id" id="inputImagenDestacadaId" value="<?= htmlspecialchars($imagenDestacada['id'] ?? '') ?>">
+                            <input type="hidden" name="featured_image_url" id="inputImagenDestacadaUrl" value="<?= htmlspecialchars($imagenUrl) ?>">
                         </div>
                     </div>
                 </div>
@@ -337,13 +376,15 @@ if ($isEdit && is_array($contentItem->content_data)) {
 
     // Boton eliminar contenido
     const botonEliminar = document.getElementById('botonEliminarContenido');
+    const BASE_URL = '<?= $baseUrl ?>';
+
     if (botonEliminar) {
         botonEliminar.addEventListener('click', function() {
             if (confirm('¿Seguro que deseas mover este contenido a la papelera?')) {
                 const contentId = <?= $contentId ?? 'null' ?>;
                 if (!contentId) return;
 
-                fetch('/admin/contents/' + contentId, {
+                fetch(BASE_URL + '/' + contentId, {
                         method: 'DELETE',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -354,9 +395,9 @@ if ($isEdit && is_array($contentItem->content_data)) {
                         if (data.success) {
                             // Navegar al listado via SPA
                             if (window.SPA) {
-                                window.SPA.navegar('/admin/contents');
+                                window.SPA.navegar(BASE_URL);
                             } else {
-                                window.location.href = '/admin/contents';
+                                window.location.href = BASE_URL;
                             }
                         } else {
                             alert('Error al eliminar: ' + (data.message || 'Error desconocido'));
@@ -367,6 +408,49 @@ if ($isEdit && is_array($contentItem->content_data)) {
                         alert('Error al eliminar el contenido');
                     });
             }
+        });
+    }
+
+    /* Selector de imagen destacada */
+    const botonSeleccionarImagen = document.getElementById('botonSeleccionarImagen');
+    const botonQuitarImagen = document.getElementById('botonQuitarImagen');
+    const previewImagen = document.getElementById('previewImagenDestacada');
+    const inputImagenId = document.getElementById('inputImagenDestacadaId');
+    const inputImagenUrl = document.getElementById('inputImagenDestacadaUrl');
+
+    if (botonSeleccionarImagen) {
+        botonSeleccionarImagen.addEventListener('click', function() {
+            if (typeof SelectorMedios === 'undefined') {
+                alert('Error: El selector de medios no esta disponible');
+                return;
+            }
+
+            window.abrirSelectorMedios({
+                tipo: 'image',
+                multiple: false,
+                onSeleccionar: function(medio) {
+                    previewImagen.innerHTML = `<img src="${medio.url}" alt="Imagen destacada">`;
+                    inputImagenId.value = medio.id;
+                    inputImagenUrl.value = medio.url;
+                    botonSeleccionarImagen.textContent = 'Cambiar';
+                    botonQuitarImagen.style.display = '';
+                }
+            });
+        });
+    }
+
+    if (botonQuitarImagen) {
+        botonQuitarImagen.addEventListener('click', function() {
+            previewImagen.innerHTML = `
+                <div class="placeholderImagen">
+                    <span class="iconoPlaceholder">🖼️</span>
+                    <span>Sin imagen</span>
+                </div>
+            `;
+            inputImagenId.value = '';
+            inputImagenUrl.value = '';
+            botonSeleccionarImagen.textContent = 'Seleccionar';
+            this.style.display = 'none';
         });
     }
 </script>

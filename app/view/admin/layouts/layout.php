@@ -11,15 +11,28 @@
 </head>
 
 <body>
+    <?php $postTypes = \app\services\PostTypeRegistry::paraMenu(); ?>
     <div class="layoutAdministracion">
         <div class="bloque admin">
             <aside class="barraLateral">
                 <nav>
-                    <a href="/admin" class="enlaceNavegacion activo">Dashboard</a>
-                    <a href="/admin/contents" class="enlaceNavegacion">Contenidos</a>
-                    <a href="/admin/media" class="enlaceNavegacion">Medios</a>
-                    <a href="/admin/users" class="enlaceNavegacion">Usuarios</a>
-                    <a href="/admin/settings" class="enlaceNavegacion">Ajustes</a>
+                    <a href="/admin" class="enlaceNavegacion <?= ($currentRoute ?? '') === 'dashboard' ? 'activo' : '' ?>">Dashboard</a>
+
+                    <div class="seccionMenu">
+                        <span class="tituloSeccion">Contenidos</span>
+                        <?php foreach ($postTypes as $slug => $tipo): ?>
+                            <a href="/admin/<?= $slug ?>" class="enlaceNavegacion <?= ($currentPostType ?? '') === $slug ? 'activo' : '' ?>">
+                                <?= $tipo['nombre'] ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div class="seccionMenu">
+                        <span class="tituloSeccion">Sistema</span>
+                        <a href="/admin/media" class="enlaceNavegacion <?= ($currentRoute ?? '') === 'media' ? 'activo' : '' ?>">Medios</a>
+                        <a href="/admin/users" class="enlaceNavegacion <?= ($currentRoute ?? '') === 'users' ? 'activo' : '' ?>">Usuarios</a>
+                        <a href="/admin/settings" class="enlaceNavegacion <?= ($currentRoute ?? '') === 'settings' ? 'activo' : '' ?>">Ajustes</a>
+                    </div>
                 </nav>
             </aside>
             <main class="contenidoPrincipal">
@@ -37,6 +50,7 @@
     </div>
     <?= \app\services\AssetManager::js('admin/js/tabs.js') ?>
     <?= \app\services\AssetManager::js('admin/js/spa.js') ?>
+    <?= \app\services\AssetManager::js('admin/js/selectorMedios.js') ?>
 </body>
 
 </html>

@@ -1,0 +1,17 @@
+/*
+ * Componentes de Dashboard
+ * Widgets y tarjetas del escritorio
+ */
+
+.widgetsEscritorio {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espacioGrande);
+}
+
+.tarjeta {
+    background-color: var(--fondoSecundario);
+    padding: var(--espacioGrande);
+    border-radius: var(--radioMedio);
+    border: 1px solid var(--bordeColor);
+}

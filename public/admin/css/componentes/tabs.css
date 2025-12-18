@@ -1,0 +1,55 @@
+/*
+ * Sistema de Tabs
+ * Navegación sin recarga entre paneles
+ */
+
+.contenedorTabs {
+    width: 100%;
+}
+
+.encabezadosTabs {
+    display: flex;
+    border-bottom: 1px solid var(--bordeColor);
+    margin-bottom: var(--espacioGrande);
+}
+
+.botonTab {
+    padding: var(--espacioBase) var(--espacioGrande);
+    background: transparent;
+    border: none;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    font-family: var(--fuenteFamilia);
+    font-size: var(--fuenteBase);
+    border-bottom: 2px solid transparent;
+    transition: all var(--transicionMedia);
+}
+
+.botonTab:hover {
+    color: var(--textoPrimario);
+}
+
+.botonTab.activo {
+    color: var(--acentoPrimario);
+    border-bottom-color: var(--acentoPrimario);
+}
+
+.panelTab {
+    display: none;
+    animation: fadeIn var(--transicionMedia) ease;
+}
+
+.panelTab.activo {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

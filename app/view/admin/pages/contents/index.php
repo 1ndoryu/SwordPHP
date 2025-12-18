@@ -1,27 +1,36 @@
+<?php
+$baseUrl = $baseUrl ?? '/admin/contents';
+$postType = $postType ?? null;
+$postTypeConfig = $postTypeConfig ?? null;
+$nombrePlural = $postTypeConfig['nombre'] ?? 'Contenidos';
+$nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
+?>
 <div id="contenidosListado" class="contenedorListado">
     <!-- Barra de herramientas -->
     <div class="barraHerramientas">
         <div class="barraHerramientasIzquierda">
-            <a href="/admin/contents/create" class="botonPrimario botonNuevo">
-                + Nuevo Contenido
+            <a href="<?= $baseUrl ?>/create" class="botonPrimario botonNuevo">
+                + Nuevo <?= $nombreSingular ?>
             </a>
             <button type="button" class="botonSecundario botonEliminarSeleccionados" id="botonEliminarSeleccionados" style="display: none;">
                 Eliminar (<span id="contadorSeleccionados">0</span>)
             </button>
-            <a href="/admin/contents/trash" class="botonSecundario enlacePapelera">
+            <a href="<?= $baseUrl ?>/trash" class="botonSecundario enlacePapelera">
                 Papelera
             </a>
         </div>
         <div class="barraHerramientasDerecha">
-            <form method="GET" action="/admin/contents" class="formularioFiltros" id="formularioFiltros">
-                <select name="type" class="selectFiltro" onchange="this.form.submit()">
-                    <option value="">Todos los tipos</option>
-                    <?php foreach ($types as $typeOption): ?>
-                        <option value="<?= htmlspecialchars($typeOption) ?>" <?= $filters['type'] === $typeOption ? 'selected' : '' ?>>
-                            <?= ucfirst(htmlspecialchars($typeOption)) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+            <form method="GET" action="<?= $baseUrl ?>" class="formularioFiltros" id="formularioFiltros">
+                <?php if (!$postType && !empty($types)): ?>
+                    <select name="type" class="selectFiltro" onchange="this.form.submit()">
+                        <option value="">Todos los tipos</option>
+                        <?php foreach ($types as $typeOption): ?>
+                            <option value="<?= htmlspecialchars($typeOption) ?>" <?= ($filters['type'] ?? '') === $typeOption ? 'selected' : '' ?>>
+                                <?= ucfirst(htmlspecialchars($typeOption)) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
                 <select name="status" class="selectFiltro" onchange="this.form.submit()">
                     <option value="">Todos los estados</option>
                     <option value="published" <?= $filters['status'] === 'published' ? 'selected' : '' ?>>Publicado</option>
@@ -42,10 +51,10 @@
 
     <!-- Resumen -->
     <div class="resumenListado">
-        <span class="contadorTotal"><?= $total ?> contenido<?= $total !== 1 ? 's' : '' ?> encontrado<?= $total !== 1 ? 's' : '' ?></span>
+        <span class="contadorTotal"><?= $total ?> <?= strtolower($total !== 1 ? $nombrePlural : $nombreSingular) ?> encontrado<?= $total !== 1 ? 's' : '' ?></span>
         <span class="ayudaSeleccion">Ctrl+clic para seleccionar varios</span>
-        <?php if (!empty($filters['type']) || !empty($filters['status']) || !empty($filters['search'])): ?>
-            <a href="/admin/contents" class="enlaceLimpiarFiltros">Limpiar filtros</a>
+        <?php if (!empty($filters['status']) || !empty($filters['search'])): ?>
+            <a href="<?= $baseUrl ?>" class="enlaceLimpiarFiltros">Limpiar filtros</a>
         <?php endif; ?>
     </div>
 
@@ -113,8 +122,8 @@
                     <tr>
                         <td colspan="6" class="celdaVacia">
                             <div class="mensajeVacio">
-                                <p>No se encontraron contenidos</p>
-                                <a href="/admin/contents/create" class="botonPrimario">Crear el primero</a>
+                                <p>No se encontraron <?= strtolower($nombrePlural) ?></p>
+                                <a href="<?= $baseUrl ?>/create" class="botonPrimario">Crear el primero</a>
                             </div>
                         </td>
                     </tr>
@@ -127,29 +136,28 @@
     <?php if ($totalPages > 1): ?>
         <div class="paginacion" id="paginacion">
             <?php
-            $baseUrl = '/admin/contents?';
+            $urlPaginacion = $baseUrl . '?';
             $queryParams = [];
-            if (!empty($filters['type'])) $queryParams[] = 'type=' . urlencode($filters['type']);
             if (!empty($filters['status'])) $queryParams[] = 'status=' . urlencode($filters['status']);
             if (!empty($filters['search'])) $queryParams[] = 'search=' . urlencode($filters['search']);
-            $baseUrl .= implode('&', $queryParams);
-            if (!empty($queryParams)) $baseUrl .= '&';
+            $urlPaginacion .= implode('&', $queryParams);
+            if (!empty($queryParams)) $urlPaginacion .= '&';
             ?>
 
             <?php if ($currentPage > 1): ?>
-                <a href="<?= $baseUrl ?>page=<?= $currentPage - 1 ?>" class="botonPagina">Anterior</a>
+                <a href="<?= $urlPaginacion ?>page=<?= $currentPage - 1 ?>" class="botonPagina">Anterior</a>
             <?php endif; ?>
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <?php if ($i === $currentPage): ?>
                     <span class="botonPagina paginaActual"><?= $i ?></span>
                 <?php else: ?>
-                    <a href="<?= $baseUrl ?>page=<?= $i ?>" class="botonPagina"><?= $i ?></a>
+                    <a href="<?= $urlPaginacion ?>page=<?= $i ?>" class="botonPagina"><?= $i ?></a>
                 <?php endif; ?>
             <?php endfor; ?>
 
             <?php if ($currentPage < $totalPages): ?>
-                <a href="<?= $baseUrl ?>page=<?= $currentPage + 1 ?>" class="botonPagina">Siguiente</a>
+                <a href="<?= $urlPaginacion ?>page=<?= $currentPage + 1 ?>" class="botonPagina">Siguiente</a>
             <?php endif; ?>
         </div>
     <?php endif; ?>
@@ -168,6 +176,9 @@
 </div>
 
 <script>
+    // URL base para este Post Type
+    const BASE_URL = '<?= $baseUrl ?>';
+
     // Estado de seleccion
     let filasSeleccionadas = new Set();
     let idAEliminar = null;
@@ -185,9 +196,9 @@
             // Clic normal - navegar al editor via SPA
             limpiarSeleccion();
             if (window.SPA) {
-                window.SPA.navegar('/admin/contents/' + id + '/edit');
+                window.SPA.navegar(BASE_URL + '/' + id + '/edit');
             } else {
-                window.location.href = '/admin/contents/' + id + '/edit';
+                window.location.href = BASE_URL + '/' + id + '/edit';
             }
         }
     }
@@ -251,7 +262,7 @@
         if (eliminarMultiples && filasSeleccionadas.size > 0) {
             // Eliminar multiples
             const promesas = Array.from(filasSeleccionadas).map(id =>
-                fetch('/admin/contents/' + id, {
+                fetch(BASE_URL + '/' + id, {
                     method: 'DELETE',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -272,7 +283,7 @@
             });
         } else if (idAEliminar) {
             // Eliminar uno
-            fetch('/admin/contents/' + idAEliminar, {
+            fetch(BASE_URL + '/' + idAEliminar, {
                     method: 'DELETE',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'

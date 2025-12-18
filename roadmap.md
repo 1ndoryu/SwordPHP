@@ -16,6 +16,61 @@
 
 ---
 
+## Reglas de Desarrollo (Agente IA)
+
+Las siguientes acciones están **PROHIBIDAS** para el agente de IA:
+
+| Acción Prohibida                                               | Razón                                         |
+| -------------------------------------------------------------- | --------------------------------------------- |
+| Ejecutar `php windows.php` o comandos de reinicio del servidor | El usuario maneja el servidor manualmente     |
+| Usar herramientas de navegador (`browser_subagent`, etc.)      | El usuario prueba manualmente en el navegador |
+| Ejecutar comandos que modifiquen el estado del servidor        | Control manual del entorno                    |
+
+### Comandos de Desarrollo Disponibles
+
+El agente **SÍ PUEDE** ejecutar los siguientes comandos para depuración:
+
+| Comando                               | Descripción                                             |
+| ------------------------------------- | ------------------------------------------------------- |
+| `php webman dev:contents`             | Lista contenidos en la BD (filtros: -t, -s)             |
+| `php webman dev:contents --type=post` | Filtrar por tipo                                        |
+| `php webman dev:contents --trashed`   | Ver contenidos en papelera                              |
+| `php webman dev:post-types`           | Lista Post Types registrados (predefinidos + dinamicos) |
+| `php webman db:install`               | Crear tablas de la BD                                   |
+
+---
+
+## Refactorización SOLID (Pendiente)
+
+### Análisis de Duplicación de Controladores
+
+Actualmente existen controladores duplicados entre API y Admin:
+
+| Controlador API                    | Controlador Admin                        | Lógica Compartida          |
+| ---------------------------------- | ---------------------------------------- | -------------------------- |
+| `app\controller\ContentController` | `app\controller\Admin\ContentController` | CRUD de contenidos         |
+| `app\controller\AuthController`    | `app\controller\Admin\AuthController`    | Validación de credenciales |
+
+### Plan de Refactorización
+
+1. **Crear `app\services\ContentService`**
+   - Extraer lógica de negocio compartida
+   - Métodos: `crear()`, `actualizar()`, `eliminar()`, `listar()`, `obtenerPorId()`
+   - Los controladores solo manejan request/response
+
+2. **Crear `app\services\AuthService`**
+   - Extraer validación de credenciales
+   - Métodos: `validarCredenciales()`, `generarJwtToken()`, `crearSesion()`
+
+3. **Beneficios**
+   - Single Responsibility: Controladores solo para HTTP, Servicios para lógica
+   - DRY: Sin duplicación de código
+   - Testeable: Servicios fáciles de probar unitariamente
+
+**Estado:** [ ] Pendiente - Planificado para después de FASE 3
+
+---
+
 ## Arquitectura de Directorios (Final)
 
 ```
@@ -161,10 +216,10 @@ CRUD completo de contenidos desde el panel admin.
   - Boton para previsualizar contenido
   - Abrir en nueva pestana
 
-- [ ] **2.6 Imagenes del contenido** (PENDIENTE)
-  - Imagen de portada/destacada
-  - Galeria de imagenes adjuntas
-  - Selector de medios integrado (depende de FASE 4)
+- [x] **2.6 Imagenes del contenido**
+  - [x] Imagen de portada/destacada (integrado via selector de medios)
+  - [ ] Galeria de imagenes adjuntas (pendiente)
+  - [x] Selector de medios integrado (ver FASE 4.3)
 
 - [x] **2.7 Sistema de Papelera**
   - Soft delete en lugar de eliminacion permanente
@@ -180,121 +235,162 @@ CRUD completo de contenidos desde el panel admin.
 
 ### FASE 3: Sistema de Post Types
 **Duración estimada:** 2 semanas  
-**Estado:** [ ] Pendiente
+**Estado:** [x] Completado (versión simplificada)
 
 #### Objetivo
-Post Types dinámicos con campos personalizados (estilo ACF).
+Post Types dinámicos que aparezcan automáticamente en el sidebar del admin.
 
-#### Tareas
+#### Implementación Realizada (Enfoque Híbrido)
 
-- [ ] **3.1 Modelo de datos para Post Types**
-  - Nueva tabla `post_types`:
-    ```sql
-    CREATE TABLE post_types (
-        id SERIAL PRIMARY KEY,
-        slug VARCHAR(50) UNIQUE NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        description TEXT,
-        icon VARCHAR(50),
-        supports JSONB DEFAULT '["title", "editor", "thumbnail"]',
-        fields JSONB DEFAULT '[]',
-        is_system BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    ```
-  - Post Types predeterminados: `post`, `page`
+- [x] **3.1 PostTypeRegistry Service** (`app/services/PostTypeRegistry.php`)
+  - Tipos predefinidos en código (`post`, `page`) con configuración completa
+  - Detección automática de tipos desde la BD (contenido creado via API)
+  - Posibilidad de registrar tipos manualmente con `register()`
+  - No requiere tabla adicional en BD
 
-- [ ] **3.2 API de Post Types**
-  - `GET /admin/post-types` - Listar todos
-  - `GET /admin/post-types/{slug}` - Obtener uno
-  - `POST /admin/post-types` - Crear
-  - `PUT /admin/post-types/{slug}` - Actualizar
-  - `DELETE /admin/post-types/{slug}` - Eliminar (solo si no es system)
+- [x] **3.2 Sidebar Dinámico**
+  - Los Post Types aparecen automáticamente en el menú
+  - Configuración: nombre, icono, orden, visibilidad
+  - Soporte para tipos creados via API (como `audio_sample`)
 
-- [ ] **3.3 Sistema de campos personalizados**
-  - Tipos de campos soportados:
-    - `text` - Texto corto
-    - `textarea` - Texto largo
-    - `richtext` - Editor WYSIWYG
-    - `number` - Número
-    - `email` - Email
-    - `url` - URL
-    - `date` - Fecha
-    - `datetime` - Fecha y hora
-    - `select` - Selección única
-    - `multiselect` - Selección múltiple
-    - `checkbox` - Casilla
-    - `radio` - Opciones radio
-    - `image` - Selector de imagen
-    - `gallery` - Galería de imágenes
-    - `file` - Archivo
-    - `relation` - Relación con otro contenido
-    - `repeater` - Grupo repetible de campos
+- [x] **3.3 Rutas Dinámicas**
+  - Ruta comodín `/admin/{type}` acepta cualquier tipo válido
+  - Validación: tipo debe existir en registro o tener contenido en BD
+  - Papelera por tipo: `/admin/{type}/trash`
 
-- [ ] **3.4 UI de gestión de Post Types**
-  - Página de listado de Post Types
-  - Editor de Post Type
-  - Constructor de campos drag & drop
-  - Configuración de cada campo (label, placeholder, requerido, etc.)
+- [x] **3.4 Filtrado por Tipo**
+  - Listado de contenidos filtrado por Post Type
+  - Papelera filtrada por tipo
+  - URLs de edición/creación respetan el tipo
 
-- [ ] **3.5 Integración con editor de contenidos**
-  - Renderizado dinámico de campos según Post Type
-  - Validación de campos requeridos
-  - Guardar datos en `content_data` JSONB
+#### Decisión de Diseño
+Se optó por **NO crear tabla `post_types`** en BD. En su lugar:
+- Los tipos base se definen en código (máximo control)
+- Los tipos creados via API se detectan automáticamente
+- Esto mantiene la filosofía headless del CMS
 
-- [ ] **3.6 Navegación dinámica**
-  - Sidebar muestra Post Types registrados
-  - Cada Post Type tiene su propia sección
+#### Pendiente para Futuro (Opcional)
+- [ ] UI para gestionar Post Types (si se requiere)
+- [ ] Sistema de campos personalizados (tipos: text, textarea, number, date, select, image, etc.)
+- [ ] Constructor de campos drag & drop
 
-#### Entregables
-- Crear Post Types personalizados desde el panel
-- Definir campos personalizados para cada tipo
-- Formularios dinámicos según el Post Type
+#### Entregables Completados
+- Post Types dinámicos sin necesidad de tabla en BD
+- Sidebar que muestra todos los tipos (predefinidos + detectados)
+- Rutas y filtrado por tipo
 
 ---
 
 ### FASE 4: Sistema de Medios
 **Duración estimada:** 1 semana  
-**Estado:** [ ] Pendiente
+**Estado:** [x] En Progreso
 
 #### Objetivo
 Librería de medios completa estilo WordPress.
 
 #### Tareas
 
-- [ ] **4.1 Vista de librería de medios**
+- [x] **4.1 Vista de librería de medios**
   - Vista de grilla con miniaturas
   - Vista de lista con detalles
   - Toggle entre vistas
 
-- [ ] **4.2 Upload de archivos**
+- [x] **4.2 Upload de archivos**
   - Zona de drag & drop
   - Botón de selección de archivos
   - Upload múltiple
-  - Barra de progreso
-  - Validación de tipos y tamaños
+  - [ ] Barra de progreso (pendiente)
+  - [ ] Validación de tipos y tamaños (pendiente)
 
-- [ ] **4.3 Modal selector de medios**
-  - Componente reutilizable para seleccionar medios
-  - Integración con editor de contenidos
+- [x] **4.3 Modal selector de medios**
+  - Componente reutilizable para seleccionar medios (`SelectorMedios` class)
+  - Integración con editor de contenidos (imagen destacada)
   - Filtros por tipo (imagen, video, documento)
+  - CSS: `public/admin/css/componentes/selectorMedios.css`
+  - JS: `public/admin/js/selectorMedios.js`
 
-- [ ] **4.4 Detalles de medio**
+- [x] **4.4 Detalles de medio**
   - Vista/edición de metadatos
   - Alt text, título, descripción
   - Información del archivo (tamaño, dimensiones, tipo)
   - URL del archivo
+  - [ ] Mostrar autor del archivo (pendiente)
+  - [ ] Mostrar posts/contenidos adjuntos (pendiente)
 
-- [ ] **4.5 Acciones sobre medios**
+- [x] **4.5 Acciones sobre medios**
   - Eliminar (con confirmación)
   - Copiar URL
-  - Descargar
+  - [ ] Descargar (pendiente)
+
+#### Refactorización Pendiente
+
+- [ ] **4.6 Refactorizar `index.php` de medios**
+  - Separar JS en archivo externo (`admin/js/media.js`)
+  - Componentes reutilizables (grilla, item, panel)
+  - Cumplir límite de 300 líneas por archivo
 
 #### Entregables
 - Galería de medios funcional
 - Upload con drag & drop
 - Selector de medios integrable en cualquier formulario
+- Imagen destacada en editor de contenidos
+
+---
+
+### REVISIÓN PRE-FASE 5: Refactorización de Archivos Grandes
+**Estado:** [ ] Pendiente  
+**Prioridad:** Alta (bloqueante para FASE 5)
+
+> **Nota:** Según las reglas de desarrollo, los límites son:
+> - Componentes/Servicios/Controladores: **300 líneas máximo**
+> - Hooks personalizados: **120 líneas máximo**  
+> - Archivos de utilidades: **150 líneas máximo**
+> - Archivos de estilos CSS: **300 líneas máximo**
+
+#### Archivos PHP que exceden límites
+
+| Archivo                                      | Líneas | Límite | Excede | Prioridad |
+| -------------------------------------------- | ------ | ------ | ------ | --------- |
+| `app/view/admin/pages/media/index.php`       | 459    | 300    | +159   | 🔴 Alta    |
+| `app/controller/Admin/ContentController.php` | 451    | 300    | +151   | 🔴 Alta    |
+| `app/view/admin/pages/contents/editor.php`   | 416    | 300    | +116   | 🔴 Alta    |
+| `app/controller/ContentController.php`       | 382    | 300    | +82    | 🟡 Media   |
+| `app/view/admin/pages/contents/index.php`    | 301    | 300    | +1     | 🟢 Baja    |
+| `app/controller/UserController.php`          | 283    | 300    | OK     | ✅         |
+| `app/view/admin/pages/contents/trash.php`    | 259    | 300    | OK     | ✅         |
+
+#### Archivos CSS/JS que exceden límites
+
+| Archivo                                           | Líneas | Límite | Excede | Prioridad |
+| ------------------------------------------------- | ------ | ------ | ------ | --------- |
+| `public/admin/css/componentes/medios.css`         | 345    | 300    | +45    | 🟡 Media   |
+| `public/admin/js/selectorMedios.js`               | 292    | 300    | OK     | ✅         |
+| `public/admin/css/componentes/selectorMedios.css` | 286    | 300    | OK     | ✅         |
+
+#### Plan de Refactorización
+
+- [ ] **R1. `media/index.php` (459 líneas)**
+  - Extraer JS a `public/admin/js/media.js`
+  - Separar componentes: grilla, panel detalles, zona upload
+  - **Meta:** < 200 líneas para la vista
+
+- [ ] **R2. `Admin/ContentController.php` (451 líneas)**
+  - Extraer lógica CRUD a `ContentService`
+  - El controlador solo maneja request/response
+  - **Meta:** < 150 líneas por controlador
+
+- [ ] **R3. `contents/editor.php` (416 líneas)**
+  - Extraer JS a `public/admin/js/editor.js`
+  - Separar panel lateral en componente parcial
+  - **Meta:** < 200 líneas para la vista
+
+- [ ] **R4. `ContentController.php` API (382 líneas)**
+  - Reutilizar `ContentService` compartido con admin
+  - **Meta:** < 150 líneas
+
+- [ ] **R5. `medios.css` (345 líneas)**
+  - Dividir en: `medios-grilla.css`, `medios-detalles.css`
+  - **Meta:** < 200 líneas cada archivo
 
 ---
 

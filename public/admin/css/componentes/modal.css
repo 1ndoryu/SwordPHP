@@ -1,0 +1,41 @@
+/*
+ * Componente Modal
+ * Ventanas modales y overlays
+ */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modalContenido {
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioGrande);
+    padding: var(--espacioExtraGrande);
+    max-width: 400px;
+    width: 90%;
+}
+
+.modalContenido h3 {
+    margin-bottom: var(--espacioMedio);
+}
+
+.modalContenido p {
+    color: var(--textoSecundario);
+    margin-bottom: var(--espacioGrande);
+}
+
+.modalAcciones {
+    display: flex;
+    gap: var(--espacioBase);
+    justify-content: flex-end;
+}

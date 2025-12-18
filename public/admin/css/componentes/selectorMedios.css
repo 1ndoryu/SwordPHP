@@ -1,0 +1,329 @@
+/* 
+ * Estilos del Modal Selector de Medios
+ * Componente reutilizable para seleccionar archivos
+ */
+
+/* Overlay del modal */
+.modalSelectorMedios {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modalSelectorMedios.activo {
+    display: flex;
+}
+
+/* Contenedor principal del modal */
+.selectorMediosContenedor {
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    background-color: var(--fondoSecundario);
+    border-radius: 8px;
+    border: 1px solid var(--bordeColor);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalEntrar 0.2s ease;
+}
+
+@keyframes modalEntrar {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Cabecera del modal */
+.selectorMediosCabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--bordeColor);
+    flex-shrink: 0;
+}
+
+.selectorMediosCabecera h3 {
+    margin: 0;
+    font-size: var(--fuenteGrande);
+    color: var(--textoPrimario);
+}
+
+.botonCerrarSelector {
+    background: transparent;
+    border: none;
+    color: var(--textoSecundario);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.botonCerrarSelector:hover {
+    color: var(--textoPrimario);
+}
+
+/* Barra de herramientas del selector */
+.selectorMediosToolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--bordeColor);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.selectorMediosToolbar .botonPrimario {
+    flex-shrink: 0;
+}
+
+.selectorMediosFiltros {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+/* Contenido del selector (grilla) */
+.selectorMediosContenido {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 20px;
+    min-height: 300px;
+}
+
+/* Grilla dentro del selector */
+.selectorGrillaMedios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+/* Items dentro del selector (mas compactos) */
+.selectorItemMedio {
+    background-color: var(--fondoTerciario);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    overflow: hidden;
+}
+
+.selectorItemMedio:hover {
+    border-color: var(--textoTenue);
+}
+
+.selectorItemMedio.seleccionado {
+    border-color: var(--acentoPrimario);
+}
+
+.selectorMiniatura {
+    aspect-ratio: 1;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--fondoTerciario);
+}
+
+.selectorMiniatura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.selectorPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.selectorNombre {
+    padding: 8px;
+    font-size: 11px;
+    color: var(--textoSecundario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+/* Indicador de seleccion */
+.selectorItemMedio .checkSeleccion {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background-color: var(--acentoPrimario);
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.selectorItemMedio.seleccionado .checkSeleccion {
+    display: flex;
+}
+
+/* Pie del modal */
+.selectorMediosPie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-top: 1px solid var(--bordeColor);
+    flex-shrink: 0;
+    gap: 15px;
+}
+
+.selectorMediosInfo {
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+}
+
+.selectorMediosAcciones {
+    display: flex;
+    gap: 10px;
+}
+
+/* Estados */
+.selectorMediosVacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--textoSecundario);
+    text-align: center;
+}
+
+.selectorMediosCargando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    color: var(--textoSecundario);
+}
+
+/* Paginacion dentro del selector */
+.selectorPaginacion {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding-top: 15px;
+}
+
+.selectorPaginacion button {
+    padding: 6px 12px;
+    background-color: var(--fondoTerciario);
+    border: 1px solid var(--bordeColor);
+    border-radius: 4px;
+    color: var(--textoSecundario);
+    cursor: pointer;
+    font-size: var(--fuentePequena);
+    transition: all 0.15s;
+}
+
+.selectorPaginacion button:hover {
+    border-color: var(--textoTenue);
+    color: var(--textoPrimario);
+}
+
+.selectorPaginacion button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.selectorPaginacion .paginaActual {
+    background-color: var(--acentoPrimario);
+    border-color: var(--acentoPrimario);
+    color: white;
+}
+
+/* Campo de imagen destacada en el editor */
+.campoImagenDestacada {
+    border: 1px solid var(--bordeColor);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--fondoTerciario);
+}
+
+.previewImagenDestacada {
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--fondoTerciario);
+    position: relative;
+}
+
+.previewImagenDestacada img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.previewImagenDestacada .placeholderImagen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--textoTenue);
+}
+
+.previewImagenDestacada .iconoPlaceholder {
+    font-size: 2rem;
+}
+
+.accionesImagenDestacada {
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.accionesImagenDestacada button {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .selectorMediosContenedor {
+        max-height: 100vh;
+        border-radius: 0;
+        max-width: 100%;
+    }
+
+    .selectorGrillaMedios {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .selectorMediosToolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selectorMediosFiltros {
+        justify-content: flex-start;
+    }
+}

@@ -1,0 +1,89 @@
+/*
+ * Estilos del Layout de Administración
+ * Barra lateral y contenido principal
+ */
+
+.layoutAdministracion {
+    height: 100%;
+    padding: var(--espacioGrande);
+    display: flex;
+    align-content: center;
+    align-items: center;
+}
+
+.barraLateral {
+    background-color: var(--fondoSecundario);
+    border-right: 1px solid var(--bordeColor);
+    padding: var(--espacioGrande);
+    margin-bottom: auto;
+    min-width: 160px;
+    height: 100%;
+}
+
+.marcaBarraLateral {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: var(--espacioExtraGrande);
+    display: block;
+}
+
+.enlaceNavegacion {
+    display: block;
+    padding: 6px var(--espacioBase);
+    margin-bottom: var(--espacioPequeno);
+    border-radius: var(--radioBase);
+    color: var(--textoSecundario);
+}
+
+.enlaceNavegacion:hover,
+.enlaceNavegacion.activo {
+    background-color: var(--fondoTerciario);
+    color: var(--textoPrimario);
+}
+
+/* 
+ * Secciones del menu lateral
+ * Agrupa los enlaces por categoria (Contenidos, Sistema, etc.)
+ */
+.seccionMenu {
+    margin-top: var(--espacioGrande);
+    padding-top: var(--espacioMedio);
+    border-top: 1px solid var(--bordeColor);
+}
+
+.seccionMenu:first-of-type {
+    margin-top: var(--espacioMedio);
+    padding-top: 0;
+    border-top: none;
+}
+
+.tituloSeccion {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--textoTenue);
+    margin-bottom: var(--espacioBase);
+    padding: 0 var(--espacioBase);
+}
+
+.contenidoPrincipal {
+    padding: var(--espacioGrande);
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--espacioExtraGrande);
+    padding-bottom: var(--espacioGrande);
+    border-bottom: 1px solid var(--bordeColor);
+}
+
+.menuUsuario {
+    font-size: 0.95rem;
+}

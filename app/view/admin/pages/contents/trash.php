@@ -104,34 +104,16 @@
         </table>
     </div>
 
-    <!-- Paginacion -->
-    <?php if ($totalPages > 1): ?>
-        <div class="paginacion" id="paginacionPapelera">
-            <?php
-            $baseUrl = '/admin/contents/trash?';
-            $queryParams = [];
-            if (!empty($filters['search'])) $queryParams[] = 'search=' . urlencode($filters['search']);
-            $baseUrl .= implode('&', $queryParams);
-            if (!empty($queryParams)) $baseUrl .= '&';
-            ?>
-
-            <?php if ($currentPage > 1): ?>
-                <a href="<?= $baseUrl ?>page=<?= $currentPage - 1 ?>" class="botonPagina">Anterior</a>
-            <?php endif; ?>
-
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <?php if ($i === $currentPage): ?>
-                    <span class="botonPagina paginaActual"><?= $i ?></span>
-                <?php else: ?>
-                    <a href="<?= $baseUrl ?>page=<?= $i ?>" class="botonPagina"><?= $i ?></a>
-                <?php endif; ?>
-            <?php endfor; ?>
-
-            <?php if ($currentPage < $totalPages): ?>
-                <a href="<?= $baseUrl ?>page=<?= $currentPage + 1 ?>" class="botonPagina">Siguiente</a>
-            <?php endif; ?>
-        </div>
-    <?php endif; ?>
+    <!-- Paginacion (componente reutilizable) -->
+    <?php
+    echo render_view('admin/components/paginacion', [
+        'baseUrl' => $baseUrl . '/trash',
+        'paginaActual' => $currentPage,
+        'totalPaginas' => $totalPages,
+        'filtros' => $filters,
+        'idContenedor' => 'paginacionPapelera'
+    ]);
+    ?>
 </div>
 
 <!-- Modal de confirmacion de eliminacion permanente -->

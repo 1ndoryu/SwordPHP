@@ -1,0 +1,257 @@
+/* 
+ * Estilos de Grilla del Sistema de Medios
+ * Items, miniaturas, estados y animaciones
+ */
+
+.contenedorMedios {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
+}
+
+/* 
+ * Zona de drop para archivos 
+ */
+.zonaDropMedios {
+    border: 2px dashed var(--bordeColor);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.2s;
+    display: none;
+}
+
+.zonaDropMedios.zonaDropActiva {
+    display: block;
+    border-color: var(--acentoPrimario);
+    background-color: rgba(239, 68, 68, 0.05);
+}
+
+.zonaDropMedios.subiendo {
+    display: block;
+    border-color: var(--exito);
+    background-color: rgba(34, 197, 94, 0.05);
+}
+
+.zonaDropContenido {
+    color: var(--textoSecundario);
+}
+
+.zonaDropIcono {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* 
+ * Grilla de medios
+ * Soporta vista grilla y lista 
+ */
+.grillaMedios {
+    display: grid;
+    gap: 15px;
+}
+
+.grillaMedios.vistaGrilla {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.grillaMedios.vistaLista {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+/* 
+ * Item individual de medio 
+ */
+.itemMedio {
+    background-color: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    overflow: hidden;
+}
+
+.itemMedio:hover {
+    border-color: var(--textoTenue);
+}
+
+.itemMedio.seleccionado {
+    border-color: var(--acentoPrimario);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.itemMedio.nuevoMedio {
+    animation: fadeInScale 0.3s ease;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 
+ * Contenedor de miniatura 
+ */
+.miniaturaContenedor {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background-color: var(--fondoTerciario);
+}
+
+.vistaLista .miniaturaContenedor {
+    width: 50px;
+    height: 50px;
+    aspect-ratio: auto;
+}
+
+.vistaLista .itemMedio {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-right: 15px;
+}
+
+.miniaturaMedio {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.miniaturaPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconoTipo {
+    font-size: 2.5rem;
+}
+
+.vistaLista .iconoTipo {
+    font-size: 1.5rem;
+}
+
+/* Gradientes por tipo de archivo */
+.tipoAudio {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f1f33 100%);
+}
+
+.tipoVideo {
+    background: linear-gradient(135deg, #3d1f5c 0%, #1f0f33 100%);
+}
+
+.tipoDocumento {
+    background: linear-gradient(135deg, #3d3d3d 0%, #1f1f1f 100%);
+}
+
+/* 
+ * Overlay al hover/seleccionar 
+ */
+.overlayMedio {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.itemMedio:hover .overlayMedio,
+.itemMedio.seleccionado .overlayMedio {
+    opacity: 1;
+}
+
+.indicadorSeleccion {
+    width: 30px;
+    height: 30px;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    opacity: 0;
+}
+
+.itemMedio.seleccionado .indicadorSeleccion {
+    opacity: 1;
+    background-color: var(--acentoPrimario);
+    border-color: var(--acentoPrimario);
+}
+
+/* 
+ * Info del medio 
+ */
+.infoMedio {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.vistaLista .infoMedio {
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nombreMedio {
+    font-size: var(--fuentePequena);
+    color: var(--textoPrimario);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.metaMedio {
+    font-size: 11px;
+    color: var(--textoTenue);
+}
+
+/* 
+ * Estado vacío 
+ */
+.mediosVacio {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--textoSecundario);
+}
+
+.mediosVacio p {
+    margin-bottom: 15px;
+}
+
+/* 
+ * Botones toggle vista 
+ */
+.botonToggleVista {
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grillaMedios.vistaGrilla {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+}

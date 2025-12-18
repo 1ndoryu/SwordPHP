@@ -1,0 +1,198 @@
+/* 
+ * Estilos del Panel de Detalles de Medios
+ * Panel lateral, formularios, preview y acciones
+ */
+
+/* 
+ * Panel lateral fijo 
+ */
+.panelDetallesMedio {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100vh;
+    max-height: 100vh;
+    background-color: var(--fondoSecundario);
+    border-left: 1px solid var(--bordeColor);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.2s ease;
+    overflow: hidden;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* 
+ * Encabezado del panel 
+ */
+.encabezadoDetalles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--bordeColor);
+    flex-shrink: 0;
+}
+
+.encabezadoDetalles h3 {
+    margin: 0;
+    font-size: var(--fuenteBase);
+}
+
+.botonCerrarDetalles {
+    background: transparent;
+    border: none;
+    color: var(--textoSecundario);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.botonCerrarDetalles:hover {
+    color: var(--textoPrimario);
+}
+
+/* 
+ * Contenido scrolleable 
+ */
+.contenidoDetalles {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    min-height: 0;
+    max-height: 100%;
+}
+
+/* 
+ * Preview del medio 
+ */
+.previewDetalles {
+    margin-bottom: 20px;
+    background-color: var(--fondoTerciario);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+}
+
+.previewDetalles img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+.previewDetalles audio,
+.previewDetalles video {
+    width: 100%;
+}
+
+.previewPlaceholder {
+    font-size: 4rem;
+    color: var(--textoTenue);
+}
+
+/* 
+ * Formulario de detalles 
+ */
+.formDetallesMedio {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.grupoFormulario {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.grupoFormulario label {
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+}
+
+.inputFormulario {
+    padding: 8px 12px;
+    background-color: var(--fondoTerciario);
+    border: 1px solid var(--bordeColor);
+    border-radius: 4px;
+    color: var(--textoPrimario);
+    font-family: var(--fuenteFamilia);
+    font-size: var(--fuenteBase);
+}
+
+.inputFormulario:focus {
+    outline: none;
+    border-color: var(--acentoPrimario);
+}
+
+.textareaFormulario {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* 
+ * Info del archivo 
+ */
+.infoArchivoDetalles {
+    padding: 15px;
+    background-color: var(--fondoTerciario);
+    border-radius: 6px;
+    font-size: var(--fuentePequena);
+}
+
+.infoArchivoDetalles p {
+    margin: 0 0 8px 0;
+    color: var(--textoSecundario);
+}
+
+.infoArchivoDetalles p:last-child {
+    margin-bottom: 0;
+}
+
+.infoArchivoDetalles strong {
+    color: var(--textoPrimario);
+}
+
+/* 
+ * Grupo URL con botón copiar 
+ */
+.grupoUrlCopiar {
+    display: flex;
+    gap: 8px;
+}
+
+.grupoUrlCopiar input {
+    flex: 1;
+    font-size: 11px;
+}
+
+/* 
+ * Acciones del panel 
+ */
+.accionesDetalles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .panelDetallesMedio {
+        width: 100%;
+    }
+}

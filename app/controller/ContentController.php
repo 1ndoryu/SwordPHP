@@ -36,7 +36,7 @@ class ContentController
             $contents = Content::where('status', AppConstants::STATUS_PUBLISHED)
                 ->latest()
                 ->paginate($per_page);
-                
+
             return api_response(true, 'Contents retrieved successfully.', $contents->toArray());
         } catch (Throwable $e) {
             return $this->handleError($e, 'content', 'Error fetching contents');
@@ -59,9 +59,9 @@ class ContentController
 
             // Admin can see all content, regardless of status
             $contents = Content::latest()->paginate($per_page);
-            
+
             $this->logSuccess('content', 'Admin consultó todos los contenidos', ['user_id' => $request->user->id]);
-            
+
             return api_response(true, 'All contents retrieved successfully for admin.', $contents->toArray());
         } catch (Throwable $e) {
             return $this->handleError($e, 'content', 'Error fetching all contents for admin');
@@ -148,7 +148,7 @@ class ContentController
         try {
             $updates = $request->post();
             $content->update($updates);
-            
+
             $this->logSuccess('content', 'Contenido actualizado', [
                 'id' => $content->id,
                 'user_id' => $request->user->id,
@@ -203,9 +203,9 @@ class ContentController
         try {
             $content_id = $content->id;
             $content_type = $content->type; // Guardar datos antes de borrar
-            
+
             $content->delete();
-            
+
             Log::channel('content')->warning('Contenido eliminado', [
                 'id' => $id,
                 'user_id' => $request->user->id,
@@ -259,7 +259,7 @@ class ContentController
                 $message = 'Like removed successfully.';
                 $liked = false;
                 Log::channel('social')->info('Like eliminado', ['content_id' => $id, 'user_id' => $user_id]);
-                
+
                 rabbit_event('content.unliked', ['content_id' => $id, 'user_id' => $user_id]);
 
                 // --- INICIO: EVENTO PARA JOPHIEL ---
@@ -279,9 +279,9 @@ class ContentController
                 $message = 'Like added successfully.';
                 $liked = true;
                 Log::channel('social')->info('Like añadido', ['content_id' => $id, 'user_id' => $user_id]);
-                
+
                 rabbit_event('content.liked', ['content_id' => $id, 'user_id' => $user_id]);
-                
+
                 // --- INICIO: EVENTO PARA JOPHIEL ---
                 if ($content->type === 'audio_sample') {
                     jophielEvento('user.interaction.like', [
@@ -322,7 +322,6 @@ class ContentController
 
             Log::channel('content')->info('Búsqueda por hash encontró contenido(s).', ['hash' => $hash, 'count' => $contents->count(), 'admin_id' => $request->user->id]);
             return api_response(true, 'Content with specified hash found.', $contents->toArray());
-
         } catch (Throwable $e) {
             Log::channel('content')->error('Error en búsqueda por hash', ['error' => $e->getMessage(), 'hash' => $hash]);
             return api_response(false, 'An internal error occurred.', null, 500);
@@ -349,7 +348,7 @@ class ContentController
         // Allow only alphanumeric characters and underscores.
         $sanitized_key = preg_replace('/[^A-Za-z0-9_]/', '', $key);
         if ($sanitized_key !== $key) {
-             return api_response(false, 'Invalid character in "key". Only alphanumeric and underscores are allowed.', null, 400);
+            return api_response(false, 'Invalid character in "key". Only alphanumeric and underscores are allowed.', null, 400);
         }
 
         try {
@@ -368,7 +367,6 @@ class ContentController
             ]);
 
             return api_response(true, 'Contents filtered successfully.', $contents->toArray());
-
         } catch (Throwable $e) {
             Log::channel('content')->error('Error en filtrado por content_data', ['error' => $e->getMessage(), 'key' => $key, 'value' => $value]);
             return api_response(false, 'An internal error occurred during filtering.', null, 500);

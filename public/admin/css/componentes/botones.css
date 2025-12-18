@@ -5,12 +5,12 @@
 
 /* Boton principal */
 .botonPrimario {
-    width: 100%;
     padding: var(--espacioBase);
     background-color: var(--acentoPrimario);
     color: white;
     border-radius: var(--radioBase);
     font-weight: bold;
+    white-space: nowrap;
 }
 
 .botonPrimario:hover {
@@ -27,6 +27,7 @@
     cursor: pointer;
     font-family: var(--fuenteFamilia);
     transition: all var(--transicionRapida);
+    white-space: nowrap;
 }
 
 .botonSecundario:hover {

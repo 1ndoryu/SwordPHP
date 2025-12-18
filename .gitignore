@@ -15,3 +15,4 @@ status.md
 public/uploads/
 composer.lock
 .history
+node_modules/

@@ -1,0 +1,32 @@
+{
+    "name": "swordphp",
+    "version": "1.0.0",
+    "description": "**Sword v2** is a minimalist, high-performance headless CMS built from the ground up on **Workerman**. It is designed for developers who need extreme speed and a simple, maintainable core. By leveraging Workerman's asynchronous, event-driven architecture, Sword v2 avoids the traditional overhead of frameworks like Laravel or Symfony, resulting in exceptionally low latency and high throughput.",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs",
+        "test": "tests"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/node": "^25.0.3",
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^4.7.0",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3",
+        "react-router-dom": "^7.11.0",
+        "typescript": "^5.9.3",
+        "vite": "^6.4.1"
+    },
+    "dependencies": {
+        "lucide-react": "^0.562.0"
+    }
+}

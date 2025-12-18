@@ -6,13 +6,14 @@
 
 ## Decisiones de Arquitectura
 
-| Aspecto                 | Decisión                                             |
-| ----------------------- | ---------------------------------------------------- |
-| **Panel Admin**         | PHP server-side rendered (SSR) con vistas nativas    |
-| **Motor de Plantillas** | PHP puro (sin dependencias externas)                 |
-| **Base de Datos**       | PostgreSQL con JSONB (existente)                     |
-| **Autenticación**       | JWT / Session cookie para admin                      |
-| **Estilos Admin**       | CSS centralizado, dark mode, Source Sans Pro 12-13px |
+| Aspecto                 | Decisión                                               |
+| ----------------------- | ------------------------------------------------------ |
+| **Panel Admin**         | **React + TypeScript (SPA)** servido por PHP           |
+| **Build System**        | **Vite** (Salida estática a `public/admin/build`)      |
+| **Motor de Plantillas** | PHP para layout inicial + React para interactividad    |
+| **Base de Datos**       | PostgreSQL con JSONB (existente)                       |
+| **Autenticación**       | JWT / Session cookie (Híbrido)                         |
+| **Estilos Admin**       | **CSS Nativo** (Reutilización 100% de clases actuales) |
 
 ---
 
@@ -146,6 +147,67 @@ SwordPHP/
 ---
 
 ## Fases de Desarrollo
+
+---
+
+### PROYECTO: MIGRACIÓN A REACT + TYPESCRIPT
+**Estado:** [x] Completado ✅
+**Prioridad:** MÁXIMA (Sustituye desarrollo en PHP puro)
+**Estrategia:** "Strangler Fig" (Reemplazo progresivo sobre la misma URL)
+
+#### Arquitectura Híbrida (Vite + PHP)
+- **Frontend:** React 18, TypeScript, React Router DOM.
+- **Build:** Vite genera assets estáticos en `public/admin/build`.
+- **Backend:** PHP sirve el HTML base (`layout`) e inyecta datos iniciales en `window.sword`.
+- **Estilos:** Se mantienen **intactos** `init.css`, `style.css` y `variables.css`. React usa `className` clásicos.
+
+#### Tareas de Migración
+
+- [x] **M1. Infraestructura Base**
+  - [x] Configurar Vite + TypeScript
+  - [x] Crear servicio `Vite.php` para inyección de assets (Dev/Prod)
+  - [x] Configurar `layout.php` con contenedor raíz `#root`
+  - [x] Establecer objeto de hidratación `window.sword`
+
+- [x] **M2. Biblioteca de Componentes UI** (Portar de `view/admin/components`)
+  - *Objetivo: Replicar HTML exacto para heredar CSS automáticamente*
+  - [x] `ui/components/ui/Button.tsx` (ex `boton.php`)
+  - [x] `ui/components/ui/Panel.tsx` (ex `panel.php`)
+  - [x] `ui/components/ui/Badge.tsx` (ex `etiqueta.php`)
+  - [x] `ui/components/ui/Alert.tsx` (ex `alerta.php`)
+  - [x] `ui/components/form/Input.tsx` (ex `campoTexto.php`)
+  - [x] `ui/components/form/Textarea.tsx` (ex `areaTexto.php`)
+  - [x] `ui/components/form/Select.tsx` (ex `selector.php`)
+  - [x] `ui/components/structure/Toolbar.tsx` (ex `barraHerramientas.php`)
+
+- [x] **M3. Páginas Principales**
+  - [x] **Dashboard:** Vista simple con widgets.
+  - [x] **Listado de Contenidos (`/contents`):**
+    - Tabla dinámica con filtros.
+    - Paginación cliente/servidor (API).
+  - [x] **Editor (`/contents/editor`):**
+    - Manejo de estado de formulario complejo.
+    - Campos JSONB dinámicos.
+    - Integración de Selector de Medios (Básico por URL).
+
+- [x] **M4. Gestión de Medios**
+  - [x] Puerto de `media/index.php` a React.
+  - [x] Componente `MediaLibrary.tsx` reutilizable.
+  - [x] Modal `MediaSelector` global.
+
+- [x] **M5. Rutas y API**
+  - [x] Configurar controladores PHP para responder JSON cuando se pida `Accept: application/json`.
+  - [x] Configurar React Router para manejar navegación interna.
+
+- [x] **M6. Limpieza de Legacy JS**
+  - *Eliminar archivos una vez su funcionalidad esté portada:*
+  - [x] `public/admin/js/spa.js` (Reemplazado por React Router)
+  - [x] `public/admin/js/tabs.js` (Reemplazado por componentes UI)
+  - [x] `public/admin/js/editor.js` (Reemplazado por React Editor)
+  - [x] `public/admin/js/medios.js` (Reemplazado por React Media Library)
+  - [x] `public/admin/js/selectorMedios.js` (Reemplazado por React Media Selector)
+
+---
 
 ---
 

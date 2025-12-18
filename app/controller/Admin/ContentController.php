@@ -111,6 +111,24 @@ class ContentController
         $baseUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
         $titulo = $postTypeConfig ? $postTypeConfig['nombre'] : 'Contenidos';
 
+        if ($request->header('accept') === 'application/json') {
+            return json([
+                'contents' => $contents,
+                'pagination' => [
+                    'current' => $page,
+                    'total_pages' => $totalPages,
+                    'total_items' => $total,
+                    'per_page' => self::ITEMS_PER_PAGE
+                ],
+                'post_type' => $postType,
+                'post_type_config' => $postTypeConfig,
+                'filters' => [
+                    'status' => $status,
+                    'search' => $search
+                ]
+            ]);
+        }
+
         $content = render_view('admin/pages/contents/index', [
             'contents' => $contents,
             'currentPage' => $page,
@@ -148,6 +166,14 @@ class ContentController
             'baseUrl' => "/admin/{$postType}",
             'content' => null
         ]);
+
+        if ($request->header('accept') === 'application/json') {
+            return json([
+                'postType' => $postType,
+                'postTypeConfig' => $postTypeConfig,
+                'mode' => 'create'
+            ]);
+        }
 
         $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
         return render_view('admin/layouts/layout', [
@@ -192,6 +218,14 @@ class ContentController
             'content_data' => $contentData
         ]);
 
+        if ($request->header('accept') === 'application/json') {
+            return json([
+                'success' => true,
+                'content' => $nuevoContenido,
+                'message' => 'Contenido creado correctamente'
+            ]);
+        }
+
         return redirect("/admin/{$postType}/{$nuevoContenido->id}/edit?saved=1");
     }
 
@@ -206,12 +240,23 @@ class ContentController
 
         $contentItem = $this->contentService->buscarPorId($id);
         if (!$contentItem) {
+            if ($request->header('accept') === 'application/json') {
+                return json(['error' => 'not_found'], 404);
+            }
             $redirectUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
             return redirect($redirectUrl . '?error=not_found');
         }
 
         $postType = $postType ?? $contentItem->type;
         $postTypeConfig = PostTypeRegistry::get($postType);
+
+        if ($request->header('accept') === 'application/json') {
+            return json([
+                'content' => $contentItem,
+                'postType' => $postType,
+                'postTypeConfig' => $postTypeConfig
+            ]);
+        }
 
         $content = render_view('admin/pages/contents/editor', [
             'mode' => 'edit',
@@ -242,6 +287,9 @@ class ContentController
 
         $contentItem = $this->contentService->buscarPorId($id);
         if (!$contentItem) {
+            if ($request->header('accept') === 'application/json') {
+                return json(['error' => 'not_found'], 404);
+            }
             $redirectUrl = $postType ? "/admin/{$postType}" : '/admin/contents';
             return redirect($redirectUrl . '?error=not_found');
         }
@@ -269,8 +317,17 @@ class ContentController
         $this->contentService->actualizar($contentItem, [
             'slug' => $request->post('slug', ''),
             'status' => $request->post('status', 'draft'),
+            'type' => $postType, // Update type if needed, though usually fixed
             'content_data' => $contentData
         ]);
+
+        if ($request->header('accept') === 'application/json') {
+            return json([
+                'success' => true,
+                'message' => 'Contenido actualizado correctamente',
+                'content' => $contentItem
+            ]);
+        }
 
         return redirect("/admin/{$postType}/{$id}/edit?saved=1");
     }
@@ -289,7 +346,7 @@ class ContentController
             return json(['success' => false, 'message' => 'Contenido no encontrado']);
         }
 
-        if ($request->isAjax()) {
+        if ($request->header('accept') === 'application/json' || $request->isAjax()) {
             return json(['success' => true, 'message' => 'Contenido enviado a la papelera']);
         }
 

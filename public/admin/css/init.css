@@ -65,3 +65,7 @@ select:focus {
 .centro {
     text-align: center;
 }
+
+div#root {
+    height: 100%;
+}

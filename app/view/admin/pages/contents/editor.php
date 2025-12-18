@@ -42,46 +42,41 @@ if ($isEdit && is_array($contentItem->content_data)) {
             <!-- Columna principal -->
             <div class="editorPrincipal">
                 <!-- Titulo -->
-                <div class="grupoFormulario">
-                    <label for="inputTitulo" class="etiquetaCampo">Titulo</label>
-                    <input
-                        type="text"
-                        id="inputTitulo"
-                        name="title"
-                        value="<?= htmlspecialchars($title) ?>"
-                        class="inputTitulo"
-                        placeholder="Escribe el titulo aqui..."
-                        required>
-                </div>
+                <!-- Titulo -->
+                <?= render_view('admin/components/formularios/campoTexto', [
+                    'label' => 'Titulo',
+                    'name' => 'title',
+                    'value' => $title,
+                    'id' => 'inputTitulo',
+                    'class' => 'inputTitulo',
+                    'placeholder' => 'Escribe el titulo aqui...',
+                    'required' => true
+                ]) ?>
 
                 <!-- Slug -->
-                <div class="grupoFormulario grupoSlug">
-                    <label for="inputSlug" class="etiquetaCampo">
-                        Slug (URL)
-                        <span class="ayudaCampo">Se genera automaticamente si lo dejas vacio</span>
-                    </label>
-                    <div class="previewSlug">
-                        <span class="prefijoSlug"><?= rtrim($_SERVER['HTTP_HOST'] ?? 'localhost', '/') ?>/</span>
-                        <input
-                            type="text"
-                            id="inputSlug"
-                            name="slug"
-                            value="<?= htmlspecialchars($slug) ?>"
-                            class="inputSlug"
-                            placeholder="mi-contenido">
-                    </div>
-                </div>
+                <!-- Slug -->
+                <?= render_view('admin/components/formularios/campoTexto', [
+                    'label' => 'Slug (URL)',
+                    'name' => 'slug',
+                    'value' => $slug,
+                    'id' => 'inputSlug',
+                    'class' => 'inputSlug',
+                    'placeholder' => 'mi-contenido',
+                    'helpText' => 'Se genera automaticamente si lo dejas vacio',
+                    'prefix' => '<span class="prefijoSlug">' . (rtrim($_SERVER['HTTP_HOST'] ?? 'localhost', '/') . '/') . '</span>'
+                ]) ?>
 
                 <!-- Contenido -->
-                <div class="grupoFormulario">
-                    <label for="inputContenido" class="etiquetaCampo">Contenido</label>
-                    <textarea
-                        id="inputContenido"
-                        name="content"
-                        class="textareaContenido"
-                        placeholder="Escribe el contenido aqui..."
-                        rows="15"><?= htmlspecialchars($body) ?></textarea>
-                </div>
+                <!-- Contenido -->
+                <?= render_view('admin/components/formularios/areaTexto', [
+                    'label' => 'Contenido',
+                    'name' => 'content',
+                    'value' => $body,
+                    'id' => 'inputContenido',
+                    'class' => 'textareaContenido',
+                    'placeholder' => 'Escribe el contenido aqui...',
+                    'rows' => 15
+                ]) ?>
 
                 <!-- Seccion de Metadatos -->
                 <div class="seccionMetadatos" id="seccionMetadatos">
@@ -144,36 +139,51 @@ if ($isEdit && is_array($contentItem->content_data)) {
             <!-- Panel lateral -->
             <div class="editorLateral">
                 <!-- Publicacion -->
-                <div class="panelLateral">
-                    <h3 class="tituloPanelLateral">Publicacion</h3>
-                    <div class="contenidoPanelLateral">
-                        <div class="grupoFormulario">
-                            <label for="selectEstado" class="etiquetaCampo">Estado</label>
-                            <select id="selectEstado" name="status" class="selectEstado">
-                                <option value="draft" <?= $status === 'draft' ? 'selected' : '' ?>>Borrador</option>
-                                <option value="published" <?= $status === 'published' ? 'selected' : '' ?>>Publicado</option>
-                            </select>
-                        </div>
+                <!-- Publicacion -->
+                <?php ob_start(); ?>
+                <?= render_view('admin/components/formularios/selector', [
+                    'label' => 'Estado',
+                    'name' => 'status',
+                    'value' => $status,
+                    'id' => 'selectEstado',
+                    'class' => 'selectEstado',
+                    'options' => [
+                        'draft' => 'Borrador',
+                        'published' => 'Publicado'
+                    ]
+                ]) ?>
 
-                        <?php if ($isEdit): ?>
-                            <div class="infoPublicacion">
-                                <p><strong>Tipo:</strong> <?= ucfirst($type) ?></p>
-                                <p><strong>ID:</strong> <?= $contentItem->id ?></p>
-                                <p><strong>Creado:</strong> <?= $contentItem->created_at->format('d/m/Y H:i') ?></p>
-                                <p><strong>Actualizado:</strong> <?= $contentItem->updated_at->format('d/m/Y H:i') ?></p>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="accionesPanelLateral">
-                            <button type="submit" class="botonPrimario botonGuardar">
-                                <?= $isEdit ? 'Actualizar' : 'Publicar' ?>
-                            </button>
-                            <button type="submit" name="status" value="draft" class="botonSecundario botonBorrador">
-                                Guardar borrador
-                            </button>
-                        </div>
+                <?php if ($isEdit): ?>
+                    <div class="infoPublicacion">
+                        <p><strong>Tipo:</strong> <?= ucfirst($type) ?></p>
+                        <p><strong>ID:</strong> <?= $contentItem->id ?></p>
+                        <p><strong>Creado:</strong> <?= $contentItem->created_at->format('d/m/Y H:i') ?></p>
+                        <p><strong>Actualizado:</strong> <?= $contentItem->updated_at->format('d/m/Y H:i') ?></p>
                     </div>
+                <?php endif; ?>
+
+                <div class="accionesPanelLateral">
+                    <?= render_view('admin/components/ui/boton', [
+                        'text' => $isEdit ? 'Actualizar' : 'Publicar',
+                        'type' => 'submit',
+                        'variant' => 'primary',
+                        'class' => 'botonGuardar'
+                    ]) ?>
+                    <?= render_view('admin/components/ui/boton', [
+                        'text' => 'Guardar borrador',
+                        'type' => 'submit',
+                        'variant' => 'secondary',
+                        'class' => 'botonBorrador',
+                        'attributes' => 'name="status" value="draft"'
+                    ]) ?>
                 </div>
+                <?php
+                $contenidoPublicacion = ob_get_clean();
+                echo render_view('admin/components/ui/panel', [
+                    'title' => 'Publicacion',
+                    'content' => $contenidoPublicacion
+                ]);
+                ?>
 
                 <!-- Imagen Destacada -->
                 <?php

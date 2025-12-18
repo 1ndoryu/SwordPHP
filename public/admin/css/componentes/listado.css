@@ -226,3 +226,10 @@
     border-color: var(--acentoPrimario);
     color: white;
 }
+
+.paginacionElipsis {
+    display: inline-block;
+    padding: 8px 10px;
+    color: var(--textoSecundario);
+    font-size: var(--fuentePequena);
+}

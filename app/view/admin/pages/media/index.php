@@ -7,39 +7,63 @@
 ?>
 <div id="mediosLibreria" class="contenedorMedios">
     <!-- Barra de herramientas -->
-    <div class="barraHerramientas">
-        <div class="barraHerramientasIzquierda">
-            <button type="button" class="botonPrimario" id="botonSubirArchivo">
-                + Subir archivo
-            </button>
-            <button type="button" class="botonSecundario botonToggleVista" id="botonVistaGrilla" title="Vista grilla">
-                ▦
-            </button>
-            <button type="button" class="botonSecundario botonToggleVista" id="botonVistaLista" title="Vista lista">
-                ☰
-            </button>
+    <!-- Barra de herramientas -->
+    <?php ob_start(); ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => '+ Subir archivo',
+        'type' => 'button',
+        'variant' => 'primary',
+        'id' => 'botonSubirArchivo'
+    ]) ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => '▦',
+        'type' => 'button',
+        'variant' => 'secondary',
+        'id' => 'botonVistaGrilla',
+        'class' => 'botonToggleVista',
+        'title' => 'Vista grilla'
+    ]) ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => '☰',
+        'type' => 'button',
+        'variant' => 'secondary',
+        'id' => 'botonVistaLista',
+        'class' => 'botonToggleVista',
+        'title' => 'Vista lista'
+    ]) ?>
+    <?php $barraIzquierda = ob_get_clean(); ?>
+
+    <?php ob_start(); ?>
+    <form method="GET" action="/admin/media" class="formularioFiltros" id="formularioFiltrosMedios">
+        <?= render_view('admin/components/formularios/selector', [
+            'name' => 'type',
+            'class' => 'selectFiltro',
+            'onchange' => 'this.form.submit()',
+            'emptyOption' => 'Todos los tipos',
+            'value' => $filters['type'] ?? '',
+            'options' => [
+                'image' => 'Imagenes',
+                'audio' => 'Audio',
+                'video' => 'Video',
+                'application' => 'Documentos'
+            ]
+        ]) ?>
+        <div class="grupoBusqueda">
+            <input
+                type="text"
+                name="search"
+                placeholder="Buscar por nombre..."
+                value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
+                class="inputBusqueda">
+            <button type="submit" class="botonBuscar">Buscar</button>
         </div>
-        <div class="barraHerramientasDerecha">
-            <form method="GET" action="/admin/media" class="formularioFiltros" id="formularioFiltrosMedios">
-                <select name="type" class="selectFiltro" onchange="this.form.submit()">
-                    <option value="">Todos los tipos</option>
-                    <option value="image" <?= ($filters['type'] ?? '') === 'image' ? 'selected' : '' ?>>Imagenes</option>
-                    <option value="audio" <?= ($filters['type'] ?? '') === 'audio' ? 'selected' : '' ?>>Audio</option>
-                    <option value="video" <?= ($filters['type'] ?? '') === 'video' ? 'selected' : '' ?>>Video</option>
-                    <option value="application" <?= ($filters['type'] ?? '') === 'application' ? 'selected' : '' ?>>Documentos</option>
-                </select>
-                <div class="grupoBusqueda">
-                    <input
-                        type="text"
-                        name="search"
-                        placeholder="Buscar por nombre..."
-                        value="<?= htmlspecialchars($filters['search'] ?? '') ?>"
-                        class="inputBusqueda">
-                    <button type="submit" class="botonBuscar">Buscar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    </form>
+    <?php $barraDerecha = ob_get_clean(); ?>
+
+    <?= render_view('admin/components/estructura/barraHerramientas', [
+        'izquierda' => $barraIzquierda,
+        'derecha' => $barraDerecha
+    ]) ?>
 
     <!-- Resumen -->
     <div class="resumenListado">
@@ -107,12 +131,13 @@
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="mediosVacio">
-                <p>No se encontraron archivos</p>
-                <button type="button" class="botonPrimario" onclick="document.getElementById('inputArchivoOculto').click()">
-                    Subir el primero
-                </button>
-            </div>
+            <?= render_view('admin/components/estructura/estadoVacio', [
+                'mensaje' => 'No se encontraron archivos',
+                'accion' => [
+                    'texto' => 'Subir el primero',
+                    'onclick' => "document.getElementById('inputArchivoOculto').click()"
+                ]
+            ]) ?>
         <?php endif; ?>
     </div>
 
@@ -181,16 +206,14 @@
 <input type="file" id="inputArchivoOculto" style="display: none;" multiple accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx">
 
 <!-- Modal de confirmacion de eliminacion -->
-<div id="modalEliminarMedio" class="modalOverlay" style="display: none;">
-    <div class="modalContenido">
-        <h3>Eliminar archivo</h3>
-        <p>Este archivo sera eliminado permanentemente. Esta accion no se puede deshacer.</p>
-        <div class="modalAcciones">
-            <button type="button" class="botonSecundario" onclick="cerrarModalEliminar()">Cancelar</button>
-            <button type="button" class="botonPeligro" id="botonConfirmarEliminarMedio">Eliminar</button>
-        </div>
-    </div>
-</div>
+<?= render_view('admin/components/modalConfirmacion', [
+    'modalId' => 'modalEliminarMedio',
+    'titulo' => 'Eliminar archivo',
+    'mensaje' => 'Este archivo sera eliminado permanentemente. Esta accion no se puede deshacer.',
+    'botonConfirmarId' => 'botonConfirmarEliminarMedio',
+    'textoConfirmar' => 'Eliminar',
+    'funcionCerrar' => 'cerrarModalEliminar'
+]) ?>
 
 <!-- Script de medios -->
 <?= \app\services\AssetManager::js('admin/js/medios.js') ?>

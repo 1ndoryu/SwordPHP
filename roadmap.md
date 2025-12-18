@@ -405,9 +405,9 @@ Librería de medios completa estilo WordPress.
 - [x] **R4. `ContentController.php` API** ✅ (Re-evaluado)
   - El controlador tiene 14 métodos específicos de API (likes, eventos Jophiel, filtros JSONB)
   - Ya usa Action classes y traits para reutilización
-  - **Decisión:** Mantener como está. Agregar `LikeService` para reutilización futura
-  - **Meta original errada:** 150 líneas era poco realista para 14 métodos
-  - **Nueva evaluación:** Estructuralmente correcto, no requiere refactorización
+  - **Acción realizada:** Se creó `app/services/LikeService.php` para encapsular lógica de likes futura
+  - **Decisión:** Mantener controlador actual, migrar progresivamente al servicio
+  - **Nueva evaluación:** Estructuralmente correcto
 
 - [x] **R5. `medios.css` (407 → dividido)** ✅
   - Creado `mediosGrilla.css` (~230 líneas): items, miniaturas, overlays
@@ -415,16 +415,29 @@ Librería de medios completa estilo WordPress.
   - Archivo original ahora solo importa componentes
   - **Meta cumplida:** < 200 líneas por archivo
 
-- [x] **R6. Componentes HTML Reutilizables** ✅
-  - Creado `app/view/admin/components/paginacion.php` (~75 líneas)
-    - Rango inteligente de páginas (1 ... 4 5 [6] 7 8 ... 20)
-    - Preserva filtros existentes en URL
-    - Configurable via parámetros (baseUrl, filtros, idContenedor)
-  - Creado `app/view/admin/components/modalConfirmacion.php` (~55 líneas)
-    - Modal genérico para confirmaciones
-    - Autogenera funciones JS de cerrar
-  - **Implementado en:** `media/index.php`, `contents/index.php`, `contents/trash.php`
-  - **Beneficio:** ~60 líneas eliminadas de cada vista
+- [x] **R6. Componentes HTML Reutilizables** ✅ (Completado)
+  - [x] **Componentes Existentes:**
+    - `paginacion.php`: Rango inteligente de páginas.
+    - `modalConfirmacion.php`: Modal básico para confirmaciones.
+  - [x] **Nuevos Componentes a Extraer (Exhaustivo):**
+    - [x] **Grupo: Formularios** (`components/fomularios/`)
+      - `campoTexto.php`: Label + input estándar + texto ayuda/error.
+      - `areaTexto.php`: Label + textarea + contador (opcional).
+      - `selector.php`: Select wrapper con soporte de array de opciones.
+      - `casillaVerificacion.php`: Checkbox con label alineado.
+    - [x] **Grupo: UI Base** (`components/ui/`)
+      - `panel.php`: Contenedor para secciones (sidebar o contenido principal) con encabezado/cuerpo/pie.
+      - `etiqueta.php`: Etiquetas de estado (publicado, borrador) y tipo.
+      - `alerta.php`: Mensajes de éxito, error o advertencia.
+      - `boton.php`: Estandarización de clases (primario, secundario, peligro, icono).
+    - [x] **Grupo: Estructura** (`components/estructura/`)
+      - `barraHerramientas.php`: Barra superior de listados (botones izquierda + filtros derecha).
+      - `estadoVacio.php`: Mensaje amigable cuando no hay resultados (icono + texto + botón acción).
+      - `tablaDatos.php`: (Opcional) Abstracción para tablas con encabezados ordenables.
+  - [x] **Implementación en Vistas:**
+    - Refactorizar `contents/editor.php` usando componentes de Form y Panel.
+    - Refactorizar `contents/index.php` usando Toolbar, Badge y EmptyState.
+    - Refactorizar `media/index.php` usando Toolbar y Modal.
 
 ---
 
@@ -487,7 +500,7 @@ Renderizar páginas públicas con temas PHP.
     - `/blog` - Archivo de posts
     - `/categoria/{slug}` - Archivo por categoría (futuro)
 
-- [ ] **5.5 Funciones de tema (Template Tags)**
+- [ ] **5.5 Funciones de tema (Template Tags)** (DEBEN SER CAMELCASE; ESPAÑOL)
   - `get_header()` / `get_footer()`
   - `the_title()` / `get_the_title()`
   - `the_content()` / `get_the_content()`
@@ -756,4 +769,4 @@ Los campos personalizados se almacenan en `content_data`:
 
 ---
 
-> **Próximo paso:** Iniciar Fase 1 - Infraestructura del Panel Admin
+> **Próximo paso:** Iniciar Fase 5 - Sistema de Temas y Plantillas (Frontend)

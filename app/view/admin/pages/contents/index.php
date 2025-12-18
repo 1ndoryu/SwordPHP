@@ -7,47 +7,73 @@ $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
 ?>
 <div id="contenidosListado" class="contenedorListado">
     <!-- Barra de herramientas -->
-    <div class="barraHerramientas">
-        <div class="barraHerramientasIzquierda">
-            <a href="<?= $baseUrl ?>/create" class="botonPrimario botonNuevo">
-                + Nuevo <?= $nombreSingular ?>
-            </a>
-            <button type="button" class="botonSecundario botonEliminarSeleccionados" id="botonEliminarSeleccionados" style="display: none;">
-                Eliminar (<span id="contadorSeleccionados">0</span>)
-            </button>
-            <a href="<?= $baseUrl ?>/trash" class="botonSecundario enlacePapelera">
-                Papelera
-            </a>
+    <!-- Barra de herramientas -->
+    <?php ob_start(); ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => '+ Nuevo ' . $nombreSingular,
+        'type' => 'link',
+        'href' => $baseUrl . '/create',
+        'variant' => 'primary',
+        'class' => 'botonNuevo'
+    ]) ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => 'Eliminar (<span id="contadorSeleccionados">0</span>)',
+        'type' => 'button',
+        'variant' => 'secondary',
+        'id' => 'botonEliminarSeleccionados',
+        'class' => 'botonEliminarSeleccionados',
+        'attributes' => 'style="display: none;"'
+    ]) ?>
+    <?= render_view('admin/components/ui/boton', [
+        'text' => 'Papelera',
+        'type' => 'link',
+        'href' => $baseUrl . '/trash',
+        'variant' => 'secondary',
+        'class' => 'enlacePapelera'
+    ]) ?>
+    <?php $barraIzquierda = ob_get_clean(); ?>
+
+    <?php ob_start(); ?>
+    <form method="GET" action="<?= $baseUrl ?>" class="formularioFiltros" id="formularioFiltros">
+        <?php if (!$postType && !empty($types)): ?>
+            <?= render_view('admin/components/formularios/selector', [
+                'name' => 'type',
+                'class' => 'selectFiltro',
+                'onchange' => 'this.form.submit()',
+                'emptyOption' => 'Todos los tipos',
+                'value' => $filters['type'] ?? '',
+                'options' => array_combine($types, array_map('ucfirst', $types)) // array simple map
+            ]) ?>
+        <?php endif; ?>
+
+        <?= render_view('admin/components/formularios/selector', [
+            'name' => 'status',
+            'class' => 'selectFiltro',
+            'onchange' => 'this.form.submit()',
+            'emptyOption' => 'Todos los estados',
+            'value' => $filters['status'] ?? '',
+            'options' => [
+                'published' => 'Publicado',
+                'draft' => 'Borrador'
+            ]
+        ]) ?>
+
+        <div class="grupoBusqueda">
+            <input
+                type="text"
+                name="search"
+                placeholder="Buscar por titulo..."
+                value="<?= htmlspecialchars($filters['search']) ?>"
+                class="inputBusqueda">
+            <button type="submit" class="botonBuscar">Buscar</button>
         </div>
-        <div class="barraHerramientasDerecha">
-            <form method="GET" action="<?= $baseUrl ?>" class="formularioFiltros" id="formularioFiltros">
-                <?php if (!$postType && !empty($types)): ?>
-                    <select name="type" class="selectFiltro" onchange="this.form.submit()">
-                        <option value="">Todos los tipos</option>
-                        <?php foreach ($types as $typeOption): ?>
-                            <option value="<?= htmlspecialchars($typeOption) ?>" <?= ($filters['type'] ?? '') === $typeOption ? 'selected' : '' ?>>
-                                <?= ucfirst(htmlspecialchars($typeOption)) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php endif; ?>
-                <select name="status" class="selectFiltro" onchange="this.form.submit()">
-                    <option value="">Todos los estados</option>
-                    <option value="published" <?= $filters['status'] === 'published' ? 'selected' : '' ?>>Publicado</option>
-                    <option value="draft" <?= $filters['status'] === 'draft' ? 'selected' : '' ?>>Borrador</option>
-                </select>
-                <div class="grupoBusqueda">
-                    <input
-                        type="text"
-                        name="search"
-                        placeholder="Buscar por titulo..."
-                        value="<?= htmlspecialchars($filters['search']) ?>"
-                        class="inputBusqueda">
-                    <button type="submit" class="botonBuscar">Buscar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    </form>
+    <?php $barraDerecha = ob_get_clean(); ?>
+
+    <?= render_view('admin/components/estructura/barraHerramientas', [
+        'izquierda' => $barraIzquierda,
+        'derecha' => $barraDerecha
+    ]) ?>
 
     <!-- Resumen -->
     <div class="resumenListado">
@@ -93,9 +119,9 @@ $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
                             </td>
                             <td class="columnaEstado">
                                 <?php if ($contentItem->status === 'published'): ?>
-                                    <span class="etiquetaEstado estadoPublicado">Publicado</span>
+                                    <?= render_view('admin/components/ui/etiqueta', ['text' => 'Publicado', 'type' => 'success']) ?>
                                 <?php else: ?>
-                                    <span class="etiquetaEstado estadoBorrador">Borrador</span>
+                                    <?= render_view('admin/components/ui/etiqueta', ['text' => 'Borrador', 'type' => 'secondary']) ?>
                                 <?php endif; ?>
                             </td>
                             <td class="columnaAutor"><?= htmlspecialchars($authorName) ?></td>
@@ -121,10 +147,13 @@ $nombreSingular = $postTypeConfig['nombreSingular'] ?? 'Contenido';
                 <?php else: ?>
                     <tr>
                         <td colspan="6" class="celdaVacia">
-                            <div class="mensajeVacio">
-                                <p>No se encontraron <?= strtolower($nombrePlural) ?></p>
-                                <a href="<?= $baseUrl ?>/create" class="botonPrimario">Crear el primero</a>
-                            </div>
+                            <?= render_view('admin/components/estructura/estadoVacio', [
+                                'mensaje' => 'No se encontraron ' . strtolower($nombrePlural),
+                                'accion' => [
+                                    'texto' => 'Crear el primero',
+                                    'url' => $baseUrl . '/create'
+                                ]
+                            ]) ?>
                         </td>
                     </tr>
                 <?php endif; ?>

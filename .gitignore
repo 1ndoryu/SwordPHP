@@ -16,3 +16,4 @@ public/uploads/
 composer.lock
 .history
 node_modules/
+public/admin/build/

@@ -143,7 +143,7 @@ export const useEditorForm = ({postType, id, isEdit}: UseEditorFormParams): UseE
                 const result = await response.json();
 
                 if (!isEdit && result.success) {
-                    navigate(`/admin/${result.content.type}/${result.content.id}/edit`, {replace: true});
+                    navigate(`/${result.content.type}/${result.content.id}/edit`, {replace: true});
                 } else {
                     alert('Contenido guardado correctamente');
                 }
@@ -170,7 +170,7 @@ export const useEditorForm = ({postType, id, isEdit}: UseEditorFormParams): UseE
 
             if (!response.ok) throw new Error('Error al eliminar contenido');
 
-            navigate(`/admin/${postType}`, {replace: true});
+            navigate(`/${postType}`, {replace: true});
         } catch (err: any) {
             setError(err.message);
         }

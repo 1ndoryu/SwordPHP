@@ -5,9 +5,9 @@ import path from 'path';
 export default defineConfig({
     plugins: [react()],
     root: 'app/view/admin/ui',
-    base: '/admin/build/',
+    base: '/static-admin/build/',
     build: {
-        outDir: '../../../../public/admin/build',
+        outDir: '../../../../public/static-admin/build',
         emptyOutDir: true,
         manifest: true,
         rollupOptions: {
@@ -16,6 +16,7 @@ export default defineConfig({
         }
     },
     server: {
+        host: '127.0.0.1',
         // For dev mode, we want to access via localhost:5173
         strictPort: true,
         cors: true

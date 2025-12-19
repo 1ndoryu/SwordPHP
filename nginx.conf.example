@@ -1,0 +1,152 @@
+# SwordPHP - Configuración Nginx
+# Modo CGI Tradicional
+# 
+# Copia este archivo a /etc/nginx/sites-available/ y ajusta según tu entorno
+# Luego crea un symlink en /etc/nginx/sites-enabled/
+
+server {
+    listen 80;
+    listen [::]:80;
+    
+    # Cambiar por tu dominio
+    server_name tudominio.com www.tudominio.com;
+    
+    # Directorio raíz apunta a /public
+    root /var/www/swordphp/public;
+    
+    index index.php index.html;
+    
+    # Charset
+    charset utf-8;
+    
+    # Logs
+    access_log /var/log/nginx/swordphp-access.log;
+    error_log /var/log/nginx/swordphp-error.log;
+    
+    # Tamaño máximo de subida
+    client_max_body_size 64M;
+    
+    # Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types text/plain text/css text/xml application/json application/javascript 
+               application/rss+xml application/atom+xml image/svg+xml;
+    
+    # Headers de seguridad
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Ruta principal - Front Controller
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    # Archivos estáticos con caché agresivo
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot|otf|mp3|mp4|webm|pdf)$ {
+        expires 1y;
+        access_log off;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+    
+    # Assets del admin
+    location /admin/ {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    # PHP-FPM
+    location ~ \.php$ {
+        # Verificar que el archivo existe
+        try_files $uri =404;
+        
+        # FastCGI split
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        
+        # Conexión a PHP-FPM (ajustar según tu configuración)
+        # Para socket:
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        # Para TCP:
+        # fastcgi_pass 127.0.0.1:9000;
+        
+        fastcgi_index index.php;
+        
+        # Parámetros FastCGI
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        
+        # Timeouts
+        fastcgi_read_timeout 300;
+        fastcgi_send_timeout 300;
+        
+        # Buffer sizes
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+    
+    # Denegar acceso a archivos ocultos
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Denegar acceso a archivos sensibles
+    location ~* \.(env|log|md|json|lock|yml|yaml)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    
+    # Denegar acceso a directorios sensibles
+    location ~ ^/(vendor|runtime|config|app|support|tests)/ {
+        deny all;
+        return 403;
+    }
+    
+    # Favicon y robots
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+    
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+}
+
+# Configuración HTTPS (descomentar y ajustar para SSL)
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     
+#     server_name tudominio.com www.tudominio.com;
+#     
+#     # Certificados SSL (ajustar rutas)
+#     ssl_certificate /etc/letsencrypt/live/tudominio.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/tudominio.com/privkey.pem;
+#     
+#     # Configuración SSL moderna
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_prefer_server_ciphers off;
+#     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+#     
+#     # HSTS
+#     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+#     
+#     # ... resto de la configuración igual que HTTP
+# }
+
+# Redirección HTTP a HTTPS (descomentar para producción)
+# server {
+#     listen 80;
+#     listen [::]:80;
+#     server_name tudominio.com www.tudominio.com;
+#     return 301 https://$server_name$request_uri;
+# }

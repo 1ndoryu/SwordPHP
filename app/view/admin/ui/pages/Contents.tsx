@@ -103,7 +103,7 @@ export const Contents = () => {
                 <span className="contadorTotal">{pagination?.total_items || 0} contenidos encontrados</span>
                 <span className="ayudaSeleccion">Ctrl+clic para seleccionar varios</span>
                 {(search || status) && (
-                    <Link to={`/admin/${postType || 'contents'}`} className="enlaceLimpiarFiltros">
+                    <Link to={`/${postType || 'contents'}`} className="enlaceLimpiarFiltros">
                         Limpiar filtros
                     </Link>
                 )}
@@ -138,7 +138,7 @@ export const Contents = () => {
                             {contents.map(item => (
                                 <tr key={item.id} className="filaContenido">
                                     <td className="columnaTitulo">
-                                        <Link to={`/admin/${item.type}/${item.id}/edit`} className="enlaceTitulo">
+                                        <Link to={`/${item.type}/${item.id}/edit`} className="enlaceTitulo">
                                             {item.content_data?.title || item.title || '(Sin título)'}
                                         </Link>
                                         <span className="slugContenido">/{item.slug}</span>

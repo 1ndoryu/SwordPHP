@@ -39,4 +39,5 @@
 /* Selector de Medios (Modal) */
 @import url('componentes/selectorMedios.css');
 
-
+/* Gestión de Temas */
+@import url('componentes/temas.css');

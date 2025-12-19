@@ -383,7 +383,7 @@ docs/CGI_MODE.md            # Documentación
 ---
 
 ### MEJORA 4.5.7: Unificación del Sistema de Rutas
-**Estado:** [~] En Progreso (falta 4.5.7.4)  
+**Estado:** [x] Completado
 **Prioridad:** 🟡 Alta (deuda técnica actual)
 
 #### Problema Actual
@@ -537,7 +537,7 @@ require BASE_PATH . '/config/route/api.php';
   - Cargar directamente `config/route/*.php`
   - Reducción: 508 → 179 líneas (~330 líneas eliminadas)
 
-- [~] **4.5.7.4 Probar compatibilidad**
+- [x] **4.5.7.4 Probar compatibilidad**
   - ✅ Interceptación de `Webman\Route` → `CgiRouteShim` funcionando
   - ✅ Interceptación de `support\Request` → `CgiRequest` funcionando
   - ✅ Rutas CGI se cargan desde `config/route/*.php`
@@ -592,7 +592,7 @@ public/index.php       # Intercepta support\Request → CgiRequest
 
 ### FASE 5: Sistema de Temas y Plantillas
 **Duración estimada:** 2-3 semanas  
-**Estado:** [ ] Pendiente
+**Estado:** [~] En Progreso
 
 #### Objetivo
 Renderizar páginas públicas con temas intercambiables, soportando 3 modos de renderizado para máxima compatibilidad.
@@ -607,69 +607,42 @@ Renderizar páginas públicas con temas intercambiables, soportando 3 modos de r
 
 #### Tareas
 
-- [ ] **5.1 Estructura de un tema**
+- [x] **5.1 Estructura de un tema**
   - Definir estructura de carpetas
-  - Archivo `theme.json` con metadatos y modo:
-    ```json
-    {
-        "name": "Developer Theme",
-        "version": "1.0.0",
-        "author": "SwordPHP",
-        "description": "Tema minimalista para desarrolladores",
-        "screenshot": "screenshot.png",
-        "mode": "php",
-        "buildCommand": null,
-        "ssrPort": null
-    }
-    ```
+  - Archivo `theme.json` con metadatos y modo
   - Archivo `functions.php` para funciones del tema
+  - **Implementado:** `themes/developer/` con `theme.json`, `functions.php`, `templates/`, `assets/`
 
-- [ ] **5.2 Motor de renderizado PHP (Modo PHP Puro)**
+- [x] **5.2 Motor de renderizado PHP (Modo PHP Puro)**
   - Clase `ThemeEngine` para cargar y renderizar plantillas
   - Sistema de variables disponibles en plantillas
   - Funciones helper: `obtenerCabecera()`, `obtenerPie()`, `elTitulo()`, etc.
   - Inclusión de parciales
+  - **Implementado:** `app/support/ThemeEngine.php` con singleton, carga de tema, resolución de plantillas
 
-- [ ] **5.3 Jerarquía de plantillas**
-  - Similar a WordPress:
-    ```
-    Página individual:
-    1. page-{slug}.php
-    2. page-{id}.php
-    3. page.php
-    4. single.php
-    5. index.php
-    
-    Post individual:
-    1. single-{post_type}-{slug}.php
-    2. single-{post_type}.php
-    3. single.php
-    4. index.php
-    
-    Archivo/Listado:
-    1. archive-{post_type}.php
-    2. archive.php
-    3. index.php
-    ```
+- [x] **5.3 Jerarquía de plantillas**
+  - Similar a WordPress: page-{slug}, page-{id}, page, single-{type}, single, archive-{type}, archive, index
+  - **Implementado:** Método `resolverPlantilla()` en ThemeEngine con fallback completo
 
-- [ ] **5.4 Rutas públicas**
+- [x] **5.4 Rutas públicas**
   - Controlador `FrontendController`
   - Rutas dinámicas para contenidos:
     - `/` - Página de inicio
     - `/{slug}` - Página o post por slug
     - `/blog` - Archivo de posts
-    - `/categoria/{slug}` - Archivo por categoría (futuro)
+  - **Implementado:** `app/controller/FrontendController.php`, `config/route/frontend.php`
 
-- [ ] **5.5 Funciones de tema (Template Tags)** (camelCase, español)
-  - `obtenerCabecera()` / `obtenerPie()`
-  - `elTitulo()` / `obtenerTitulo()`
-  - `elContenido()` / `obtenerContenido()`
-  - `elEnlace()` / `obtenerEnlace()`
-  - `laImagen()` / `obtenerUrlImagen()`
-  - `obtenerPosts()` - Obtener lista de posts
-  - `obtenerOpcion()` - Ya existe como `get_option()`
-  - `urlSitio()` / `urlInicio()`
-  - `urlAsset()` - URL de assets del tema
+- [x] **5.5 Funciones de tema (Template Tags)** (camelCase, español)
+  - `obtenerCabecera()` / `obtenerPie()` / `obtenerParcial()`
+  - `elTitulo()` / `obtenerTitulo()` / `elContenido()` / `obtenerContenido()`
+  - `elEnlace()` / `obtenerEnlace()` / `elExcerpto()` / `obtenerExcerpto()`
+  - `laImagen()` / `obtenerUrlImagen()` / `tieneImagen()`
+  - `obtenerPosts()` / `obtenerPost()` - Query de contenidos
+  - `urlSitio()` / `urlInicio()` / `urlAsset()`
+  - `nombreSitio()` / `descripcionSitio()` / `elNombreSitio()`
+  - `obtenerMeta()` / `elMeta()` / `laFecha()` / `obtenerFecha()`
+  - `laCabezaSeo()` - Genera meta tags SEO y Open Graph
+  - **Implementado:** `app/support/TemplateTags.php` con 30+ funciones
 
 - [ ] **5.6 Motor SSG (Static Site Generation)**
   - Comando `php webman theme:build`
@@ -683,16 +656,21 @@ Renderizar páginas públicas con temas intercambiables, soportando 3 modos de r
   - Node renderiza y devuelve HTML
   - Configuración de proxy en `theme.json`
 
-- [ ] **5.8 Panel de temas**
-  - Página de listado de temas instalados
-  - Preview de tema
-  - Activar tema
+- [x] **5.8 Panel de temas (API)**
+  - Endpoint de listado de temas instalados
+  - Endpoint para ver detalles de un tema
+  - Endpoint para activar tema
   - Indicador de modo y compatibilidad del hosting
+  - **Implementado:** `app/controller/Admin/ThemeController.php` con rutas en `/admin/themes`
+  - **Pendiente:** UI en React para el panel de temas
 
-- [ ] **5.9 Temas de demostración (3 temas base)**
-  - `developer` - Modo PHP puro, minimalista
-  - `developer-ssg` - Modo SSG, genera estáticos
-  - `developer-ssr` - Modo SSR con React
+- [x] **5.9 Tema de demostración: `developer`**
+  - Modo PHP puro, minimalista
+  - Plantillas: header, footer, index, single, page, archive, 404
+  - CSS modular: variables, base, layout, components
+  - Diseño moderno con gradientes, sombras y animaciones
+  - **Implementado:** Tema completo con 4 archivos CSS, 6 plantillas
+  - **Pendiente:** Temas `developer-ssg` y `developer-ssr`
 
 #### Estructura de Carpetas por Modo
 

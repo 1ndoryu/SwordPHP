@@ -70,3 +70,116 @@ div#root {
     height: 100%;
 }
 
+/* 
+ * Scrollbar Minimalista - Dark Mode
+ * No ocupa espacio, aparece solo al hacer scroll/hover
+ */
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Contenedores con scroll customizado */
+.scrollMinimalista {
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+}
+
+.scrollMinimalista:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.scrollMinimalista::-webkit-scrollbar-thumb {
+    background: transparent;
+    transition: background 0.3s ease;
+}
+
+.scrollMinimalista:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.scrollMinimalista::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 
+ * Estado dinamico controlado por JavaScript
+ * Scrollbar completamente invisible hasta que se usa
+ */
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.contenidoPrincipal::-webkit-scrollbar-thumb,
+.barraLateral::-webkit-scrollbar-thumb {
+    background: transparent;
+    transition: background 0.3s ease;
+}
+
+html.estaScrolleando::-webkit-scrollbar-thumb,
+body.estaScrolleando::-webkit-scrollbar-thumb,
+.contenidoPrincipal.estaScrolleando::-webkit-scrollbar-thumb,
+.barraLateral.estaScrolleando::-webkit-scrollbar-thumb,
+html:hover::-webkit-scrollbar-thumb,
+body:hover::-webkit-scrollbar-thumb,
+.contenidoPrincipal:hover::-webkit-scrollbar-thumb,
+.barraLateral:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.contenidoPrincipal::-webkit-scrollbar-thumb:hover,
+.barraLateral::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox - estado dinamico */
+html,
+body,
+.contenidoPrincipal,
+.barraLateral {
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+}
+
+html.estaScrolleando,
+body.estaScrolleando,
+.contenidoPrincipal.estaScrolleando,
+.barraLateral.estaScrolleando,
+html:hover,
+body:hover,
+.contenidoPrincipal:hover,
+.barraLateral:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}

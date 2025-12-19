@@ -1,0 +1,141 @@
+/* 
+ * Layout CSS - Tema Developer
+ * 
+ * Estructura principal, contenedor, cabecera y pie
+ */
+
+/* Contenedor principal */
+.contenedor {
+    width: 100%;
+    max-width: var(--anchoContenedor);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--paddingContenedor);
+    padding-right: var(--paddingContenedor);
+}
+
+.contenedorArticulo,
+.contenedorPagina {
+    max-width: var(--anchoArticulo);
+}
+
+/* Contenido principal */
+.contenidoPrincipal {
+    min-height: calc(100vh - 200px);
+    padding: var(--espacio2xl) 0;
+}
+
+/* 
+ * Cabecera
+ */
+.cabeceraPrincipal {
+    background-color: var(--fondoCabecera);
+    border-bottom: 1px solid var(--colorGris200);
+    position: sticky;
+    top: 0;
+    z-index: var(--zSticky);
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.cabeceraPrincipal .contenedor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 72px;
+}
+
+.logoSitio {
+    font-size: var(--tamanoXl);
+    font-weight: var(--pesoBold);
+    color: var(--textoTitulo);
+    text-decoration: none;
+    transition: color var(--transicionRapida);
+}
+
+.logoSitio:hover {
+    color: var(--colorPrimario);
+}
+
+.navegacionPrincipal {
+    display: flex;
+    gap: var(--espacioLg);
+}
+
+.navegacionPrincipal a {
+    font-size: var(--tamanoSm);
+    font-weight: var(--pesoMedio);
+    color: var(--colorGris600);
+    text-decoration: none;
+    padding: var(--espacioSm) var(--espacioMd);
+    border-radius: var(--radioMedio);
+    transition: all var(--transicionRapida);
+}
+
+.navegacionPrincipal a:hover {
+    color: var(--colorPrimario);
+    background-color: var(--colorGris100);
+}
+
+/* 
+ * Pie de página
+ */
+.piePrincipal {
+    background-color: var(--fondoPie);
+    color: var(--colorGris400);
+    padding: var(--espacio2xl) 0;
+}
+
+.piePrincipal .contenedor {
+    text-align: center;
+}
+
+.copyright {
+    font-size: var(--tamanoSm);
+    margin: 0;
+}
+
+.piePrincipal a {
+    color: var(--colorPrimarioClaro);
+}
+
+.piePrincipal a:hover {
+    color: var(--colorBlanco);
+}
+
+/* 
+ * Responsive
+ */
+@media (max-width: 768px) {
+    .cabeceraPrincipal .contenedor {
+        flex-direction: column;
+        height: auto;
+        padding-top: var(--espacioMd);
+        padding-bottom: var(--espacioMd);
+        gap: var(--espacioMd);
+    }
+
+    .navegacionPrincipal {
+        gap: var(--espacioSm);
+    }
+
+    .contenidoPrincipal {
+        padding: var(--espacioXl) 0;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --paddingContenedor: var(--espacioSm);
+    }
+
+    h1 {
+        font-size: var(--tamano3xl);
+    }
+    h2 {
+        font-size: var(--tamano2xl);
+    }
+    h3 {
+        font-size: var(--tamanoXl);
+    }
+}

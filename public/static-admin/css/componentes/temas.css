@@ -1,0 +1,278 @@
+/*
+ * Estilos para la pagina de Temas
+ * Grilla de tarjetas con preview y acciones
+ */
+
+.paginaTemas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioGrande);
+    height: 100%;
+}
+
+/* 
+ * Encabezado de la pagina
+ */
+.temasEncabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--espacioMedio);
+    border-bottom: 1px solid var(--bordeColor);
+}
+
+.temasEncabezadoInfo {
+    display: flex;
+    align-items: baseline;
+    gap: var(--espacioMedio);
+}
+
+.temasTitulo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--textoPrimario);
+    margin: 0;
+}
+
+.temasContador {
+    font-size: var(--fuentePequena);
+    color: var(--textoTenue);
+}
+
+/* 
+ * Grilla de temas
+ */
+.temasGrilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--espacioGrande);
+}
+
+/* 
+ * Tarjeta individual de tema
+ */
+.temaTarjeta {
+    background: var(--fondoSecundario);
+    border: 1px solid var(--bordeColor);
+    border-radius: var(--radioGrande);
+    overflow: hidden;
+    transition: border-color var(--transicionMedia), transform var(--transicionMedia);
+}
+
+.temaTarjeta:hover {
+    border-color: var(--textoTenue);
+    transform: translateY(-2px);
+}
+
+.temaTarjetaActiva {
+    border-color: var(--acentoPrimario);
+    box-shadow: 0 0 0 1px var(--acentoPrimario);
+}
+
+.temaTarjetaActiva:hover {
+    border-color: var(--acentoPrimario);
+}
+
+/* 
+ * Preview del tema (screenshot)
+ */
+.temaPreview {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--fondoTerciario);
+    overflow: hidden;
+}
+
+.temaScreenshot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transicionMedia);
+}
+
+.temaTarjeta:hover .temaScreenshot {
+    transform: scale(1.02);
+}
+
+.temaPreviewVacio {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--fondoTerciario) 0%, var(--fondoSecundario) 100%);
+}
+
+.temaPreviewIcono {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--textoTenue);
+    opacity: 0.5;
+}
+
+/* 
+ * Indicador de tema activo
+ */
+.temaActivoIndicador {
+    position: absolute;
+    top: var(--espacioBase);
+    right: var(--espacioBase);
+    background: var(--acentoPrimario);
+    color: white;
+    padding: 4px 10px;
+    border-radius: var(--radioPildora);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 
+ * Contenido de la tarjeta
+ */
+.temaContenido {
+    padding: var(--espacioMedio);
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacioBase);
+}
+
+.temaInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--espacioBase);
+}
+
+.temaNombre {
+    font-size: var(--fuenteGrande);
+    font-weight: 600;
+    color: var(--textoPrimario);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.temaMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--espacioPequeno);
+    flex-shrink: 0;
+}
+
+.temaVersion {
+    font-size: 11px;
+    color: var(--textoTenue);
+}
+
+.temaDescripcion {
+    font-size: var(--fuentePequena);
+    color: var(--textoSecundario);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.temaAutor {
+    font-size: var(--fuentePequena);
+    color: var(--textoTenue);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.temaAutorNombre {
+    color: var(--textoSecundario);
+}
+
+/* 
+ * Acciones de la tarjeta
+ */
+.temaAcciones {
+    margin-top: var(--espacioPequeno);
+    padding-top: var(--espacioBase);
+    border-top: 1px solid var(--bordeColor);
+}
+
+.temaBotonActivar,
+.temaBotonActivo {
+    width: 100%;
+}
+
+.temaBotonActivo {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* 
+ * Estados vacios y de carga
+ */
+.temasEstadoVacio,
+.temasEstadoError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espacioMedio);
+    padding: var(--espacioExtraGrande);
+    min-height: 300px;
+    text-align: center;
+}
+
+.temasEstadoVacio p,
+.temasEstadoError p {
+    color: var(--textoSecundario);
+    margin: 0;
+}
+
+.temasIconoVacio {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fondoTerciario);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--textoTenue);
+}
+
+.temasIconoError {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--errorFondo);
+    border: 1px solid var(--errorBorde);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--error);
+}
+
+.temasAyuda {
+    font-size: var(--fuentePequena);
+    color: var(--textoTenue);
+}
+
+/* 
+ * Spinner de carga
+ */
+.temasSpinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--bordeColor);
+    border-top-color: var(--acentoPrimario);
+    border-radius: 50%;
+    animation: girarSpinner 0.8s linear infinite;
+}
+
+@keyframes girarSpinner {
+    to {
+        transform: rotate(360deg);
+    }
+}

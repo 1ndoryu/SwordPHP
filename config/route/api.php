@@ -17,7 +17,7 @@ use app\middleware\PermissionMiddleware;
 use app\controller\SearchController;
 
 // Ruta de bienvenida para la API
-Route::get('/', function () {
+Route::get('/api', function () {
     return json([
         'project' => 'Sword v2',
         'status' => 'API is running',

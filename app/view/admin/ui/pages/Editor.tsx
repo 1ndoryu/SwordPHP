@@ -67,11 +67,6 @@ export const Editor = () => {
     return (
         <div className="contenedorEditor" id="contenedorEditor">
             <Toolbar
-                left={
-                    <h1 className="tituloPagina">
-                        {isEdit ? 'Editar' : 'Componer'} {config?.nombreSingular || 'Contenido'}
-                    </h1>
-                }
                 right={
                     <div className="grupoAcciones">
                         <Button variant="secondary" onClick={() => handleSave('draft')} disabled={saving}>

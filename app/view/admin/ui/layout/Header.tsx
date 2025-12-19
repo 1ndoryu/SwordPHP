@@ -19,6 +19,11 @@ export const Header = () => {
             return 'Biblioteca de Medios';
         }
 
+        /* Temas */
+        if (path.startsWith('/themes')) {
+            return 'Temas';
+        }
+
         /* Post Types dinamicos */
         const postTypes = sword.postTypes || {};
         for (const [slug, config] of Object.entries(postTypes) as [string, PostTypeDef][]) {

@@ -1,0 +1,140 @@
+/* 
+ * Variables CSS - Tema Developer
+ * 
+ * Sistema de diseño centralizado con colores, tipografía y espaciados
+ */
+
+:root {
+    /* 
+     * Paleta de colores principal
+     */
+    --colorPrimario: #6366f1;
+    --colorPrimarioOscuro: #4f46e5;
+    --colorPrimarioClaro: #818cf8;
+    --colorSecundario: #10b981;
+    --colorSecundarioOscuro: #059669;
+
+    /* Colores de acento */
+    --colorAcento: #f59e0b;
+    --colorExito: #22c55e;
+    --colorError: #ef4444;
+    --colorAviso: #f59e0b;
+
+    /* Escala de grises */
+    --colorNegro: #0f172a;
+    --colorGris900: #1e293b;
+    --colorGris800: #334155;
+    --colorGris700: #475569;
+    --colorGris600: #64748b;
+    --colorGris500: #94a3b8;
+    --colorGris400: #cbd5e1;
+    --colorGris300: #e2e8f0;
+    --colorGris200: #f1f5f9;
+    --colorGris100: #f8fafc;
+    --colorBlanco: #ffffff;
+
+    /* Fondos */
+    --fondoPrincipal: var(--colorGris100);
+    --fondoSecundario: var(--colorBlanco);
+    --fondoTarjeta: var(--colorBlanco);
+    --fondoCabecera: var(--colorBlanco);
+    --fondoPie: var(--colorGris900);
+
+    /* Texto */
+    --textoTitulo: var(--colorGris900);
+    --textoPrincipal: var(--colorGris700);
+    --textoSecundario: var(--colorGris500);
+    --textoEnlace: var(--colorPrimario);
+    --textoEnlaceHover: var(--colorPrimarioOscuro);
+    --textoInverso: var(--colorBlanco);
+
+    /* 
+     * Tipografía
+     */
+    --fuentePrincipal: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --fuenteTitulos: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --fuenteCodigo: 'Fira Code', 'JetBrains Mono', monospace;
+
+    --tamanoBase: 1rem;
+    --tamanoXs: 0.75rem;
+    --tamanoSm: 0.875rem;
+    --tamanoMd: 1rem;
+    --tamanoLg: 1.125rem;
+    --tamanoXl: 1.25rem;
+    --tamano2xl: 1.5rem;
+    --tamano3xl: 1.875rem;
+    --tamano4xl: 2.25rem;
+    --tamano5xl: 3rem;
+    --tamano6xl: 3.75rem;
+
+    --pesoNormal: 400;
+    --pesoMedio: 500;
+    --pesoSemibold: 600;
+    --pesoBold: 700;
+
+    --lineaAlturaNormal: 1.5;
+    --lineaAlturaCompacta: 1.25;
+    --lineaAlturaRelaxed: 1.75;
+
+    /* 
+     * Espaciado
+     */
+    --espacioXs: 0.25rem;
+    --espacioSm: 0.5rem;
+    --espacioMd: 1rem;
+    --espacioLg: 1.5rem;
+    --espacioXl: 2rem;
+    --espacio2xl: 3rem;
+    --espacio3xl: 4rem;
+    --espacio4xl: 6rem;
+
+    /* Contenedor */
+    --anchoContenedor: 1200px;
+    --anchoArticulo: 768px;
+    --paddingContenedor: var(--espacioMd);
+
+    /* 
+     * Bordes y sombras
+     */
+    --radioPequeno: 0.375rem;
+    --radioMedio: 0.5rem;
+    --radioGrande: 0.75rem;
+    --radioXl: 1rem;
+    --radioCompleto: 9999px;
+
+    --sombraSutil: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --sombraPequena: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    --sombraMedia: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --sombraGrande: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --sombraXl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+    /* 
+     * Transiciones
+     */
+    --transicionRapida: 150ms ease;
+    --transicionNormal: 250ms ease;
+    --transicionLenta: 350ms ease;
+
+    /* Z-index */
+    --zBase: 1;
+    --zDropdown: 100;
+    --zSticky: 200;
+    --zFixed: 300;
+    --zModal: 400;
+    --zTooltip: 500;
+}
+
+/* 
+ * Variante modo oscuro (para futuro)
+ * Descomentar el bloque de abajo para habilitar modo oscuro automático
+ * 
+ * @media (prefers-color-scheme: dark) {
+ *     :root {
+ *         --fondoPrincipal: var(--colorGris900);
+ *         --fondoSecundario: var(--colorGris800);
+ *         --fondoTarjeta: var(--colorGris800);
+ *         --textoTitulo: var(--colorGris100);
+ *         --textoPrincipal: var(--colorGris300);
+ *     }
+ * }
+ */

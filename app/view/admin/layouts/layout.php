@@ -32,9 +32,9 @@ foreach ($postTypes as $type) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static-admin/css/variables.css">
     <link rel="stylesheet" href="/static-admin/css/init.css">
     <link rel="stylesheet" href="/static-admin/css/style.css">
-    <link rel="stylesheet" href="/static-admin/css/variables.css">
 </head>
 
 <body>

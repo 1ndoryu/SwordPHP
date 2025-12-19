@@ -5,6 +5,7 @@ use app\controller\Admin\DashboardController;
 use app\controller\Admin\AuthController;
 use app\controller\Admin\ContentController;
 use app\controller\Admin\MediaController;
+use app\controller\Admin\ThemeController;
 
 use app\middleware\AdminAuth;
 
@@ -39,6 +40,12 @@ Route::group('/admin', function () {
         Route::get('/media/{id:\d+}', [MediaController::class, 'show']);
         Route::post('/media/{id:\d+}', [MediaController::class, 'update']);
         Route::delete('/media/{id:\d+}', [MediaController::class, 'destroy']);
+
+        // Rutas de Temas
+        Route::get('/themes', [ThemeController::class, 'index']);
+        Route::get('/themes/active', [ThemeController::class, 'active']);
+        Route::get('/themes/{slug:[a-z\-_]+}', [ThemeController::class, 'show']);
+        Route::post('/themes/{slug:[a-z\-_]+}/activate', [ThemeController::class, 'activate']);
 
         // Rutas dinamicas para cualquier Post Type (comodin)
         // El controlador valida si el tipo existe

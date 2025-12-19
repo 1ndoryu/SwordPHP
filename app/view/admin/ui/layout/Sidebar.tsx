@@ -36,6 +36,9 @@ export const Sidebar = () => {
                     <NavLink to="/media" className={activeClass}>
                         Medios
                     </NavLink>
+                    <NavLink to="/themes" className={activeClass}>
+                        Temas
+                    </NavLink>
                     <NavLink to="/users" className={activeClass}>
                         Usuarios
                     </NavLink>

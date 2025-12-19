@@ -70,11 +70,22 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($requestUri, PHP_URL_PATH);
 
 if (esArchivoEstatico($path)) {
+    /* Primero buscar en public/ */
     $archivoPublico = BASE_PATH . '/public' . $path;
 
     if (file_exists($archivoPublico) && is_file($archivoPublico)) {
         servirArchivoEstatico($archivoPublico);
         exit;
+    }
+
+    /* Si es ruta de temas (/themes/...), buscar en la raíz */
+    if (str_starts_with($path, '/themes/')) {
+        $archivoTema = BASE_PATH . $path;
+
+        if (file_exists($archivoTema) && is_file($archivoTema)) {
+            servirArchivoEstatico($archivoTema);
+            exit;
+        }
     }
 }
 
@@ -89,6 +100,7 @@ if (esArchivoEstatico($path)) {
 /* Cargar las rutas desde los archivos de configuración */
 require_once BASE_PATH . '/config/route/admin.php';
 require_once BASE_PATH . '/config/route/api.php';
+require_once BASE_PATH . '/config/route/frontend.php';
 
 /* Crear request CGI */
 $request = new CgiRequest();
